@@ -1,0 +1,30 @@
+@{
+    Layout = ViewNames.AdminLayout;
+}
+
+@using Nop.Plugin.Api.Constants
+@using Nop.Web.Framework
+@using Nop.Plugin.Api.Models
+
+@model ClientModel
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="section-header">
+        <div class="title">
+            <img src="@Url.Content("~/Administration/Content/images/ico-catalog.png")" alt="Catalog Icon" />
+            @T("Plugins.Api.Admin.Edit") - @Html.ActionLink("(" + T("Plugins.Api.Admin.Client.BackToList") + ")", "List")
+        </div>
+        <div class="options">
+            <input type="submit" name="save" class="k-button" value="@T("Admin.Common.Save")" />
+            <input type="submit" name="save-continue" class="k-button" value="@T("Admin.Common.SaveContinue")" />
+            <span id="client-delete" class="k-button">@T("Admin.Common.Delete")</span>
+        </div>
+    </div>
+    
+    @Html.Partial(ViewNames.AdminApiClientsCreateOrUpdate, Model)  
+}
+
+@Html.DeleteConfirmation("client-delete")

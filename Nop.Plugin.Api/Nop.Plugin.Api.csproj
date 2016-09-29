@@ -1,0 +1,361 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6A13D01B-5B1A-4932-9A9D-4117AC27011F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Nop.Plugin.Api</RootNamespace>
+    <AssemblyName>Nop.Plugin.Api</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Presentation\Nop.Web\Plugins\Nop.Plugin.Api\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\..\Presentation\Nop.Web\Plugins\Nop.Plugin.Api\Nop.Plugin.Api.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Presentation\Nop.Web\Plugins\Nop.Plugin.Api\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\..\Presentation\Nop.Web\Plugins\Nop.Plugin.Api\Nop.Plugin.Api.XML</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Autofac">
+      <HintPath>..\..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Autofac.Integration.WebApi, Version=3.4.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Autofac.WebApi2.3.4.0\lib\net45\Autofac.Integration.WebApi.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="AutoMapper, Version=4.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\AutoMapper.4.1.1\lib\net45\AutoMapper.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="FluentValidation">
+      <HintPath>..\..\packages\FluentValidation.5.6.2.0\lib\Net45\FluentValidation.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin">
+      <HintPath>..\..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Cors, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Owin.Cors.3.0.1\lib\net45\Microsoft.Owin.Cors.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb">
+      <HintPath>..\..\packages\Microsoft.Owin.Host.SystemWeb.3.0.1\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security">
+      <HintPath>..\..\packages\Microsoft.Owin.Security.3.0.1\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.OAuth">
+      <HintPath>..\..\packages\Microsoft.Owin.Security.OAuth.3.0.1\lib\net45\Microsoft.Owin.Security.OAuth.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Owin">
+      <HintPath>..\..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Swashbuckle.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cd1bb07a5ac7c7bc, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Swashbuckle.Core.5.3.2\lib\net40\Swashbuckle.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Cors, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.Cors.5.0.0\lib\net45\System.Web.Cors.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Web.Http.Owin">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Owin.5.2.3\lib\net45\System.Web.Http.Owin.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="WebActivatorEx, Version=2.0.0.0, Culture=neutral, PublicKeyToken=7b26dc2a43f6a0d4, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\WebActivatorEx.2.0\lib\net40\WebActivatorEx.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Attributes\BaseAttributeInvoker.cs" />
+    <Compile Include="Attributes\DoNotMap.cs" />
+    <Compile Include="Attributes\GetRequestsErrorInterceptorActionFilter.cs" />
+    <Compile Include="Attributes\ServerErrorHandlerAttribute.cs" />
+    <Compile Include="Attributes\ImageAttribute.cs" />
+    <Compile Include="Attributes\ImageCollectionAttribute.cs" />
+    <Compile Include="Attributes\ValidateVendor.cs" />
+    <Compile Include="Controllers\BaseApiController.cs" />
+    <Compile Include="Controllers\OrderItemsController.cs" />
+    <Compile Include="DTOs\OrderItems\OrderItemsCountRootObject.cs" />
+    <Compile Include="DTOs\OrderItems\OrderItemsRootObject.cs" />
+    <Compile Include="Factories\AddressFactory.cs" />
+    <Compile Include="Factories\CustomerFactory.cs" />
+    <Compile Include="Factories\OrderFactory.cs" />
+    <Compile Include="Factories\ProductFactory.cs" />
+    <Compile Include="Factories\ShoppingCartItemFactory.cs" />
+    <Compile Include="Helpers\CustomerRolesHelper.cs" />
+    <Compile Include="Helpers\ICustomerRolesHelper.cs" />
+    <Compile Include="Helpers\JTokenHelper.cs" />
+    <Compile Include="Delta\Delta.cs" />
+    <Compile Include="DTOs\Errors\ErrorsRootObject.cs" />
+    <Compile Include="DTOs\Images\ImageDto.cs" />
+    <Compile Include="Factories\IFactory.cs" />
+    <Compile Include="Factories\CategoryFactory.cs" />
+    <Compile Include="JSON\ActionResults\ErrorActionResult.cs" />
+    <Compile Include="JSON\ActionResults\RawJsonActionResult.cs" />
+    <Compile Include="Maps\IJsonPropertyMap.cs" />
+    <Compile Include="Maps\JsonPropertyMap.cs" />
+    <Compile Include="ModelBinders\JsonModelBinder.cs" />
+    <Compile Include="Models\DefaultWeApiErrorsModel.cs" />
+    <Compile Include="Models\OrderItemsParameters\OrderItemsParametersModel.cs" />
+    <Compile Include="OAuth\Attributes\BearerTokenAuthorizeAttribute.cs" />
+    <Compile Include="Constants\ViewNames.cs" />
+    <Compile Include="JSON\ContractResolvers\DynamicContractResolver.cs" />
+    <Compile Include="Controllers\Admin\ApiAdminController.cs" />
+    <Compile Include="Controllers\CategoriesController.cs" />
+    <Compile Include="Controllers\CustomersController.cs" />
+    <Compile Include="Controllers\Admin\ManageClientsAdminController.cs" />
+    <Compile Include="Controllers\OAuth\OAuthController.cs" />
+    <Compile Include="Controllers\ProductCategoryMappingsController.cs" />
+    <Compile Include="Controllers\OrdersController.cs" />
+    <Compile Include="Controllers\ProductsController.cs" />
+    <Compile Include="Controllers\ShoppingCartItemsController.cs" />
+    <Compile Include="DataMappings\ClientMap.cs" />
+    <Compile Include="DataStructures\ApiList.cs" />
+    <Compile Include="Data\ApiObjectContext.cs" />
+    <Compile Include="Domain\ApiSettings.cs" />
+    <Compile Include="Domain\Client.cs" />
+    <Compile Include="DTOs\AddressDto.cs" />
+    <Compile Include="DTOs\Categories\CategoriesCountRootObject.cs" />
+    <Compile Include="DTOs\Categories\CategoriesRootObject.cs" />
+    <Compile Include="DTOs\Categories\CategoryDto.cs" />
+    <Compile Include="DTOs\Customers\BaseCustomerDto.cs" />
+    <Compile Include="DTOs\ISerializableObject.cs" />
+    <Compile Include="DTOs\ProductCategoryMappings\ProductCategoryMappingsCountRootObject.cs" />
+    <Compile Include="DTOs\ProductCategoryMappings\ProductCategoryMappingsDto.cs" />
+    <Compile Include="DTOs\ProductCategoryMappings\ProductCategoryMappingsRootObject.cs" />
+    <Compile Include="DTOs\Orders\OrderDto.cs" />
+    <Compile Include="DTOs\OrderItems\OrderItemDto.cs" />
+    <Compile Include="DTOs\Orders\OrdersCountRootObject.cs" />
+    <Compile Include="DTOs\Orders\OrdersRootObject.cs" />
+    <Compile Include="DTOs\Orders\SingleOrderRootObject.cs" />
+    <Compile Include="DTOs\Products\ProductDto.cs" />
+    <Compile Include="DTOs\Products\ProductsCountRootObject.cs" />
+    <Compile Include="DTOs\Products\ProductsRootObjectDto.cs" />
+    <Compile Include="Converters\IObjectConverter.cs" />
+    <Compile Include="Converters\IApiTypeConverter.cs" />
+    <Compile Include="Converters\ObjectConverter.cs" />
+    <Compile Include="Converters\ApiTypeConverter.cs" />
+    <Compile Include="DTOs\ShoppingCarts\ShoppingCartItemDto.cs" />
+    <Compile Include="DTOs\ShoppingCarts\ShoppingCartItemsRootObject.cs" />
+    <Compile Include="OAuth\Helpers\AuthorizationHelper.cs" />
+    <Compile Include="OAuth\Helpers\IAuthorizationHelper.cs" />
+    <Compile Include="Helpers\IJsonHelper.cs" />
+    <Compile Include="Helpers\IMappingHelper.cs" />
+    <Compile Include="Helpers\IWebConfigManagerHelper.cs" />
+    <Compile Include="Helpers\JsonHelper.cs" />
+    <Compile Include="Helpers\MappingHelper.cs" />
+    <Compile Include="Helpers\ReflectionHelper.cs" />
+    <Compile Include="Helpers\WebConfigManagerHelper.cs" />
+    <Compile Include="DTOs\Customers\CustomerAttributeMappingDto.cs" />
+    <Compile Include="DTOs\Customers\CustomerDto.cs" />
+    <Compile Include="DTOs\Customers\CustomerForShoppingCartItemDto.cs" />
+    <Compile Include="DTOs\Customers\CustomersCountRootObject.cs" />
+    <Compile Include="DTOs\Customers\CustomersRootObject.cs" />
+    <Compile Include="DTOs\Customers\OrderCustomerDto.cs" />
+    <Compile Include="Infrastructure\DependencyRegister.cs" />
+    <Compile Include="MappingExtensions\AddressDtoMappings.cs" />
+    <Compile Include="MappingExtensions\BaseMapping.cs" />
+    <Compile Include="MappingExtensions\CategoryDtoMappings.cs" />
+    <Compile Include="MappingExtensions\ClientMappings.cs" />
+    <Compile Include="MappingExtensions\ConfigurationMappings.cs" />
+    <Compile Include="MappingExtensions\CustomerDtoMappings.cs" />
+    <Compile Include="MappingExtensions\Maps.cs" />
+    <Compile Include="MappingExtensions\ProductCategoryMappingDtoMappings.cs" />
+    <Compile Include="MappingExtensions\OrderDtoMappings.cs" />
+    <Compile Include="MappingExtensions\OrderItemDtoMappings.cs" />
+    <Compile Include="MappingExtensions\ProductDtoMappings.cs" />
+    <Compile Include="MappingExtensions\ShoppingCartItemDtoMappings.cs" />
+    <Compile Include="ModelBinders\ParametersModelBinder.cs" />
+    <Compile Include="Models\CategoriesParameters\BaseCategoriesParametersModel.cs" />
+    <Compile Include="Models\CategoriesParameters\CategoriesCountParametersModel.cs" />
+    <Compile Include="Models\CategoriesParameters\CategoriesParametersModel.cs" />
+    <Compile Include="Models\ClientModel.cs" />
+    <Compile Include="Models\ConfigurationModel.cs" />
+    <Compile Include="Models\CustomersParameters\CustomersParametersModel.cs" />
+    <Compile Include="Models\CustomersParameters\CustomersSearchParametersModel.cs" />
+    <Compile Include="Models\ProductCategoryMappingsParameters\ProductCategoryMappingsCountParametersModel.cs" />
+    <Compile Include="Models\ProductCategoryMappingsParameters\BaseCategoryMappingsParametersModel.cs" />
+    <Compile Include="Models\ProductCategoryMappingsParameters\ProductCategoryMappingsParametersModel.cs" />
+    <Compile Include="Models\OrdersParameters\BaseOrdersParametersModel.cs" />
+    <Compile Include="Models\OrdersParameters\OrdersCountParametersModel.cs" />
+    <Compile Include="Models\OrdersParameters\OrdersParametersModel.cs" />
+    <Compile Include="Models\ProductsParameters\BaseProductsParametersModel.cs" />
+    <Compile Include="Models\ProductsParameters\ProductsCountParametersModel.cs" />
+    <Compile Include="Models\ProductsParameters\ProductsParametersModel.cs" />
+    <Compile Include="Models\ShoppingCartsParameters\BaseShoppingCartItemsParametersModel.cs" />
+    <Compile Include="Models\ShoppingCartsParameters\ShoppingCartItemsForCustomerParametersModel.cs" />
+    <Compile Include="Models\ShoppingCartsParameters\ShoppingCartItemsParametersModel.cs" />
+    <Compile Include="Constants\Configurations.cs" />
+    <Compile Include="OAuth\Middlewares\BearerTokenMiddleware.cs" />
+    <Compile Include="OAuth\Providers\AuthenticationTokenProvider.cs" />
+    <Compile Include="OAuth\Providers\AuthorisationServerProvider.cs" />
+    <Compile Include="OAuth\Providers\RefreshTokenProvider.cs" />
+    <Compile Include="Plugin\ApiPlugin.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="JSON\Serializers\IJsonFieldsSerializer.cs" />
+    <Compile Include="JSON\Serializers\JsonFieldsSerializer.cs" />
+    <Compile Include="Services\CategoryApiService.cs" />
+    <Compile Include="Services\ClientService.cs" />
+    <Compile Include="Services\CustomerApiService.cs" />
+    <Compile Include="Services\ICategoryApiService.cs" />
+    <Compile Include="Services\IOrderItemApiService.cs" />
+    <Compile Include="Services\IProductCategoryMappingsApiService.cs" />
+    <Compile Include="Services\IClientService.cs" />
+    <Compile Include="Services\ICustomerApiService.cs" />
+    <Compile Include="Services\IOrderApiService.cs" />
+    <Compile Include="Services\IProductApiService.cs" />
+    <Compile Include="Services\IShoppingCartItemApiService.cs" />
+    <Compile Include="Services\OrderApiService.cs" />
+    <Compile Include="Services\OrderItemApiService.cs" />
+    <Compile Include="Services\ProductApiService.cs" />
+    <Compile Include="Services\ProductCategoryMappingsApiService.cs" />
+    <Compile Include="Services\ShoppingCartItemApiService.cs" />
+    <Compile Include="Startup.cs" />
+    <Compile Include="Swagger\ChangeParameterTypeOperationFilter.cs" />
+    <Compile Include="Swagger\ExcludeEnpointsDocumentFilter.cs" />
+    <Compile Include="Swagger\RemovePrefixesOperationFilter.cs" />
+    <Compile Include="Validators\AddressDtoValidator.cs" />
+    <Compile Include="Validators\OrderDtoValidator.cs" />
+    <Compile Include="Validators\OrderItemDtoValidator.cs" />
+    <Compile Include="Validators\ProductCategoryMappingDtoValidator.cs" />
+    <Compile Include="Validators\CustomerDtoValidator.cs" />
+    <Compile Include="Validators\ProductDtoValidator.cs" />
+    <Compile Include="Validators\CategoryDtoValidator.cs" />
+    <Compile Include="Validators\ClientValidator.cs" />
+    <Compile Include="Validators\FieldsValidator.cs" />
+    <Compile Include="Validators\IFieldsValidator.cs" />
+    <Compile Include="Validators\ShoppingCartItemDtoValidator.cs" />
+    <Compile Include="Validators\TypeValidator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Description.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\Nop.Core\Nop.Core.csproj">
+      <Project>{6BDA8332-939F-45B7-A25E-7A797260AE59}</Project>
+      <Name>Nop.Core</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libraries\Nop.Data\Nop.Data.csproj">
+      <Project>{ccd7f2c9-6a2c-4cf0-8e89-076b8fc0f144}</Project>
+      <Name>Nop.Data</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libraries\Nop.Services\Nop.Services.csproj">
+      <Project>{210541ad-f659-47da-8763-16f36c5cd2f4}</Project>
+      <Name>Nop.Services</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj">
+      <Project>{75FD4163-333C-4DD5-854D-2EF294E45D94}</Project>
+      <Name>Nop.Web.Framework</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Presentation\Nop.Web\Administration\Nop.Admin.csproj">
+      <Project>{152c761a-dd2e-4c1f-af89-dfb2547a3bca}</Project>
+      <Name>Nop.Admin</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\swaggerPostPutTryItOutButtonsRemoval.js" />
+    <Content Include="Views\Clients\ClientSettings.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Clients\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Clients\CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Clients\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Clients\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Configure.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="web.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

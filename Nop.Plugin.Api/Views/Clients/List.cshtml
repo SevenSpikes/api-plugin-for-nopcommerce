@@ -1,0 +1,127 @@
+﻿@{
+    Layout = ViewNames.AdminLayout;
+}
+
+@using Nop.Core.Domain.Common;
+@using Nop.Core.Infrastructure;
+@using Nop.Plugin.Api.Constants
+
+@{
+    var defaultGridPageSize = EngineContext.Current.Resolve<AdminAreaSettings>().DefaultGridPageSize;
+    var gridPageSizes = EngineContext.Current.Resolve<AdminAreaSettings>().GridPageSizes;
+}
+
+@Html.AntiForgeryToken()
+
+<div class="section-header">
+    <div class="title">
+        <img src="@Url.Content("~/Administration/Content/images/ico-catalog.png")" alt="Catalog Icon" />
+        @T("Plugins.Api.Admin.Menu.ManageClients")
+    </div>
+    <div class="options">
+        <a href="Create" class="k-button">@T("Plugins.Api.Admin.Client.AddNew")</a>
+    </div>
+</div>
+<table class="adminContent">
+    <tr>
+        <td>
+            <div id="api-grid"></div>
+            <script>
+                $(document).ready(function () {
+                    $("#api-grid").kendoGrid({
+                        dataSource: {
+                            type: "json",
+                            transport: {
+                                read: {
+                                    url: "@Html.Raw(Url.Action("List", "ManageClientsAdmin"))",
+                                    type: "POST",
+                                    dataType: "json",
+                                    data: addAntiForgeryToken
+                                },
+                                destroy: {
+                                    url: "@Html.Raw(Url.Action("DeleteClient", "ManageClientsAdmin"))",
+                                    type: "POST",
+                                    dataType: "json",
+                                    data: addAntiForgeryToken
+                                }
+                            },
+                            schema: {
+                                data: "Data",
+                                total: "Total",
+                                errors: "Errors",
+                                model: {
+                                    id: "Id",
+                                    fields: {
+                                        Id: { editable: false, type: "number" },
+                                        Name: { editable: false, type: "string" },
+                                        ClientId: { editable: false, type: "string" },
+                                        ClientSecret: { editable: false, type: "string" },
+                                        CallbackUrl: { editable: false, type: "string" },
+                                        IsActive: { editable: true, type: "boolean" }
+                                    }
+                                }
+                            },
+                            requestEnd: function (e) {
+                                if (e.type == "update") {
+                                    this.read();
+                                }
+                            },
+                            error: function (e) {
+                                display_kendoui_grid_error(e);
+                                // Cancel the changes
+                                this.cancelChanges();
+                            },
+                            pageSize: @defaultGridPageSize
+                            },
+                        pageable: {
+                            refresh: true,
+                            pageSizes: [@(gridPageSizes)]
+                        },
+                        editable: {
+                            confirmation: true,
+                            mode: "inline"
+                        },
+                        filterable: false,
+                        sortable: true,
+                        scrollable: false,
+                        columns: [
+                        {
+                            field: "Name",
+                            title: "@T("Plugins.Api.Admin.Client.Name")"
+                        },{
+                            field: "ClientId",
+                            title: "@T("Plugins.Api.Admin.Client.ClientId")"
+                        }, {
+                            field: "ClientSecret",
+                            title: "@T("Plugins.Api.Admin.Client.ClientSecret")"
+                        }, {
+                            field: "CallbackUrl",
+                            title: "@T("Plugins.Api.Admin.Client.CallbackUrl")"
+                        }, {
+                            field: "IsActive",
+                            title: "@T("Plugins.Api.Admin.Client.IsActive")",
+                            editable: true
+                        }, {
+                            template: kendo.template($("#commands-template").html()),
+                            filterable: false,
+                            sortable: false
+                        }, {
+                            command: [{
+                                name: "destroy",
+                                text: "@T("Admin.Common.Delete")"
+                            }],
+                            width: 200
+                        }]
+                    });
+                });
+            </script>
+        </td>
+    </tr>
+</table>
+
+<script id="commands-template" type="text/x-kendo-template">
+    <a class="k-button" href="Edit/#: Id#" title="@T("Admin.Common.Edit")">
+        <span class="k-icon k-edit"></span>
+        @T("Admin.Common.Edit")
+    </a>
+</script>
