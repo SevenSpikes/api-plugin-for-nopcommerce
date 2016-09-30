@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
-using AutoMapper.Internal;
+using AutoMapper.Configuration;
 using Newtonsoft.Json;
 
 namespace Nop.Plugin.Api.Validators

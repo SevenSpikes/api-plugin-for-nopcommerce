@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿using Nop.Plugin.Api.AutoMapper;
 using Nop.Core.Domain.Customers;
 using Nop.Plugin.Api.DTOs.Customers;
 
@@ -8,17 +8,17 @@ namespace Nop.Plugin.Api.MappingExtensions
     {
         public static CustomerDto ToDto(this Customer customer)
         {
-            return Mapper.Map<Customer, CustomerDto>(customer);
+            return customer.MapTo<Customer, CustomerDto>();
         }
 
         public static OrderCustomerDto ToOrderCustomerDto(this Customer customer)
         {
-            return Mapper.Map<Customer, OrderCustomerDto>(customer);
+            return customer.MapTo<Customer, OrderCustomerDto>();
         }
 
         public static CustomerForShoppingCartItemDto ToCustomerForShoppingCartItemDto(this Customer customer)
         {
-            return Mapper.DynamicMap<Customer, CustomerForShoppingCartItemDto>(customer);
+            return customer.MapTo<Customer, CustomerForShoppingCartItemDto>();
         }
     }
 }

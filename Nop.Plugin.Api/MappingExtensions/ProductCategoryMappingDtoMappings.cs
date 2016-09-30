@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿using Nop.Plugin.Api.AutoMapper;
 using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
 
@@ -8,7 +8,7 @@ namespace Nop.Plugin.Api.MappingExtensions
     {
         public static ProductCategoryMappingDto ToDto(this ProductCategory mapping)
         {
-            return Mapper.Map<ProductCategory, ProductCategoryMappingDto>(mapping);
+            return mapping.MapTo<ProductCategory, ProductCategoryMappingDto>();
         }
     }
 }

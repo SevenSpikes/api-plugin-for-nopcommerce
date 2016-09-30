@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using AutoMapper.Internal;
 using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.Factories;
 
@@ -103,21 +102,20 @@ namespace Nop.Plugin.Api.Helpers
                         collection = Activator.CreateInstance(constructedListType);
                         objectProperty.SetValue(objectToBeUpdated, collection);
                     }
-                    
-                    propertyValueAsCollection.Each(
-                        x =>
+
+                    foreach (var item in propertyValueAsCollection)
+                    {
+                        if (collectionElementsType.Namespace != "System")
                         {
-                            if (collectionElementsType.Namespace != "System")
-                            {
-                                AddOrUpdateComplexItemInCollection(x as Dictionary<string, object>,
-                                    collection as IList,
-                                    collectionElementsType);
-                            }
-                            else
-                            {
-                                AddBaseItemInCollection(x, collection as IList, collectionElementsType);
-                            }
-                        });
+                            AddOrUpdateComplexItemInCollection(item as Dictionary<string, object>,
+                                collection as IList,
+                                collectionElementsType);
+                        }
+                        else
+                        {
+                            AddBaseItemInCollection(item, collection as IList, collectionElementsType);
+                        }
+                    }
 
                     return;
                 }

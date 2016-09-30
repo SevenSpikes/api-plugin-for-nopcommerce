@@ -8,6 +8,7 @@ using System.Linq;
 using System.Web;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Directory;
+using Nop.Plugin.Api.AutoMapper;
 using Nop.Plugin.Api.DTOs;
 using Nop.Plugin.Api.DTOs.Orders;
 using Nop.Plugin.Api.DTOs.Products;
@@ -19,12 +20,12 @@ namespace Nop.Plugin.Api.MappingExtensions
     {
         public static IMappingExpression<TSource, TDestination> CreateMap<TSource, TDestination>()
         {
-            return Mapper.CreateMap<TSource, TDestination>().IgnoreAllNonExisting();
+            return AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<TSource, TDestination>().IgnoreAllNonExisting();
         }
 
         public static void CreateOrderEntityToOrderDtoMap()
         {
-            Mapper.CreateMap<Order, OrderDto>()
+            AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Order, OrderDto>()
                 .IgnoreAllNonExisting()
                 .ForMember(x => x.Id, y => y.MapFrom(src => src.Id))
                 .ForMember(x => x.OrderItemDtos, y => y.MapFrom(src => src.OrderItems.Select(x => x.ToDto())));
@@ -32,7 +33,7 @@ namespace Nop.Plugin.Api.MappingExtensions
         
         public static void CreateAddressMap()
         {
-            Mapper.CreateMap<Address, AddressDto>()
+            AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Address, AddressDto>()
                .IgnoreAllNonExisting()
                .ForMember(x => x.Id, y => y.MapFrom(src => src.Id))
                .ForMember(x => x.CountryName, y => y.MapFrom(src => src.Country.GetWithDefault(x => x, new Country()).Name))
@@ -41,14 +42,14 @@ namespace Nop.Plugin.Api.MappingExtensions
 
         public static void CreateAddressDtoToEntityMap()
         {
-            Mapper.CreateMap<AddressDto, Address>()
+            AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<AddressDto, Address>()
                 .IgnoreAllNonExisting()
                 .ForMember(x => x.Id, y => y.MapFrom(src => src.Id));
         }
 
         public static void CreateCustomerForShoppingCartItemMapFromCustomer()
         {
-            Mapper.CreateMap<Customer, CustomerForShoppingCartItemDto>()
+            AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Customer, CustomerForShoppingCartItemDto>()
                 .IgnoreAllNonExisting()
                 .ForMember(x => x.Id, y => y.MapFrom(src => src.Id))
                 .ForMember(x => x.BillingAddress, y => y.MapFrom(src => src.BillingAddress.GetWithDefault(x => x, new Address()).ToDto()))
@@ -58,7 +59,7 @@ namespace Nop.Plugin.Api.MappingExtensions
         
         public static void CreateCustomerToDTOMap()
         {
-            Mapper.CreateMap<Customer, CustomerDto>()
+            AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Customer, CustomerDto>()
                 .IgnoreAllNonExisting()
                 .ForMember(x => x.Id, y => y.MapFrom(src => src.Id))
                 .ForMember(x => x.BillingAddress,
@@ -81,13 +82,13 @@ namespace Nop.Plugin.Api.MappingExtensions
 
         public static void CreateCustomerToOrderCustomerDTOMap()
         {
-            Mapper.CreateMap<Customer, OrderCustomerDto>()
+            AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Customer, OrderCustomerDto>()
                 .IgnoreAllNonExisting();
         }
 
         public static void CreateShoppingCartItemMap()
         {
-            Mapper.CreateMap<ShoppingCartItem, ShoppingCartItemDto>()
+            AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<ShoppingCartItem, ShoppingCartItemDto>()
                 .IgnoreAllNonExisting()
                 .ForMember(x => x.CustomerDto, y => y.MapFrom(src => src.Customer.GetWithDefault(x => x, new Customer()).ToCustomerForShoppingCartItemDto()))
                 .ForMember(x => x.ProductDto, y => y.MapFrom(src => src.Product.GetWithDefault(x => x, new Product()).ToDto()));
@@ -95,7 +96,7 @@ namespace Nop.Plugin.Api.MappingExtensions
 
         public static void CreateProductMap()
         {
-            Mapper.CreateMap<Product, ProductDto>()
+            AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Product, ProductDto>()
                .IgnoreAllNonExisting()
                .ForMember(x => x.FullDescription, y => y.MapFrom(src => HttpUtility.HtmlEncode(src.FullDescription)))
                .ForMember(x => x.Tags, y => y.MapFrom(src => src.ProductTags.Select(x => x.Name)));

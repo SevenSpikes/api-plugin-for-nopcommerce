@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿using Nop.Plugin.Api.AutoMapper;
 using Nop.Plugin.Api.Domain;
 using Nop.Plugin.Api.Models;
 
@@ -8,17 +8,17 @@ namespace Nop.Plugin.Api.MappingExtensions
     {
         public static ClientModel ToModel(this Client client)
         {
-            return Mapper.Map<Client, ClientModel>(client);
+            return client.MapTo<Client, ClientModel>();
         }
 
         public static Client ToEntity(this ClientModel clientModel)
         {
-            return Mapper.Map<ClientModel, Client>(clientModel);
+            return clientModel.MapTo<ClientModel, Client>();
         }
 
         public static Client ToEntity(this ClientModel model, Client destination)
         {
-            return Mapper.Map(model, destination);
+            return model.MapTo<ClientModel, Client>(destination);
         }
     }
 }

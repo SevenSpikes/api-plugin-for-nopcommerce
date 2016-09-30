@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Nop.Admin.Extensions;
 using Nop.Core.Domain.Orders;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
 
@@ -8,7 +9,7 @@ namespace Nop.Plugin.Api.MappingExtensions
     {
         public static ShoppingCartItemDto ToDto(this ShoppingCartItem shoppingCartItem)
         {
-            return Mapper.DynamicMap<ShoppingCartItem, ShoppingCartItemDto>(shoppingCartItem);
+            return shoppingCartItem.MapTo<ShoppingCartItem, ShoppingCartItemDto>();
         }
     }
 }

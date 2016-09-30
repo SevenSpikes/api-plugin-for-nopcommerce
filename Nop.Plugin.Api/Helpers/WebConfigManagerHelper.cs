@@ -31,7 +31,7 @@ namespace Nop.Plugin.Api.Helpers
             // load web.config
             XDocument webConfig = null;
 
-            using (var fs = System.IO.File.OpenRead(_webHelper.MapPath("~/Web.config")))
+            using (var fs = System.IO.File.OpenRead(CommonHelper.MapPath("~/Web.config")))
             {
                 webConfig = XDocument.Load(fs);
             }
@@ -60,7 +60,7 @@ namespace Nop.Plugin.Api.Helpers
                     // only save when changes have been made
                     try
                     {
-                        webConfig.Save(_webHelper.MapPath("~/Web.config"));
+                        webConfig.Save(CommonHelper.MapPath("~/Web.config"));
                     }
                     catch
                     {
