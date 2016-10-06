@@ -22,7 +22,7 @@ namespace Nop.Plugin.Api.Models.CategoriesParameters
         /// <summary>
         /// A comma-separated list of category ids
         /// </summary>
-        [JsonProperty("published_status")]
+        [JsonProperty("ids")]
         public List<int> Ids { get; set; }
 
         /// <summary>

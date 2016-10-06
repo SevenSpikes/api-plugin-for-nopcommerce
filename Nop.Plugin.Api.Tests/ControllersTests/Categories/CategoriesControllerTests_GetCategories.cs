@@ -34,7 +34,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             };
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<CategoriesApiController>();
+            var autoMocker = new RhinoAutoMocker<CategoriesController>();
 
             autoMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(Arg<CategoriesRootObject>.Is.Anything, Arg<string>.Is.Anything))
                                                            .IgnoreArguments()
@@ -60,7 +60,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             };
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<CategoriesApiController>();
+            var autoMocker = new RhinoAutoMocker<CategoriesController>();
 
             autoMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(Arg<CategoriesRootObject>.Is.Anything, Arg<string>.Is.Anything))
                                                            .IgnoreArguments()
@@ -81,7 +81,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             var parameters = new CategoriesParametersModel();
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<CategoriesApiController>();
+            var autoMocker = new RhinoAutoMocker<CategoriesController>();
             autoMocker.Get<ICategoryApiService>()
                 .Expect(x => x.GetCategories(parameters.Ids,
                                                     parameters.CreatedAtMin,
@@ -115,7 +115,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             var parameters = new CategoriesParametersModel();
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<CategoriesApiController>();
+            var autoMocker = new RhinoAutoMocker<CategoriesController>();
             autoMocker.Get<ICategoryApiService>().Stub(x => x.GetCategories()).Return(returnedCategoriesCollection);
             autoMocker.Get<IAclService>().Stub(x => x.GetAclRecords(new Category())).IgnoreArguments().Return(new List<AclRecord>());
             autoMocker.Get<IStoreMappingService>().Stub(x => x.GetStoreMappings(new Category())).IgnoreArguments().Return(new List<StoreMapping>());
@@ -138,7 +138,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             };
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<CategoriesApiController>();
+            var autoMocker = new RhinoAutoMocker<CategoriesController>();
             autoMocker.Get<ICategoryApiService>().Stub(x => x.GetCategories()).Return(new List<Category>());
 
             //Act
@@ -155,7 +155,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             var parameters = new CategoriesParametersModel();
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<CategoriesApiController>();
+            var autoMocker = new RhinoAutoMocker<CategoriesController>();
             autoMocker.Get<ICategoryApiService>().Stub(x => x.GetCategories()).Return(new List<Category>());
 
             //Act

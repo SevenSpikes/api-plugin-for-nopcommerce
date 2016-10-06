@@ -117,13 +117,13 @@ namespace Nop.Plugin.Api
             config.Routes.MapHttpRoute(
                name: "categories",
                routeTemplate: "api/categories",
-               defaults: new { controller = "CategoriesApi", action = "GetCategories" },
+               defaults: new { controller = "Categories", action = "GetCategories" },
                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
 
             config.Routes.MapHttpRoute(
                name: "deleteCategory",
                routeTemplate: "api/categories/{id}",
-               defaults: new { controller = "CategoriesApi", action = "DeleteCategory" },
+               defaults: new { controller = "Categories", action = "DeleteCategory" },
                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Delete) });
 
             config.Routes.MapHttpRoute(
@@ -135,19 +135,19 @@ namespace Nop.Plugin.Api
             config.Routes.MapHttpRoute(
                name: "updateCategory",
                routeTemplate: "api/categories/{id}",
-               defaults: new { controller = "CategoriesApi", action = "UpdateCategory" },
+               defaults: new { controller = "Categories", action = "UpdateCategory" },
                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Put) });
 
             config.Routes.MapHttpRoute(
                 name: "categoriesCount",
                 routeTemplate: "api/categories/count",
-                defaults: new { controller = "CategoriesApi", action = "GetCategoriesCount" },
+                defaults: new { controller = "Categories", action = "GetCategoriesCount" },
                 constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
 
             config.Routes.MapHttpRoute(
                 name: "categoryById",
                 routeTemplate: "api/categories/{id}",
-                defaults: new { controller = "CategoriesApi", action = "GetCategoryById" },
+                defaults: new { controller = "Categories", action = "GetCategoryById" },
                 constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
 
             config.Routes.MapHttpRoute(

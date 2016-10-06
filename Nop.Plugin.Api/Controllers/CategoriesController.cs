@@ -33,7 +33,7 @@ using Nop.Services.Stores;
 namespace Nop.Plugin.Api.Controllers
 {
     [BearerTokenAuthorize]
-    public class CategoriesApiController : BaseApiController
+    public class CategoriesController : BaseApiController
     {
         private readonly ICategoryApiService _categoryApiService;
         private readonly ICategoryService _categoryService;
@@ -41,7 +41,7 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IPictureService _pictureService;
         private readonly IFactory<Category> _factory; 
 
-        public CategoriesApiController(ICategoryApiService categoryApiService,
+        public CategoriesController(ICategoryApiService categoryApiService,
             IJsonFieldsSerializer jsonFieldsSerializer,
             ICategoryService categoryService,
             IUrlRecordService urlRecordService,

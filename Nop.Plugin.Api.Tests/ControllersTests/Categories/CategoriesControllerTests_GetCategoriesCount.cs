@@ -19,7 +19,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             var parameters = new CategoriesCountParametersModel();
 
             // arrange
-            var autoMocker = new RhinoAutoMocker<CategoriesApiController>();
+            var autoMocker = new RhinoAutoMocker<CategoriesController>();
             autoMocker.Get<ICategoryApiService>().Stub(x => x.GetCategoriesCount()).IgnoreArguments().Return(0);
 
             //  act
@@ -36,7 +36,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             var parameters = new CategoriesCountParametersModel();
 
             // arrange
-            var autoMocker = new RhinoAutoMocker<CategoriesApiController>();
+            var autoMocker = new RhinoAutoMocker<CategoriesController>();
             autoMocker.Get<ICategoryApiService>().Stub(x => x.GetCategoriesCount()).IgnoreArguments().Return(1);
 
             // act
@@ -54,7 +54,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             int categoriesCount = 20;
 
             // arrange
-            var autoMocker = new RhinoAutoMocker<CategoriesApiController>();
+            var autoMocker = new RhinoAutoMocker<CategoriesController>();
             autoMocker.Get<ICategoryApiService>().Stub(x => x.GetCategoriesCount()).IgnoreArguments().Return(categoriesCount);
 
             // act
