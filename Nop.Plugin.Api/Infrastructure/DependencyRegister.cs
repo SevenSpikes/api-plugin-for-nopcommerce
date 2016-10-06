@@ -42,7 +42,7 @@ namespace Nop.Plugin.Api.Infrastructure
                .WithParameter(ResolvedParameter.ForNamed<IDbContext>(ObjectContextName))
                .InstancePerLifetimeScope();
 
-            CreateModelMappings();
+            MappingExtensions.Maps.CreateAllMappings();
 
             RegisterPluginServices(builder);
 
@@ -66,33 +66,6 @@ namespace Nop.Plugin.Api.Infrastructure
         {
             builder.RegisterGeneric(typeof(ParametersModelBinder<>)).InstancePerLifetimeScope();
             builder.RegisterGeneric(typeof(JsonModelBinder<>)).InstancePerLifetimeScope();
-        }
-
-        private void CreateModelMappings()
-        {
-            MappingExtensions.Maps.CreateMap<ApiSettings, ConfigurationModel>();
-            MappingExtensions.Maps.CreateMap<ConfigurationModel, ApiSettings>();
-            
-            MappingExtensions.Maps.CreateMap<Client, ClientModel>();
-            MappingExtensions.Maps.CreateMap<ClientModel, Client>();
-            
-            MappingExtensions.Maps.CreateMap<Category, CategoryDto>();
-            MappingExtensions.Maps.CreateMap<CategoryDto, Category>();
-            
-            MappingExtensions.Maps.CreateMap<ProductCategory, ProductCategoryMappingDto>();
-            
-            MappingExtensions.Maps.CreateAddressMap();
-            MappingExtensions.Maps.CreateAddressDtoToEntityMap();
-            MappingExtensions.Maps.CreateShoppingCartItemMap();
-            
-            MappingExtensions.Maps.CreateCustomerToDTOMap();
-            MappingExtensions.Maps.CreateCustomerToOrderCustomerDTOMap();
-            MappingExtensions.Maps.CreateCustomerForShoppingCartItemMapFromCustomer();
-
-            MappingExtensions.Maps.CreateMap<OrderItem, OrderItemDto>();
-            MappingExtensions.Maps.CreateOrderEntityToOrderDtoMap();
-
-            MappingExtensions.Maps.CreateProductMap();
         }
 
         private void RegisterPluginServices(ContainerBuilder builder)

@@ -9,10 +9,15 @@ using System.Web;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Directory;
 using Nop.Plugin.Api.AutoMapper;
+using Nop.Plugin.Api.Domain;
 using Nop.Plugin.Api.DTOs;
+using Nop.Plugin.Api.DTOs.Categories;
+using Nop.Plugin.Api.DTOs.OrderItems;
 using Nop.Plugin.Api.DTOs.Orders;
+using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
 using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
+using Nop.Plugin.Api.Models;
 
 namespace Nop.Plugin.Api.MappingExtensions
 {
@@ -100,6 +105,33 @@ namespace Nop.Plugin.Api.MappingExtensions
                .IgnoreAllNonExisting()
                .ForMember(x => x.FullDescription, y => y.MapFrom(src => HttpUtility.HtmlEncode(src.FullDescription)))
                .ForMember(x => x.Tags, y => y.MapFrom(src => src.ProductTags.Select(x => x.Name)));
+        }
+
+        public static void CreateAllMappings()
+        {
+            CreateMap<ApiSettings, ConfigurationModel>();
+            CreateMap<ConfigurationModel, ApiSettings>();
+
+            CreateMap<Client, ClientModel>();
+            CreateMap<ClientModel, Client>();
+
+            CreateMap<Category, CategoryDto>();
+            CreateMap<CategoryDto, Category>();
+
+            CreateMap<ProductCategory, ProductCategoryMappingDto>();
+
+            CreateAddressMap();
+            CreateAddressDtoToEntityMap();
+            CreateShoppingCartItemMap();
+
+            CreateCustomerToDTOMap();
+            CreateCustomerToOrderCustomerDTOMap();
+            CreateCustomerForShoppingCartItemMapFromCustomer();
+
+            CreateMap<OrderItem, OrderItemDto>();
+            CreateOrderEntityToOrderDtoMap();
+
+            CreateProductMap();
         }
     }
 }
