@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Nop.Admin.Extensions;
+﻿using Nop.Plugin.Api.AutoMapper;
 using Nop.Core.Domain.Orders;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
 
