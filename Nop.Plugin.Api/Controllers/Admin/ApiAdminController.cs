@@ -37,7 +37,7 @@ namespace Nop.Plugin.Api.Controllers.Admin
         }
         
         [HttpGet]
-        public ActionResult Configure()
+        public ActionResult Settings()
         {
             var storeScope = this.GetActiveStoreScopeConfiguration(_storeService, _workContext);
 
@@ -60,7 +60,7 @@ namespace Nop.Plugin.Api.Controllers.Admin
         }
 
         [HttpPost]
-        public ActionResult Configure(ConfigurationModel configurationModel)
+        public ActionResult Settings(ConfigurationModel configurationModel)
         {
             //load settings for a chosen store scope
             var storeScope = this.GetActiveStoreScopeConfiguration(_storeService, _workContext);

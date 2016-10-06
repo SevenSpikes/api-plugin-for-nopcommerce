@@ -1,19 +1,65 @@
 ﻿using System.Web.Routing;
+using Nop.Core;
+using Nop.Core.Domain.Localization;
+using Nop.Core.Infrastructure;
 using Nop.Core.Plugins;
 using Nop.Plugin.Api.Data;
 using Nop.Plugin.Api.Helpers;
 using Nop.Services.Common;
+using Nop.Services.Configuration;
 using Nop.Web.Framework.Menu;
 using Nop.Services.Localization;
 
 namespace Nop.Plugin.Api.Plugin
 {
-    public class ApiPlugin : BasePlugin, IAdminMenuPlugin, IMiscPlugin
+    public class ApiPlugin : BasePlugin, IAdminMenuPlugin
     {
         private const string ControllersNamespace = "Nop.Plugin.Api.Controllers";
 
         private readonly ApiObjectContext _objectContext;
         private readonly IWebConfigMangerHelper _webConfigMangerHelper;
+        private ILocalizationService _localizationService;
+        private IWebHelper _webHelper;
+        private IWorkContext _workContext;
+
+        protected ILocalizationService LocalizationService
+        {
+            get
+            {
+                if (_localizationService == null)
+                {
+                    _localizationService = EngineContext.Current.Resolve<ILocalizationService>();
+                }
+
+                return _localizationService;
+            }
+        }
+
+        protected IWebHelper WebHelper
+        {
+            get
+            {
+                if (_webHelper == null)
+                {
+                    _webHelper = EngineContext.Current.Resolve<IWebHelper>();
+                }
+
+                return _webHelper;
+            }
+        }
+
+        protected IWorkContext WorkContext
+        {
+            get
+            {
+                if (_workContext == null)
+                {
+                    _workContext = EngineContext.Current.Resolve<IWorkContext>();
+                }
+
+                return _workContext;
+            }
+        }
 
         public ApiPlugin(ApiObjectContext objectContext, IWebConfigMangerHelper webConfigMangerHelper)
         {
@@ -33,13 +79,29 @@ namespace Nop.Plugin.Api.Plugin
             this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.EnableApi", "Enable Api");
             this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.EnableApi.Hint", "By checking this settings you can Enable/Disable the Web Api");
             this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.AllowRequestsFromSwagger", "Allow Requests From Swagger");
-            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.AllowRequestsFromSwagger.Hint", "Swagger is the documentation generation tool used for the API. It has a client that enables it to make requests to the api endpoints, so the users can try our certain point on place. By enabling this option you will allow all requests from the swagger client. Do Not Enable on live site, it is only for demo sites or local testing!!!");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.AllowRequestsFromSwagger.Hint", "Swagger is the documentation generation tool used for the API (/Swagger). It has a client that enables it to make GET requests to the API endpoints. By enabling this option you will allow all requests from the swagger client. Do Not Enable on live site, it is only for demo sites or local testing!!!");
+
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Menu.Title","API");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Menu.Settings.Title","Settings");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Menu.Clients.Title", "Clients");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Menu.Docs.Title", "Docs");
+
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Page.Settings.Title", "Api Settings");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Page.Clients.Title", "Api Clients");
+            
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Page.Clients.Create.Title", "Add a new Api client");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Page.Clients.Edit.Title", "Edit Api client");
 
             this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Client.Name", "Name");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Client.Name.Hint", "Name Hint");
             this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Client.ClientId", "Client Id");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Client.ClientId.Hint", "The id of the client");
             this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Client.ClientSecret", "Client Secret");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Client.ClientSecret.Hint", "The client secret is used during the authentication for obtaining the Access Token");
             this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Client.CallbackUrl", "Callback Url");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Client.CallbackUrl.Hint", "The url where the Authorization code will be send");
             this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Client.IsActive", "Is Active");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Client.IsActive.Hint", "You can use it to enable/disable the access to your store for the client");
             this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Client.AddNew", "Add New Client");
             this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Client.Edit", "Edit");
             this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Client.Created", "Created");
@@ -77,6 +139,12 @@ namespace Nop.Plugin.Api.Plugin
             //locales
             this.DeletePluginLocaleResource("Plugins.Api");
             this.DeletePluginLocaleResource("Plugins.Api.Admin.Menu.ManageClients");
+
+            this.DeletePluginLocaleResource("Plugins.Api.Admin.Menu.Title");
+            this.DeletePluginLocaleResource("Plugins.Api.Admin.Menu.Settings.Title");
+            this.DeletePluginLocaleResource("Plugins.Api.Admin.Menu.Clients.Title");
+            this.DeletePluginLocaleResource("Plugins.Api.Admin.Menu.Docs.Title");
+
             this.DeletePluginLocaleResource("Plugins.Api.Admin.Configure");
             this.DeletePluginLocaleResource("Plugins.Api.Admin.GeneralSettings");
             this.DeletePluginLocaleResource("Plugins.Api.Admin.EnableApi");
@@ -110,20 +178,54 @@ namespace Nop.Plugin.Api.Plugin
 
         public void ManageSiteMap(SiteMapNode rootNode)
         {
-           
-        }
+            string pluginMenuName = LocalizationService.GetResource("Plugins.Api.Admin.Menu.Title",languageId: WorkContext.WorkingLanguage.Id, defaultValue: "API");
 
-        /// <summary>
-        /// Gets a route for provider configuration
-        /// </summary>
-        /// <param name="actionName">Action name</param>
-        /// <param name="controllerName">Controller name</param>
-        /// <param name="routeValues">Route values</param>
-        public void GetConfigurationRoute(out string actionName, out string controllerName, out RouteValueDictionary routeValues)
-        {
-            actionName = "Configure";
-            controllerName = "ApiAdmin";
-            routeValues = new RouteValueDictionary { { "Namespaces", ControllersNamespace }, { "area", null } };
+            string settingsMenuName = LocalizationService.GetResource("Plugins.Api.Admin.Menu.Settings.Title", languageId: WorkContext.WorkingLanguage.Id, defaultValue: "API");
+
+            string manageClientsMenuName = LocalizationService.GetResource("Plugins.Api.Admin.Menu.Clients.Title", languageId: WorkContext.WorkingLanguage.Id, defaultValue: "API");
+
+            const string adminUrlPart = "Plugins/";
+
+            var pluginMainMenu = new SiteMapNode
+            {
+                Title = pluginMenuName,
+                Visible = true,
+                SystemName = "Api-Main-Menu",
+                IconClass = "fa-genderless"
+            };
+
+            pluginMainMenu.ChildNodes.Add(new SiteMapNode
+            {
+                Title = settingsMenuName,
+                Url = WebHelper.GetStoreLocation() + adminUrlPart + "ApiAdmin/Settings",
+                Visible = true,
+                SystemName = "Api-Settings-Menu",
+                IconClass = "fa-genderless"
+            });
+
+            pluginMainMenu.ChildNodes.Add(new SiteMapNode
+            {
+                Title = manageClientsMenuName,
+                Url = WebHelper.GetStoreLocation() + adminUrlPart + "ManageClientsAdmin/List",
+                Visible = true,
+                SystemName = "Api-Clients-Menu",
+                IconClass = "fa-genderless"
+            });
+            
+
+            string pluginDocumentationUrl = "https://github.com/SevenSpikes/api-plugin-for-nopcommerce";
+            
+            pluginMainMenu.ChildNodes.Add(new SiteMapNode
+                {
+                    Title = LocalizationService.GetResource("Plugins.Api.Admin.Menu.Docs.Title"),
+                    Url = pluginDocumentationUrl,
+                    Visible = true,
+                    SystemName = "Api-Docs-Menu",
+                    IconClass = "fa-genderless"
+                });//TODO: target="_blank"
+            
+
+            rootNode.ChildNodes.Add(pluginMainMenu);
         }
     }
 }

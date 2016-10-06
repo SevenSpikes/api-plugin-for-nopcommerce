@@ -2,51 +2,61 @@
 @using Nop.Plugin.Api.Models
 
 @model ClientModel
+<div class="content">
+    <div class="form-horizontal">
 
-<table class="adminContent">
-    <tr class="apiSettings">
-        <td class="adminTitle">
-            @Html.NopLabelFor(model => model.Name):
-        </td>
-        <td class="adminData">
-            @Html.EditorFor(model => model.Name)
-            @Html.ValidationMessageFor(model => model.Name)
-        </td>
-    </tr>
-    <tr class="apiSettings">
-        <td class="adminTitle">
-            @Html.NopLabelFor(model => model.ClientId):
-        </td>
-        <td class="adminData">
-            @Html.EditorFor(model => model.ClientId)
-            @Html.ValidationMessageFor(model => model.ClientId)
-        </td>
-    </tr>
-    <tr class="apiSettings">
-        <td class="adminTitle">
-            @Html.NopLabelFor(model => model.ClientSecret):
-        </td>
-        <td class="adminData">
-            @Html.EditorFor(model => model.ClientSecret)
-            @Html.ValidationMessageFor(model => model.ClientSecret)
-        </td>
-    </tr>
-    <tr class="apiSettings">
-        <td class="adminTitle">
-            @Html.NopLabelFor(model => model.CallbackUrl):
-        </td>
-        <td class="adminData">
-            @Html.EditorFor(model => model.CallbackUrl)
-            @Html.ValidationMessageFor(model => model.CallbackUrl)
-        </td>
-    </tr>
-    <tr class="apiSettings">
-        <td class="adminTitle">
-            @Html.NopLabelFor(model => model.IsActive):
-        </td>
-        <td class="adminData">
-            @Html.EditorFor(model => model.IsActive)
-            @Html.ValidationMessageFor(model => model.IsActive)
-        </td>
-    </tr>
-</table>
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.NopLabelFor(model => model.Name)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.NopEditorFor(model => model.Name)
+                            @Html.ValidationMessageFor(model => model.Name)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.NopLabelFor(model => model.ClientId)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.NopEditorFor(model => model.ClientId)
+                            @Html.ValidationMessageFor(model => model.ClientId)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.NopLabelFor(model => model.ClientSecret)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.NopEditorFor(model => model.ClientSecret)
+                            @Html.ValidationMessageFor(model => model.ClientSecret)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.NopLabelFor(model => model.CallbackUrl)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.NopEditorFor(model => model.CallbackUrl)
+                            @Html.ValidationMessageFor(model => model.CallbackUrl)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.NopLabelFor(model => model.IsActive)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.NopEditorFor(model => model.IsActive)
+                            @Html.ValidationMessageFor(model => model.IsActive)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+

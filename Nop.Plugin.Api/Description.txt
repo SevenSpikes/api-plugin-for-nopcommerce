@@ -6,3 +6,4 @@ SupportedVersions: 3.80
 Author: nopCommerce/nop-templates team
 DisplayOrder: 1
 FileName: Nop.Plugin.Api.dll
+Description: This plugin provides a Restful Api for connecting to your store

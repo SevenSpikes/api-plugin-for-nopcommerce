@@ -2,7 +2,7 @@
 {
     public class ViewNames
     {
-        public const string AdminApiSettings = "~/Plugins/Nop.Plugin.Api/Views/Configure.cshtml";
+        public const string AdminApiSettings = "~/Plugins/Nop.Plugin.Api/Views/Settings.cshtml";
         public const string AdminApiClientsCreateOrUpdate = "~/Plugins/Nop.Plugin.Api/Views/Clients/CreateOrUpdate.cshtml";
         public const string AdminApiClientsSettings = "~/Plugins/Nop.Plugin.Api/Views/Clients/ClientSettings.cshtml";
         public const string AdminApiClientsList = "~/Plugins/Nop.Plugin.Api/Views/Clients/List.cshtml";

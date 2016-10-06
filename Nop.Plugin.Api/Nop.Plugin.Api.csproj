@@ -258,6 +258,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="JSON\Serializers\IJsonFieldsSerializer.cs" />
     <Compile Include="JSON\Serializers\JsonFieldsSerializer.cs" />
+    <Compile Include="RouteProvider.cs" />
     <Compile Include="Services\CategoryApiService.cs" />
     <Compile Include="Services\ClientService.cs" />
     <Compile Include="Services\CustomerApiService.cs" />
@@ -340,7 +341,7 @@
     <Content Include="Views\Clients\List.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Views\Configure.cshtml">
+    <Content Include="Views\Settings.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="web.config">

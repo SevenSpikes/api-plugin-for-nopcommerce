@@ -1,0 +1,72 @@
+﻿@{
+    Layout = ViewNames.AdminLayout;
+
+    //page title
+    ViewBag.Title = T("Plugins.Api.Admin.Page.Settings.Title").Text;
+
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Api-Settings-Menu");
+}
+@model Nop.Plugin.Api.Models.ConfigurationModel
+
+@using System.Web.Mvc.Html
+@using Nop.Plugin.Api.Constants
+@using Nop.Web.Framework;
+@using Nop.Web.Framework.UI
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    @Html.Action("StoreScopeConfiguration", "Setting", new { area = "Admin" })
+
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Plugins.Api.Admin.Page.Settings.Title")
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+
+
+    <div class="content">
+        <div class="form-horizontal">
+            @Html.Action("StoreScopeConfiguration", "Setting")
+            @Html.Action("Mode", "Setting")
+            @Html.ValidationSummary(false)
+            <div class="panel-group">
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.EnableApi_OverrideForStore, model => model.EnableApi, Model.ActiveStoreScopeConfiguration)
+                                @Html.NopLabelFor(model => model.EnableApi)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.NopEditorFor(model => model.EnableApi)
+                                @Html.ValidationMessageFor(model => model.EnableApi)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AllowRequestsFromSwagger_OverrideForStore, model => model.AllowRequestsFromSwagger, Model.ActiveStoreScopeConfiguration)
+                                @Html.NopLabelFor(model => model.AllowRequestsFromSwagger)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.NopEditorFor(model => model.AllowRequestsFromSwagger)
+                                @Html.ValidationMessageFor(model => model.AllowRequestsFromSwagger)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+                        
