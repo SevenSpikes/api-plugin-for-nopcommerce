@@ -3,8 +3,8 @@
     public class Configurations
     {
         // time is in minutes (30 days = 43200 minutes)
-        public const int AccessTokenExpiration = 60;
-        public const int RefreshTokenExpiration = int.MaxValue;
+        public const int AccessTokenExpirationMinutes = 60;
+        public const int RefreshTokenExpirationMinutes = int.MaxValue;
         public const int DefaultLimit = 50;
         public const int DefaultPageValue = 1;
         public const int DefaultSinceId = 0;

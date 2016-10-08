@@ -40,7 +40,7 @@ namespace Nop.Plugin.Api
                 AllowInsecureHttp = true,
                 TokenEndpointPath = new PathString("/api/token"),
                 AuthorizeEndpointPath = new PathString("/OAuth/Authorize"),
-                AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(Configurations.AccessTokenExpiration),
+                AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(Configurations.AccessTokenExpirationMinutes),
                 Provider = new AuthorisationServerProvider(),
                 AuthorizationCodeProvider = new AuthenticationTokenProvider(),
                 RefreshTokenProvider = new RefreshTokenProvider(),

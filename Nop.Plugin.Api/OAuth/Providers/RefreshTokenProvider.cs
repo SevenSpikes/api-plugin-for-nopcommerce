@@ -15,7 +15,7 @@ namespace Nop.Plugin.Api.Owin.OAuth.Providers
         public async Task CreateAsync(AuthenticationTokenCreateContext context)
         {
             context.Ticket.Properties.IssuedUtc = DateTime.UtcNow;
-            context.Ticket.Properties.ExpiresUtc = DateTime.UtcNow.AddMinutes(Configurations.RefreshTokenExpiration);
+            context.Ticket.Properties.ExpiresUtc = DateTime.UtcNow.AddMinutes(Configurations.RefreshTokenExpirationMinutes);
 
             context.SetToken(context.SerializeTicket());
         }
