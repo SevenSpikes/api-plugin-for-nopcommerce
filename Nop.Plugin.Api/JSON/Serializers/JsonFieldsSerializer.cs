@@ -10,8 +10,6 @@ namespace Nop.Plugin.Api.Serializers
 {
     public class JsonFieldsSerializer : IJsonFieldsSerializer
     {
-        private const string DateTimeIso8601Format = "yyyy-MM-ddTHH:mm:ssZ";
-
         public string Serialize(ISerializableObject objectToSerialize, string jsonFields)
         {
             if (objectToSerialize == null)
@@ -38,12 +36,7 @@ namespace Nop.Plugin.Api.Serializers
 
         private string Serialize(object objectToSerialize, IList<string> jsonFields = null)
         {
-            var serializer = new JsonSerializer
-            {
-                DateFormatString = DateTimeIso8601Format
-            };
-
-            JToken jToken = JToken.FromObject(objectToSerialize, serializer);
+            JToken jToken = JToken.FromObject(objectToSerialize);
 
             if (jsonFields != null)
             {
