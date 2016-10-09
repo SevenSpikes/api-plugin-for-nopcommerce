@@ -33,7 +33,7 @@ namespace Nop.Plugin.Api.Tests.ConvertersTests.ApiTypeConverter
             //Arange
 
             //Act
-            DateTime? result = _apiTypeConverter.ToDateTimeNullable(invalidDate);
+            DateTime? result = _apiTypeConverter.ToUtcDateTimeNullable(invalidDate);
 
             //Assert
             Assert.IsNull(result);
@@ -47,27 +47,44 @@ namespace Nop.Plugin.Api.Tests.ConvertersTests.ApiTypeConverter
             //Arange
 
             //Act
-            DateTime? result = _apiTypeConverter.ToDateTimeNullable(nullOrEmpty);
+            DateTime? result = _apiTypeConverter.ToUtcDateTimeNullable(nullOrEmpty);
 
             //Assert
             Assert.IsNull(result);
         }
         
         [Test]
+        [TestCase("2016-12")]
         [TestCase("2016-12-26")]
-        [TestCase("2016-12-26T12:45")]
-        [TestCase("2016-12-26T12:45:49")]
-        [TestCase("2013-12-11T14:36:00+01:00")]
-        public void WhenValidDatePassed_ShouldParseThatDate(string validDate)
+        [TestCase("2016-12-26T06:45")]
+        [TestCase("2016-12-26T06:45:49")]
+        [TestCase("2016-12-26T06:45:49.05")]
+        public void WhenValidIso8601DateWithoutTimeZoneOrOffsetPassed_ShouldConvertAsUTC(string validDate)
         {
             //Arange
-            DateTime validParsedDate = DateTime.Parse(validDate);
+            DateTime expectedDateTimeUtc = DateTime.Parse(validDate,null,DateTimeStyles.RoundtripKind);
 
             //Act
-            DateTime? result = _apiTypeConverter.ToDateTimeNullable(validDate);
+            DateTime? result = _apiTypeConverter.ToUtcDateTimeNullable(validDate);
 
             //Assert
-            Assert.AreEqual(validParsedDate, result);
+            Assert.AreEqual(expectedDateTimeUtc, result);
+        }
+
+        [TestCase("2016-12-26T06:45:49Z")]
+        [TestCase("2016-12-26T07:45:49+01:00")]
+        [TestCase("2016-12-26T08:45:49+02:00")]
+        [TestCase("2016-12-26T04:45:49-02:00")]
+        public void WhenValidDateWithTimeZoneOrOffsetPassed_ShouldConvertThatDateInUTC(string validDate)
+        {
+            //Arange
+            DateTime expectedDateTimeUtc = new DateTime(2016,12,26,6,45,49,DateTimeKind.Utc);
+
+            //Act
+            DateTime? result = _apiTypeConverter.ToUtcDateTimeNullable(validDate);
+
+            //Assert
+            Assert.AreEqual(expectedDateTimeUtc, result);
         }
     }
 }

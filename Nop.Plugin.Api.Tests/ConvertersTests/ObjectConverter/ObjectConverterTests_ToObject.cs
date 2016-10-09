@@ -26,7 +26,7 @@ namespace Nop.Plugin.Api.Tests.ConvertersTests.ObjectConverter
             //Assert
             apiTypeConverterMock.AssertWasNotCalled(x => x.ToInt(Arg<string>.Is.Anything));
             apiTypeConverterMock.AssertWasNotCalled(x => x.ToIntNullable(Arg<string>.Is.Anything));
-            apiTypeConverterMock.AssertWasNotCalled(x => x.ToDateTimeNullable(Arg<string>.Is.Anything));
+            apiTypeConverterMock.AssertWasNotCalled(x => x.ToUtcDateTimeNullable(Arg<string>.Is.Anything));
             apiTypeConverterMock.AssertWasNotCalled(x => x.ToListOfInts(Arg<string>.Is.Anything));
             apiTypeConverterMock.AssertWasNotCalled(x => x.ToStatus(Arg<string>.Is.Anything));
         }
@@ -104,7 +104,7 @@ namespace Nop.Plugin.Api.Tests.ConvertersTests.ObjectConverter
             //Assert
             apiTypeConverterMock.AssertWasNotCalled(x => x.ToInt(Arg<string>.Is.Anything));
             apiTypeConverterMock.AssertWasNotCalled(x => x.ToIntNullable(Arg<string>.Is.Anything));
-            apiTypeConverterMock.AssertWasNotCalled(x => x.ToDateTimeNullable(Arg<string>.Is.Anything));
+            apiTypeConverterMock.AssertWasNotCalled(x => x.ToUtcDateTimeNullable(Arg<string>.Is.Anything));
             apiTypeConverterMock.AssertWasNotCalled(x => x.ToListOfInts(Arg<string>.Is.Anything));
             apiTypeConverterMock.AssertWasNotCalled(x => x.ToStatus(Arg<string>.Is.Anything));
         }
@@ -229,7 +229,7 @@ namespace Nop.Plugin.Api.Tests.ConvertersTests.ObjectConverter
             //Assert
             apiTypeConverterMock.AssertWasNotCalled(x => x.ToInt(Arg<string>.Is.Anything));
             apiTypeConverterMock.AssertWasNotCalled(x => x.ToIntNullable(Arg<string>.Is.Anything));
-            apiTypeConverterMock.AssertWasNotCalled(x => x.ToDateTimeNullable(Arg<string>.Is.Anything));
+            apiTypeConverterMock.AssertWasNotCalled(x => x.ToUtcDateTimeNullable(Arg<string>.Is.Anything));
             apiTypeConverterMock.AssertWasNotCalled(x => x.ToListOfInts(Arg<string>.Is.Anything));
             apiTypeConverterMock.AssertWasNotCalled(x => x.ToStatus(Arg<string>.Is.Anything));
         }
@@ -244,7 +244,7 @@ namespace Nop.Plugin.Api.Tests.ConvertersTests.ObjectConverter
         {
             //Arange
             IApiTypeConverter apiTypeConverterMock = MockRepository.GenerateMock<IApiTypeConverter>();
-            apiTypeConverterMock.Expect(x => x.ToDateTimeNullable(Arg<string>.Is.Anything)).IgnoreArguments().Return(DateTime.Now);
+            apiTypeConverterMock.Expect(x => x.ToUtcDateTimeNullable(Arg<string>.Is.Anything)).IgnoreArguments().Return(DateTime.Now);
 
             IObjectConverter objectConverter = new Converters.ObjectConverter(apiTypeConverterMock);
 
@@ -257,7 +257,7 @@ namespace Nop.Plugin.Api.Tests.ConvertersTests.ObjectConverter
             objectConverter.ToObject<SomeTestingObject>(collection);
 
             //Assert
-            apiTypeConverterMock.AssertWasCalled(x => x.ToDateTimeNullable(Arg<string>.Is.Anything));
+            apiTypeConverterMock.AssertWasCalled(x => x.ToUtcDateTimeNullable(Arg<string>.Is.Anything));
         }
 
         [Test]
@@ -266,7 +266,7 @@ namespace Nop.Plugin.Api.Tests.ConvertersTests.ObjectConverter
         {
             //Arange
             IApiTypeConverter apiTypeConverterMock = MockRepository.GenerateMock<IApiTypeConverter>();
-            apiTypeConverterMock.Expect(x => x.ToDateTimeNullable(Arg<string>.Is.Anything)).IgnoreArguments();
+            apiTypeConverterMock.Expect(x => x.ToUtcDateTimeNullable(Arg<string>.Is.Anything)).IgnoreArguments();
 
             IObjectConverter objectConverter = new Converters.ObjectConverter(apiTypeConverterMock);
 
@@ -279,7 +279,7 @@ namespace Nop.Plugin.Api.Tests.ConvertersTests.ObjectConverter
             objectConverter.ToObject<SomeTestingObject>(collection);
 
             //Assert
-            apiTypeConverterMock.AssertWasNotCalled(x => x.ToDateTimeNullable(Arg<string>.Is.Anything));
+            apiTypeConverterMock.AssertWasNotCalled(x => x.ToUtcDateTimeNullable(Arg<string>.Is.Anything));
         }
 
         [Test]

@@ -41,7 +41,7 @@ namespace Nop.Plugin.Api.Converters
         {
             if (type == typeof(DateTime?))
             {
-                return _apiTypeConverter.ToDateTimeNullable(value);
+                return _apiTypeConverter.ToUtcDateTimeNullable(value);
             }
             else if (type == typeof (int?))
             {

@@ -7,20 +7,34 @@ namespace Nop.Plugin.Api.Converters
 {
     public class ApiTypeConverter : IApiTypeConverter
     {
-        public DateTime? ToDateTimeNullable(string value)
+        /// <summary>
+        /// Converts the value, which should be in ISO 8601 format to UTC time or null if not valid
+        /// </summary>
+        /// <param name="value">The time format in ISO 8601. If no timezone or offset specified we assume it is in UTC</param>
+        /// <returns>The time in UTC or null if the time is not valid</returns>
+        public DateTime? ToUtcDateTimeNullable(string value)
         {
             DateTime result;
 
             var formats = new string[]
             {
+                "yyyy",
+                "yyyy-MM",
                 "yyyy-MM-dd",
                 "yyyy-MM-ddTHH:mm",
                 "yyyy-MM-ddTHH:mm:ss",
                 "yyyy-MM-ddTHH:mm:sszzz",
+                "yyyy-MM-ddTHH:mm:ss.FFFFFFFK"
             };
 
             if (DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out result))
             {
+                // only if parsed in Local time then we need to convert it to UTC
+                if (result.Kind == DateTimeKind.Local)
+                {
+                    return result.ToUniversalTime();
+                }
+
                 return result;
             }
 

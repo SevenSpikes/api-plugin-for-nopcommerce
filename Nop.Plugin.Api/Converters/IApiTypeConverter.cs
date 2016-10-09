@@ -5,7 +5,7 @@ namespace Nop.Plugin.Api.Converters
 {
     public interface IApiTypeConverter
     {
-        DateTime? ToDateTimeNullable(string value);
+        DateTime? ToUtcDateTimeNullable(string value);
         int ToInt(string value);
         int? ToIntNullable(string value);
         IList<int> ToListOfInts(string value);
