@@ -1,6 +1,9 @@
+# API plugin for nopCommerce
+
 This plugin provides a RESTful API for managing resources in nopCommerce.
 
-Some Terminology:
+What is a RESTful API?
+----------------------------------------
 
 HTTP requests are often the way that you interact with a RESTful API.
 A client makes a HTTP request to a server and the server responds with an HTTP response.
