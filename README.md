@@ -41,36 +41,28 @@ What can you do with Customers?
 
 The nopCommerce API lets you do the following with the Customer resource.
 
-GET /api/customers
-
++ GET /api/customers  
 Receive a list of all Customers
 
-GET /api/customers/search?query=first_name:john
-
++ GET /api/customers/search?query=first_name:john  
 Search for customers matching supplied query
 
-GET /api/customers/{id}
-
++ GET /api/customers/{id}  
 Receive a single Customer
 
-POST /api/customers
-
++ POST /api/customers  
 Create a new Customer
 
-PUT /api/customers/{id}
-
++ PUT /api/customers/{id}  
 Modify an existing Customer
 
-DELETE /api/customers/{id}
-
++ DELETE /api/customers/{id}  
 Remove a Customer (mark as Deleted)
 
-GET /api/customers/count
-
++ GET /api/customers/count  
 Receive a count of all Customers
 
-GET /api/orders/customer/{customer_id}
-
++ GET /api/orders/customer/{customer_id}  
 Find orders belonging to this customer
 
 Customer Endpoints
