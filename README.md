@@ -20,7 +20,7 @@ In a HTTP request, you need to define the type of action that you want to perfor
 
 A resource is a data object that can be accessed via an HTTP request. The API allows you to “access your nopCommerce site’s data (resources) through an easy-to-use HTTP REST API”. In the case of the most recent version of the API (nopCommerce version 3.80), the resources include the following 7 nopCommerce objects:
 
-**Customers**
+[**Customers**](#what-can-you-do-with-customers)
 
 **Products**
 
@@ -84,3 +84,4 @@ Customer Endpoints
 |  limit |  Amount of results (default: 50) (maximum: 250) |
 |  page |  Page to show (default: 1) |
 |  fields |  Comma-separated list of fields to include in the response |
+
