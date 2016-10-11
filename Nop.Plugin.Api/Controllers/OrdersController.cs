@@ -196,15 +196,15 @@ namespace Nop.Plugin.Api.Controllers
         /// <summary>
         /// Retrieve all orders for customer
         /// </summary>
-        /// <param name="customerId">Id of the customer whoes orders you want to get</param>
+        /// <param name="customer_id">Id of the customer whoes orders you want to get</param>
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
         [ResponseType(typeof(OrdersRootObject))]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult GetOrdersByCustomerId(int customerId)
+        public IHttpActionResult GetOrdersByCustomerId(int customer_id)
         {
-            IList<OrderDto> ordersForCustomer = _orderApiService.GetOrdersByCustomerId(customerId).Select(x => x.ToDto()).ToList();
+            IList<OrderDto> ordersForCustomer = _orderApiService.GetOrdersByCustomerId(customer_id).Select(x => x.ToDto()).ToList();
 
             var ordersRootObject = new OrdersRootObject()
             {
