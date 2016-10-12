@@ -68,6 +68,9 @@ Find orders belonging to this customer
 Customer Endpoints
 -------------------------------------
 
+GET /api/customers  
+Retrieve all customers
+
 |  GET |  /api/customers |
 |:---|:---|
 |  since_id |  Restrict results to after the specified ID |
@@ -77,3 +80,194 @@ Customer Endpoints
 |  page |  Page to show (default: 1) |
 |  fields |  Comma-separated list of fields to include in the response |
 
+GET /api/customers  
+Get all customers
+
+<details>
+<summary>
+Response
+<summary/>
+```json
+
+         HTTP/1.1 200 OK
+{
+  "customers": [
+    {
+      "shopping_cart_items": [],
+      "billing_address": {
+        "id": "1",
+        "first_name": "John",
+        "last_name": "Smith",
+        "email": "admin@yourStore.com",
+        "company": "Nop Solutions Ltd",
+        "country_id": 1,
+        "country": "United States",
+        "state_province_id": 40,
+        "city": "New York",
+        "address1": "21 West 52nd Street",
+        "address2": "",
+        "zip_postal_code": "10021",
+        "phone_number": "12345678",
+        "fax_number": "",
+        "customer_attributes": null,
+        "created_on_utc": "2016-09-30T08:56:13.85",
+        "province": "New York"
+      },
+      "shipping_address": {
+        "id": "1",
+        "first_name": "John",
+        "last_name": "Smith",
+        "email": "admin@yourStore.com",
+        "company": "Nop Solutions Ltd",
+        "country_id": 1,
+        "country": "United States",
+        "state_province_id": 40,
+        "city": "New York",
+        "address1": "21 West 52nd Street",
+        "address2": "",
+        "zip_postal_code": "10021",
+        "phone_number": "12345678",
+        "fax_number": "",
+        "customer_attributes": null,
+        "created_on_utc": "2016-09-30T08:56:13.85",
+        "province": "New York"
+      },
+      "addresses": [
+        {
+          "id": "1",
+          "first_name": "John",
+          "last_name": "Smith",
+          "email": "admin@yourStore.com",
+          "company": "Nop Solutions Ltd",
+          "country_id": 1,
+          "country": "United States",
+          "state_province_id": 40,
+          "city": "New York",
+          "address1": "21 West 52nd Street",
+          "address2": "",
+          "zip_postal_code": "10021",
+          "phone_number": "12345678",
+          "fax_number": "",
+          "customer_attributes": null,
+          "created_on_utc": "2016-09-30T08:56:13.85",
+          "province": "New York"
+        }
+      ],
+      "id": "1",
+      "username": "admin@yourStore.com",
+      "email": "admin@yourStore.com",
+      "first_name": "John",
+      "last_name": "Smith",
+      "admin_comment": null,
+      "is_tax_exempt": false,
+      "has_shopping_cart_items": false,
+      "active": true,
+      "deleted": false,
+      "is_system_account": false,
+      "system_name": null,
+      "last_ip_address": "127.0.0.1",
+      "created_on_utc": "2016-09-30T08:56:13.443",
+      "last_login_date_utc": "2016-10-12T19:59:05.063",
+      "last_activity_date_utc": "2016-10-12T19:59:05.137",
+      "role_ids": []
+    }
+  ]
+}
+```
+<details/>
+
+Get all customers created after a certain date
+
+GET /api/customers?updated_at_min=2016-09-30T08:56:13.85
+
+<details>
+<summary>Response<summary/>
+```json
+
+         HTTP/1.1 200 OK
+
+{
+  "customers": [
+    {
+      "shopping_cart_items": [],
+      "billing_address": {
+        "id": "2",
+        "first_name": "Steve",
+        "last_name": "Gates",
+        "email": "steve_gates@nopCommerce.com",
+        "company": "Steve Company",
+        "country_id": 1,
+        "country": "United States",
+        "state_province_id": 9,
+        "city": "Los Angeles",
+        "address1": "750 Bel Air Rd.",
+        "address2": "",
+        "zip_postal_code": "90077",
+        "phone_number": "87654321",
+        "fax_number": "",
+        "customer_attributes": null,
+        "created_on_utc": "2016-09-30T08:56:13.97",
+        "province": "California"
+      },
+      "shipping_address": {
+        "id": "2",
+        "first_name": "Steve",
+        "last_name": "Gates",
+        "email": "steve_gates@nopCommerce.com",
+        "company": "Steve Company",
+        "country_id": 1,
+        "country": "United States",
+        "state_province_id": 9,
+        "city": "Los Angeles",
+        "address1": "750 Bel Air Rd.",
+        "address2": "",
+        "zip_postal_code": "90077",
+        "phone_number": "87654321",
+        "fax_number": "",
+        "customer_attributes": null,
+        "created_on_utc": "2016-09-30T08:56:13.97",
+        "province": "California"
+      },
+      "addresses": [
+        {
+          "id": "2",
+          "first_name": "Steve",
+          "last_name": "Gates",
+          "email": "steve_gates@nopCommerce.com",
+          "company": "Steve Company",
+          "country_id": 1,
+          "country": "United States",
+          "state_province_id": 9,
+          "city": "Los Angeles",
+          "address1": "750 Bel Air Rd.",
+          "address2": "",
+          "zip_postal_code": "90077",
+          "phone_number": "87654321",
+          "fax_number": "",
+          "customer_attributes": null,
+          "created_on_utc": "2016-09-30T08:56:13.97",
+          "province": "California"
+        }
+      ],
+      "id": "2",
+      "username": "steve_gates@nopCommerce.com",
+      "email": "steve_gates@nopCommerce.com",
+      "first_name": "Steve",
+      "last_name": "Gates",
+      "admin_comment": null,
+      "is_tax_exempt": false,
+      "has_shopping_cart_items": false,
+      "active": true,
+      "deleted": false,
+      "is_system_account": false,
+      "system_name": null,
+      "last_ip_address": null,
+      "created_on_utc": "2016-09-30T08:56:13.967",
+      "last_login_date_utc": null,
+      "last_activity_date_utc": "2016-09-30T08:56:13.967",
+      "role_ids": []
+    }
+  ]
+}
+
+<details/>
