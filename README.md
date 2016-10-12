@@ -83,13 +83,10 @@ Retrieve all customers
 GET /api/customers  
 Get all customers
 
-<details>
-<summary>
-Response
-<summary/>
+<details><summary>Response</summary><p>
 ```json
-
          HTTP/1.1 200 OK
+         
 {
   "customers": [
     {
@@ -174,18 +171,16 @@ Response
   ]
 }
 ```
-<details/>
+</p></details>
 
 Get all customers created after a certain date
 
 GET /api/customers?updated_at_min=2016-09-30T08:56:13.85
 
-<details>
-<summary>Response<summary/>
+<details><summary>Response</summary><p>
 ```json
-
          HTTP/1.1 200 OK
-
+         
 {
   "customers": [
     {
@@ -269,5 +264,6 @@ GET /api/customers?updated_at_min=2016-09-30T08:56:13.85
     }
   ]
 }
+```
+</p></details>
 
-<details/>
