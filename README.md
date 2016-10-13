@@ -46,8 +46,8 @@ Receive a list of all Customers](#get-apicustomers)
 + [GET /api/customers/search?query=first_name:john  
 Search for customers matching supplied query](#get-apicustomerssearch)
 
-+ GET /api/customers/{id}  
-Receive a single Customer
++ [GET /api/customers/{id}  
+Receive a single Customer](#get-apicustomersid)
 
 + POST /api/customers  
 Create a new Customer
@@ -369,3 +369,120 @@ Get all customers with first name "John"
 ```
 </p></details>
 
+### GET /api/customers/{id}  
+Retrieve customer by spcified id
+
+|  GET |  /api/customers/{id} |
+|:---|:---|
+|  fields |  Comma-separated list of fields to include in the response |
+
+GET /api/customers/1  
+Get a single customer with id 1
+
+<details><summary>Response</summary><p>
+```json
+         HTTP/1.1 200 OK
+         
+{
+  "customers": [
+    {
+      "shopping_cart_items": [],
+      "billing_address": {
+        "id": "1",
+        "first_name": "John",
+        "last_name": "Smith",
+        "email": "admin@yourStore.com",
+        "company": "Nop Solutions Ltd",
+        "country_id": 1,
+        "country": "United States",
+        "state_province_id": 40,
+        "city": "New York",
+        "address1": "21 West 52nd Street",
+        "address2": "",
+        "zip_postal_code": "10021",
+        "phone_number": "12345678",
+        "fax_number": "",
+        "customer_attributes": null,
+        "created_on_utc": "2016-09-30T08:56:13.85",
+        "province": "New York"
+      },
+      "shipping_address": {
+        "id": "1",
+        "first_name": "John",
+        "last_name": "Smith",
+        "email": "admin@yourStore.com",
+        "company": "Nop Solutions Ltd",
+        "country_id": 1,
+        "country": "United States",
+        "state_province_id": 40,
+        "city": "New York",
+        "address1": "21 West 52nd Street",
+        "address2": "",
+        "zip_postal_code": "10021",
+        "phone_number": "12345678",
+        "fax_number": "",
+        "customer_attributes": null,
+        "created_on_utc": "2016-09-30T08:56:13.85",
+        "province": "New York"
+      },
+      "addresses": [
+        {
+          "id": "1",
+          "first_name": "John",
+          "last_name": "Smith",
+          "email": "admin@yourStore.com",
+          "company": "Nop Solutions Ltd",
+          "country_id": 1,
+          "country": "United States",
+          "state_province_id": 40,
+          "city": "New York",
+          "address1": "21 West 52nd Street",
+          "address2": "",
+          "zip_postal_code": "10021",
+          "phone_number": "12345678",
+          "fax_number": "",
+          "customer_attributes": null,
+          "created_on_utc": "2016-09-30T08:56:13.85",
+          "province": "New York"
+        }
+      ],
+      "id": "1",
+      "username": "admin@yourStore.com",
+      "email": "admin@yourStore.com",
+      "first_name": "John",
+      "last_name": "Smith",
+      "admin_comment": null,
+      "is_tax_exempt": false,
+      "has_shopping_cart_items": false,
+      "active": true,
+      "deleted": false,
+      "is_system_account": false,
+      "system_name": null,
+      "last_ip_address": "127.0.0.1",
+      "created_on_utc": "2016-09-30T08:56:13.443",
+      "last_login_date_utc": "2016-10-12T19:59:05.063",
+      "last_activity_date_utc": "2016-10-12T19:59:05.137",
+      "role_ids": []
+    }
+  ]
+}
+```
+</p></details>
+
+GET /api/customers/1?fields=id,email  
+Get a single customer with id 1 and add only the id and the email in the response
+
+<details><summary>Response</summary><p>
+```json
+         HTTP/1.1 200 OK
+         
+{
+  "customers": [
+    {
+      "id": "1",
+      "email": "admin@yourStore.com"
+    }
+  ]
+}
+```
+</p></details>
