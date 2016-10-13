@@ -52,8 +52,8 @@ Receive a single Customer](#get-apicustomersid)
 + [POST /api/customers  
 Create a new Customer](#post-apicustomers)
 
-+ PUT /api/customers/{id}  
-Modify an existing Customer
++ [PUT /api/customers/{id}  
+Modify an existing Customer](#put-apicustomersid)
 
 + DELETE /api/customers/{id}  
 Remove a Customer (mark as Deleted)
@@ -708,5 +708,183 @@ POST /api/customers
 ```
 </p></details>
 
+---
+
+### PUT /api/customers/{id}  
+
+#### Add shipping address to an existing customer  
+POST /api/customers/97  
+```json
+{
+  "customer": {
+    "shipping_address": {
+      "first_name": "Steve",
+      "last_name": "Gates",
+      "email": "steve.gates@example.com",
+      "company": "Nop Solutions Ltd",
+      "country_id": 1,
+      "state_province_id": 40,
+      "city": "New York",
+      "address1": "21 West 52nd Street",
+      "phone_number": "12345678",
+      "zip_postal_code": "10021"
+    }
+  }
+}
+```
+
+<details><summary>Response</summary><p>
+```json
+         HTTP/1.1 200 OK
+         
+{
+  "customers": [
+    {
+      "shopping_cart_items": [],
+      "billing_address": {
+        "id": "25",
+        "first_name": "Steve",
+        "last_name": "Gates",
+        "email": "steve.gates@example.com",
+        "company": "Nop Solutions Ltd",
+        "country_id": 1,
+        "country": "United States",
+        "state_province_id": 40,
+        "city": "New York",
+        "address1": "21 West 52nd Street",
+        "address2": null,
+        "zip_postal_code": "10021",
+        "phone_number": "12345678",
+        "fax_number": null,
+        "customer_attributes": null,
+        "created_on_utc": "2016-10-13T11:18:07.71",
+        "province": "New York"
+      },
+      "shipping_address": {
+        "id": "26",
+        "first_name": "Steve",
+        "last_name": "Gates",
+        "email": "steve.gates@example.com",
+        "company": "Nop Solutions Ltd",
+        "country_id": 1,
+        "country": "United States",
+        "state_province_id": 40,
+        "city": "New York",
+        "address1": "21 West 52nd Street",
+        "address2": null,
+        "zip_postal_code": "10021",
+        "phone_number": "12345678",
+        "fax_number": null,
+        "customer_attributes": null,
+        "created_on_utc": "2016-10-13T12:51:56.207",
+        "province": "New York"
+      },
+      "addresses": [],
+      "id": "97",
+      "username": null,
+      "email": "steve.gates@example.com",
+      "first_name": "Steve",
+      "last_name": "Gates",
+      "admin_comment": null,
+      "is_tax_exempt": false,
+      "has_shopping_cart_items": false,
+      "active": true,
+      "deleted": false,
+      "is_system_account": false,
+      "system_name": null,
+      "last_ip_address": null,
+      "created_on_utc": "2016-10-13T11:18:07.71",
+      "last_login_date_utc": null,
+      "last_activity_date_utc": "2016-10-13T11:18:07.71",
+      "role_ids": [
+        3
+      ]
+    }
+  ]
+}
+```
+</p></details>
+
+#### Update details for a customer  
+POST /api/customers/97  
+```json
+{
+  "customer": {
+    "admin_comment": "Customer is a great guy"
+  }
+}
+```
+
+<details><summary>Response</summary><p>
+```json
+         HTTP/1.1 200 OK  
+         
+{
+  "customers": [
+    {
+      "shopping_cart_items": [],
+      "billing_address": {
+        "id": "25",
+        "first_name": "Steve",
+        "last_name": "Gates",
+        "email": "steve.gates@example.com",
+        "company": "Nop Solutions Ltd",
+        "country_id": 1,
+        "country": "United States",
+        "state_province_id": 40,
+        "city": "New York",
+        "address1": "21 West 52nd Street",
+        "address2": null,
+        "zip_postal_code": "10021",
+        "phone_number": "12345678",
+        "fax_number": null,
+        "customer_attributes": null,
+        "created_on_utc": "2016-10-13T11:18:07.71",
+        "province": "New York"
+      },
+      "shipping_address": {
+        "id": "26",
+        "first_name": "Steve",
+        "last_name": "Gates",
+        "email": "steve.gates@example.com",
+        "company": "Nop Solutions Ltd",
+        "country_id": 1,
+        "country": "United States",
+        "state_province_id": 40,
+        "city": "New York",
+        "address1": "21 West 52nd Street",
+        "address2": null,
+        "zip_postal_code": "10021",
+        "phone_number": "12345678",
+        "fax_number": null,
+        "customer_attributes": null,
+        "created_on_utc": "2016-10-13T12:51:56.207",
+        "province": "New York"
+      },
+      "addresses": [],
+      "id": "97",
+      "username": null,
+      "email": "steve.gates@example.com",
+      "first_name": "Steve",
+      "last_name": "Gates",
+      "admin_comment": "Customer is a good guy",
+      "is_tax_exempt": false,
+      "has_shopping_cart_items": false,
+      "active": true,
+      "deleted": false,
+      "is_system_account": false,
+      "system_name": null,
+      "last_ip_address": null,
+      "created_on_utc": "2016-10-13T11:18:07.71",
+      "last_login_date_utc": null,
+      "last_activity_date_utc": "2016-10-13T11:18:07.71",
+      "role_ids": [
+        3
+      ]
+    }
+  ]
+}
+```
+</p></details>
 
 
