@@ -78,7 +78,7 @@ Retrieve all customers
 |  page |  Page to show (default: 1) |
 |  fields |  Comma-separated list of fields to include in the response |
 
-GET /api/customers  
+#### GET /api/customers  
 Get all customers
 
 <details><summary>Response</summary><p>
@@ -171,9 +171,8 @@ Get all customers
 ```
 </p></details>
 
+#### GET /api/customers?updated_at_min=2016-09-30T08:56:13.85  
 Get all customers created after a certain date
-
-GET /api/customers?updated_at_min=2016-09-30T08:56:13.85
 
 <details><summary>Response</summary><p>
 ```json
@@ -276,7 +275,7 @@ Search for customers matching supplied query
 |  page |  Page to show (default: 1) |
 |  fields |  Comma-separated list of fields to include in the response |
 
-GET /api/customers/search?query=first_name:john  
+#### GET /api/customers/search?query=first_name:john  
 Get all customers with first name "John"
 
 <details><summary>Response</summary><p>
@@ -370,13 +369,13 @@ Get all customers with first name "John"
 </p></details>
 
 ### GET /api/customers/{id}  
-Retrieve customer by spcified id
+Retrieve customer by specified id
 
 |  GET |  /api/customers/{id} |
 |:---|:---|
 |  fields |  Comma-separated list of fields to include in the response |
 
-GET /api/customers/1  
+#### GET /api/customers/1  
 Get a single customer with id 1
 
 <details><summary>Response</summary><p>
@@ -469,7 +468,7 @@ Get a single customer with id 1
 ```
 </p></details>
 
-GET /api/customers/1?fields=id,email  
+#### GET /api/customers/1?fields=id,email  
 Get a single customer with id 1 and add only the id and the email in the response
 
 <details><summary>Response</summary><p>
