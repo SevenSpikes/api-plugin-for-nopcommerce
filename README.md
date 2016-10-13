@@ -49,8 +49,8 @@ Search for customers matching supplied query](#get-apicustomerssearch)
 + [GET /api/customers/{id}  
 Receive a single Customer](#get-apicustomersid)
 
-+ POST /api/customers  
-Create a new Customer
++ [POST /api/customers  
+Create a new Customer](#post-apicustomers)
 
 + PUT /api/customers/{id}  
 Modify an existing Customer
@@ -495,7 +495,7 @@ Get a single customer with id 1 and add only the id and the email in the respons
 
 ### POST /api/customers  
 
-#### Trying to create a customer without an email or customer role will return an error
+#### Trying to create a customer without an email or customer role will return an error  
 POST /api/customers  
 ```json
 {
@@ -505,6 +505,7 @@ POST /api/customers
   }
 }
 ```
+
 <details><summary>Response</summary><p>
 ```json
          HTTP/1.1 422 Unprocessable Entity
@@ -523,7 +524,7 @@ POST /api/customers
 ```
 </p></details>
 
-#### Create a new customer record
+#### Create a new customer record  
 POST /api/customers  
 ```json
 {
@@ -535,6 +536,7 @@ POST /api/customers
   }
 }
 ```
+
 <details><summary>Response</summary><p>
 ```json
          HTTP/1.1 200 OK  
@@ -606,4 +608,105 @@ POST /api/customers
 }
 ```
 </p></details>
+
+#### Create a new customer record with a billing address  
+POST /api/customers  
+```json
+{
+  "customer": {
+    "first_name": "Steve",
+    "last_name": "Gates",
+    "email": "steve.gates@example.com",
+    "role_ids": [
+      3
+    ],
+    "billing_address": {
+      "first_name": "Steve",
+      "last_name": "Gates",
+      "email": "steve.gates@example.com",
+      "company": "Nop Solutions Ltd",
+      "country_id": 1,
+      "state_province_id": 40,
+      "city": "New York",
+      "address1": "21 West 52nd Street",
+      "phone_number": "12345678",
+      "zip_postal_code": "10021"
+    }
+  }
+}
+```
+
+<details><summary>Response</summary><p>
+```json
+         HTTP/1.1 200 OK  
+         
+{
+  "customers": [
+    {
+      "shopping_cart_items": [],
+      "billing_address": {
+        "id": "25",
+        "first_name": "Steve",
+        "last_name": "Gates",
+        "email": "steve.gates@example.com",
+        "company": "Nop Solutions Ltd",
+        "country_id": 1,
+        "country": "United States",
+        "state_province_id": 40,
+        "city": "New York",
+        "address1": "21 West 52nd Street",
+        "address2": null,
+        "zip_postal_code": "10021",
+        "phone_number": "12345678",
+        "fax_number": null,
+        "customer_attributes": null,
+        "created_on_utc": "2016-10-13T11:18:07.7097928Z",
+        "province": null
+      },
+      "shipping_address": {
+        "id": "0",
+        "first_name": null,
+        "last_name": null,
+        "email": null,
+        "company": null,
+        "country_id": null,
+        "country": null,
+        "state_province_id": null,
+        "city": null,
+        "address1": null,
+        "address2": null,
+        "zip_postal_code": null,
+        "phone_number": null,
+        "fax_number": null,
+        "customer_attributes": null,
+        "created_on_utc": "0001-01-01T00:00:00",
+        "province": null
+      },
+      "addresses": [],
+      "id": "97",
+      "username": null,
+      "email": "steve.gates@example.com",
+      "first_name": "Steve",
+      "last_name": "Gates",
+      "admin_comment": null,
+      "is_tax_exempt": false,
+      "has_shopping_cart_items": false,
+      "active": true,
+      "deleted": false,
+      "is_system_account": false,
+      "system_name": null,
+      "last_ip_address": null,
+      "created_on_utc": "2016-10-13T11:18:07.7097928Z",
+      "last_login_date_utc": null,
+      "last_activity_date_utc": "2016-10-13T11:18:07.7097928Z",
+      "role_ids": [
+        3
+      ]
+    }
+  ]
+}
+```
+</p></details>
+
+
 
