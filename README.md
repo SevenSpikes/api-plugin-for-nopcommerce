@@ -66,6 +66,7 @@ Find orders belonging to this customer
 
 ## Customer Endpoints
 
+
 ### GET /api/customers  
 Retrieve all customers
 
@@ -264,6 +265,8 @@ Get all customers created after a certain date
 ```
 </p></details>
 
+---
+
 ### GET /api/customers/search  
 Search for customers matching supplied query
 
@@ -367,6 +370,8 @@ Get all customers with first name "John"
 }
 ```
 </p></details>
+
+---
 
 ### GET /api/customers/{id}  
 Retrieve customer by specified id
@@ -485,3 +490,120 @@ Get a single customer with id 1 and add only the id and the email in the respons
 }
 ```
 </p></details>
+
+---
+
+### POST /api/customers  
+
+#### Trying to create a customer without an email or customer role will return an error
+POST /api/customers  
+```json
+{
+  "customer": {
+    "email": null,
+    "role_ids": [],
+  }
+}
+```
+<details><summary>Response</summary><p>
+```json
+         HTTP/1.1 422 Unprocessable Entity
+         
+{
+  "errors": {
+    "RoleIds": [
+      "role_ids required"
+    ],
+    "Email": [
+      "'Email' must not be empty.",
+      "email can not be empty"
+    ]
+  }
+}
+```
+</p></details>
+
+#### Create a new customer record
+POST /api/customers  
+```json
+{
+  "customer": {
+    "first_name": "Steve",
+    "last_name": "Gates",
+    "email": "steve.gates@example.com",
+    "role_ids": [ 3 ]   
+  }
+}
+```
+<details><summary>Response</summary><p>
+```json
+         HTTP/1.1 200 OK  
+         
+{
+  "customers": [
+    {
+      "shopping_cart_items": [],
+      "billing_address": {
+        "id": "0",
+        "first_name": null,
+        "last_name": null,
+        "email": null,
+        "company": null,
+        "country_id": null,
+        "country": null,
+        "state_province_id": null,
+        "city": null,
+        "address1": null,
+        "address2": null,
+        "zip_postal_code": null,
+        "phone_number": null,
+        "fax_number": null,
+        "customer_attributes": null,
+        "created_on_utc": "0001-01-01T00:00:00",
+        "province": null
+      },
+      "shipping_address": {
+        "id": "0",
+        "first_name": null,
+        "last_name": null,
+        "email": null,
+        "company": null,
+        "country_id": null,
+        "country": null,
+        "state_province_id": null,
+        "city": null,
+        "address1": null,
+        "address2": null,
+        "zip_postal_code": null,
+        "phone_number": null,
+        "fax_number": null,
+        "customer_attributes": null,
+        "created_on_utc": "0001-01-01T00:00:00",
+        "province": null
+      },
+      "addresses": [],
+      "id": "85",
+      "username": null,
+      "email": "steve.gates@example.com",
+      "first_name": "Steve",
+      "last_name": "Gates",
+      "admin_comment": null,
+      "is_tax_exempt": false,
+      "has_shopping_cart_items": false,
+      "active": true,
+      "deleted": false,
+      "is_system_account": false,
+      "system_name": null,
+      "last_ip_address": null,
+      "created_on_utc": "2016-10-13T10:36:46.1537491Z",
+      "last_login_date_utc": null,
+      "last_activity_date_utc": "2016-10-13T10:36:46.1537491Z",
+      "role_ids": [
+        3
+      ]
+    }
+  ]
+}
+```
+</p></details>
+
