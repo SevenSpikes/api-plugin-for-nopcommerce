@@ -18,8 +18,6 @@
 {
     @Html.AntiForgeryToken()
 
-    @Html.Action("StoreScopeConfiguration", "Setting", new { area = "Admin" })
-
     <div class="content-header clearfix">
         <h1 class="pull-left">
             @T("Plugins.Api.Admin.Page.Settings.Title")
