@@ -867,7 +867,7 @@ POST /api/customers/97
       "email": "steve.gates@example.com",
       "first_name": "Steve",
       "last_name": "Gates",
-      "admin_comment": "Customer is a good guy",
+      "admin_comment": "Customer is a great guy",
       "is_tax_exempt": false,
       "has_shopping_cart_items": false,
       "active": true,
