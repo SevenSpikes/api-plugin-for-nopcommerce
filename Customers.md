@@ -1,5 +1,5 @@
 
-## What can you do with Customers?
+# What can you do with Customers?
 
 The nopCommerce API lets you do the following with the Customer resource.
 
@@ -27,11 +27,12 @@ Receive a count of all Customers](#get-apicustomerscount)
 + [GET /api/orders/customer/{customer_id}  
 Find orders belonging to this customer](#get-apiorderscustomercustomer_id)
 
-## Customer Endpoints
+# Customer Endpoints
 
 
-### GET /api/customers  
+## GET /api/customers  
 Retrieve all customers
+
 
 |  GET |  /api/customers |
 |:---|:---|
@@ -43,7 +44,7 @@ Retrieve all customers
 |  fields |  Comma-separated list of fields to include in the response |
 
 
-#### GET /api/customers  
+### GET /api/customers  
 Get all customers
 
 <details><summary>Response</summary><p>
@@ -137,7 +138,7 @@ Get all customers
 </p></details>
 
 
-#### GET /api/customers?created_at_min=2016-09-30T08:56:13.85  
+### GET /api/customers?created_at_min=2016-09-30T08:56:13.85  
 Get all customers created after a certain date
 
 <details><summary>Response</summary><p>
@@ -230,10 +231,11 @@ Get all customers created after a certain date
 ```
 </p></details>
 
----
 
-### GET /api/customers/search  
+
+## GET /api/customers/search  
 Search for customers matching supplied query
+
 
 |  GET |  /api/customers/search |
 |:---|:---|
@@ -244,7 +246,7 @@ Search for customers matching supplied query
 |  fields |  Comma-separated list of fields to include in the response |
 
 
-#### GET /api/customers/search?query=first_name:john  
+### GET /api/customers/search?query=first_name:john  
 Get all customers with first name "John"
 
 <details><summary>Response</summary><p>
@@ -337,17 +339,18 @@ Get all customers with first name "John"
 ```
 </p></details>
 
----
 
-### GET /api/customers/{id}  
+
+## GET /api/customers/{id}  
 Retrieve customer by specified id
+
 
 |  GET |  /api/customers/{id} |
 |:---|:---|
 |  fields |  Comma-separated list of fields to include in the response |
 
 
-#### GET /api/customers/1  
+### GET /api/customers/1  
 Get a single customer with id 1
 
 <details><summary>Response</summary><p>
@@ -441,7 +444,8 @@ Get a single customer with id 1
 </p></details>
 
 
-#### GET /api/customers/1?fields=id,email  
+
+### GET /api/customers/1?fields=id,email  
 Get a single customer with id 1 and add only the id and the email in the response
 
 <details><summary>Response</summary><p>
@@ -459,13 +463,13 @@ Get a single customer with id 1 and add only the id and the email in the respons
 ```
 </p></details>
 
----
 
-### POST /api/customers  
+
+## POST /api/customers  
 Creates a new customer
 
 
-#### Trying to create a customer without an email or customer role will return an error  
+### Trying to create a customer without an email or customer role will return an error  
 POST /api/customers  
 ```json
 {
@@ -495,7 +499,8 @@ POST /api/customers
 </p></details>
 
 
-#### Create a new customer record  
+
+### Create a new customer record  
 POST /api/customers  
 ```json
 {
@@ -581,7 +586,8 @@ POST /api/customers
 </p></details>
 
 
-#### Create a new customer record with a billing address  
+
+### Create a new customer record with a billing address  
 POST /api/customers  
 ```json
 {
@@ -680,12 +686,13 @@ POST /api/customers
 ```
 </p></details>
 
----
 
-### PUT /api/customers/{id}  
+
+## PUT /api/customers/{id}  
 Update an existing customer
 
-#### Add shipping address to an existing customer  
+
+### Add shipping address to an existing customer  
 POST /api/customers/97  
 ```json
 {
@@ -779,7 +786,8 @@ POST /api/customers/97
 </p></details>
 
 
-#### Update details for a customer  
+
+### Update details for a customer  
 POST /api/customers/97  
 ```json
 {
@@ -861,12 +869,13 @@ POST /api/customers/97
 ```
 </p></details>
 
----
 
-### DELETE /api/customers/{id}  
+
+## DELETE /api/customers/{id}  
 Mark a customer as Deleted. Deleted customers are not returned by the GET endpoints.
 
-#### Remove an existing customer (will be marked as Deleted)  
+
+### Remove an existing customer (will be marked as Deleted)  
 DELETE /api/customers/97  
 
 <details><summary>Response</summary><p>
@@ -877,9 +886,10 @@ DELETE /api/customers/97
 ```
 </p></details>
 
----
 
-### GET /api/customers/count  
+
+
+## GET /api/customers/count  
 Get a count of all customers
 
 GET /api/customers/count
@@ -893,10 +903,12 @@ GET /api/customers/count
 ```
 </p></details>
 
----
 
-### GET /api/orders/customer/{customer_id}  
+
+
+## GET /api/orders/customer/{customer_id}  
 Get all orders belonging to this customer
+
 
 GET /api/orders/customer/6
 <details><summary>Response</summary><p>
