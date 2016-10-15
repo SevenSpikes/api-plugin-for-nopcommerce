@@ -26,7 +26,7 @@ Remove a Product from the database (mark as Deleted)](#delete-apiproductsid)
 
 
 ## GET /api/products
-Retrieve all customers
+Retrieve all products
 
 
 |  GET |  /api/products |
@@ -1150,7 +1150,7 @@ Update a product
 
 
 ### Update a product's name and short description
-POST /api/customers/49  
+POST /api/products/49  
 ```json
 {
   "product": {
