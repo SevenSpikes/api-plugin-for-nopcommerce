@@ -4,22 +4,22 @@
 
 The nopCommerce API lets you do the following with the Product resource.
 
-+ [GET /api/products?fields=id,name,images
++ [GET /api/products?fields=id,name,images  
 Receive a list of all Products](#get-apiproducts)
 
-+ [GET /api/products/count
++ [GET /api/products/count  
 Receive a count of all Products](#get-apiproductscount)
 
-+ [GET /api/products/{id}?fields=id,name,images
++ [GET /api/products/{id}?fields=id,name,images  
 Receive a single Product](#get-apiproductsid)
 
-+ [POST /api/products
++ [POST /api/products  
 Create a new Product](#post-apiproducts)
 
-+ [PUT /api/products/{id}.
++ [PUT /api/products/{id}  
 Modify an existing Product](#put-apiproductsid)
 
-+ [DELETE /api/products/{id}
++ [DELETE /api/products/{id}  
 Remove a Product from the database (mark as Deleted)](#delete-apiproductsid)
 
 # Product Endpoints
@@ -35,7 +35,7 @@ Retrieve all customers
 |  limit |  Amount of results (default: 50) (maximum: 250) |
 |  page |  Page to show (default: 1) |
 |  since_id |  Restrict results to after the specified ID |
-|  published_status | <ul><li><strong>published</strong> - Show only published products</li><br/><br/><li><strong>unpublished</strong> - Show only unpublished products</li><br/><br/><li><strong>any</strong> - Show all products (<strong>default</strong>)</li></ul> |
+|  published_status | <ul><li><strong>published</strong> - Show only published products</li><br/><li><strong>unpublished</strong> - Show only unpublished products</li><br/><li><strong>any</strong> - Show all products (<strong>default</strong>)</li></ul> |
 |  vendor_name | Filter by product vendor |
 |  category_id | Show only the products mapped to the specified category  |
 |  created_at_min |  Show products created after date (format: 2014-04-25T16:15:47-04:00) |
@@ -409,7 +409,7 @@ Get all products after the specified ID
 
 
 
-### GET /api/products?category_id=1&fields=id,name
+### GET /api/products?category_id=3&fields=id,name
 Fetches all products that belong to a certain category
 
 <details><summary>Response</summary><p>
@@ -493,6 +493,7 @@ Count all products belonging to a certain category
 </p></details>
 
 
+
 ## GET /api/products/{id}  
 Get a single product
 
@@ -500,6 +501,7 @@ Get a single product
 |  GET |  /api/products/{id} |
 |:---|:---|
 |  fields |  Comma-separated list of fields to include in the response |
+
 
 
 ### GET /api/products/2  
