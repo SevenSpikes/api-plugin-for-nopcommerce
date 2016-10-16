@@ -9,6 +9,11 @@ namespace Nop.Plugin.Api.Attributes
 
         public override void Validate(object instance)
         {
+            // Images are not required so they could be null
+            // and there is nothing to validate in this case
+            if (instance == null)
+                return;
+
             var imagesCollection = instance as ICollection<ImageDto>;
 
             foreach (var image in imagesCollection)

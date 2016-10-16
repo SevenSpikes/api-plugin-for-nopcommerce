@@ -485,11 +485,6 @@ namespace Nop.Plugin.Api.DTOs.Products
         {
             get
             {
-                if (_roleIds == null)
-                {
-                    _roleIds = new List<int>();
-                }
-
                 return _roleIds;
             }
             set
@@ -503,11 +498,6 @@ namespace Nop.Plugin.Api.DTOs.Products
         {
             get
             {
-                if (_discountIds == null)
-                {
-                    _discountIds = new List<int>();
-                }
-
                 return _discountIds;
             }
             set
@@ -521,11 +511,6 @@ namespace Nop.Plugin.Api.DTOs.Products
         {
             get
             {
-                if (_storeIds == null)
-                {
-                    _storeIds = new List<int>();
-                }
-
                 return _storeIds;
             }
             set
@@ -539,11 +524,6 @@ namespace Nop.Plugin.Api.DTOs.Products
         {
             get
             {
-                if (_manufacturerIds == null)
-                {
-                    _manufacturerIds = new List<int>();
-                }
-
                 return _manufacturerIds;
             }
             set
@@ -558,11 +538,6 @@ namespace Nop.Plugin.Api.DTOs.Products
         {
             get
             {
-                if (_images == null)
-                {
-                    _images = new List<ImageDto>();
-                }
-
                 return _images;
             }
             set
@@ -576,11 +551,6 @@ namespace Nop.Plugin.Api.DTOs.Products
         {
             get
             {
-                if (_tags == null)
-                {
-                    _tags = new List<string>();
-                }
-
                 return _tags;
             }
             set

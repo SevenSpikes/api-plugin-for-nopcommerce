@@ -96,34 +96,43 @@ namespace Nop.Plugin.Api.Controllers
             return new ErrorActionResult(errorsJson, statusCode);
         }
 
-        protected List<int> MapRoleToEntity<TEntity>(TEntity entity, List<int> passedRoleIds) where TEntity: BaseEntity, IAclSupported
+        protected List<int> UpdateAclRoles<TEntity>(TEntity entity, List<int> passedRoleIds) where TEntity: BaseEntity, IAclSupported
         {
+            IList<AclRecord> existingAclRecords = _aclService.GetAclRecords(entity);
+
             var roleIds = new List<int>();
 
-            IList<AclRecord> existingAclRecords = _aclService.GetAclRecords(entity);
-            IList<CustomerRole> allCustomerRoles = _customerService.GetAllCustomerRoles(true);
-
-            foreach (var customerRole in allCustomerRoles)
+            if (passedRoleIds == null)
             {
-                if (passedRoleIds.Contains(customerRole.Id))
+                roleIds = existingAclRecords.Select(acl => acl.CustomerRoleId).ToList();
+            }
+            else
+            {
+                IList<CustomerRole> allCustomerRoles = _customerService.GetAllCustomerRoles(true);
+
+                foreach (var customerRole in allCustomerRoles)
                 {
-                    //new role
-                    if (existingAclRecords.Count(acl => acl.CustomerRoleId == customerRole.Id) == 0)
+                    if (passedRoleIds.Contains(customerRole.Id))
                     {
-                        _aclService.InsertAclRecord(entity, customerRole.Id);
+                        //new role
+                        if (existingAclRecords.Count(acl => acl.CustomerRoleId == customerRole.Id) == 0)
+                        {
+                            _aclService.InsertAclRecord(entity, customerRole.Id);
+                        }
+
+                        roleIds.Add(customerRole.Id);
                     }
-
-                    roleIds.Add(customerRole.Id);
-                }
-                else
-                {
-                    //remove role
-                    var aclRecordToDelete = existingAclRecords.FirstOrDefault(acl => acl.CustomerRoleId == customerRole.Id);
-
-                    if (aclRecordToDelete != null)
+                    else
                     {
-                        _aclService.DeleteAclRecord(aclRecordToDelete);
-                        roleIds.Remove(customerRole.Id);
+                        //remove role
+                        var aclRecordToDelete =
+                            existingAclRecords.FirstOrDefault(acl => acl.CustomerRoleId == customerRole.Id);
+
+                        if (aclRecordToDelete != null)
+                        {
+                            _aclService.DeleteAclRecord(aclRecordToDelete);
+                            roleIds.Remove(customerRole.Id);
+                        }
                     }
                 }
             }
@@ -133,34 +142,43 @@ namespace Nop.Plugin.Api.Controllers
             return roleIds;
         }
 
-        protected List<int> MapEntityToStores<TEntity>(TEntity entity, List<int> passedStoreIds) where TEntity : BaseEntity, IStoreMappingSupported
+        protected List<int> UpdateStoreMappings<TEntity>(TEntity entity, List<int> passedStoreIds) where TEntity : BaseEntity, IStoreMappingSupported
         {
             IList<StoreMapping> existingStoreMappings = _storeMappingService.GetStoreMappings(entity);
-            IList<Store> allStores = _storeService.GetAllStores();
 
             var storeIds = new List<int>();
 
-            foreach (var store in allStores)
+            if (passedStoreIds == null)
             {
-                if (passedStoreIds.Contains(store.Id))
+                storeIds = existingStoreMappings.Select(x => x.StoreId).ToList();
+            }
+            else
+            {
+                IList<Store> allStores = _storeService.GetAllStores();
+
+                foreach (var store in allStores)
                 {
-                    //new store
-                    if (existingStoreMappings.Count(sm => sm.StoreId == store.Id) == 0)
+                    if (passedStoreIds.Contains(store.Id))
                     {
-                        _storeMappingService.InsertStoreMapping(entity, store.Id);
+                        //new store
+                        if (existingStoreMappings.Count(sm => sm.StoreId == store.Id) == 0)
+                        {
+                            _storeMappingService.InsertStoreMapping(entity, store.Id);
+                        }
+
+                        storeIds.Add(store.Id);
                     }
-
-                    storeIds.Add(store.Id);
-                }
-                else
-                {
-                    //remove store
-                    StoreMapping storeMappingToDelete = existingStoreMappings.FirstOrDefault(sm => sm.StoreId == store.Id);
-
-                    if (storeMappingToDelete != null)
+                    else
                     {
-                        _storeMappingService.DeleteStoreMapping(storeMappingToDelete);
-                        storeIds.Remove(store.Id);
+                        //remove store
+                        StoreMapping storeMappingToDelete =
+                            existingStoreMappings.FirstOrDefault(sm => sm.StoreId == store.Id);
+
+                        if (storeMappingToDelete != null)
+                        {
+                            _storeMappingService.DeleteStoreMapping(storeMappingToDelete);
+                            storeIds.Remove(store.Id);
+                        }
                     }
                 }
             }
@@ -178,31 +196,38 @@ namespace Nop.Plugin.Api.Controllers
 
             if (appliedDiscountsProperty == null) return discountIds;
 
-            Dictionary<int, bool> appliedDiscounts = appliedDiscountsProperty.ToDictionary(x => x.Id, x => true);
-
-            // Ensure that there won't be repeating discounts.
-            var uniqueDiscounts = new HashSet<int>(passedDiscountIds);
-
-            var allDiscounts = _discountService.GetAllDiscounts(discountType, showHidden: true);
-
-            foreach (var discount in allDiscounts)
+            if (passedDiscountIds == null)
             {
-                // Apply the discount. This is a failsafe to make sure that you won't apply the discount two times.
-                if (!appliedDiscounts.ContainsKey(discount.Id) && uniqueDiscounts.Contains(discount.Id))
+                discountIds = appliedDiscountsProperty.Select(discount => discount.Id).ToList();
+            }
+            else
+            {
+                Dictionary<int, bool> appliedDiscounts = appliedDiscountsProperty.ToDictionary(x => x.Id, x => true);
+
+                // Ensure that there won't be repeating discounts.
+                var uniqueDiscounts = new HashSet<int>(passedDiscountIds);
+
+                var allDiscounts = _discountService.GetAllDiscounts(discountType, showHidden: true);
+
+                foreach (var discount in allDiscounts)
                 {
-                    appliedDiscountsProperty.Add(discount);
-                    discountIds.Add(discount.Id);
-                }
-                // Remove the discount
-                else if (appliedDiscounts.ContainsKey(discount.Id) && !uniqueDiscounts.Contains(discount.Id))
-                {
-                    appliedDiscountsProperty.Remove(discount);
-                    discountIds.Remove(discount.Id);
-                }
-                // Here we make sure that we will add the discount if it is already applied and it is not for removal.
-                else if(appliedDiscounts.ContainsKey(discount.Id))
-                {
-                    discountIds.Add(discount.Id);
+                    // Apply the discount. This is a failsafe to make sure that you won't apply the discount two times.
+                    if (!appliedDiscounts.ContainsKey(discount.Id) && uniqueDiscounts.Contains(discount.Id))
+                    {
+                        appliedDiscountsProperty.Add(discount);
+                        discountIds.Add(discount.Id);
+                    }
+                    // Remove the discount
+                    else if (appliedDiscounts.ContainsKey(discount.Id) && !uniqueDiscounts.Contains(discount.Id))
+                    {
+                        appliedDiscountsProperty.Remove(discount);
+                        discountIds.Remove(discount.Id);
+                    }
+                    // Here we make sure that we will add the discount if it is already applied and it is not for removal.
+                    else if (appliedDiscounts.ContainsKey(discount.Id))
+                    {
+                        discountIds.Add(discount.Id);
+                    }
                 }
             }
 
