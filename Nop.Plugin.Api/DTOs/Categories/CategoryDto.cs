@@ -134,11 +134,6 @@ namespace Nop.Plugin.Api.DTOs.Categories
         {
             get
             {
-                if (_roleIds == null)
-                {
-                    _roleIds = new List<int>();
-                }
-
                 return _roleIds;
             }
             set
@@ -152,11 +147,6 @@ namespace Nop.Plugin.Api.DTOs.Categories
         {
             get
             {
-                if (_discountIds == null)
-                {
-                    _discountIds = new List<int>();
-                }
-
                 return _discountIds;
             }
             set
@@ -170,11 +160,6 @@ namespace Nop.Plugin.Api.DTOs.Categories
         {
             get
             {
-                if (_storeIds == null)
-                {
-                    _storeIds = new List<int>();
-                }
-
                 return _storeIds;
             }
             set
@@ -187,11 +172,6 @@ namespace Nop.Plugin.Api.DTOs.Categories
         public ImageDto Image {
             get
             {
-                if (_imageDto == null)
-                {
-                    _imageDto = new ImageDto();
-                }
-
                 return _imageDto;
             }
             set
@@ -199,8 +179,8 @@ namespace Nop.Plugin.Api.DTOs.Categories
                 _imageDto = value;
             }
         }
-        
-        [AllowHtml]
+
+        [JsonProperty("se_name")]
         public string SeName { get; set; }
     }
 }

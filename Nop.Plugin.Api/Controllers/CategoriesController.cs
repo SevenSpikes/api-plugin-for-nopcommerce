@@ -183,77 +183,43 @@ namespace Nop.Plugin.Api.Controllers
             Picture insertedPicture = null;
 
             // We need to insert the picture before the category so we can obtain the picture id and map it to the category.
-            if (categoryDelta.Dto.Image.Binary != null)
+            if (categoryDelta.Dto.Image != null && categoryDelta.Dto.Image.Binary != null)
             {
                 insertedPicture = _pictureService.InsertPicture(categoryDelta.Dto.Image.Binary, categoryDelta.Dto.Image.MimeType, string.Empty);
             }
 
             // Inserting the new category
-            Category newCategory = _factory.Initialize();
-            categoryDelta.Merge(newCategory);
+            Category category = _factory.Initialize();
+            categoryDelta.Merge(category);
 
             if (insertedPicture != null)
             {
-                newCategory.PictureId = insertedPicture.Id;
+                category.PictureId = insertedPicture.Id;
             }
 
-            _categoryService.InsertCategory(newCategory);
+            _categoryService.InsertCategory(category);
 
-            // We need to insert the entity first so we can have its id in order to map it to anything.
-            // TODO: Localization
-            List<int> roleIds = null;
+            
+            UpdateAclRoles(category, categoryDelta.Dto.RoleIds);
 
-            if (categoryDelta.Dto.RoleIds.Count > 0)
-            {
-                roleIds = UpdateAclRoles(newCategory, categoryDelta.Dto.RoleIds);
-            }
+            UpdateDiscounts(category, categoryDelta.Dto.DiscountIds);
 
-            List<int> discountIds = null;
-
-            if (categoryDelta.Dto.DiscountIds.Count > 0)
-            {
-                discountIds = ApplyDiscountsToEntity(newCategory, categoryDelta.Dto.DiscountIds, DiscountType.AssignedToCategories);
-            }
-
-            List<int> storeIds = null;
-
-            if (categoryDelta.Dto.StoreIds.Count > 0)
-            {
-                storeIds = UpdateStoreMappings(newCategory, categoryDelta.Dto.StoreIds);
-            }
-
-            // Preparing the result dto of the new category
-            CategoryDto newCategoryDto = newCategory.ToDto();
+            UpdateStoreMappings(category, categoryDelta.Dto.StoreIds);
 
             //search engine name
-            newCategoryDto.SeName = newCategory.ValidateSeName(newCategoryDto.SeName, newCategory.Name, true);
-            _urlRecordService.SaveSlug(newCategory, newCategoryDto.SeName, 0);
-
-            // Here we prepare the resulted dto image.
-            ImageDto imageDto = PrepareImageDto(insertedPicture, newCategoryDto);
-
-            if (imageDto != null)
+            if (categoryDelta.Dto.SeName != null)
             {
-                newCategoryDto.Image = imageDto;
-            }
-            
-            if (storeIds != null)
-            {
-                newCategoryDto.StoreIds = storeIds;
-            }
-
-            if (discountIds != null)
-            {
-                newCategoryDto.DiscountIds = discountIds;
-            }
-
-            if (roleIds != null)
-            {
-                newCategoryDto.RoleIds = roleIds;
+                var seName = category.ValidateSeName(categoryDelta.Dto.SeName, category.Name, true);
+                _urlRecordService.SaveSlug(category, seName, 0);
             }
 
             _customerActivityService.InsertActivity("AddNewCategory",
-                _localizationService.GetResource("ActivityLog.AddNewCategory"), newCategory.Name);
+                _localizationService.GetResource("ActivityLog.AddNewCategory"), category.Name);
+
+            // Preparing the result dto of the new category
+            CategoryDto newCategoryDto = category.ToDto();
+
+            PrepareDtoAditionalProperties(category, newCategoryDto);
 
             var categoriesRootObject = new CategoriesRootObject();
 
@@ -278,43 +244,46 @@ namespace Nop.Plugin.Api.Controllers
             // We do not need to validate the category id, because this will happen in the model binder using the dto validator.
             int updateCategoryId = int.Parse(categoryDelta.Dto.Id);
 
-            Category categoryEntityToUpdate = _categoryApiService.GetCategoryById(updateCategoryId);
+            Category category = _categoryApiService.GetCategoryById(updateCategoryId);
 
-            if (categoryEntityToUpdate == null)
+            if (category == null)
             {
                 return Error(HttpStatusCode.NotFound, "category", "category not found");
             }
 
-            categoryDelta.Merge(categoryEntityToUpdate);
-     
-            Picture updatedPicture = UpdatePicture(categoryEntityToUpdate, categoryDelta.Dto.Image.Binary, categoryDelta.Dto.Image.MimeType);
+            categoryDelta.Merge(category);
 
-            List<int> storeIds = UpdateStoreMappings(categoryEntityToUpdate, categoryDelta.Dto.StoreIds);
-         
-            List<int> roleIds = UpdateAclRoles(categoryEntityToUpdate, categoryDelta.Dto.RoleIds);
+            category.UpdatedOnUtc = DateTime.UtcNow;
 
-            List<int> discountIds = ApplyDiscountsToEntity(categoryEntityToUpdate, categoryDelta.Dto.DiscountIds, DiscountType.AssignedToCategories);
+            _categoryService.UpdateCategory(category);
 
-            categoryEntityToUpdate.UpdatedOnUtc = DateTime.UtcNow;
+            UpdatePicture(category, categoryDelta.Dto.Image);
 
-            _categoryService.UpdateCategory(categoryEntityToUpdate);
+            UpdateAclRoles(category, categoryDelta.Dto.RoleIds);
+
+            UpdateDiscounts(category, categoryDelta.Dto.DiscountIds);
+
+            UpdateStoreMappings(category, categoryDelta.Dto.StoreIds);
+
+            //search engine name
+            if (categoryDelta.Dto.SeName != null)
+            {
+                var seName = category.ValidateSeName(categoryDelta.Dto.SeName, category.Name, true);
+                _urlRecordService.SaveSlug(category, seName, 0);
+            }
+
+            _categoryService.UpdateCategory(category);
 
             _customerActivityService.InsertActivity("UpdateCategory",
-                _localizationService.GetResource("ActivityLog.UpdateCategory"), categoryEntityToUpdate.Name);
+                _localizationService.GetResource("ActivityLog.UpdateCategory"), category.Name);
 
-            CategoryDto updatedCategoryDto = categoryEntityToUpdate.ToDto();
+            CategoryDto categoryDto = category.ToDto();
 
-            PrepareImageDto(updatedPicture, updatedCategoryDto);
-            
-            updatedCategoryDto.StoreIds = storeIds;
-            
-            updatedCategoryDto.RoleIds = roleIds;
-
-            updatedCategoryDto.DiscountIds = discountIds;
+            PrepareDtoAditionalProperties(category,categoryDto);
 
             var categoriesRootObject = new CategoriesRootObject();
 
-            categoriesRootObject.Categories.Add(updatedCategoryDto);
+            categoriesRootObject.Categories.Add(categoryDto);
 
             var json = _jsonFieldsSerializer.Serialize(categoriesRootObject, string.Empty);
 
@@ -354,14 +323,19 @@ namespace Nop.Plugin.Api.Controllers
             {
                 categoryDto.Image = imageDto;
             }
-            
+
+            categoryDto.SeName = category.GetSeName();
             categoryDto.DiscountIds = category.AppliedDiscounts.Select(discount => discount.Id).ToList();
             categoryDto.RoleIds = _aclService.GetAclRecords(category).Select(acl => acl.CustomerRoleId).ToList();
             categoryDto.StoreIds = _storeMappingService.GetStoreMappings(category).Select(mapping => mapping.StoreId).ToList();
         }
 
-        private Picture UpdatePicture(Category categoryEntityToUpdate, byte[] imageBytes, string mimeType)
+        private void UpdatePicture(Category categoryEntityToUpdate, ImageDto imageDto)
         {
+            // no image specified then do nothing
+            if (imageDto == null)
+                return;
+
             Picture updatedPicture = null;
             Picture currentCategoryPicture = _pictureService.GetPictureById(categoryEntityToUpdate.PictureId);
 
@@ -371,27 +345,49 @@ namespace Nop.Plugin.Api.Controllers
                 _pictureService.DeletePicture(currentCategoryPicture);
 
                 // When the image attachment is null or empty.
-                if (imageBytes == null)
+                if (imageDto.Binary == null)
                 {
                     categoryEntityToUpdate.PictureId = 0;
                 }
                 else
                 {
-                    updatedPicture = _pictureService.InsertPicture(imageBytes, mimeType, string.Empty);
+                    updatedPicture = _pictureService.InsertPicture(imageDto.Binary, imageDto.MimeType, string.Empty);
                     categoryEntityToUpdate.PictureId = updatedPicture.Id;
                 }
             }
             // when there isn't a picture set for the category
             else
             {
-                if (imageBytes != null)
+                if (imageDto.Binary != null)
                 {
-                    updatedPicture = _pictureService.InsertPicture(imageBytes, mimeType, string.Empty);
+                    updatedPicture = _pictureService.InsertPicture(imageDto.Binary, imageDto.MimeType, string.Empty);
                     categoryEntityToUpdate.PictureId = updatedPicture.Id;
                 }
             }
+        }
 
-            return updatedPicture;
+        public void UpdateDiscounts(Category category, List<int> passedDiscountIds)
+        {
+            if(passedDiscountIds == null)
+                return;
+
+            var allDiscounts = _discountService.GetAllDiscounts(DiscountType.AssignedToCategories, showHidden: true);
+            foreach (var discount in allDiscounts)
+            {
+                if (passedDiscountIds.Contains(discount.Id))
+                {
+                    //new discount
+                    if (category.AppliedDiscounts.Count(d => d.Id == discount.Id) == 0)
+                        category.AppliedDiscounts.Add(discount);
+                }
+                else
+                {
+                    //remove discount
+                    if (category.AppliedDiscounts.Count(d => d.Id == discount.Id) > 0)
+                        category.AppliedDiscounts.Remove(discount);
+                }
+            }
+            _categoryService.UpdateCategory(category);
         }
     }
 }

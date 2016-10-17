@@ -201,10 +201,7 @@ namespace Nop.Plugin.Api.Controllers
 
             UpdateAclRoles(product, productDelta.Dto.RoleIds);
 
-            List<int> discountIds = ApplyDiscountsToEntity(product, productDelta.Dto.DiscountIds, DiscountType.AssignedToSkus);
-            // Unable to add it to the method above (like it is implemented for the stores and roles) 
-            // because the property is not part of any specific interface
-            product.HasDiscountsApplied = discountIds.Count > 0;
+            UpdateDiscountMappings(product,productDelta.Dto.DiscountIds);
 
             UpdateStoreMappings(product, productDelta.Dto.StoreIds);
 
@@ -236,8 +233,6 @@ namespace Nop.Plugin.Api.Controllers
                 return Error();
             }
 
-            //If the validation has passed the productDelta object won't be null for sure so we don't need to check for this.
-
             // We do not need to validate the product id, because this will happen in the model binder using the dto validator.
             int productId = int.Parse(productDelta.Dto.Id);
 
@@ -249,6 +244,9 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             productDelta.Merge(product);
+
+            product.UpdatedOnUtc = DateTime.UtcNow;
+            _productService.UpdateProduct(product);
 
             UpdateProductPictures(product, productDelta.Dto.Images);
 
@@ -262,17 +260,12 @@ namespace Nop.Plugin.Api.Controllers
                 var seName = product.ValidateSeName(productDelta.Dto.SeName, product.Name, true);
                 _urlRecordService.SaveSlug(product, seName, 0);
             }
-
-            UpdateAclRoles(product, productDelta.Dto.RoleIds);
-
-            List<int> discountIds = ApplyDiscountsToEntity(product, productDelta.Dto.DiscountIds, DiscountType.AssignedToSkus);
-            // Unable to add it to the method above (like it is implemented for the stores and roles) 
-            // because the property is not part of any specific interface
-            product.HasDiscountsApplied = discountIds.Count > 0;
+            
+            UpdateDiscountMappings(product,productDelta.Dto.DiscountIds);
 
             UpdateStoreMappings(product, productDelta.Dto.StoreIds);
 
-            product.UpdatedOnUtc = DateTime.UtcNow;
+            UpdateAclRoles(product, productDelta.Dto.RoleIds);
 
             _productService.UpdateProduct(product);
 
@@ -334,7 +327,15 @@ namespace Nop.Plugin.Api.Controllers
             if (setPictures == null)
                 return;
 
+            // delete unused product pictures
             var unusedProductPictures = entityToUpdate.ProductPictures.Where(x => setPictures.All(y => y.Id != x.Id)).ToList();
+            foreach (var unusedProductPicture in unusedProductPictures)
+            {
+                var picture = _pictureService.GetPictureById(unusedProductPicture.PictureId);
+                if (picture == null)
+                    throw new ArgumentException("No picture found with the specified id");
+                _pictureService.DeletePicture(picture);
+            }
 
             foreach (var imageDto in setPictures)
             {
@@ -344,31 +345,19 @@ namespace Nop.Plugin.Api.Controllers
                     var productPictureToUpdate = entityToUpdate.ProductPictures.FirstOrDefault(x => x.Id == imageDto.Id);
                     if (productPictureToUpdate != null && imageDto.Position > 0)
                     {
-                        productPictureToUpdate.DisplayOrder = imageDto.Position;
+                        _productService.UpdateProductPicture(productPictureToUpdate);
                     }
                 }
                 else
                 {
                     // add new product picture
                     Picture newPicture = _pictureService.InsertPicture(imageDto.Binary, imageDto.MimeType, string.Empty);
-
-                    entityToUpdate.ProductPictures.Add(new ProductPicture()
+                    _productService.InsertProductPicture(new ProductPicture()
                     {
-                        ProductId = entityToUpdate.Id,
                         PictureId = newPicture.Id,
-                        DisplayOrder = imageDto.Position
+                        ProductId = entityToUpdate.Id
                     });
                 }
-            }
-
-
-            foreach (var unusedProductPicture in unusedProductPictures)
-            {
-                entityToUpdate.ProductPictures.Remove(unusedProductPicture);
-                var picture = _pictureService.GetPictureById(unusedProductPicture.PictureId);
-                if (picture == null)
-                    throw new ArgumentException("No picture found with the specified id");
-                _pictureService.DeletePicture(picture);
             }
         }
 
@@ -429,6 +418,33 @@ namespace Nop.Plugin.Api.Controllers
             }
         }
 
+        private void UpdateDiscountMappings(Product product, List<int> passedDiscountIds)
+        {
+            if(passedDiscountIds == null)
+                return;
+
+            var allDiscounts = _discountService.GetAllDiscounts(DiscountType.AssignedToSkus, showHidden: true);
+
+            foreach (var discount in allDiscounts)
+            {
+                if (passedDiscountIds.Contains(discount.Id))
+                {
+                    //new discount
+                    if (product.AppliedDiscounts.Count(d => d.Id == discount.Id) == 0)
+                        product.AppliedDiscounts.Add(discount);
+                }
+                else
+                {
+                    //remove discount
+                    if (product.AppliedDiscounts.Count(d => d.Id == discount.Id) > 0)
+                        product.AppliedDiscounts.Remove(discount);
+                }
+            }
+
+            _productService.UpdateProduct(product);
+            _productService.UpdateHasDiscountsApplied(product);
+        }
+
         private void PrepareProductImages(IEnumerable<ProductPicture> productPictures, ProductDto productDto)
         {
             if (productDto.Images == null)
@@ -454,12 +470,12 @@ namespace Nop.Plugin.Api.Controllers
             if (passedManufacturerIds == null)
                 return;
 
-            var unusedProductManufacturers = product.ProductManufacturers.Where(x => !passedManufacturerIds.Contains(x.ManufacturerId));
+            var unusedProductManufacturers = product.ProductManufacturers.Where(x => !passedManufacturerIds.Contains(x.ManufacturerId)).ToList();
 
             // remove all manufacturers that are not passed
             foreach (var unusedProductManufacturer in unusedProductManufacturers)
             {
-                product.ProductManufacturers.Remove(unusedProductManufacturer);
+                _manufacturerService.DeleteProductManufacturer(unusedProductManufacturer);
             }
 
             foreach (var passedManufacturerId in passedManufacturerIds)
@@ -471,8 +487,8 @@ namespace Nop.Plugin.Api.Controllers
                     var manufacturer = _manufacturerService.GetManufacturerById(passedManufacturerId);
                     if (manufacturer != null)
                     {
-                        product.ProductManufacturers.Add(new ProductManufacturer()
-                        { Manufacturer = manufacturer, Product = product });
+                        _manufacturerService.InsertProductManufacturer(new ProductManufacturer()
+                        { ProductId = product.Id, ManufacturerId = manufacturer.Id});
                     }
                 }
             }
