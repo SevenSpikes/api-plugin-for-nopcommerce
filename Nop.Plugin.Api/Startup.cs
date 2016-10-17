@@ -129,7 +129,7 @@ namespace Nop.Plugin.Api
             config.Routes.MapHttpRoute(
                name: "createCategory",
                routeTemplate: "api/categories",
-               defaults: new { controller = "CategoriesApi", action = "CreateCategory" },
+               defaults: new { controller = "Categories", action = "CreateCategory" },
                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Post) });
 
             config.Routes.MapHttpRoute(
@@ -290,7 +290,7 @@ namespace Nop.Plugin.Api
 
             config.Routes.MapHttpRoute(
                 name: "shoppingCartItemsByCustomerId",
-                routeTemplate: "api/shopping_carts/{customerId}",
+                routeTemplate: "api/shopping_cart_items/{customerId}",
                 defaults: new { controller = "ShoppingCartItems", action = "GetShoppingCartItemsByCustomerId" },
                 constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
 
