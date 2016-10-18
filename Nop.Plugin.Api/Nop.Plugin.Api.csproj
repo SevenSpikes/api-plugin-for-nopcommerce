@@ -252,7 +252,7 @@
     <Compile Include="Constants\Configurations.cs" />
     <Compile Include="OAuth\Middlewares\BearerTokenMiddleware.cs" />
     <Compile Include="OAuth\Providers\AuthenticationTokenProvider.cs" />
-    <Compile Include="OAuth\Providers\AuthorisationServerProvider.cs" />
+    <Compile Include="OAuth\Providers\AuthorizationServerProvider.cs" />
     <Compile Include="OAuth\Providers\RefreshTokenProvider.cs" />
     <Compile Include="Plugin\ApiPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
