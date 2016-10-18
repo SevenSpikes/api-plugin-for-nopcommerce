@@ -35,3 +35,7 @@ A resource is a data object that can be accessed via an HTTP request. The API al
 [**ShoppingCartItems**](ShoppingCartItems.md)
 
 With the nopCommerce API, you can perform any of the four CRUD actions against any of your nopCommerce site’s resources listed above. For example, you can use the API to create a product, retrieve a product, update a product or delete a product associated with your nopCommerce website.
+
+## What about security?
+
+The API plugin currently supports OAuth 2.0 Authorization Code grant type flow. So in order to access the resource endpoints you need to provide a valid AccessToken. To understand how the authorization code grant flow works please refer to the [**Sample Application**](https://github.com/SevenSpikes/nopCommerce-Api-SampleApplication).
