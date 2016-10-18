@@ -22,16 +22,16 @@ A resource is a data object that can be accessed via an HTTP request. The API al
 
 [**Customers**](Customers.md)
 
-**Products**
+[**Products**](Products.md)
 
-**Categories**
+[**Categories**](Categories.md)
 
-**ProductCategoryMappings**
+[**ProductCategoryMappings**](ProductCategoryMappings.md)
 
-**Orders**
+[**Orders**](Orders.md)
 
-**OrderItems**
+[**OrderItems**](OrderItems.md)
 
-**ShoppingCartItems**
+[**ShoppingCartItems**](ShoppingCartItems.md)
 
 With the nopCommerce API, you can perform any of the four CRUD actions against any of your nopCommerce site’s resources listed above. For example, you can use the API to create a product, retrieve a product, update a product or delete a product associated with your nopCommerce website.
