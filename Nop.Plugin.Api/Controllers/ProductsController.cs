@@ -345,6 +345,7 @@ namespace Nop.Plugin.Api.Controllers
                     var productPictureToUpdate = entityToUpdate.ProductPictures.FirstOrDefault(x => x.Id == imageDto.Id);
                     if (productPictureToUpdate != null && imageDto.Position > 0)
                     {
+                        productPictureToUpdate.DisplayOrder = imageDto.Position;
                         _productService.UpdateProductPicture(productPictureToUpdate);
                     }
                 }
@@ -355,7 +356,8 @@ namespace Nop.Plugin.Api.Controllers
                     _productService.InsertProductPicture(new ProductPicture()
                     {
                         PictureId = newPicture.Id,
-                        ProductId = entityToUpdate.Id
+                        ProductId = entityToUpdate.Id,
+                        DisplayOrder = imageDto.Position
                     });
                 }
             }
