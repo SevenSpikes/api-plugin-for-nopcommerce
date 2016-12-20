@@ -188,6 +188,7 @@
     <Compile Include="ServicesTests\Customers\CustomerApiServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SetUp.cs" />
+    <Compile Include="ValidatorTests\TypeValidatorTests_IsValid.cs" />
     <Compile Include="ValidatorTests\FieldsValidatorTests_GetValidFields.cs" />
   </ItemGroup>
   <ItemGroup>

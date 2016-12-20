@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Reflection;
 using AutoMapper.Configuration;
 using Newtonsoft.Json;
@@ -109,7 +110,7 @@ namespace Nop.Plugin.Api.Validators
                 // This is needed because the isValid method does not work well if the value it is trying to validate is object.
                 if (value != null)
                 {
-                    valueToValidate = value.ToString();
+                    valueToValidate = string.Format(CultureInfo.InvariantCulture, "{0}", value);
                 }
 
                 if (!converter.IsValid(valueToValidate)) isCurrentPropertyValid = false;
