@@ -296,43 +296,43 @@ namespace Nop.Plugin.Api
 
             config.Routes.MapHttpRoute(
                name: "orderItemsByOrderId",
-               routeTemplate: "api/orders/{orderId}/order_items",
+               routeTemplate: "api/orders/{orderId}/items",
                defaults: new { controller = "OrderItems", action = "GetOrderItems" },
                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
 
             config.Routes.MapHttpRoute(
               name: "orderItemByIdForOrder",
-              routeTemplate: "api/orders/{orderId}/order_items/{orderItemId}",
+              routeTemplate: "api/orders/{orderId}/items/{orderItemId}",
               defaults: new { controller = "OrderItems", action = "GetOrderItemByIdForOrder" },
               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
 
             config.Routes.MapHttpRoute(
                name: "orderItemsCountByOrderId",
-               routeTemplate: "api/orders/{orderId}/order_items/count",
+               routeTemplate: "api/orders/{orderId}/items/count",
                defaults: new { controller = "OrderItems", action = "GetOrderItemsCount" },
                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
 
             config.Routes.MapHttpRoute(
                 name: "CreateOrderItem",
-                routeTemplate: "api/orders/{orderId}/order_items",
+                routeTemplate: "api/orders/{orderId}/items",
                 defaults: new { controller = "OrderItems", action = "CreateOrderItem" },
                 constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Post) });
 
             config.Routes.MapHttpRoute(
               name: "UpdateOrderItem",
-              routeTemplate: "api/orders/{orderId}/order_items/{orderItemId}",
+              routeTemplate: "api/orders/{orderId}/items/{orderItemId}",
               defaults: new { controller = "OrderItems", action = "UpdateOrderItem" },
               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Put) });
 
             config.Routes.MapHttpRoute(
                name: "deleteOrderItemForOrderById",
-               routeTemplate: "api/orders/{orderId}/order_items/{orderItemId}",
+               routeTemplate: "api/orders/{orderId}/items/{orderItemId}",
                defaults: new { controller = "OrderItems", action = "DeleteOrderItemById" },
                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Delete) });
 
             config.Routes.MapHttpRoute(
                name: "deleteOrderItemsForOrder",
-               routeTemplate: "api/orders/{orderId}/order_items",
+               routeTemplate: "api/orders/{orderId}/items",
                defaults: new { controller = "OrderItems", action = "DeleteAllOrderItemsForOrder" },
                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Delete) });
 
