@@ -480,6 +480,9 @@ namespace Nop.Plugin.Api.DTOs.Products
             }
         }
 
+        [JsonProperty("parent_grouped_product_id")]
+        public int? ParentGroupedProductId { get; set; }
+
         [JsonProperty("role_ids")]
         public List<int> RoleIds
         {
