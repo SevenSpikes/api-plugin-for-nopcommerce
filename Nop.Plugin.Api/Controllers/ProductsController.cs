@@ -195,6 +195,8 @@ namespace Nop.Plugin.Api.Controllers
 
             UpdateProductManufacturers(product, productDelta.Dto.ManufacturerIds);
 
+            UpdateAssociatedProducts(product, productDelta.Dto.AssociatedProductIds);
+
             //search engine name
             var seName = product.ValidateSeName(productDelta.Dto.SeName, product.Name, true);
             _urlRecordService.SaveSlug(product, seName, 0);
@@ -253,6 +255,8 @@ namespace Nop.Plugin.Api.Controllers
             UpdateProductTags(product, productDelta.Dto.Tags);
 
             UpdateProductManufacturers(product, productDelta.Dto.ManufacturerIds);
+
+            UpdateAssociatedProducts(product,productDelta.Dto.AssociatedProductIds);
 
             // Update the SeName if specified
             if (productDelta.Dto.SeName != null)
@@ -319,6 +323,11 @@ namespace Nop.Plugin.Api.Controllers
             productDto.RoleIds = _aclService.GetAclRecords(product).Select(acl => acl.CustomerRoleId).ToList();
             productDto.StoreIds = _storeMappingService.GetStoreMappings(product).Select(mapping => mapping.StoreId).ToList();
             productDto.Tags = product.ProductTags.Select(tag => tag.Name).ToList();
+
+            productDto.AssociatedProductIds =
+                _productService.GetAssociatedProducts(product.Id, showHidden: true)
+                    .Select(associatedProduct => associatedProduct.Id)
+                    .ToList();
         }
 
         private void UpdateProductPictures(Product entityToUpdate, List<ImageDto> setPictures)
@@ -493,6 +502,31 @@ namespace Nop.Plugin.Api.Controllers
                         { ProductId = product.Id, ManufacturerId = manufacturer.Id});
                     }
                 }
+            }
+        }
+
+        private void UpdateAssociatedProducts(Product product, List<int> passedAssociatedProductIds)
+        {
+            // If no associated products specified then there is nothing to map 
+            if (passedAssociatedProductIds == null)
+                return;
+
+            var noLongerAssociatedProducts =
+                _productService.GetAssociatedProducts(product.Id, showHidden: true)
+                    .Where(p => !passedAssociatedProductIds.Contains(p.Id));
+
+            // update all products that are no longer associated with our product
+            foreach (var noLongerAssocuatedProduct in noLongerAssociatedProducts)
+            {
+                noLongerAssocuatedProduct.ParentGroupedProductId = 0;
+                _productService.UpdateProduct(noLongerAssocuatedProduct);
+            }
+
+            var newAssociatedProducts = _productService.GetProductsByIds(passedAssociatedProductIds.ToArray());
+            foreach (var newAssociatedProduct in newAssociatedProducts)
+            {
+                newAssociatedProduct.ParentGroupedProductId = product.Id;
+                _productService.UpdateProduct(newAssociatedProduct);
             }
         }
     }
