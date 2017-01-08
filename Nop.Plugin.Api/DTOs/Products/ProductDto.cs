@@ -19,6 +19,7 @@ namespace Nop.Plugin.Api.DTOs.Products
         private List<int> _roleIds;
         private List<int> _manufacturerIds;
         private List<ImageDto> _images;
+        private List<ProductAttributeMappingDto> _productAttributeMappings;
         private List<int> _associatedProductIds;
         private List<string> _tags;
 
@@ -547,6 +548,19 @@ namespace Nop.Plugin.Api.DTOs.Products
             set
             {
                 _images = value;
+            }
+        }
+
+        [JsonProperty("attributes")]
+        public List<ProductAttributeMappingDto> ProductAttributeMappings
+        {
+            get
+            {
+                return _productAttributeMappings;
+            }
+            set
+            {
+                _productAttributeMappings = value;
             }
         }
 

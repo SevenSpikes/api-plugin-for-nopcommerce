@@ -43,6 +43,7 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IManufacturerService _manufacturerService;
         private readonly IFactory<Product> _factory;
         private readonly IProductTagService _productTagService;
+        private readonly IProductAttributeService _productAttributeService;
 
         public ProductsController(IProductApiService productApiService,
                                   IJsonFieldsSerializer jsonFieldsSerializer,
@@ -58,7 +59,8 @@ namespace Nop.Plugin.Api.Controllers
                                   IDiscountService discountService,
                                   IPictureService pictureService,
                                   IManufacturerService manufacturerService,
-                                  IProductTagService productTagService) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService)
+                                  IProductTagService productTagService,
+                                  IProductAttributeService productAttributeService) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService)
         {
             _productApiService = productApiService;
             _factory = factory;
@@ -67,6 +69,7 @@ namespace Nop.Plugin.Api.Controllers
             _productTagService = productTagService;
             _urlRecordService = urlRecordService;
             _productService = productService;
+            _productAttributeService = productAttributeService;
         }
 
         /// <summary>
@@ -203,7 +206,7 @@ namespace Nop.Plugin.Api.Controllers
 
             UpdateAclRoles(product, productDelta.Dto.RoleIds);
 
-            UpdateDiscountMappings(product,productDelta.Dto.DiscountIds);
+            UpdateDiscountMappings(product, productDelta.Dto.DiscountIds);
 
             UpdateStoreMappings(product, productDelta.Dto.StoreIds);
 
@@ -256,7 +259,7 @@ namespace Nop.Plugin.Api.Controllers
 
             UpdateProductManufacturers(product, productDelta.Dto.ManufacturerIds);
 
-            UpdateAssociatedProducts(product,productDelta.Dto.AssociatedProductIds);
+            UpdateAssociatedProducts(product, productDelta.Dto.AssociatedProductIds);
 
             // Update the SeName if specified
             if (productDelta.Dto.SeName != null)
@@ -264,8 +267,8 @@ namespace Nop.Plugin.Api.Controllers
                 var seName = product.ValidateSeName(productDelta.Dto.SeName, product.Name, true);
                 _urlRecordService.SaveSlug(product, seName, 0);
             }
-            
-            UpdateDiscountMappings(product,productDelta.Dto.DiscountIds);
+
+            UpdateDiscountMappings(product, productDelta.Dto.DiscountIds);
 
             UpdateStoreMappings(product, productDelta.Dto.StoreIds);
 
@@ -316,6 +319,7 @@ namespace Nop.Plugin.Api.Controllers
         private void MapAdditionalPropertiesToDTO(Product product, ProductDto productDto)
         {
             PrepareProductImages(product.ProductPictures, productDto);
+            PrepareProductAttributes(product.ProductAttributeMappings, productDto);
 
             productDto.SeName = product.GetSeName();
             productDto.DiscountIds = product.AppliedDiscounts.Select(discount => discount.Id).ToList();
@@ -431,7 +435,7 @@ namespace Nop.Plugin.Api.Controllers
 
         private void UpdateDiscountMappings(Product product, List<int> passedDiscountIds)
         {
-            if(passedDiscountIds == null)
+            if (passedDiscountIds == null)
                 return;
 
             var allDiscounts = _discountService.GetAllDiscounts(DiscountType.AssignedToSkus, showHidden: true);
@@ -475,6 +479,56 @@ namespace Nop.Plugin.Api.Controllers
             }
         }
 
+        private void PrepareProductAttributes(IEnumerable<ProductAttributeMapping> productAttributeMappings, ProductDto productDto)
+        {
+            if (productDto.ProductAttributeMappings == null)
+                productDto.ProductAttributeMappings = new List<ProductAttributeMappingDto>();
+
+            foreach (var productAttributeMapping in productAttributeMappings)
+            {
+                ProductAttributeMappingDto productAttributeMappingDto = PrepareProductAttributeMappingDto(productAttributeMapping);
+
+                if (productAttributeMappingDto != null)
+                {
+                    productDto.ProductAttributeMappings.Add(productAttributeMappingDto);
+                }
+            }
+        }
+
+        private ProductAttributeMappingDto PrepareProductAttributeMappingDto(ProductAttributeMapping productAttributeMapping)
+        {
+            ProductAttributeMappingDto productAttributeMappingDto = null;
+
+            if (productAttributeMapping != null)
+            {
+                productAttributeMappingDto = new ProductAttributeMappingDto()
+                {
+                    ProductAttributeId = productAttributeMapping.ProductAttributeId,
+                    ProductAttributeName = _productAttributeService.GetProductAttributeById(productAttributeMapping.ProductAttributeId).Name,
+                    TextPrompt = productAttributeMapping.TextPrompt,
+                    DefaultValue = productAttributeMapping.DefaultValue,
+                    AttributeControlTypeId = productAttributeMapping.AttributeControlTypeId,
+                    DisplayOrder = productAttributeMapping.DisplayOrder,
+                    IsRequired = productAttributeMapping.IsRequired,
+                    ProductAttributeValues = productAttributeMapping.ProductAttributeValues.Select(PrepareProductAttributeValueDto).ToList()
+                };
+            }
+
+            return productAttributeMappingDto;
+        }
+
+        private ProductAttributeValueDto PrepareProductAttributeValueDto(ProductAttributeValue productAttributeValue)
+        {
+            ProductAttributeValueDto productAttributeValueDto = null;
+
+            if (productAttributeValue != null)
+            {
+                productAttributeValueDto = productAttributeValue.ToDto();
+            }
+
+            return productAttributeValueDto;
+        }
+
         private void UpdateProductManufacturers(Product product, List<int> passedManufacturerIds)
         {
             // If no manufacturers specified then there is nothing to map 
@@ -499,7 +553,7 @@ namespace Nop.Plugin.Api.Controllers
                     if (manufacturer != null)
                     {
                         _manufacturerService.InsertProductManufacturer(new ProductManufacturer()
-                        { ProductId = product.Id, ManufacturerId = manufacturer.Id});
+                        { ProductId = product.Id, ManufacturerId = manufacturer.Id });
                     }
                 }
             }

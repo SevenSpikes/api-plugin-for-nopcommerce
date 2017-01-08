@@ -1,0 +1,114 @@
+﻿using System;
+using System.Collections.Generic;
+using FluentValidation.Attributes;
+using Newtonsoft.Json;
+using Nop.Core.Domain.Catalog;
+using Nop.Plugin.Api.Attributes;
+using Nop.Plugin.Api.DTOs.Images;
+using Nop.Plugin.Api.Validators;
+
+namespace Nop.Plugin.Api.DTOs.Products
+{
+    [JsonObject(Title = "attribute_value")]
+    //[Validator(typeof(ProductDtoValidator))]
+    public class ProductAttributeValueDto
+    {
+        /// <summary>
+        /// Gets or sets the product attribute value id
+        /// </summary>
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the attribute value type identifier
+        /// </summary>
+        [JsonProperty("type_id")]
+        public int? AttributeValueTypeId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the associated product identifier (used only with AttributeValueType.AssociatedToProduct)
+        /// </summary>
+        [JsonProperty("associated_product_id")]
+        public int? AssociatedProductId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the product attribute name
+        /// </summary>
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color RGB value (used with "Color squares" attribute type)
+        /// </summary>
+        [JsonProperty("color_squares_rgb")]
+        public string ColorSquaresRgb { get; set; }
+
+        /// <summary>
+        /// Gets or sets the picture ID for image square (used with "Image squares" attribute type)
+        /// </summary>
+        [JsonProperty("image_squares_picture_id")]
+        public int? ImageSquaresPictureId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the price adjustment (used only with AttributeValueType.Simple)
+        /// </summary>
+        [JsonProperty("price_adjustment")]
+        public decimal? PriceAdjustment { get; set; }
+
+        /// <summary>
+        /// Gets or sets the weight adjustment (used only with AttributeValueType.Simple)
+        /// </summary>
+        [JsonProperty("weight_adjustment")]
+        public decimal? WeightAdjustment { get; set; }
+
+        /// <summary>
+        /// Gets or sets the attibute value cost (used only with AttributeValueType.Simple)
+        /// </summary>
+        [JsonProperty("cost")]
+        public decimal? Cost { get; set; }
+
+        /// <summary>
+        /// Gets or sets the quantity of associated product (used only with AttributeValueType.AssociatedToProduct)
+        /// </summary>
+        [JsonProperty("quantity")]
+        public int? Quantity { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the value is pre-selected
+        /// </summary>
+        [JsonProperty("is_pre_selected")]
+        public bool? IsPreSelected { get; set; }
+
+        /// <summary>
+        /// Gets or sets the display order
+        /// </summary>
+        [JsonProperty("display_order")]
+        public int? DisplayOrder { get; set; }
+
+        /// <summary>
+        /// Gets or sets the picture (identifier) associated with this value. This picture should replace a product main picture once clicked (selected).
+        /// </summary>
+        [JsonProperty("image_id")]
+        public int? PictureId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the attribute value type
+        /// </summary>
+        [JsonProperty("type")]
+        public string AttributeValueType
+        {
+            get
+            {
+                return ((AttributeValueType)this.AttributeValueTypeId).ToString();
+            }
+            set
+            {
+                AttributeValueType attributeValueTypeId;
+                if (Enum.TryParse(value, out attributeValueTypeId))
+                {
+                    this.AttributeValueTypeId = (int)attributeValueTypeId;
+                }
+            }
+        }
+    }
+}

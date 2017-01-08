@@ -141,6 +141,8 @@
     <Compile Include="Controllers\OrderItemsController.cs" />
     <Compile Include="DTOs\OrderItems\OrderItemsCountRootObject.cs" />
     <Compile Include="DTOs\OrderItems\OrderItemsRootObject.cs" />
+    <Compile Include="DTOs\Products\ProductAttributeValueDto.cs" />
+    <Compile Include="DTOs\Products\ProductAttributeMappingDto.cs" />
     <Compile Include="Factories\AddressFactory.cs" />
     <Compile Include="Factories\CustomerFactory.cs" />
     <Compile Include="Factories\OrderFactory.cs" />
