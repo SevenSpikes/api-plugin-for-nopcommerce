@@ -20,6 +20,7 @@ using Nop.Services.Customers;
 using Nop.Services.Discounts;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
+using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Stores;
 
@@ -44,8 +45,9 @@ namespace Nop.Plugin.Api.Controllers
             ICustomerActivityService customerActivityService,
             ILocalizationService localizationService, 
             ICategoryApiService categoryApiService, 
-            IProductApiService productApiService)
-            : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService)
+            IProductApiService productApiService,
+            IPictureService pictureService)
+            : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService,pictureService)
         {
             _productCategoryMappingsService = productCategoryMappingsService;
             _categoryService = categoryService;

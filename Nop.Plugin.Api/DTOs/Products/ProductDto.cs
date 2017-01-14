@@ -18,7 +18,7 @@ namespace Nop.Plugin.Api.DTOs.Products
         private List<int> _discountIds;
         private List<int> _roleIds;
         private List<int> _manufacturerIds;
-        private List<ImageDto> _images;
+        private List<ImageMappingDto> _images;
         private List<ProductAttributeMappingDto> _productAttributeMappings;
         private List<int> _associatedProductIds;
         private List<string> _tags;
@@ -539,7 +539,7 @@ namespace Nop.Plugin.Api.DTOs.Products
         
         [ImageCollectionValidation]
         [JsonProperty("images")]
-        public List<ImageDto> Images
+        public List<ImageMappingDto> Images
         {
             get
             {

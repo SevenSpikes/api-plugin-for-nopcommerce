@@ -46,8 +46,8 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// <summary>
         /// Gets or sets the picture ID for image square (used with "Image squares" attribute type)
         /// </summary>
-        [JsonProperty("image_squares_picture_id")]
-        public int? ImageSquaresPictureId { get; set; }
+        [JsonProperty("image_squares_image")]
+        public ImageDto ImageSquaresImage { get; set; }
 
         /// <summary>
         /// Gets or sets the price adjustment (used only with AttributeValueType.Simple)
@@ -88,8 +88,11 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// <summary>
         /// Gets or sets the picture (identifier) associated with this value. This picture should replace a product main picture once clicked (selected).
         /// </summary>
-        [JsonProperty("image_id")]
+        [JsonIgnore]
         public int? PictureId { get; set; }
+
+        [JsonProperty("product_image_id")]
+        public int? ProductPictureId { get; set; }
 
         /// <summary>
         /// Gets or sets the attribute value type

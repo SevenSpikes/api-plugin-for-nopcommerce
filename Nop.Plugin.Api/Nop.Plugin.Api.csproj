@@ -139,6 +139,7 @@
     <Compile Include="AutoMapper\AutoMapperApiConfiguration.cs" />
     <Compile Include="Controllers\BaseApiController.cs" />
     <Compile Include="Controllers\OrderItemsController.cs" />
+    <Compile Include="DTOs\Images\ImageMappingDto.cs" />
     <Compile Include="DTOs\OrderItems\OrderItemsCountRootObject.cs" />
     <Compile Include="DTOs\OrderItems\OrderItemsRootObject.cs" />
     <Compile Include="DTOs\Products\ProductAttributeValueDto.cs" />

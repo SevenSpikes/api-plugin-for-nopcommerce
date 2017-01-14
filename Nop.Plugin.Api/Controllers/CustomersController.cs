@@ -27,6 +27,7 @@ using Nop.Services.Directory;
 using Nop.Services.Discounts;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
+using Nop.Services.Media;
 using Nop.Services.Messages;
 using Nop.Services.Security;
 using Nop.Services.Stores;
@@ -78,8 +79,9 @@ namespace Nop.Plugin.Api.Controllers
             IFactory<Customer> factory, 
             ICountryService countryService, 
             IMappingHelper mappingHelper, 
-            INewsLetterSubscriptionService newsLetterSubscriptionService) : 
-            base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService)
+            INewsLetterSubscriptionService newsLetterSubscriptionService,
+            IPictureService pictureService) : 
+            base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService,pictureService)
         {
             _customerApiService = customerApiService;
             _factory = factory;

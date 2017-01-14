@@ -53,7 +53,7 @@ namespace Nop.Plugin.Api.Controllers
             IDiscountService discountService,
             IAclService aclService,
             ICustomerService customerService,
-            IFactory<Category> factory) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService)
+            IFactory<Category> factory) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService,pictureService)
         {
             _categoryApiService = categoryApiService;
             _categoryService = categoryService;
@@ -317,7 +317,7 @@ namespace Nop.Plugin.Api.Controllers
         private void PrepareDtoAditionalProperties(Category category, CategoryDto categoryDto)
         {
             Picture picture = _pictureService.GetPictureById(category.PictureId);
-            ImageDto imageDto = PrepareImageDto(picture, categoryDto);
+            ImageDto imageDto = PrepareImageDto(picture);
 
             if (imageDto != null)
             {
