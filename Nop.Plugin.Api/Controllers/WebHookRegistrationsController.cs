@@ -90,7 +90,6 @@ namespace Nop.Plugin.Api.Controllers
         [ResponseType(typeof(WebHook))]
         public async Task<IHttpActionResult> RegisterWebHook(WebHook webHook)
         {
-            // TODO: Check if there is already a registered webhook with the same url and filters. If some of the filters are overlapping, remove them and save only the ones that are not in the db.
             if (!ModelState.IsValid)
             {
                 return Error();
@@ -106,9 +105,9 @@ namespace Nop.Plugin.Api.Controllers
             await VerifyWebHook(webHook);
 
             IEnumerable<WebHook> existingWebhooks = await GetAllWebHooks();
-            IEnumerable<WebHook> existingWebhooksForTheSameUrl = existingWebhooks.Where(wh => wh.WebHookUri == webHook.WebHookUri);
+            IEnumerable<WebHook> existingWebhooksForTheSameUri = existingWebhooks.Where(wh => wh.WebHookUri == webHook.WebHookUri);
 
-            foreach (var existingWebHook in existingWebhooksForTheSameUrl)
+            foreach (var existingWebHook in existingWebhooksForTheSameUri)
             {
                 webHook.Filters.ExceptWith(existingWebHook.Filters);
 
@@ -143,7 +142,7 @@ namespace Nop.Plugin.Api.Controllers
             }
             catch (Exception ex)
             {
-                string msg = string.Format(CultureInfo.CurrentCulture, _localizationService.GetResource("Api.WebHooks.CouldNotRegisterWebhook"), ex.Message);
+                string msg = string.Format(CultureInfo.InvariantCulture, _localizationService.GetResource("Api.WebHooks.CouldNotRegisterWebhook"), ex.Message);
                 Configuration.DependencyResolver.GetLogger().Error(msg, ex);
                 HttpResponseMessage error = Request.CreateErrorResponse(HttpStatusCode.InternalServerError, msg, ex);
                 return ResponseMessage(error);
@@ -178,7 +177,7 @@ namespace Nop.Plugin.Api.Controllers
             }
             catch (Exception ex)
             {
-                string msg = string.Format(CultureInfo.CurrentCulture, _localizationService.GetResource("Api.WebHooks.CouldNotUpdateWebhook"), ex.Message);
+                string msg = string.Format(CultureInfo.InvariantCulture, _localizationService.GetResource("Api.WebHooks.CouldNotUpdateWebhook"), ex.Message);
                 Configuration.DependencyResolver.GetLogger().Error(msg, ex);
                 HttpResponseMessage error = Request.CreateErrorResponse(HttpStatusCode.InternalServerError, msg, ex);
                 return ResponseMessage(error);
@@ -201,7 +200,7 @@ namespace Nop.Plugin.Api.Controllers
             }
             catch (Exception ex)
             {
-                string msg = string.Format(CultureInfo.CurrentCulture, _localizationService.GetResource("Api.WebHooks.CouldNotDeleteWebhook"), ex.Message);
+                string msg = string.Format(CultureInfo.InvariantCulture, _localizationService.GetResource("Api.WebHooks.CouldNotDeleteWebhook"), ex.Message);
                 Configuration.DependencyResolver.GetLogger().Error(msg, ex);
                 HttpResponseMessage error = Request.CreateErrorResponse(HttpStatusCode.InternalServerError, msg, ex);
                 return ResponseMessage(error);
@@ -223,7 +222,7 @@ namespace Nop.Plugin.Api.Controllers
             }
             catch (Exception ex)
             {
-                string msg = string.Format(CultureInfo.CurrentCulture, _localizationService.GetResource("Api.WebHooks.CouldNotDeleteWebhooks"), ex.Message);
+                string msg = string.Format(CultureInfo.InvariantCulture, _localizationService.GetResource("Api.WebHooks.CouldNotDeleteWebhooks"), ex.Message);
                 Configuration.DependencyResolver.GetLogger().Error(msg, ex);
                 HttpResponseMessage error = Request.CreateErrorResponse(HttpStatusCode.InternalServerError, msg, ex);
                 return ResponseMessage(error);
