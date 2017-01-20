@@ -10,7 +10,7 @@ namespace Nop.Plugin.Api.Services
     {
         int GetCustomersCount();
 
-        CustomerDto GetCustomerById(int id);
+        CustomerDto GetCustomerById(int id, bool showDeleted = false);
 
         Customer GetCustomerEntityById(int id);
 

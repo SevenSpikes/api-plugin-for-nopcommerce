@@ -29,6 +29,7 @@ using Nop.Services.Discounts;
 using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Stores;
+using Nop.Plugin.Api.Helpers;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -39,7 +40,8 @@ namespace Nop.Plugin.Api.Controllers
         private readonly ICategoryService _categoryService;
         private readonly IUrlRecordService _urlRecordService;
         private readonly IPictureService _pictureService;
-        private readonly IFactory<Category> _factory; 
+        private readonly IFactory<Category> _factory;
+        private readonly IDTOHelper _dtoHelper;
 
         public CategoriesController(ICategoryApiService categoryApiService,
             IJsonFieldsSerializer jsonFieldsSerializer,
@@ -53,13 +55,15 @@ namespace Nop.Plugin.Api.Controllers
             IDiscountService discountService,
             IAclService aclService,
             ICustomerService customerService,
-            IFactory<Category> factory) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService)
+            IFactory<Category> factory,
+            IDTOHelper dtoHelper) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService)
         {
             _categoryApiService = categoryApiService;
             _categoryService = categoryService;
             _urlRecordService = urlRecordService;
             _factory = factory;
             _pictureService = pictureService;
+            _dtoHelper = dtoHelper;
         }
 
         /// <summary>
@@ -90,11 +94,7 @@ namespace Nop.Plugin.Api.Controllers
 
             IList<CategoryDto> categoriesAsDtos = allCategories.Select(category =>
             {
-                CategoryDto categoryDto = category.ToDto();
-
-                PrepareDtoAditionalProperties(category, categoryDto);
-
-                return categoryDto;
+                return _dtoHelper.PrepareCategoryDTO(category);
 
             }).ToList();
 
@@ -155,9 +155,7 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.NotFound, "category", "category not found");
             }
 
-            CategoryDto categoryDto = category.ToDto();
-
-            PrepareDtoAditionalProperties(category, categoryDto);
+            CategoryDto categoryDto = _dtoHelper.PrepareCategoryDTO(category);
 
             var categoriesRootObject = new CategoriesRootObject();
 
@@ -217,9 +215,7 @@ namespace Nop.Plugin.Api.Controllers
                 _localizationService.GetResource("ActivityLog.AddNewCategory"), category.Name);
 
             // Preparing the result dto of the new category
-            CategoryDto newCategoryDto = category.ToDto();
-
-            PrepareDtoAditionalProperties(category, newCategoryDto);
+            CategoryDto newCategoryDto = _dtoHelper.PrepareCategoryDTO(category);
 
             var categoriesRootObject = new CategoriesRootObject();
 
@@ -277,9 +273,7 @@ namespace Nop.Plugin.Api.Controllers
             _customerActivityService.InsertActivity("UpdateCategory",
                 _localizationService.GetResource("ActivityLog.UpdateCategory"), category.Name);
 
-            CategoryDto categoryDto = category.ToDto();
-
-            PrepareDtoAditionalProperties(category,categoryDto);
+            CategoryDto categoryDto = _dtoHelper.PrepareCategoryDTO(category);
 
             var categoriesRootObject = new CategoriesRootObject();
 
@@ -312,22 +306,6 @@ namespace Nop.Plugin.Api.Controllers
             _customerActivityService.InsertActivity("DeleteCategory", _localizationService.GetResource("ActivityLog.DeleteCategory"), categoryToDelete.Name);
 
             return new RawJsonActionResult("{}");
-        }
-
-        private void PrepareDtoAditionalProperties(Category category, CategoryDto categoryDto)
-        {
-            Picture picture = _pictureService.GetPictureById(category.PictureId);
-            ImageDto imageDto = PrepareImageDto(picture, categoryDto);
-
-            if (imageDto != null)
-            {
-                categoryDto.Image = imageDto;
-            }
-
-            categoryDto.SeName = category.GetSeName();
-            categoryDto.DiscountIds = category.AppliedDiscounts.Select(discount => discount.Id).ToList();
-            categoryDto.RoleIds = _aclService.GetAclRecords(category).Select(acl => acl.CustomerRoleId).ToList();
-            categoryDto.StoreIds = _storeMappingService.GetStoreMappings(category).Select(mapping => mapping.StoreId).ToList();
         }
 
         private void UpdatePicture(Category categoryEntityToUpdate, ImageDto imageDto)

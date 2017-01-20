@@ -1,6 +1,7 @@
 ﻿using System;
 using Autofac;
 using Autofac.Core;
+using Microsoft.AspNet.WebHooks;
 using Nop.Core.Configuration;
 using Nop.Core.Data;
 using Nop.Core.Domain.Catalog;
@@ -60,6 +61,8 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<OrdersController>().InstancePerLifetimeScope();
             builder.RegisterType<ShoppingCartItemsController>().InstancePerLifetimeScope();
             builder.RegisterType<OrderItemsController>().InstancePerLifetimeScope();
+            builder.RegisterType<WebHookRegistrationsController>().InstancePerLifetimeScope();
+            builder.RegisterType<WebHookFiltersController>().InstancePerLifetimeScope();
         }
 
         private void RegisterModelBinders(ContainerBuilder builder)
@@ -84,10 +87,13 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<CustomerRolesHelper>().As<ICustomerRolesHelper>().InstancePerLifetimeScope();
             builder.RegisterType<JsonHelper>().As<IJsonHelper>().InstancePerLifetimeScope();
             builder.RegisterType<WebConfigMangerHelper>().As<IWebConfigMangerHelper>().InstancePerLifetimeScope();
+            builder.RegisterType<DTOHelper>().As<IDTOHelper>().InstancePerLifetimeScope();
 
             builder.RegisterType<JsonFieldsSerializer>().As<IJsonFieldsSerializer>().InstancePerLifetimeScope();
 
             builder.RegisterType<FieldsValidator>().As<IFieldsValidator>().InstancePerLifetimeScope();
+
+            builder.RegisterType<WebHookService>().As<IWebHookService>().SingleInstance();
 
             builder.RegisterType<ObjectConverter>().As<IObjectConverter>().InstancePerLifetimeScope();
             builder.RegisterType<ApiTypeConverter>().As<IApiTypeConverter>().InstancePerLifetimeScope();

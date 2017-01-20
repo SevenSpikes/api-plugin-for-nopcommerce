@@ -6,6 +6,7 @@ using Nop.Core;
 using Nop.Data;
 using Nop.Plugin.Api.DataMappings;
 using Nop.Plugin.Api.Domain;
+using System.Linq;
 
 namespace Nop.Plugin.Api.Data
 {
@@ -22,6 +23,7 @@ namespace Nop.Plugin.Api.Data
             Database.SetInitializer<ApiObjectContext>(null);
 
             modelBuilder.Configurations.Add(new ClientMap());
+            modelBuilder.Configurations.Add(new WebHooksMap());
 
             //disable EdmMetadata generation
             //modelBuilder.Conventions.Remove<IncludeMetadataConvention>();
@@ -52,6 +54,30 @@ namespace Nop.Plugin.Api.Data
             //drop the table
             var tableName = this.GetTableName<Client>();
             this.DropPluginTable(tableName);
+
+            var webHooksName = this.GetTableName<Domain.WebHooks>();
+            DropPluginTableWithSchema(this, webHooksName);
+        }
+
+        // The WebHook table has a different schema than the nopCommerce tables,
+        // so in order to drop the table we should use this method.
+        private void DropPluginTableWithSchema(DbContext context, string tableName)
+        {
+            if (context == null)
+                throw new ArgumentNullException("context");
+
+            if (String.IsNullOrEmpty(tableName))
+                throw new ArgumentNullException("tableName");
+
+            //drop the table
+            var tableSchema = context.Database.SqlQuery<string>("SELECT TABLE_SCHEMA FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}", tableName).FirstOrDefault();
+ 
+            if (!String.IsNullOrEmpty(tableSchema))
+            {
+                var dbScript = String.Format("DROP TABLE [{0}].[{1}]", tableSchema, tableName);
+                context.Database.ExecuteSqlCommand(dbScript);
+            }
+            context.SaveChanges();
         }
 
         public IDbSet<TEntity> Set<TEntity>() where TEntity : BaseEntity

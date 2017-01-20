@@ -4,5 +4,7 @@
     {
         void AddConfiguration();
         void RemoveConfiguration();
+
+        void AddConnectionString();
     }
 }

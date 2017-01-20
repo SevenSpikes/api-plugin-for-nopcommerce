@@ -69,6 +69,10 @@ namespace Nop.Plugin.Api.Plugin
 
         public override void Install()
         {
+            // Add the nopCommerce connection string to the web.config file. This is required by the WebHooks.
+            IWebConfigMangerHelper webConfigManagerHelper = EngineContext.Current.ContainerManager.Resolve<IWebConfigMangerHelper>();
+            webConfigManagerHelper.AddConnectionString();
+
             _objectContext.Install();
 
             //locales
@@ -125,6 +129,13 @@ namespace Nop.Plugin.Api.Plugin
             this.AddOrUpdatePluginLocaleResource("Api.Category.InvalidImageSrc", "Invalid image source");
             this.AddOrUpdatePluginLocaleResource("Api.Category.InvalidImageSrcType", "You have provided an invalid image source/attachment ");
 
+            this.AddOrUpdatePluginLocaleResource("Api.WebHooks.CouldNotRegisterWebhook", "Could not register WebHook due to error: {0}");
+            this.AddOrUpdatePluginLocaleResource("Api.WebHooks.CouldNotRegisterDuplicateWebhook", "Could not register WebHook because a webhook with the same URI and Filters is already registered.");
+            this.AddOrUpdatePluginLocaleResource("Api.WebHooks.CouldNotUpdateWebhook", "Could not update WebHook due to error: {0}");
+            this.AddOrUpdatePluginLocaleResource("Api.WebHooks.CouldNotDeleteWebhook", "Could not delete WebHook due to error: {0}");
+            this.AddOrUpdatePluginLocaleResource("Api.WebHooks.CouldNotDeleteWebhooks", "Could not delete WebHooks due to error: {0}");
+            this.AddOrUpdatePluginLocaleResource("Api.WebHooks.InvalidFilters", "The following filters are not valid: '{0}'. A list of valid filters can be obtained from the path '{1}'.");
+
             base.Install();
 
             // Changes to Web.Config trigger application restart.
@@ -136,6 +147,7 @@ namespace Nop.Plugin.Api.Plugin
         {
             _objectContext.Uninstall();
 
+            // TODO: Delete all resources
             //locales
             this.DeletePluginLocaleResource("Plugins.Api");
             this.DeletePluginLocaleResource("Plugins.Api.Admin.Menu.ManageClients");
@@ -168,6 +180,13 @@ namespace Nop.Plugin.Api.Plugin
             this.DeletePluginLocaleResource("Plugins.Api.Admin.Settings.GeneralSettingsTitle");
             this.DeletePluginLocaleResource("Plugins.Api.Admin.Edit");
             this.DeletePluginLocaleResource("Plugins.Api.Admin.Client.BackToList");
+            
+            this.DeletePluginLocaleResource("Api.WebHooks.CouldNotRegisterWebhook");
+            this.DeletePluginLocaleResource("Api.WebHooks.CouldNotRegisterDuplicateWebhook");
+            this.DeletePluginLocaleResource("Api.WebHooks.CouldNotUpdateWebhook");
+            this.DeletePluginLocaleResource("Api.WebHooks.CouldNotDeleteWebhook");
+            this.DeletePluginLocaleResource("Api.WebHooks.CouldNotDeleteWebhooks");
+            this.DeletePluginLocaleResource("Api.WebHooks.InvalidFilters");
 
             base.Uninstall();
 
