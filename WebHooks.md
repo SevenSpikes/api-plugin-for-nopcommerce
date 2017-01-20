@@ -35,7 +35,9 @@
         The JSON should contain at least the WebHook Id, WebHookUri and Filters.
       
 6. Delete a specific WebHook
+
          Make a **DELETE** request to the following route: **/api/webhooks/registrations/{webhookid}** 
          
 7. Delete all WebHooks
+
           Make a **DELETE** request to the following route: **/api/webhooks/registrations**
