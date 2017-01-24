@@ -41,3 +41,25 @@
 7. Delete all WebHooks
 
           Make a **DELETE** request to the following route: **/api/webhooks/registrations**
+          
+          
+### Webhook Verification
+    
+   In order to verify that the webhook is sent from the nopCommerce api you should check the request header for a ** ms-signature ** key. The key should contain a similar value: ** sha256=21349127391293**
+    
+   In order to verify the webhook you should use the following code:
+    
+   ```cs
+        private bool VerifyWebhook(string data, string hashedHeader, string webhookSecret)
+        {
+            byte[] secret = Encoding.UTF8.GetBytes(webhookSecret);
+            using (var hasher = new HMACSHA256(secret))
+            {
+                byte[] encodedData = Encoding.UTF8.GetBytes(data);
+                byte[] sha256 = hasher.ComputeHash(encodedData);
+                string hashedData = string.Format(CultureInfo.InvariantCulture, "sha256={0}", EncodingUtilities.ToHex(sha256));
+
+                return hashedHeader.Equals(hashedData);
+            }
+        }
+   ```
