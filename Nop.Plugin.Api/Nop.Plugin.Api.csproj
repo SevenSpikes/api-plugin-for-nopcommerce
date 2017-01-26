@@ -249,12 +249,15 @@
     <Compile Include="Constants\WebHookNames.cs" />
     <Compile Include="Controllers\BaseApiController.cs" />
     <Compile Include="Controllers\OrderItemsController.cs" />
+    <Compile Include="Controllers\StoreController.cs" />
     <Compile Include="Controllers\WebHookFiltersController.cs" />
     <Compile Include="Controllers\WebHookRegistrationsController.cs" />
     <Compile Include="DataMappings\WebHooksMap.cs" />
     <Compile Include="Domain\WebHooks.cs" />
     <Compile Include="DTOs\OrderItems\OrderItemsCountRootObject.cs" />
     <Compile Include="DTOs\OrderItems\OrderItemsRootObject.cs" />
+    <Compile Include="DTOs\Stores\StoreDto.cs" />
+    <Compile Include="DTOs\Stores\StoresRootObject.cs" />
     <Compile Include="Factories\AddressFactory.cs" />
     <Compile Include="Factories\CustomerFactory.cs" />
     <Compile Include="Factories\OrderFactory.cs" />
@@ -272,6 +275,7 @@
     <Compile Include="Factories\CategoryFactory.cs" />
     <Compile Include="JSON\ActionResults\ErrorActionResult.cs" />
     <Compile Include="JSON\ActionResults\RawJsonActionResult.cs" />
+    <Compile Include="MappingExtensions\StoreDtoMappings.cs" />
     <Compile Include="Maps\IJsonPropertyMap.cs" />
     <Compile Include="Maps\JsonPropertyMap.cs" />
     <Compile Include="ModelBinders\JsonModelBinder.cs" />

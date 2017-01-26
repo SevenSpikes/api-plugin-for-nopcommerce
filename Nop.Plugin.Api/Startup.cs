@@ -340,6 +340,12 @@ namespace Nop.Plugin.Api
                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Delete) });
 
             config.Routes.MapHttpRoute(
+               name: "getCurrentStore",
+               routeTemplate: "api/stores",
+               defaults: new { controller = "Store", action = "GetCurrentStore" },
+               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+
+            config.Routes.MapHttpRoute(
                name: "getAllWebHooks",
                routeTemplate: "api/webhooks/registrations",
                defaults: new { controller = "WebHookRegistrations", action = "GetAllWebHooks" },
