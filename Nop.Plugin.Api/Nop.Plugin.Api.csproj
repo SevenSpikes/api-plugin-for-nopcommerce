@@ -413,6 +413,7 @@
     <Compile Include="Validators\IFieldsValidator.cs" />
     <Compile Include="Validators\ShoppingCartItemDtoValidator.cs" />
     <Compile Include="Validators\TypeValidator.cs" />
+    <Compile Include="WebHooks\ApiWebHookSender.cs" />
     <Compile Include="WebHooks\FilterProvider.cs" />
     <Compile Include="WebHooks\WebHookEventConsumer.cs" />
   </ItemGroup>
