@@ -87,6 +87,8 @@ namespace Nop.Plugin.Api.Helpers
                 {
                     imageDto.Id = productPicture.Id;
                     imageDto.Position = productPicture.DisplayOrder;
+                    imageDto.Src = _pictureService.GetPictureUrl(productPicture.Picture);
+                    imageDto.MimeType = productPicture.Picture.MimeType;
                     productDto.Images.Add(imageDto);
                 }
             }
