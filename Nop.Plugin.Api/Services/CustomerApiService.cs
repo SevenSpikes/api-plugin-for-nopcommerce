@@ -310,7 +310,9 @@ namespace Nop.Plugin.Api.Services
 
         private IQueryable<Customer> GetCustomersQuery(DateTime? createdAtMin = null, DateTime? createdAtMax = null, int sinceId = 0)
         {
-            var query = _customerRepository.TableNoTracking.Where(customer => !customer.Deleted);
+            var query = _customerRepository.TableNoTracking.Where(customer => !customer.Deleted && !customer.IsSystemAccount && customer.Active);
+
+            query = query.Where(customer => !customer.CustomerRoles.Any(cr => (cr.Active) && (cr.SystemName == SystemCustomerRoleNames.Guests)));
 
             if (createdAtMin != null)
             {
