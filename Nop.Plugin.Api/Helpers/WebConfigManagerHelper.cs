@@ -65,6 +65,8 @@ namespace Nop.Plugin.Api.Helpers
                 }
                 else
                 {
+                    // Check if the connection string is changed.
+                    // If so update the connection string in the web.config.
                     string connectionStringInConfig = element.Attribute("connectionString").Value;
 
                     if (!String.Equals(connectionStringFromNop, connectionStringInConfig, StringComparison.InvariantCultureIgnoreCase))

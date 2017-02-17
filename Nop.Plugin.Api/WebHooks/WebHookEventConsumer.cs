@@ -48,6 +48,8 @@ namespace Nop.Plugin.Api.WebHooks
         {
             CustomerDto customer = _customerApiService.GetCustomerById(eventMessage.Entity.Id, true);
 
+            // In nopCommerce the Customer, Product, Category and Order entities are not deleted.
+            // Instead the Deleted property of the entity is set to true.
             string webhookEvent = WebHookNames.CustomerUpdated;
 
             if(customer.Deleted == true)

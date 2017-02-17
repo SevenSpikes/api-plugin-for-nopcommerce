@@ -426,9 +426,11 @@ namespace Nop.Plugin.Api
             config.InitializeCustomWebHooksSqlStorage();
 
             // This is required only in development.
-            // It it is required only when you want to send a webhook to an https address with an invalid SSL certificate. (self-signed)
-            // The code makrs all sertificates as valid.
+            // It it is required only when you want to send a web hook to an https address with an invalid SSL certificate. (self-signed)
+            // The code marks all certificates as valid.
             // We may want to extract this as a setting in the future.
+
+            // NOTE: If this code is commented the certificates will be validated.
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
         }
     }

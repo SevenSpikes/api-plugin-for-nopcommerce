@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Nop.Plugin.Api.Serializers;
 using Nop.Services.Customers;
@@ -20,7 +19,6 @@ using System.Net;
 using Nop.Plugin.Api.Helpers;
 using System.Globalization;
 using Nop.Plugin.Api.Constants;
-using Microsoft.AspNet.WebHooks.Services;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -104,6 +102,10 @@ namespace Nop.Plugin.Api.Controllers
             await VerifyFilters(webHook);
             await VerifyWebHook(webHook);
 
+            // In order to ensure that a web hook filter is not registered multiple times for the same uri
+            // we remove the already registered filters from the current web hook.
+            // If the same filters are registered multiple times with the same uri, the web hook event will be
+            // sent for each registration.
             IEnumerable<WebHook> existingWebhooks = await GetAllWebHooks();
             IEnumerable<WebHook> existingWebhooksForTheSameUri = existingWebhooks.Where(wh => wh.WebHookUri == webHook.WebHookUri);
 
@@ -234,6 +236,9 @@ namespace Nop.Plugin.Api.Controllers
         {
             base.Initialize(controllerContext);
 
+            // The Microsoft.AspNet.WebHooks library registeres an extension method for the DependencyResolver.
+            // Sadly we cannot access these properties by using out Autofac dependency injection.
+            // In order to access them we have to resolve them through the Configuration.
             _manager = Configuration.DependencyResolver.GetManager();
             _store = Configuration.DependencyResolver.GetStore();
             _user = Configuration.DependencyResolver.GetUser();
