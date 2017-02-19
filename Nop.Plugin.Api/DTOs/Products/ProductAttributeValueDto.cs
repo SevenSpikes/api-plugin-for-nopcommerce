@@ -17,7 +17,7 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// Gets or sets the product attribute value id
         /// </summary>
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets the attribute value type identifier

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -39,7 +40,6 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IProductApiService _productApiService;
         private readonly IProductService _productService;
         private readonly IUrlRecordService _urlRecordService;
-        private readonly IPictureService _pictureService;
         private readonly IManufacturerService _manufacturerService;
         private readonly IFactory<Product> _factory;
         private readonly IProductTagService _productTagService;
@@ -64,7 +64,6 @@ namespace Nop.Plugin.Api.Controllers
         {
             _productApiService = productApiService;
             _factory = factory;
-            _pictureService = pictureService;
             _manufacturerService = manufacturerService;
             _productTagService = productTagService;
             _urlRecordService = urlRecordService;
@@ -248,10 +247,12 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.NotFound, "product", "not found");
             }
 
-            productDelta.Merge(product);
+            productDelta.Merge(product,true);
 
             product.UpdatedOnUtc = DateTime.UtcNow;
             _productService.UpdateProduct(product);
+
+            UpdateProductAttributes(product, productDelta);
 
             UpdateProductPictures(product, productDelta.Dto.Images);
 
@@ -372,6 +373,93 @@ namespace Nop.Plugin.Api.Controllers
                         ProductId = entityToUpdate.Id,
                         DisplayOrder = imageDto.Position
                     });
+                }
+            }
+        }
+
+        private void UpdateProductAttributes(Product entityToUpdate, Delta<ProductDto> productDtoDelta)
+        {
+            // If no product attribute mappings are specified means we don't have to update anything
+            if (productDtoDelta.Dto.ProductAttributeMappings == null)
+                return;
+
+            // delete unused product attribute mappings
+            IEnumerable<int> toBeUpdatedIds = productDtoDelta.Dto.ProductAttributeMappings.Where(y => y.Id != 0).Select(x => x.Id);
+
+            var unusedProductAttributeMappings = entityToUpdate.ProductAttributeMappings.Where(x => !toBeUpdatedIds.Contains(x.Id)).ToList();
+
+            foreach (var unusedProductAttributeMapping in unusedProductAttributeMappings)
+            {
+                _productAttributeService.DeleteProductAttributeMapping(unusedProductAttributeMapping);
+            }
+
+            foreach (var productAttributeMappingDto in productDtoDelta.Dto.ProductAttributeMappings)
+            {
+                if (productAttributeMappingDto.Id > 0)
+                {
+                    // update existing product attribute mapping
+                    var productAttributeMappingToUpdate = entityToUpdate.ProductAttributeMappings.FirstOrDefault(x => x.Id == productAttributeMappingDto.Id);
+                    if (productAttributeMappingToUpdate != null)
+                    {
+                        productDtoDelta.Merge(productAttributeMappingDto,productAttributeMappingToUpdate,false);
+                       
+                        _productAttributeService.UpdateProductAttributeMapping(productAttributeMappingToUpdate);
+
+                        UpdateProductAttributeValues(productAttributeMappingDto, productDtoDelta);
+                    }
+                }
+                else
+                {
+                    ProductAttributeMapping newProductAttributeMapping = new ProductAttributeMapping();
+                    newProductAttributeMapping.ProductId = entityToUpdate.Id;
+
+                    productDtoDelta.Merge(productAttributeMappingDto, newProductAttributeMapping);
+
+                    // add new product attribute
+                    _productAttributeService.InsertProductAttributeMapping(newProductAttributeMapping);
+                }
+            }
+        }
+
+        private void UpdateProductAttributeValues(ProductAttributeMappingDto productAttributeMappingDto, Delta<ProductDto> productDtoDelta)
+        {
+            // If no product attribute values are specified means we don't have to update anything
+            if (productAttributeMappingDto.ProductAttributeValues == null)
+                return;
+
+            // delete unused product attribute values
+            IEnumerable<int> toBeUpdatedIds = productAttributeMappingDto.ProductAttributeValues.Where(y => y.Id != 0).Select(x => x.Id);
+
+            var unusedProductAttributeValues =
+                _productAttributeService.GetProductAttributeValues(productAttributeMappingDto.Id).Where(x => !toBeUpdatedIds.Contains(x.Id)).ToList(); ;
+
+            foreach (var unusedProductAttributeValue in unusedProductAttributeValues)
+            {
+                _productAttributeService.DeleteProductAttributeValue(unusedProductAttributeValue);
+            }
+
+            foreach (var productAttributeValueDto in productAttributeMappingDto.ProductAttributeValues)
+            {
+                if (productAttributeValueDto.Id > 0)
+                {
+                    // update existing product attribute mapping
+                    var productAttributeValueToUpdate =
+                        _productAttributeService.GetProductAttributeValueById(productAttributeValueDto.Id);
+                    if (productAttributeValueToUpdate != null)
+                    {
+                        productDtoDelta.Merge(productAttributeValueDto, productAttributeValueToUpdate, false);
+
+                        _productAttributeService.UpdateProductAttributeValue(productAttributeValueToUpdate);
+                    }
+                }
+                else
+                {
+                    ProductAttributeValue newProductAttributeValue = new ProductAttributeValue();
+                    productDtoDelta.Merge(productAttributeValueDto, newProductAttributeValue);
+
+                    newProductAttributeValue.ProductAttributeMappingId = productAttributeMappingDto.Id;
+                    // add new product attribute value
+                    _productAttributeService.InsertProductAttributeValue(newProductAttributeValue);
                 }
             }
         }

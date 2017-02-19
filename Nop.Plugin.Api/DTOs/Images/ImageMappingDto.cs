@@ -11,17 +11,5 @@ namespace Nop.Plugin.Api.DTOs.Images
 
         [JsonProperty("position")]
         public int Position { get; set; }
-
-        [JsonProperty("src")]
-        public string Src { get; set; }
-
-        [JsonProperty("attachment")]
-        public string Attachment { get; set; }
-
-        [JsonIgnore]
-        public byte[] Binary { get; set; }
-
-        [JsonIgnore]
-        public string MimeType { get; set; }
     }
 }
