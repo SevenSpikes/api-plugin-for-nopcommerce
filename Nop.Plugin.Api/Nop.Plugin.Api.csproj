@@ -132,6 +132,7 @@
     <Compile Include="Attributes\BaseAttributeInvoker.cs" />
     <Compile Include="Attributes\DoNotMap.cs" />
     <Compile Include="Attributes\GetRequestsErrorInterceptorActionFilter.cs" />
+    <Compile Include="Attributes\ProductTypeValidationAttribute.cs" />
     <Compile Include="Attributes\ServerErrorHandlerAttribute.cs" />
     <Compile Include="Attributes\ImageAttribute.cs" />
     <Compile Include="Attributes\ImageCollectionAttribute.cs" />

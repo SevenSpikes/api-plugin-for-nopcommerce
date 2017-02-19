@@ -25,6 +25,8 @@ namespace Nop.Plugin.Api.Factories
             defaultProduct.CreatedOnUtc = DateTime.UtcNow;
             defaultProduct.UpdatedOnUtc = DateTime.UtcNow;
 
+            defaultProduct.ProductType = ProductType.SimpleProduct;
+
             defaultProduct.MaximumCustomerEnteredPrice = 1000;
             defaultProduct.MaxNumberOfDownloads = 10;
             defaultProduct.RecurringCycleLength = 100;

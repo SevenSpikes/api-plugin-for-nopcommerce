@@ -461,6 +461,7 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// <summary>
         /// Gets or sets the product type
         /// </summary>
+        [ProductTypeValidationAttribute]
         [JsonProperty("product_type")]
         public string ProductType
         {
