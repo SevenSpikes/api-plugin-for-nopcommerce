@@ -416,12 +416,13 @@ namespace Nop.Plugin.Api.Controllers
 
         private void InsertFirstAndLastNameGenericAttributes(string firstName, string lastName, Customer newCustomer)
         {
-            if (!string.IsNullOrEmpty(firstName))
+            // we assume that if the first name is not sent then it will be null and in this case we don't want to update it
+            if (firstName != null)
             {
                 _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.FirstName, firstName);
             }
 
-            if (!string.IsNullOrEmpty(lastName))
+            if (lastName != null)
             {
                 _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.LastName, lastName);
             }
