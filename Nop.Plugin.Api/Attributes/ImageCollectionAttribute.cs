@@ -14,7 +14,7 @@ namespace Nop.Plugin.Api.Attributes
             if (instance == null)
                 return;
 
-            var imagesCollection = instance as ICollection<ImageDto>;
+            var imagesCollection = instance as ICollection<ImageMappingDto>;
 
             foreach (var image in imagesCollection)
             {

@@ -117,7 +117,10 @@ namespace Nop.Plugin.Api.Validators
             }
             else
             {
-                isCurrentPropertyValid = ValidateNestedProperty(type, (Dictionary<string, object>)value);
+                if (value != null)
+                {
+                    isCurrentPropertyValid = ValidateNestedProperty(type, (Dictionary<string, object>) value);
+                }
             }
 
             return isCurrentPropertyValid;

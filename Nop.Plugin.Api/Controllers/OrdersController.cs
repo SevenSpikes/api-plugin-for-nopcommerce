@@ -32,6 +32,7 @@ using Nop.Services.Customers;
 using Nop.Services.Discounts;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
+using Nop.Services.Media;
 using Nop.Services.Orders;
 using Nop.Services.Payments;
 using Nop.Services.Security;
@@ -86,9 +87,10 @@ namespace Nop.Plugin.Api.Controllers
             IShoppingCartService shoppingCartService,
             IGenericAttributeService genericAttributeService,
             IStoreContext storeContext,
-            IShippingService shippingService)
+            IShippingService shippingService,
+            IPictureService pictureService)
             : base(jsonFieldsSerializer, aclService, customerService, storeMappingService,
-                 storeService, discountService, customerActivityService, localizationService)
+                 storeService, discountService, customerActivityService, localizationService,pictureService)
         {
             _orderApiService = orderApiService;
             _factory = factory;

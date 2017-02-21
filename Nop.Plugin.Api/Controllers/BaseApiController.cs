@@ -17,6 +17,7 @@ using Nop.Services.Customers;
 using Nop.Services.Discounts;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
+using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Stores;
 
@@ -32,6 +33,7 @@ namespace Nop.Plugin.Api.Controllers
         protected readonly IDiscountService _discountService;
         protected readonly ICustomerActivityService _customerActivityService;
         protected readonly ILocalizationService _localizationService;
+        protected readonly IPictureService _pictureService;
 
         public BaseApiController(IJsonFieldsSerializer jsonFieldsSerializer, 
             IAclService aclService, 
@@ -40,7 +42,8 @@ namespace Nop.Plugin.Api.Controllers
             IStoreService storeService, 
             IDiscountService discountService, 
             ICustomerActivityService customerActivityService, 
-            ILocalizationService localizationService)
+            ILocalizationService localizationService,
+            IPictureService pictureService)
         {
             _jsonFieldsSerializer = jsonFieldsSerializer;
             _aclService = aclService;
@@ -50,6 +53,7 @@ namespace Nop.Plugin.Api.Controllers
             _discountService = discountService;
             _customerActivityService = customerActivityService;
             _localizationService = localizationService;
+            _pictureService = pictureService;
         }
 
         protected IHttpActionResult Error(HttpStatusCode statusCode = (HttpStatusCode)422, string propertyKey = "", string errorMessage = "")
@@ -152,7 +156,7 @@ namespace Nop.Plugin.Api.Controllers
             }
         }
 
-        protected ImageDto PrepareImageDto<TDto>(Picture picture, TDto dto)
+        protected ImageDto PrepareImageDto(Picture picture)
         {
             ImageDto image = null;
 
@@ -162,7 +166,8 @@ namespace Nop.Plugin.Api.Controllers
                 // because the picture may be passed with src and the result should only include the base64 format.
                 image = new ImageDto()
                 {
-                    Attachment = Convert.ToBase64String(picture.PictureBinary)
+                    Attachment = Convert.ToBase64String(picture.PictureBinary),
+                    Src = _pictureService.GetPictureUrl(picture)
                 };
             }
 

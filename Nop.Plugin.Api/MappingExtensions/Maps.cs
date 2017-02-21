@@ -103,6 +103,7 @@ namespace Nop.Plugin.Api.MappingExtensions
         {
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Product, ProductDto>()
                .IgnoreAllNonExisting()
+               .ForMember(x => x.ProductAttributeMappings, y => y.Ignore())
                .ForMember(x => x.FullDescription, y => y.MapFrom(src => HttpUtility.HtmlEncode(src.FullDescription)))
                .ForMember(x => x.Tags, y => y.MapFrom(src => src.ProductTags.Select(x => x.Name)));
         }
@@ -132,6 +133,8 @@ namespace Nop.Plugin.Api.MappingExtensions
             CreateOrderEntityToOrderDtoMap();
 
             CreateProductMap();
+
+            CreateMap<ProductAttributeValue, ProductAttributeValueDto>();
         }
     }
 }

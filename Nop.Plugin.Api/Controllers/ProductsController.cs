@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -39,10 +40,10 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IProductApiService _productApiService;
         private readonly IProductService _productService;
         private readonly IUrlRecordService _urlRecordService;
-        private readonly IPictureService _pictureService;
         private readonly IManufacturerService _manufacturerService;
         private readonly IFactory<Product> _factory;
         private readonly IProductTagService _productTagService;
+        private readonly IProductAttributeService _productAttributeService;
 
         public ProductsController(IProductApiService productApiService,
                                   IJsonFieldsSerializer jsonFieldsSerializer,
@@ -58,15 +59,16 @@ namespace Nop.Plugin.Api.Controllers
                                   IDiscountService discountService,
                                   IPictureService pictureService,
                                   IManufacturerService manufacturerService,
-                                  IProductTagService productTagService) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService)
+                                  IProductTagService productTagService,
+                                  IProductAttributeService productAttributeService) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService, pictureService)
         {
             _productApiService = productApiService;
             _factory = factory;
-            _pictureService = pictureService;
             _manufacturerService = manufacturerService;
             _productTagService = productTagService;
             _urlRecordService = urlRecordService;
             _productService = productService;
+            _productAttributeService = productAttributeService;
         }
 
         /// <summary>
@@ -203,7 +205,7 @@ namespace Nop.Plugin.Api.Controllers
 
             UpdateAclRoles(product, productDelta.Dto.RoleIds);
 
-            UpdateDiscountMappings(product,productDelta.Dto.DiscountIds);
+            UpdateDiscountMappings(product, productDelta.Dto.DiscountIds);
 
             UpdateStoreMappings(product, productDelta.Dto.StoreIds);
 
@@ -245,10 +247,12 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.NotFound, "product", "not found");
             }
 
-            productDelta.Merge(product);
+            productDelta.Merge(product,true);
 
             product.UpdatedOnUtc = DateTime.UtcNow;
             _productService.UpdateProduct(product);
+
+            UpdateProductAttributes(product, productDelta);
 
             UpdateProductPictures(product, productDelta.Dto.Images);
 
@@ -256,7 +260,7 @@ namespace Nop.Plugin.Api.Controllers
 
             UpdateProductManufacturers(product, productDelta.Dto.ManufacturerIds);
 
-            UpdateAssociatedProducts(product,productDelta.Dto.AssociatedProductIds);
+            UpdateAssociatedProducts(product, productDelta.Dto.AssociatedProductIds);
 
             // Update the SeName if specified
             if (productDelta.Dto.SeName != null)
@@ -264,8 +268,8 @@ namespace Nop.Plugin.Api.Controllers
                 var seName = product.ValidateSeName(productDelta.Dto.SeName, product.Name, true);
                 _urlRecordService.SaveSlug(product, seName, 0);
             }
-            
-            UpdateDiscountMappings(product,productDelta.Dto.DiscountIds);
+
+            UpdateDiscountMappings(product, productDelta.Dto.DiscountIds);
 
             UpdateStoreMappings(product, productDelta.Dto.StoreIds);
 
@@ -316,6 +320,7 @@ namespace Nop.Plugin.Api.Controllers
         private void MapAdditionalPropertiesToDTO(Product product, ProductDto productDto)
         {
             PrepareProductImages(product.ProductPictures, productDto);
+            PrepareProductAttributes(product.ProductAttributeMappings, productDto);
 
             productDto.SeName = product.GetSeName();
             productDto.DiscountIds = product.AppliedDiscounts.Select(discount => discount.Id).ToList();
@@ -330,7 +335,7 @@ namespace Nop.Plugin.Api.Controllers
                     .ToList();
         }
 
-        private void UpdateProductPictures(Product entityToUpdate, List<ImageDto> setPictures)
+        private void UpdateProductPictures(Product entityToUpdate, List<ImageMappingDto> setPictures)
         {
             // If no pictures are specified means we don't have to update anything
             if (setPictures == null)
@@ -368,6 +373,93 @@ namespace Nop.Plugin.Api.Controllers
                         ProductId = entityToUpdate.Id,
                         DisplayOrder = imageDto.Position
                     });
+                }
+            }
+        }
+
+        private void UpdateProductAttributes(Product entityToUpdate, Delta<ProductDto> productDtoDelta)
+        {
+            // If no product attribute mappings are specified means we don't have to update anything
+            if (productDtoDelta.Dto.ProductAttributeMappings == null)
+                return;
+
+            // delete unused product attribute mappings
+            IEnumerable<int> toBeUpdatedIds = productDtoDelta.Dto.ProductAttributeMappings.Where(y => y.Id != 0).Select(x => x.Id);
+
+            var unusedProductAttributeMappings = entityToUpdate.ProductAttributeMappings.Where(x => !toBeUpdatedIds.Contains(x.Id)).ToList();
+
+            foreach (var unusedProductAttributeMapping in unusedProductAttributeMappings)
+            {
+                _productAttributeService.DeleteProductAttributeMapping(unusedProductAttributeMapping);
+            }
+
+            foreach (var productAttributeMappingDto in productDtoDelta.Dto.ProductAttributeMappings)
+            {
+                if (productAttributeMappingDto.Id > 0)
+                {
+                    // update existing product attribute mapping
+                    var productAttributeMappingToUpdate = entityToUpdate.ProductAttributeMappings.FirstOrDefault(x => x.Id == productAttributeMappingDto.Id);
+                    if (productAttributeMappingToUpdate != null)
+                    {
+                        productDtoDelta.Merge(productAttributeMappingDto,productAttributeMappingToUpdate,false);
+                       
+                        _productAttributeService.UpdateProductAttributeMapping(productAttributeMappingToUpdate);
+
+                        UpdateProductAttributeValues(productAttributeMappingDto, productDtoDelta);
+                    }
+                }
+                else
+                {
+                    ProductAttributeMapping newProductAttributeMapping = new ProductAttributeMapping();
+                    newProductAttributeMapping.ProductId = entityToUpdate.Id;
+
+                    productDtoDelta.Merge(productAttributeMappingDto, newProductAttributeMapping);
+
+                    // add new product attribute
+                    _productAttributeService.InsertProductAttributeMapping(newProductAttributeMapping);
+                }
+            }
+        }
+
+        private void UpdateProductAttributeValues(ProductAttributeMappingDto productAttributeMappingDto, Delta<ProductDto> productDtoDelta)
+        {
+            // If no product attribute values are specified means we don't have to update anything
+            if (productAttributeMappingDto.ProductAttributeValues == null)
+                return;
+
+            // delete unused product attribute values
+            IEnumerable<int> toBeUpdatedIds = productAttributeMappingDto.ProductAttributeValues.Where(y => y.Id != 0).Select(x => x.Id);
+
+            var unusedProductAttributeValues =
+                _productAttributeService.GetProductAttributeValues(productAttributeMappingDto.Id).Where(x => !toBeUpdatedIds.Contains(x.Id)).ToList(); ;
+
+            foreach (var unusedProductAttributeValue in unusedProductAttributeValues)
+            {
+                _productAttributeService.DeleteProductAttributeValue(unusedProductAttributeValue);
+            }
+
+            foreach (var productAttributeValueDto in productAttributeMappingDto.ProductAttributeValues)
+            {
+                if (productAttributeValueDto.Id > 0)
+                {
+                    // update existing product attribute mapping
+                    var productAttributeValueToUpdate =
+                        _productAttributeService.GetProductAttributeValueById(productAttributeValueDto.Id);
+                    if (productAttributeValueToUpdate != null)
+                    {
+                        productDtoDelta.Merge(productAttributeValueDto, productAttributeValueToUpdate, false);
+
+                        _productAttributeService.UpdateProductAttributeValue(productAttributeValueToUpdate);
+                    }
+                }
+                else
+                {
+                    ProductAttributeValue newProductAttributeValue = new ProductAttributeValue();
+                    productDtoDelta.Merge(productAttributeValueDto, newProductAttributeValue);
+
+                    newProductAttributeValue.ProductAttributeMappingId = productAttributeMappingDto.Id;
+                    // add new product attribute value
+                    _productAttributeService.InsertProductAttributeValue(newProductAttributeValue);
                 }
             }
         }
@@ -431,7 +523,7 @@ namespace Nop.Plugin.Api.Controllers
 
         private void UpdateDiscountMappings(Product product, List<int> passedDiscountIds)
         {
-            if(passedDiscountIds == null)
+            if (passedDiscountIds == null)
                 return;
 
             var allDiscounts = _discountService.GetAllDiscounts(DiscountType.AssignedToSkus, showHidden: true);
@@ -459,20 +551,93 @@ namespace Nop.Plugin.Api.Controllers
         private void PrepareProductImages(IEnumerable<ProductPicture> productPictures, ProductDto productDto)
         {
             if (productDto.Images == null)
-                productDto.Images = new List<ImageDto>();
+                productDto.Images = new List<ImageMappingDto>();
 
             // Here we prepare the resulted dto image.
             foreach (var productPicture in productPictures)
             {
-                ImageDto imageDto = PrepareImageDto(productPicture.Picture, productDto);
+                ImageDto imageDto = PrepareImageDto(productPicture.Picture);
 
                 if (imageDto != null)
                 {
-                    imageDto.Id = productPicture.Id;
-                    imageDto.Position = productPicture.DisplayOrder;
-                    productDto.Images.Add(imageDto);
+                    ImageMappingDto productImageDto = new ImageMappingDto();
+                    productImageDto.Id = productPicture.Id;
+                    productImageDto.Position = productPicture.DisplayOrder;
+                    productImageDto.Src = imageDto.Src;
+                    productImageDto.Attachment = imageDto.Attachment;
+
+                    productDto.Images.Add(productImageDto);
                 }
             }
+        }
+
+        private void PrepareProductAttributes(IEnumerable<ProductAttributeMapping> productAttributeMappings, ProductDto productDto)
+        {
+            if (productDto.ProductAttributeMappings == null)
+                productDto.ProductAttributeMappings = new List<ProductAttributeMappingDto>();
+
+            foreach (var productAttributeMapping in productAttributeMappings)
+            {
+                ProductAttributeMappingDto productAttributeMappingDto = PrepareProductAttributeMappingDto(productAttributeMapping);
+
+                if (productAttributeMappingDto != null)
+                {
+                    productDto.ProductAttributeMappings.Add(productAttributeMappingDto);
+                }
+            }
+        }
+
+        private ProductAttributeMappingDto PrepareProductAttributeMappingDto(ProductAttributeMapping productAttributeMapping)
+        {
+            ProductAttributeMappingDto productAttributeMappingDto = null;
+
+            if (productAttributeMapping != null)
+            {
+                productAttributeMappingDto = new ProductAttributeMappingDto()
+                {
+                    Id = productAttributeMapping.Id,
+                    ProductAttributeId = productAttributeMapping.ProductAttributeId,
+                    ProductAttributeName = _productAttributeService.GetProductAttributeById(productAttributeMapping.ProductAttributeId).Name,
+                    TextPrompt = productAttributeMapping.TextPrompt,
+                    DefaultValue = productAttributeMapping.DefaultValue,
+                    AttributeControlTypeId = productAttributeMapping.AttributeControlTypeId,
+                    DisplayOrder = productAttributeMapping.DisplayOrder,
+                    IsRequired = productAttributeMapping.IsRequired,
+                    ProductAttributeValues = productAttributeMapping.ProductAttributeValues.Select(x => PrepareProductAttributeValueDto(x,productAttributeMapping.Product)).ToList()
+                };
+            }
+
+            return productAttributeMappingDto;
+        }
+
+        private ProductAttributeValueDto PrepareProductAttributeValueDto(ProductAttributeValue productAttributeValue,Product product)
+        {
+            ProductAttributeValueDto productAttributeValueDto = null;
+
+            if (productAttributeValue != null)
+            {
+                productAttributeValueDto = productAttributeValue.ToDto();
+                if (productAttributeValue.ImageSquaresPictureId > 0)
+                {
+                    Picture imageSquaresPicture = _pictureService.GetPictureById(productAttributeValue.ImageSquaresPictureId);
+                    ImageDto imageDto = PrepareImageDto(imageSquaresPicture);
+                    productAttributeValueDto.ImageSquaresImage = imageDto;
+                }
+
+                if (productAttributeValue.PictureId > 0)
+                {
+                    // make sure that the picture is mapped to the product
+                    // This is needed since if you delete the product picture mapping from the nopCommerce administrationthe
+                    // then the attribute value is not updated and it will point to a picture that has been deleted
+                   var productPicture = product.ProductPictures.FirstOrDefault(pp => pp.PictureId == productAttributeValue.PictureId);
+                    if (productPicture != null)
+                    {
+                        productAttributeValueDto.ProductPictureId = productPicture.Id;
+                    }
+                }
+            }
+
+            return productAttributeValueDto;
         }
 
         private void UpdateProductManufacturers(Product product, List<int> passedManufacturerIds)
@@ -499,7 +664,7 @@ namespace Nop.Plugin.Api.Controllers
                     if (manufacturer != null)
                     {
                         _manufacturerService.InsertProductManufacturer(new ProductManufacturer()
-                        { ProductId = product.Id, ManufacturerId = manufacturer.Id});
+                        { ProductId = product.Id, ManufacturerId = manufacturer.Id });
                     }
                 }
             }

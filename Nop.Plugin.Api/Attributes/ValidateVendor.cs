@@ -35,15 +35,16 @@ namespace Nop.Plugin.Api.Attributes
 
             if (instance != null && int.TryParse(instance.ToString(), out vendorId))
             {
-                Vendor vendor = VendorService.GetVendorById(vendorId);
-
-                if (vendor == null)
+                if (vendorId > 0)
                 {
-                    _errors.Add("Invalid vendor id", "Non existing vendor");
+                    Vendor vendor = VendorService.GetVendorById(vendorId);
+
+                    if (vendor == null)
+                    {
+                        _errors.Add("Invalid vendor id", "Non existing vendor");
+                    }
                 }
-                // TODO: validate that the vendorId is an existing vendor.
             }
-            // The type validation happens in the model binder automatically so we don't need to set an error here.
         }
 
         public override Dictionary<string, string> GetErrors()
