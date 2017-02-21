@@ -40,12 +40,24 @@ namespace Nop.Plugin.Api.WebHooks
 
         public void HandleEvent(EntityInserted<Customer> eventMessage)
         {
+            // There is no need to send webhooks for guest customers.
+            if (eventMessage.Entity.IsGuest())
+            {
+                return;
+            }
+
             CustomerDto customer = _customerApiService.GetCustomerById(eventMessage.Entity.Id);
             _webHookManager.NotifyAllAsync(WebHookNames.CustomerCreated, new { Item = customer });
         }
 
         public void HandleEvent(EntityUpdated<Customer> eventMessage)
         {
+            // There is no need to send webhooks for guest customers.
+            if (eventMessage.Entity.IsGuest())
+            {
+                return;
+            }
+
             CustomerDto customer = _customerApiService.GetCustomerById(eventMessage.Entity.Id, true);
 
             // In nopCommerce the Customer, Product, Category and Order entities are not deleted.
