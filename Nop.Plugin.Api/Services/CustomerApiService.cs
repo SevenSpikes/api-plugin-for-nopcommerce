@@ -92,7 +92,7 @@ namespace Nop.Plugin.Api.Services
             return customer;
         }
 
-        public CustomerDto GetCustomerById(int id)
+        public CustomerDto GetCustomerById(int id, bool showDeleted = false)
         {
             if (id == 0)
                 return null;
@@ -100,7 +100,7 @@ namespace Nop.Plugin.Api.Services
             // Here we expect to get two records, one for the first name and one for the last name.
             List<CustomerAttributeMappingDto> customerAttributeMappings = (from customer in _customerRepository.TableNoTracking
                                                                            join attribute in _genericAttributeRepository.TableNoTracking on customer.Id equals attribute.EntityId
-                                                                           where customer.Id == id && !customer.Deleted &&
+                                                                           where customer.Id == id && 
                                                                                  attribute.KeyGroup.Equals(KeyGroup, StringComparison.InvariantCultureIgnoreCase) &&
                                                                                  (attribute.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase) ||
                                                                                   attribute.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase))
@@ -120,6 +120,11 @@ namespace Nop.Plugin.Api.Services
 
                 foreach (var mapping in customerAttributeMappings)
                 {
+                    if(!showDeleted && mapping.Customer.Deleted)
+                    {
+                        continue;
+                    }
+
                     if (mapping.Attribute.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase))
                     {
                         customerDto.FirstName = mapping.Attribute.Value;
@@ -133,11 +138,14 @@ namespace Nop.Plugin.Api.Services
             else
             {
                 // This is when we do not have first and last name set.
-                Customer currentCustomer = _customerRepository.TableNoTracking.FirstOrDefault(customer => customer.Id == id && !customer.Deleted);
+                Customer currentCustomer = _customerRepository.TableNoTracking.FirstOrDefault(customer => customer.Id == id);
 
                 if (currentCustomer != null)
                 {
-                    customerDto = currentCustomer.ToDto();
+                    if (showDeleted || !currentCustomer.Deleted)
+                    {
+                        customerDto = currentCustomer.ToDto();
+                    }
                 }
             }
 
@@ -302,7 +310,9 @@ namespace Nop.Plugin.Api.Services
 
         private IQueryable<Customer> GetCustomersQuery(DateTime? createdAtMin = null, DateTime? createdAtMax = null, int sinceId = 0)
         {
-            var query = _customerRepository.TableNoTracking.Where(customer => !customer.Deleted);
+            var query = _customerRepository.TableNoTracking.Where(customer => !customer.Deleted && !customer.IsSystemAccount && customer.Active);
+
+            query = query.Where(customer => !customer.CustomerRoles.Any(cr => (cr.Active) && (cr.SystemName == SystemCustomerRoleNames.Guests)));
 
             if (createdAtMin != null)
             {

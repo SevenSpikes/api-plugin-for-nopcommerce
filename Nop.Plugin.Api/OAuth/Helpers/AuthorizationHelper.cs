@@ -22,7 +22,7 @@ namespace Nop.Plugin.Api.Helpers
             return false;
         }
 
-        private Client GetCurrentClientFromClaims()
+        public Client GetCurrentClientFromClaims()
         {
             // This needs to be here, because otherwise we might get 
             // "Operation cannot be completed, because the DbContext has been disposed" exception.

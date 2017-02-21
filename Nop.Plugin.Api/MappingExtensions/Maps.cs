@@ -8,6 +8,7 @@ using System.Linq;
 using System.Web;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Directory;
+using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.AutoMapper;
 using Nop.Plugin.Api.Domain;
 using Nop.Plugin.Api.DTOs;
@@ -17,6 +18,7 @@ using Nop.Plugin.Api.DTOs.Orders;
 using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
 using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
+using Nop.Plugin.Api.DTOs.Stores;
 using Nop.Plugin.Api.Models;
 
 namespace Nop.Plugin.Api.MappingExtensions
@@ -118,6 +120,8 @@ namespace Nop.Plugin.Api.MappingExtensions
 
             CreateMap<Category, CategoryDto>();
             CreateMap<CategoryDto, Category>();
+
+            CreateMap<Store, StoreDto>();
 
             CreateMap<ProductCategory, ProductCategoryMappingDto>();
 

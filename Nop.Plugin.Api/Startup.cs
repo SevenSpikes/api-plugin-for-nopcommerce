@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using Autofac.Integration.WebApi;
+using Microsoft.AspNet.WebHooks;
 using Microsoft.Owin;
 using Microsoft.Owin.Extensions;
 using Microsoft.Owin.Security.OAuth;
@@ -16,6 +17,8 @@ using Nop.Plugin.Api.Owin.OAuth.Providers;
 using Nop.Plugin.Api.Swagger;
 using Owin;
 using Swashbuckle.Application;
+using System.Net;
+using Nop.Plugin.Api.Helpers;
 
 namespace Nop.Plugin.Api
 {
@@ -336,6 +339,54 @@ namespace Nop.Plugin.Api
                defaults: new { controller = "OrderItems", action = "DeleteAllOrderItemsForOrder" },
                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Delete) });
 
+            config.Routes.MapHttpRoute(
+               name: "getCurrentStore",
+               routeTemplate: "api/stores",
+               defaults: new { controller = "Store", action = "GetCurrentStore" },
+               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+
+            config.Routes.MapHttpRoute(
+               name: "getAllWebHooks",
+               routeTemplate: "api/webhooks/registrations",
+               defaults: new { controller = "WebHookRegistrations", action = "GetAllWebHooks" },
+               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+
+            config.Routes.MapHttpRoute(
+               name: WebHookNames.GetWebhookByIdAction,
+               routeTemplate: "api/webhooks/registrations/{id}",
+               defaults: new { controller = "WebHookRegistrations", action = "GetWebHookById" },
+               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+
+            config.Routes.MapHttpRoute(
+               name: "registerWebHook",
+               routeTemplate: "api/webhooks/registrations",
+               defaults: new { controller = "WebHookRegistrations", action = "RegisterWebHook" },
+               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Post) });
+
+            config.Routes.MapHttpRoute(
+               name: "updateWebHook",
+               routeTemplate: "api/webhooks/registrations/{id}",
+               defaults: new { controller = "WebHookRegistrations", action = "UpdateWebHook" },
+               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Put) });
+
+            config.Routes.MapHttpRoute(
+               name: "deleteWebHook",
+               routeTemplate: "api/webhooks/registrations/{id}",
+               defaults: new { controller = "WebHookRegistrations", action = "DeleteWebHook" },
+               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Delete) });
+
+            config.Routes.MapHttpRoute(
+               name: "deleteAllWebHooks",
+               routeTemplate: "api/webhooks/registrations",
+               defaults: new { controller = "WebHookRegistrations", action = "DeleteAllWebHooks" },
+               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Delete) });
+
+            config.Routes.MapHttpRoute(
+               name: WebHookNames.FiltersGetAction,
+               routeTemplate: "api/webhooks/filters",
+               defaults: new { controller = "WebHookFilters", action = "GetWebHookFilters" },
+               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+
             // The default route templates for the Swagger docs and swagger-ui are "swagger/docs/{apiVersion}" and "swagger/ui/index#/{assetPath}" respectively.
             config
                 .EnableSwagger(c =>
@@ -356,10 +407,31 @@ namespace Nop.Plugin.Api
                     // http://stackoverflow.com/questions/36772032/swagger-5-2-3-supportedsubmitmethods-removed/36780806#36780806
                     c.InjectJavaScript(currentAssembly, string.Format("{0}.Scripts.swaggerPostPutTryItOutButtonsRemoval.js", currentAssemblyName));
                 });
-
+            
             app.UseWebApi(config);
 
             config.DependencyResolver = new AutofacWebApiDependencyResolver(EngineContext.Current.ContainerManager.Container);
+
+            // Configure the asp.net webhooks.
+            ConfigureWebhooks(config);
+        }
+
+        private void ConfigureWebhooks(HttpConfiguration config)
+        {
+            // Check if the connection string in the config and actual connection string are different. If so update the one in the config.
+            IWebConfigMangerHelper webConfigManagerHelper = EngineContext.Current.ContainerManager.Resolve<IWebConfigMangerHelper>();
+            webConfigManagerHelper.AddConnectionString();
+
+            config.InitializeCustomWebHooks();
+            config.InitializeCustomWebHooksSqlStorage();
+
+            // This is required only in development.
+            // It it is required only when you want to send a web hook to an https address with an invalid SSL certificate. (self-signed)
+            // The code marks all certificates as valid.
+            // We may want to extract this as a setting in the future.
+
+            // NOTE: If this code is commented the certificates will be validated.
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
         }
     }
 }
