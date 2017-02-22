@@ -693,7 +693,7 @@ Update an existing customer
 
 
 ### Add shipping address to an existing customer  
-POST /api/customers/97  
+PUT /api/customers/97  
 ```json
 {
   "customer": {
@@ -788,7 +788,7 @@ POST /api/customers/97
 
 
 ### Update details for a customer  
-POST /api/customers/97  
+PUT /api/customers/97  
 ```json
 {
   "customer": {
