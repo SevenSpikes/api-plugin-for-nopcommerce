@@ -155,23 +155,5 @@ namespace Nop.Plugin.Api.Controllers
                 }
             }
         }
-
-        protected ImageDto PrepareImageDto(Picture picture)
-        {
-            ImageDto image = null;
-
-            if (picture != null)
-            {
-                // We don't use the image from the passed dto directly 
-                // because the picture may be passed with src and the result should only include the base64 format.
-                image = new ImageDto()
-                {
-                    Attachment = Convert.ToBase64String(picture.PictureBinary),
-                    Src = _pictureService.GetPictureUrl(picture)
-                };
-            }
-
-            return image;
-        }
     }
 }
