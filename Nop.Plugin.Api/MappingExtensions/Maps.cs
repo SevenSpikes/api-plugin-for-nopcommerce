@@ -93,6 +93,12 @@ namespace Nop.Plugin.Api.MappingExtensions
                 .IgnoreAllNonExisting();
         }
 
+        public static void CreateCustomerDTOToOrderCustomerDTOMap()
+        {
+            AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<CustomerDto, OrderCustomerDto>()
+                .IgnoreAllNonExisting();
+        }
+
         public static void CreateShoppingCartItemMap()
         {
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<ShoppingCartItem, ShoppingCartItemDto>()
@@ -131,6 +137,7 @@ namespace Nop.Plugin.Api.MappingExtensions
 
             CreateCustomerToDTOMap();
             CreateCustomerToOrderCustomerDTOMap();
+            CreateCustomerDTOToOrderCustomerDTOMap();
             CreateCustomerForShoppingCartItemMapFromCustomer();
 
             CreateMap<OrderItem, OrderItemDto>();
