@@ -76,5 +76,11 @@ namespace Nop.Plugin.Api.DTOs.Stores
         /// </summary>
         [JsonProperty("company_vat")]
         public string CompanyVat { get; set; }
+
+        /// <summary>
+        /// Get or set the currency format
+        /// </summary>
+        [JsonProperty("primary_currency_display_locale")]
+        public string PrimaryCurrencyDisplayLocale { get; set; }
     }
 }
