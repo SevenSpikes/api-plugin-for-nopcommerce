@@ -1538,6 +1538,218 @@ POST /api/products/49
 </p></details>
 
 
+### Update a product, reordering product attributes 
+PUT /api/products/50  
+```json
+{
+  "product": {
+    "attributes": [
+        {
+          "id": 45,          
+          "display_order": 1,          
+        },
+        {      
+          "id": 46,
+          "display_order": 3,          
+        },
+        {
+          "id": 47,          
+          "display_order": 2,
+        }
+      ]
+  }
+}
+```
+
+<details><summary>Response</summary><p>
+```json
+         HTTP/1.1 200 OK  
+         
+{
+  "products": [
+    {
+      "id": "50",
+      "visible_individually": true,
+      "name": "Skate Banana",
+       "attributes": [
+        {
+          "id": 45,
+          "product_attribute_id":8,
+          "product_attribute_name": "Size",
+          "text_prompt": null,
+          "is_required": true,
+          "attribute_control_type_id": 1,
+          "display_order": 1,
+          "default_value": null,
+          "attribute_control_type_name": "DropdownList",
+          "attribute_values": [
+            {
+              "id": 55,
+              "type_id": 0,
+              "associated_product_id": 0,
+              "name": "28",
+              "color_squares_rgb": null,
+              "image_squares_image": null,
+              "price_adjustment": 0.0000,
+              "weight_adjustment": 0.0000,
+              "cost": 0.0000,
+              "quantity": 0,
+              "is_pre_selected": false,
+              "display_order": 1,
+              "product_image_id": null,
+              "type": "Simple"
+            },
+            {   
+              "id": 56,
+              "type_id": 0,
+              "associated_product_id": 0,
+              "name": "29",
+              "color_squares_rgb": null,
+              "image_squares_image": null,
+              "price_adjustment": 0.0000,
+              "weight_adjustment": 0.0000,
+              "cost": 0.0000,
+              "quantity": 5,
+              "is_pre_selected": false,
+              "display_order": 2,
+              "product_image_id": null,
+              "type": "Simple"
+            }
+          ]
+        },
+        {      
+          "id": 46,
+          "product_attribute_id": 3,
+          "product_attribute_name": "Custom Text",
+          "text_prompt": null,
+          "is_required": true,
+          "attribute_control_type_id": 4,
+          "display_order": 3,
+          "default_value": null,
+          "attribute_control_type_name": "Textbox",
+          "attribute_values":[]
+        },
+        {
+          "id": 47,
+          "product_attribute_id": 1,
+          "product_attribute_name": "Color",
+          "text_prompt": null,
+          "is_required": true,
+          "attribute_control_type_id": 1,
+          "display_order": 2,
+          "default_value": null,
+          "attribute_control_type_name": "DropdownList",
+          "attribute_values": [
+            {
+             "id": 57,
+             "type_id": 0,
+              "associated_product_id": 0,
+              "name": "Red",
+              "color_squares_rgb": null,
+              "image_squares_image": null,
+              "price_adjustment": 0.0000,
+              "weight_adjustment": 0.0000,
+              "cost": 0.0000,
+              "quantity": 0,
+              "is_pre_selected": false,
+              "display_order": 1,
+              "product_image_id": null,
+              "type": "Simple"
+            }
+          ]
+        }
+      ],
+      "short_description": "",
+      "full_description": "",
+      "show_on_home_page": false,
+      "meta_keywords": null,
+      "meta_description": null,
+      "meta_title": null,
+      "allow_customer_reviews": true,
+      "approved_rating_sum": 0,
+      "not_approved_rating_sum": 0,
+      "approved_total_reviews": 0,
+      "not_approved_total_reviews": 0,
+      "sku": null,
+      "manufacturer_part_number": null,
+      "gtin": null,
+      "is_gift_card": false,
+      "require_other_products": false,
+      "automatically_add_required_products": false,
+      "is_download": false,
+      "unlimited_downloads": true,
+      "max_number_of_downloads": 10,
+      "download_expiration_days": null,
+      "has_sample_download": false,
+      "has_user_agreement": false,
+      "is_recurring": false,
+      "recurring_cycle_length": 100,
+      "recurring_total_cycles": 10,
+      "is_rental": false,
+      "rental_price_length": 1,
+      "is_ship_enabled": true,
+      "is_free_shipping": false,
+      "ship_separately": false,
+      "additional_shipping_charge": 0.0,
+      "is_tax_exempt": false,
+      "is_telecommunications_or_broadcasting_or_electronic_services": false,
+      "use_multiple_warehouses": false,
+      "stock_quantity": 10000,
+      "display_stock_availability": false,
+      "display_stock_quantity": false,
+      "min_stock_quantity": 0,
+      "notify_admin_for_quantity_below": 1,
+      "allow_back_in_stock_subscriptions": false,
+      "order_minimum_quantity": 1,
+      "order_maximum_quantity": 10000,
+      "allowed_quantities": null,
+      "allow_adding_only_existing_attribute_combinations": false,
+      "disable_buy_button": false,
+      "disable_wishlist_button": false,
+      "available_for_pre_order": false,
+      "pre_order_availability_start_date_time_utc": null,
+      "call_for_price": false,
+      "price": 0.0,
+      "old_price": 0.0,
+      "product_cost": 0.0,
+      "special_price": null,
+      "special_price_start_date_time_utc": null,
+      "special_price_end_date_time_utc": null,
+      "customer_enters_price": false,
+      "minimum_customer_entered_price": 0.0,
+      "maximum_customer_entered_price": 1000.0,
+      "baseprice_enabled": false,
+      "baseprice_amount": 0.0,
+      "baseprice_base_amount": 0.0,
+      "has_tier_prices": false,
+      "has_discounts_applied": false,
+      "weight": 1.00000000,
+      "length": 0.0,
+      "width": 0.0,
+      "height": 0.0,
+      "available_start_date_time_utc": null,
+      "available_end_date_time_utc": null,
+      "display_order": 0,
+      "published": true,
+      "deleted": false,
+      "created_on_utc": "2016-10-15T17:00:31.5466951Z",
+      "updated_on_utc": "2016-10-15T17:00:31.5466951Z",
+      "product_type": "0",
+      "role_ids": [],
+      "discount_ids": [],
+      "store_ids": [],
+      "manufacturer_ids": [],
+      "images": [],
+      "tags": [],
+      "vendor_id": 0,
+      "se_name": "skate-banana-4"
+    }
+  ]
+}
+```
+</p></details>
+
+
 
 ## DELETE /api/products/{id}  
 Mark a product as Deleted.
