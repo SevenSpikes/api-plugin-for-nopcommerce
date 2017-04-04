@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.DTOs.Products;
 using Nop.Services.Catalog;
@@ -11,8 +9,12 @@ using Nop.Services.Security;
 using Nop.Services.Stores;
 using Nop.Plugin.Api.DTOs.Images;
 using Nop.Core.Domain.Media;
+using Nop.Core.Domain.Orders;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.DTOs.Categories;
+using Nop.Plugin.Api.DTOs.Customers;
+using Nop.Plugin.Api.DTOs.Orders;
+using Nop.Plugin.Api.Services;
 using Nop.Services.Media;
 
 namespace Nop.Plugin.Api.Helpers
@@ -24,18 +26,21 @@ namespace Nop.Plugin.Api.Helpers
         private IStoreMappingService _storeMappingService;
         private IPictureService _pictureService;
         private IProductAttributeService _productAttributeService;
+        private ICustomerApiService _customerApiService;
 
         public DTOHelper(IProductService productService,
             IAclService aclService,
             IStoreMappingService storeMappingService,
             IPictureService pictureService,
-            IProductAttributeService productAttributeService)
+            IProductAttributeService productAttributeService,
+            ICustomerApiService customerApiService)
         {
             _productService = productService;
             _aclService = aclService;
             _storeMappingService = storeMappingService;
             _pictureService = pictureService;
             _productAttributeService = productAttributeService;
+            _customerApiService = customerApiService;
         }
 
         public ProductDto PrepareProductDTO(Product product)
@@ -78,6 +83,20 @@ namespace Nop.Plugin.Api.Helpers
             categoryDto.StoreIds = _storeMappingService.GetStoreMappings(category).Select(mapping => mapping.StoreId).ToList();
 
             return categoryDto;
+        }
+
+        public OrderDto PrepareOrderDTO(Order order)
+        {
+            OrderDto orderDto = order.ToDto();
+
+            CustomerDto customerDto = _customerApiService.GetCustomerById(order.Customer.Id);
+
+            if (customerDto != null)
+            {
+                orderDto.Customer = customerDto.ToOrderCustomerDto();
+            }
+
+            return orderDto;
         }
 
         private void PrepareProductImages(IEnumerable<ProductPicture> productPictures, ProductDto productDto)
@@ -189,6 +208,5 @@ namespace Nop.Plugin.Api.Helpers
 
             return productAttributeValueDto;
         }
-
     }
 }

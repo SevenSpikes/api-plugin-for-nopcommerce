@@ -1,7 +1,10 @@
-﻿using System.Net;
+﻿using System;
+using System.Globalization;
+using System.Net;
 using System.Web.Http;
 using System.Web.Http.Description;
 using Nop.Core;
+using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.DTOs.Stores;
@@ -9,12 +12,14 @@ using Nop.Plugin.Api.JSON.ActionResults;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.Serializers;
 using Nop.Services.Customers;
+using Nop.Services.Directory;
 using Nop.Services.Discounts;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Stores;
+using static System.Decimal;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -22,6 +27,8 @@ namespace Nop.Plugin.Api.Controllers
     public class StoreController : BaseApiController
     {
         private IStoreContext _storeContext;
+        private readonly CurrencySettings _currencySettings;
+        private readonly ICurrencyService _currencyService;
 
         public StoreController(IJsonFieldsSerializer jsonFieldsSerializer,
             IAclService aclService,
@@ -32,7 +39,9 @@ namespace Nop.Plugin.Api.Controllers
             ICustomerActivityService customerActivityService,
             ILocalizationService localizationService,
             IPictureService pictureService,
-            IStoreContext storeContext)
+            IStoreContext storeContext,
+            CurrencySettings currencySettings,
+            ICurrencyService currencyService)
             : base(jsonFieldsSerializer,
                   aclService,
                   customerService,
@@ -44,6 +53,8 @@ namespace Nop.Plugin.Api.Controllers
                   pictureService)
         {
             _storeContext = storeContext;
+            _currencySettings = currencySettings;
+            _currencyService = currencyService;
         }
 
         /// <summary>
@@ -66,6 +77,13 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             StoreDto storeDto = store.ToDto();
+
+            Currency primaryCurrency = _currencyService.GetCurrencyById(_currencySettings.PrimaryStoreCurrencyId);
+
+            if (!String.IsNullOrEmpty(primaryCurrency.DisplayLocale))
+            {
+                storeDto.PrimaryCurrencyDisplayLocale = primaryCurrency.DisplayLocale;
+            }
 
             var storesRootObject = new StoresRootObject();
 

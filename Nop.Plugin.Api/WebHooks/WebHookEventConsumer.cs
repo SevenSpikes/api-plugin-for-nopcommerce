@@ -116,14 +116,14 @@ namespace Nop.Plugin.Api.WebHooks
 
         public void HandleEvent(EntityInserted<Order> eventMessage)
         {
-            OrderDto orderDto = eventMessage.Entity.ToDto();
+            OrderDto orderDto = _dtoHelper.PrepareOrderDTO(eventMessage.Entity);
 
             _webHookManager.NotifyAllAsync(WebHookNames.OrderCreated, new { Item = orderDto });
         }
 
         public void HandleEvent(EntityUpdated<Order> eventMessage)
         {
-            OrderDto orderDto = eventMessage.Entity.ToDto();
+            OrderDto orderDto = _dtoHelper.PrepareOrderDTO(eventMessage.Entity);
 
             string webhookEvent = WebHookNames.OrderUpdated;
 

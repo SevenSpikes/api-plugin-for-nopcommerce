@@ -1,12 +1,8 @@
-﻿using System.Web.Routing;
-using Nop.Core;
-using Nop.Core.Domain.Localization;
+﻿using Nop.Core;
 using Nop.Core.Infrastructure;
 using Nop.Core.Plugins;
 using Nop.Plugin.Api.Data;
 using Nop.Plugin.Api.Helpers;
-using Nop.Services.Common;
-using Nop.Services.Configuration;
 using Nop.Web.Framework.Menu;
 using Nop.Services.Localization;
 

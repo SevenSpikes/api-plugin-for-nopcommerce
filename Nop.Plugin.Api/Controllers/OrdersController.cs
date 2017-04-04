@@ -19,6 +19,7 @@ using Nop.Plugin.Api.DTOs;
 using Nop.Plugin.Api.DTOs.OrderItems;
 using Nop.Plugin.Api.DTOs.Orders;
 using Nop.Plugin.Api.Factories;
+using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.JSON.ActionResults;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.ModelBinders;
@@ -51,6 +52,7 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IGenericAttributeService _genericAttributeService;
         private readonly IShippingService _shippingService;
+        private readonly IDTOHelper _dtoHelper;
         private readonly IStoreContext _storeContext;
         private readonly IFactory<Order> _factory;
 
@@ -88,7 +90,8 @@ namespace Nop.Plugin.Api.Controllers
             IGenericAttributeService genericAttributeService,
             IStoreContext storeContext,
             IShippingService shippingService,
-            IPictureService pictureService)
+            IPictureService pictureService,
+            IDTOHelper dtoHelper)
             : base(jsonFieldsSerializer, aclService, customerService, storeMappingService,
                  storeService, discountService, customerActivityService, localizationService,pictureService)
         {
@@ -100,6 +103,7 @@ namespace Nop.Plugin.Api.Controllers
             _genericAttributeService = genericAttributeService;
             _storeContext = storeContext;
             _shippingService = shippingService;
+            _dtoHelper = dtoHelper;
             _productService = productService;
         }
 
@@ -124,10 +128,13 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid limit parameter");
             }
 
-            IList<OrderDto> ordersAsDtos = _orderApiService.GetOrders(parameters.Ids, parameters.CreatedAtMin, parameters.CreatedAtMax,
-                                                                      parameters.Limit, parameters.Page, parameters.SinceId,
-                                                                      parameters.Status, parameters.PaymentStatus, parameters.ShippingStatus,
-                                                                      parameters.CustomerId).Select(x => x.ToDto()).ToList();
+            IList<Order> orders = _orderApiService.GetOrders(parameters.Ids, parameters.CreatedAtMin,
+                parameters.CreatedAtMax,
+                parameters.Limit, parameters.Page, parameters.SinceId,
+                parameters.Status, parameters.PaymentStatus, parameters.ShippingStatus,
+                parameters.CustomerId);
+
+            IList<OrderDto> ordersAsDtos = orders.Select(x => _dtoHelper.PrepareOrderDTO(x)).ToList();
 
             var ordersRootObject = new OrdersRootObject()
             {
@@ -187,7 +194,7 @@ namespace Nop.Plugin.Api.Controllers
 
             var ordersRootObject = new OrdersRootObject();
 
-            OrderDto orderDto = order.ToDto();
+            OrderDto orderDto = _dtoHelper.PrepareOrderDTO(order);
             ordersRootObject.Orders.Add(orderDto);
 
             var json = _jsonFieldsSerializer.Serialize(ordersRootObject, fields);
@@ -206,7 +213,7 @@ namespace Nop.Plugin.Api.Controllers
         [GetRequestsErrorInterceptorActionFilter]
         public IHttpActionResult GetOrdersByCustomerId(int customer_id)
         {
-            IList<OrderDto> ordersForCustomer = _orderApiService.GetOrdersByCustomerId(customer_id).Select(x => x.ToDto()).ToList();
+            IList<OrderDto> ordersForCustomer = _orderApiService.GetOrdersByCustomerId(customer_id).Select(x => _dtoHelper.PrepareOrderDTO(x)).ToList();
 
             var ordersRootObject = new OrdersRootObject()
             {
@@ -316,7 +323,7 @@ namespace Nop.Plugin.Api.Controllers
 
             var ordersRootObject = new OrdersRootObject();
 
-            OrderDto placedOrderDto = placeOrderResult.PlacedOrder.ToDto();
+            OrderDto placedOrderDto = _dtoHelper.PrepareOrderDTO(placeOrderResult.PlacedOrder);
 
             ordersRootObject.Orders.Add(placedOrderDto);
 
@@ -422,7 +429,7 @@ namespace Nop.Plugin.Api.Controllers
 
             var ordersRootObject = new OrdersRootObject();
 
-            OrderDto placedOrderDto = currentOrder.ToDto();
+            OrderDto placedOrderDto = _dtoHelper.PrepareOrderDTO(currentOrder);
             placedOrderDto.ShippingMethod = orderDelta.Dto.ShippingMethod;
 
             ordersRootObject.Orders.Add(placedOrderDto);
