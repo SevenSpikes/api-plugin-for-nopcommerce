@@ -2,7 +2,7 @@
 FriendlyName: Api
 SystemName: Nop.Plugin.Api
 Version: 1.0
-SupportedVersions: 3.80
+SupportedVersions: 3.90
 Author: nopCommerce/nop-templates team
 DisplayOrder: 1
 FileName: Nop.Plugin.Api.dll
