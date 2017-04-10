@@ -4,13 +4,13 @@ using Nop.Core.Data;
 using Nop.Core.Domain.Customers;
 using Nop.Plugin.Api.DTOs.Customers;
 using System.Linq;
+using System.Linq.Dynamic;
 using System.Text.RegularExpressions;
 using Nop.Core.Domain.Common;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.DataStructures;
 using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.MappingExtensions;
-using Nop.Web.Framework.Kendoui;
 
 namespace Nop.Plugin.Api.Services
 {

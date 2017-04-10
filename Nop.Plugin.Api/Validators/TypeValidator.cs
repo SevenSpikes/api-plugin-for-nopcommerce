@@ -55,7 +55,7 @@ namespace Nop.Plugin.Api.Validators
                     else if (pair.Value != null && pair.Value is ICollection<object> && 
                         propertyType.GetInterface("IEnumerable") != null)
                     {
-                        var elementsType = propertyType.GetGenericElementType();
+                        var elementsType = propertyType.GetGenericTypeDefinition();
 
                         ICollection<object> propertyValueAsCollection = pair.Value as ICollection<object>;
 

@@ -10,7 +10,7 @@ namespace Nop.Plugin.Api.Tests
     [SetUpFixture]
     public class SetUp
     {
-        [SetUp]
+        [OneTimeSetUp]
         public void RunBeforeAnyTests()
         {
             // We need to create all the mappings before any of the test are run

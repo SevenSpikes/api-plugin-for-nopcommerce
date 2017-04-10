@@ -6,6 +6,7 @@ using AutoMock;
 using Nop.Core.Domain.Orders;
 using Nop.Plugin.Api.Controllers;
 using Nop.Plugin.Api.DTOs.Orders;
+using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.Serializers;
 using Nop.Plugin.Api.Services;
 using NUnit.Framework;
@@ -79,12 +80,14 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
         public void WhenIdEqualsToExistingOrderId_ShouldSerializeThatOrder()
         {
             int existingOrderId = 5;
-            var existingOrderDto = new Order() { Id = existingOrderId };
+            var existingOrder = new Order() { Id = existingOrderId };
+            var existingOrderDto = new OrderDto() { Id = existingOrderId.ToString() };
 
             // Arange
             var autoMocker = new RhinoAutoMocker<OrdersController>();
 
-            autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrderById(existingOrderId)).Return(existingOrderDto);
+            autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrderById(existingOrderId)).Return(existingOrder);
+            autoMocker.Get<IDTOHelper>().Stub(x => x.PrepareOrderDTO(existingOrder)).Return(existingOrderDto);
 
             // Act
             autoMocker.ClassUnderTest.GetOrderById(existingOrderId);
@@ -92,7 +95,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
             // Assert
             autoMocker.Get<IJsonFieldsSerializer>().AssertWasCalled(
                 x => x.Serialize(
-                    Arg<OrdersRootObject>.Matches(objectToSerialize => objectToSerialize.Orders[0].Id == existingOrderDto.Id.ToString()),
+                    Arg<OrdersRootObject>.Matches(objectToSerialize => objectToSerialize.Orders[0].Id == existingOrderId.ToString()),
                 Arg<string>.Matches(fields => fields == "")));
         }
     }

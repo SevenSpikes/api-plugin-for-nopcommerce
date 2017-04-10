@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web.Http;
@@ -470,28 +471,35 @@ namespace Nop.Plugin.Api.Controllers
         private void AddPassword(string newPassword, Customer customer)
         {
             // TODO: call this method before inserting the customer.
+            var customerPassword = new CustomerPassword
+            {
+                Customer = customer,
+                PasswordFormat = CustomerSettings.DefaultPasswordFormat,
+                CreatedOnUtc = DateTime.UtcNow
+            };
+
             switch (CustomerSettings.DefaultPasswordFormat)
             {
                 case PasswordFormat.Clear:
                     {
-                        customer.Password = newPassword;
+                        customerPassword.Password = newPassword;
                     }
                     break;
                 case PasswordFormat.Encrypted:
                     {
-                        customer.Password = _encryptionService.EncryptText(newPassword);
+                        customerPassword.Password = _encryptionService.EncryptText(newPassword);
                     }
                     break;
                 case PasswordFormat.Hashed:
                     {
                         string saltKey = _encryptionService.CreateSaltKey(5);
-                        customer.PasswordSalt = saltKey;
-                        customer.Password = _encryptionService.CreatePasswordHash(newPassword, saltKey, CustomerSettings.HashedPasswordFormat);
+                        customerPassword.PasswordSalt = saltKey;
+                        customerPassword.Password = _encryptionService.CreatePasswordHash(newPassword, saltKey, CustomerSettings.HashedPasswordFormat);
                     }
                     break;
             }
-            
-            customer.PasswordFormat = CustomerSettings.DefaultPasswordFormat;
+
+            _customerService.InsertCustomerPassword(customerPassword);
 
             // TODO: remove this.
             _customerService.UpdateCustomer(customer);
