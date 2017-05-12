@@ -37,14 +37,14 @@ namespace Nop.Plugin.Api.Helpers
         {
             TypeConverter converter = TypeDescriptor.GetConverter(objectProperty.PropertyType);
 
-            string propertyValueAsString = propertyValue.ToString();
+            string propertyValueAsString = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", propertyValue);
 
-            if (converter.IsValid(propertyValueAsString))
-            {
-                var convertedValue = converter.ConvertFrom(propertyValueAsString);
-
-                objectProperty.SetValue(objectToBeUpdated, convertedValue);
-            }
+			if (converter.IsValid(propertyValueAsString))
+			{
+				var convertedValue = converter.ConvertFromInvariantString(propertyValueAsString);
+				
+				objectProperty.SetValue(objectToBeUpdated, convertedValue);
+			}
         }
 
         private void SetValue(object objectToBeUpdated, KeyValuePair<string, object> propertyNameValuePair, Dictionary<object, object> objectPropertyNameValuePairs, bool handleComplexTypeCollections)
