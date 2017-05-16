@@ -14,7 +14,7 @@ namespace Nop.Plugin.Api.Validators
             {
                 SetCustomerIdRule();
 
-                SetProductIdRule();
+                SetProductRule();
 
                 SetQuantityRule();
                 
@@ -37,7 +37,7 @@ namespace Nop.Plugin.Api.Validators
 
                 if (passedPropertyValuePaires.ContainsKey("product_id"))
                 {
-                    SetProductIdRule();
+                    SetProductRule();
                 }
 
                 if (passedPropertyValuePaires.ContainsKey("quantity"))
@@ -82,11 +82,11 @@ namespace Nop.Plugin.Api.Validators
                    .WithMessage("Please, set customer id");
         }
 
-        private void SetProductIdRule()
+        private void SetProductRule()
         {
             RuleFor(x => x.ProductId)
-                   .NotNull()
-                   .WithMessage("Please, set product id");
+                   .NotNull().When(a => string.IsNullOrEmpty(a.ProductSku))
+                   .WithMessage("Please, set product id or sku");
         }
 
         private void SetQuantityRule()

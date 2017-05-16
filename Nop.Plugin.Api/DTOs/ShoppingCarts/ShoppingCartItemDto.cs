@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using FluentValidation.Attributes;
 using Newtonsoft.Json;
 using Nop.Core.Domain.Orders;
@@ -83,6 +84,10 @@ namespace Nop.Plugin.Api.DTOs.ShoppingCarts
 
         [JsonProperty("product_id")]
         public int? ProductId { get; set; }
+
+
+        [JsonProperty("product_sku")]
+        public string ProductSku { get; set; }
 
         /// <summary>
         /// Gets or sets the product

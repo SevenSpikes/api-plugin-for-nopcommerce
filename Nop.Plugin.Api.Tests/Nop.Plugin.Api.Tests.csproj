@@ -116,6 +116,8 @@
     <Compile Include="ConvertersTests\ApiTypeConverter\ApiTypeConverterTests_ToIntNullable.cs" />
     <Compile Include="ConvertersTests\ApiTypeConverter\ApiTypeConverterTests_ToInt.cs" />
     <Compile Include="ConvertersTests\ApiTypeConverter\ApiTypeConverterTests_ToStatus.cs" />
+    <Compile Include="FactoryTests\ProductFactoryTests\WhenTestingCreateForWithProductId.cs" />
+    <Compile Include="FactoryTests\ProductFactoryTests\WhenTestingCreateForWithProductSku.cs" />
     <Compile Include="ModelBinderTests\DummyObjects\DummyModel.cs" />
     <Compile Include="ModelBinderTests\JsonModelBinderTests_BindModel.cs" />
     <Compile Include="ModelBinderTests\ParametersModelBinderTests_BindModel.cs" />
@@ -200,7 +202,7 @@
       <Project>{210541AD-F659-47DA-8763-16F36C5CD2F4}</Project>
       <Name>Nop.Services</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Nop.Plugin.Api\Nop.Plugin.Api.csproj">
+    <ProjectReference Include="..\..\Plugins\Nop.Plugin.Api\Nop.Plugin.Api.csproj">
       <Project>{6a13d01b-5b1a-4932-9a9d-4117ac27011f}</Project>
       <Name>Nop.Plugin.Api</Name>
     </ProjectReference>
