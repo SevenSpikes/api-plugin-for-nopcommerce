@@ -1,19 +1,24 @@
 ﻿using System;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Directory;
+using Nop.Plugin.Api.DTOs.ShoppingCarts;
+using Nop.Services.Catalog;
 using Nop.Services.Directory;
 
 namespace Nop.Plugin.Api.Factories
 {
-    public class ProductFactory : IFactory<Product>
+    public class ProductFactory : IFactory<Product>, IShoppingCartFactory<Product>
     {
         private readonly IMeasureService _measureService;
-        private readonly MeasureSettings _measureSettings;
+        private readonly IMeasureSettings _measureSettings;
 
-        public ProductFactory(IMeasureService measureService, MeasureSettings measureSettings)
+        private readonly IProductService _productService;
+
+        public ProductFactory(IMeasureService measureService, IMeasureSettings measureSettings, IProductService productService)
         {
             _measureService = measureService;
             _measureSettings = measureSettings;
+            _productService = productService;
         }
 
         public Product Initialize()
@@ -44,6 +49,22 @@ namespace Nop.Plugin.Api.Factories
             defaultProduct.VisibleIndividually = true;
            
             return defaultProduct;
+        }
+
+        public Product CreateFor(ShoppingCartItemDto model)
+        {
+            Product product;
+            if (model.ProductId.HasValue)
+            {
+               product= _productService.GetProductById(model.ProductId.Value);
+               model.ProductSku = product.Sku;
+            }
+            else
+            {
+                product = _productService.GetProductBySku(model.ProductSku);
+                model.ProductId = product.Id;
+            }
+            return product;
         }
     }
 }

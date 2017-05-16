@@ -37,7 +37,8 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IShoppingCartItemApiService _shoppingCartItemApiService;
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IProductService _productService;
-        private readonly IFactory<ShoppingCartItem> _factory; 
+        private readonly IFactory<ShoppingCartItem> _factory;
+        private readonly IShoppingCartFactory<Product> _productShoppingCartFactory;
 
         public ShoppingCartItemsController(IShoppingCartItemApiService shoppingCartItemApiService, 
             IJsonFieldsSerializer jsonFieldsSerializer, 
@@ -51,7 +52,7 @@ namespace Nop.Plugin.Api.Controllers
             IShoppingCartService shoppingCartService, 
             IProductService productService, 
             IFactory<ShoppingCartItem> factory,
-            IPictureService pictureService)
+            IPictureService pictureService, IShoppingCartFactory<Product> productShoppingCartFactory)
             :base(jsonFieldsSerializer, 
                  aclService, 
                  customerService, 
@@ -66,6 +67,7 @@ namespace Nop.Plugin.Api.Controllers
             _shoppingCartService = shoppingCartService;
             _productService = productService;
             _factory = factory;
+            _productShoppingCartFactory = productShoppingCartFactory;
         }
 
         /// <summary>
@@ -175,7 +177,7 @@ namespace Nop.Plugin.Api.Controllers
             
             // We know that the product id and customer id will be provided because they are required by the validator.
             // TODO: validate
-            Product product = _productService.GetProductById(shoppingCartItemDelta.Dto.ProductId.Value);
+            Product product = _productShoppingCartFactory.CreateFor(shoppingCartItemDelta.Dto);
 
             if (product == null)
             {
