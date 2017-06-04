@@ -17,5 +17,8 @@ namespace Nop.Plugin.Api.Helpers
 
             return jsonObject;
         }
+
+        public static Type GetGenericElementType(Type type)
+            => type.HasElementType ? type.GetElementType() : type.GetTypeInfo().GenericTypeArguments[0];
     }
 }

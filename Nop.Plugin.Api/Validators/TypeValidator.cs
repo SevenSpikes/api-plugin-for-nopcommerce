@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Reflection;
 using AutoMapper.Configuration;
 using Newtonsoft.Json;
+using Nop.Plugin.Api.Helpers;
 
 namespace Nop.Plugin.Api.Validators
 {
@@ -14,16 +15,16 @@ namespace Nop.Plugin.Api.Validators
 
         public TypeValidator()
         {
-            InvalidProperties = new List<string>();    
+            InvalidProperties = new List<string>();
         }
 
         public bool IsValid(Dictionary<string, object> propertyValuePaires)
         {
             bool isValid = true;
-            
+
             var jsonPropertyNameTypePair = new Dictionary<string, Type>();
 
-            var objectProperties = typeof (T).GetProperties();
+            var objectProperties = typeof(T).GetProperties();
 
             foreach (var property in objectProperties)
             {
@@ -37,7 +38,7 @@ namespace Nop.Plugin.Api.Validators
                     }
                 }
             }
-            
+
             foreach (var pair in propertyValuePaires)
             {
                 bool isCurrentPropertyValid = true;
@@ -49,13 +50,13 @@ namespace Nop.Plugin.Api.Validators
                     // handle nested properties
                     if (pair.Value is Dictionary<string, object>)
                     {
-                        isCurrentPropertyValid = ValidateNestedProperty(propertyType, (Dictionary<string, object>) pair.Value);
+                        isCurrentPropertyValid = ValidateNestedProperty(propertyType, (Dictionary<string, object>)pair.Value);
                     }
                     // This case hadles collections.
-                    else if (pair.Value != null && pair.Value is ICollection<object> && 
+                    else if (pair.Value != null && pair.Value is ICollection<object> &&
                         propertyType.GetInterface("IEnumerable") != null)
                     {
-                        var elementsType = propertyType.GetGenericTypeDefinition();
+                        var elementsType = ReflectionHelper.GetGenericElementType(propertyType);
 
                         ICollection<object> propertyValueAsCollection = pair.Value as ICollection<object>;
 
@@ -64,7 +65,7 @@ namespace Nop.Plugin.Api.Validators
                         {
                             isCurrentPropertyValid = IsCurrentPropertyValid(elementsType, item);
 
-                            if(!isCurrentPropertyValid) break;
+                            if (!isCurrentPropertyValid) break;
                         }
                     }
                     else
@@ -87,12 +88,12 @@ namespace Nop.Plugin.Api.Validators
         {
             bool isCurrentPropertyValid = true;
 
-            Type constructedType = typeof (TypeValidator<>).MakeGenericType(propertyType);
+            Type constructedType = typeof(TypeValidator<>).MakeGenericType(propertyType);
             var typeValidatorForNestedProperty = Activator.CreateInstance(constructedType);
 
             var isValidMethod = constructedType.GetMethod("IsValid");
 
-            isCurrentPropertyValid = (bool) isValidMethod.Invoke(typeValidatorForNestedProperty, new object[] { value });
+            isCurrentPropertyValid = (bool)isValidMethod.Invoke(typeValidatorForNestedProperty, new object[] { value });
 
             return isCurrentPropertyValid;
         }
@@ -119,7 +120,7 @@ namespace Nop.Plugin.Api.Validators
             {
                 if (value != null)
                 {
-                    isCurrentPropertyValid = ValidateNestedProperty(type, (Dictionary<string, object>) value);
+                    isCurrentPropertyValid = ValidateNestedProperty(type, (Dictionary<string, object>)value);
                 }
             }
 
