@@ -7,6 +7,7 @@ using Nop.Plugin.Api.DTOs.Errors;
 using Nop.Plugin.Api.JSON.ActionResults;
 using Nop.Plugin.Api.Serializers;
 using Nop.Services.Logging;
+using System.Web.Http;
 
 namespace Nop.Plugin.Api.Attributes
 {
@@ -14,8 +15,22 @@ namespace Nop.Plugin.Api.Attributes
     {
         public override void OnException(HttpActionExecutedContext context)
         {
-            if (context.Exception != null)
+            if (context != null && context.Exception != null)
             {
+                string responseErrorMessage = string.Empty;
+
+                var responseException = context.Exception as HttpResponseException;
+                if (responseException != null)
+                {
+                    responseErrorMessage = responseException.Response.ToString();
+                } else
+                {
+                    responseErrorMessage = context.Exception.Message;
+                }
+
+                var logger = EngineContext.Current.Resolve<ILogger>();
+                logger.Error(responseErrorMessage, context.Exception);
+
                 var jsonFieldsSerializer = EngineContext.Current.Resolve<IJsonFieldsSerializer>();
 
                 var errors = new Dictionary<string, List<string>>()
@@ -25,10 +40,6 @@ namespace Nop.Plugin.Api.Attributes
                         new List<string>() {"Please contact the store owner!"}
                     }
                 };
-
-                var logger = EngineContext.Current.Resolve<ILogger>();
-                
-                logger.Error(context.Exception.Message, context.Exception);
 
                 var errorsRootObject = new ErrorsRootObject()
                 {
