@@ -21,7 +21,7 @@ namespace Nop.Plugin.Api.Attributes
 
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
-            if (actionExecutedContext.Response.StatusCode != HttpStatusCode.OK)
+            if (actionExecutedContext.Response != null && actionExecutedContext.Response.StatusCode != HttpStatusCode.OK)
             {
                 var content = actionExecutedContext.Response.Content.ReadAsStringAsync().Result;
 
