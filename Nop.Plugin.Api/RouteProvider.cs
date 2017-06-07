@@ -1,6 +1,8 @@
 ﻿using System.Web.Mvc;
 using System.Web.Routing;
 using Nop.Web.Framework.Mvc.Routes;
+using Nop.Plugin.Api.Helpers;
+using Nop.Core.Infrastructure;
 
 namespace Nop.Plugin.Api
 {
@@ -37,6 +39,15 @@ namespace Nop.Plugin.Api
                  new { controller = "ManageClientsAdmin", action = "Delete" , id = @"\d+" },
                  new[] { "Nop.Plugin.Api.Controllers.Admin" }
             );
+
+
+            IWebConfigMangerHelper webConfigManagerHelper = EngineContext.Current.ContainerManager.Resolve<IWebConfigMangerHelper>();
+
+            // make sure the connection string is added in the Web.config
+            webConfigManagerHelper.AddConnectionString();
+
+            // make sure the OwinAutomaticAppStartup is enabled in the Web.config
+            webConfigManagerHelper.AddConfiguration();
         }
 
         public int Priority
