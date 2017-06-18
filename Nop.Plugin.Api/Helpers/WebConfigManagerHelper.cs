@@ -132,9 +132,17 @@ namespace Nop.Plugin.Api.Helpers
                     element.SetAttributeValue("key", "owin:AutomaticAppStartup");
                     httpAppSettings.Add(element);
                 }
+                else
+                {
+                    // there should be only a single attribute and it should be boolean
+                    bool existingValue = Boolean.Parse(element.LastAttribute.Value);
 
-                // set the attributes value
-                element.SetAttributeValue("value", value.ToString());
+                    if (existingValue != value)
+                    {
+                        // set the attributes value
+                        element.SetAttributeValue("value", value.ToString());
+                    }
+                }               
 
                 if (hasChanged)
                 {
