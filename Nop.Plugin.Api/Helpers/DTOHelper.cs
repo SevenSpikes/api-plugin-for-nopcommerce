@@ -186,12 +186,6 @@ namespace Nop.Plugin.Api.Helpers
             if (productAttributeValue != null)
             {
                 productAttributeValueDto = productAttributeValue.ToDto();
-                if (productAttributeValue.ImageSquaresPictureId > 0)
-                {
-                    Picture imageSquaresPicture = _pictureService.GetPictureById(productAttributeValue.ImageSquaresPictureId);
-                    ImageDto imageDto = PrepareImageDto(imageSquaresPicture);
-                    productAttributeValueDto.ImageSquaresImage = imageDto;
-                }
 
                 if (productAttributeValue.PictureId > 0)
                 {

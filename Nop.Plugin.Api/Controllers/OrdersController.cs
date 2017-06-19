@@ -458,7 +458,7 @@ namespace Nop.Plugin.Api.Controllers
             }
             else
             {
-                GetShippingOptionResponse shippingOptionResponse = _shippingService.GetShippingOptions(shoppingCartItems, customer.ShippingAddress, customer,
+                GetShippingOptionResponse shippingOptionResponse = _shippingService.GetShippingOptions(shoppingCartItems, customer.ShippingAddress,
                         shippingRateComputationMethodSystemName, storeId);
 
                 var shippingOptions = new List<ShippingOption>();

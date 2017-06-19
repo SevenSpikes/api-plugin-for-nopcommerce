@@ -1,4 +1,4 @@
-﻿using Nop.Plugin.Api.AutoMapper;
+﻿using AutoMapper;
 using Nop.Plugin.Api.Domain;
 using Nop.Plugin.Api.Models;
 
@@ -8,12 +8,12 @@ namespace Nop.Plugin.Api.MappingExtensions
     {
         public static ConfigurationModel ToModel(this ApiSettings apiSettings)
         {
-            return apiSettings.MapTo<ApiSettings, ConfigurationModel>();
+            return Mapper.Map<ApiSettings, ConfigurationModel>(apiSettings);
         }
 
         public static ApiSettings ToEntity(this ConfigurationModel apiSettingsModel)
         {
-            return apiSettingsModel.MapTo<ConfigurationModel, ApiSettings>();
+            return Mapper.Map<ConfigurationModel, ApiSettings>(apiSettingsModel);
         }
     }
 }

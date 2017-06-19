@@ -1,14 +1,16 @@
-﻿using Nop.Core;
+﻿using System.Web.Routing;
+using Nop.Core;
 using Nop.Core.Infrastructure;
 using Nop.Core.Plugins;
 using Nop.Plugin.Api.Data;
 using Nop.Plugin.Api.Helpers;
+using Nop.Services.Common;
 using Nop.Web.Framework.Menu;
 using Nop.Services.Localization;
 
 namespace Nop.Plugin.Api.Plugin
 {
-    public class ApiPlugin : BasePlugin, IAdminMenuPlugin
+    public class ApiPlugin : BasePlugin, IAdminMenuPlugin, IMiscPlugin
     {
         private const string ControllersNamespace = "Nop.Plugin.Api.Controllers";
 
@@ -193,54 +195,20 @@ namespace Nop.Plugin.Api.Plugin
 
         public void ManageSiteMap(SiteMapNode rootNode)
         {
-            string pluginMenuName = LocalizationService.GetResource("Plugins.Api.Admin.Menu.Title",languageId: WorkContext.WorkingLanguage.Id, defaultValue: "API");
 
-            string settingsMenuName = LocalizationService.GetResource("Plugins.Api.Admin.Menu.Settings.Title", languageId: WorkContext.WorkingLanguage.Id, defaultValue: "API");
+        }
 
-            string manageClientsMenuName = LocalizationService.GetResource("Plugins.Api.Admin.Menu.Clients.Title", languageId: WorkContext.WorkingLanguage.Id, defaultValue: "API");
-
-            const string adminUrlPart = "Plugins/";
-
-            var pluginMainMenu = new SiteMapNode
-            {
-                Title = pluginMenuName,
-                Visible = true,
-                SystemName = "Api-Main-Menu",
-                IconClass = "fa-genderless"
-            };
-
-            pluginMainMenu.ChildNodes.Add(new SiteMapNode
-            {
-                Title = settingsMenuName,
-                Url = WebHelper.GetStoreLocation() + adminUrlPart + "ApiAdmin/Settings",
-                Visible = true,
-                SystemName = "Api-Settings-Menu",
-                IconClass = "fa-genderless"
-            });
-
-            pluginMainMenu.ChildNodes.Add(new SiteMapNode
-            {
-                Title = manageClientsMenuName,
-                Url = WebHelper.GetStoreLocation() + adminUrlPart + "ManageClientsAdmin/List",
-                Visible = true,
-                SystemName = "Api-Clients-Menu",
-                IconClass = "fa-genderless"
-            });
-            
-
-            string pluginDocumentationUrl = "https://github.com/SevenSpikes/api-plugin-for-nopcommerce";
-            
-            pluginMainMenu.ChildNodes.Add(new SiteMapNode
-                {
-                    Title = LocalizationService.GetResource("Plugins.Api.Admin.Menu.Docs.Title"),
-                    Url = pluginDocumentationUrl,
-                    Visible = true,
-                    SystemName = "Api-Docs-Menu",
-                    IconClass = "fa-genderless"
-                });//TODO: target="_blank"
-            
-
-            rootNode.ChildNodes.Add(pluginMainMenu);
+        /// <summary>
+        /// Gets a route for provider configuration
+        /// </summary>
+        /// <param name="actionName">Action name</param>
+        /// <param name="controllerName">Controller name</param>
+        /// <param name="routeValues">Route values</param>
+        public void GetConfigurationRoute(out string actionName, out string controllerName, out RouteValueDictionary routeValues)
+        {
+            actionName = "Settings";
+            controllerName = "ApiAdmin";
+            routeValues = new RouteValueDictionary { { "Namespaces", ControllersNamespace }, { "area", null } };
         }
     }
 }

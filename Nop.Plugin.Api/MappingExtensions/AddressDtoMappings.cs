@@ -1,5 +1,5 @@
-﻿using Nop.Core.Domain.Common;
-using Nop.Plugin.Api.AutoMapper;
+﻿using AutoMapper;
+using Nop.Core.Domain.Common;
 using Nop.Plugin.Api.DTOs;
 
 namespace Nop.Plugin.Api.MappingExtensions
@@ -8,12 +8,12 @@ namespace Nop.Plugin.Api.MappingExtensions
     {
         public static AddressDto ToDto(this Address address)
         {
-            return address.MapTo<Address, AddressDto>();
+            return Mapper.DynamicMap<Address, AddressDto>(address);
         }
 
         public static Address ToEntity(this AddressDto addressDto)
         {
-            return addressDto.MapTo<AddressDto, Address>();
+            return Mapper.DynamicMap<AddressDto, Address>(addressDto);
         }
     }
 }

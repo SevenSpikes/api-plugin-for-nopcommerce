@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Nop.Core.Domain.Orders;
-using Nop.Plugin.Api.AutoMapper;
 using Nop.Plugin.Api.DTOs.OrderItems;
 
 namespace Nop.Plugin.Api.MappingExtensions
@@ -9,7 +8,7 @@ namespace Nop.Plugin.Api.MappingExtensions
     {
         public static OrderItemDto ToDto(this OrderItem orderItem)
         {
-            return orderItem.MapTo<OrderItem, OrderItemDto>();
+            return Mapper.DynamicMap<OrderItem, OrderItemDto>(orderItem);
         }
     }
 }
