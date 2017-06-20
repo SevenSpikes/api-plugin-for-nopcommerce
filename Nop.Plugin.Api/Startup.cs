@@ -423,7 +423,7 @@ namespace Nop.Plugin.Api
             webConfigManagerHelper.AddConnectionString();
 
             config.InitializeCustomWebHooks();
-            config.InitializeCustomWebHooksSqlStorage();
+            config.InitializeCustomWebHooksSqlStorage(false);
 
             // This is required only in development.
             // It it is required only when you want to send a web hook to an https address with an invalid SSL certificate. (self-signed)
