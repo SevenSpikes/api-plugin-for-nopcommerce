@@ -5,16 +5,19 @@ using Nop.Core.Data;
 using Nop.Core.Domain.Orders;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.DataStructures;
+using Nop.Core;
 
 namespace Nop.Plugin.Api.Services
 {
     public class ShoppingCartItemApiService : IShoppingCartItemApiService
     {
         private readonly IRepository<ShoppingCartItem> _shoppingCartItemsRepository;
+        private readonly IStoreContext _storeContext;
 
-        public ShoppingCartItemApiService(IRepository<ShoppingCartItem> shoppingCartItemsRepository)
+        public ShoppingCartItemApiService(IRepository<ShoppingCartItem> shoppingCartItemsRepository, IStoreContext storeContext)
         {
             _shoppingCartItemsRepository = shoppingCartItemsRepository;
+            _storeContext = storeContext;
         }
 
         public List<ShoppingCartItem> GetShoppingCartItems(int? customerId = null, DateTime? createdAtMin = null, DateTime? createdAtMax = null,
@@ -61,6 +64,10 @@ namespace Nop.Plugin.Api.Services
             {
                 query = query.Where(c => c.UpdatedOnUtc < updatedAtMax.Value);
             }
+
+            // items for the current store only
+            int currentStoreId = _storeContext.CurrentStore.Id;
+            query = query.Where(c => c.StoreId == currentStoreId);
 
             query = query.OrderBy(shoppingCartItem => shoppingCartItem.Id);
 
