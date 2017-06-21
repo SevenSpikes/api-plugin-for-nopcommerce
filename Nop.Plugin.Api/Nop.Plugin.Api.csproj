@@ -254,6 +254,7 @@
     <Compile Include="Domain\WebHooks.cs" />
     <Compile Include="DTOs\OrderItems\OrderItemsCountRootObject.cs" />
     <Compile Include="DTOs\OrderItems\OrderItemsRootObject.cs" />
+    <Compile Include="DTOs\ProductItemAttributeDto.cs" />
     <Compile Include="DTOs\Products\ProductAttributeValueDto.cs" />
     <Compile Include="DTOs\Stores\StoreDto.cs" />
     <Compile Include="DTOs\Products\ProductAttributeMappingDto.cs" />
@@ -384,6 +385,7 @@
     <Compile Include="Services\CustomerApiService.cs" />
     <Compile Include="Services\ICategoryApiService.cs" />
     <Compile Include="Services\IOrderItemApiService.cs" />
+    <Compile Include="Services\IProductAttributeConverter.cs" />
     <Compile Include="Services\IProductCategoryMappingsApiService.cs" />
     <Compile Include="Services\IClientService.cs" />
     <Compile Include="Services\ICustomerApiService.cs" />
@@ -394,6 +396,7 @@
     <Compile Include="Services\OrderApiService.cs" />
     <Compile Include="Services\OrderItemApiService.cs" />
     <Compile Include="Services\ProductApiService.cs" />
+    <Compile Include="Services\ProductAttributeConverter.cs" />
     <Compile Include="Services\ProductCategoryMappingsApiService.cs" />
     <Compile Include="Services\ShoppingCartItemApiService.cs" />
     <Compile Include="Services\WebHookService.cs" />

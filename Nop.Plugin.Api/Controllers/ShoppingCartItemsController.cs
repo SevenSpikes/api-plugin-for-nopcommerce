@@ -28,6 +28,8 @@ using Nop.Services.Media;
 using Nop.Services.Orders;
 using Nop.Services.Security;
 using Nop.Services.Stores;
+using Nop.Plugin.Api.Helpers;
+using Nop.Core;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -37,26 +39,32 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IShoppingCartItemApiService _shoppingCartItemApiService;
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IProductService _productService;
-        private readonly IFactory<ShoppingCartItem> _factory; 
+        private readonly IFactory<ShoppingCartItem> _factory;
+        private readonly IProductAttributeConverter _productAttributeConverter;
+        private readonly IDTOHelper _dtoHelper;
+        private readonly IStoreContext _storeContext;
 
-        public ShoppingCartItemsController(IShoppingCartItemApiService shoppingCartItemApiService, 
-            IJsonFieldsSerializer jsonFieldsSerializer, 
-            IAclService aclService, 
-            ICustomerService customerService, 
+        public ShoppingCartItemsController(IShoppingCartItemApiService shoppingCartItemApiService,
+            IJsonFieldsSerializer jsonFieldsSerializer,
+            IAclService aclService,
+            ICustomerService customerService,
             IStoreMappingService storeMappingService,
             IStoreService storeService,
             IDiscountService discountService,
             ICustomerActivityService customerActivityService,
-            ILocalizationService localizationService, 
-            IShoppingCartService shoppingCartService, 
-            IProductService productService, 
+            ILocalizationService localizationService,
+            IShoppingCartService shoppingCartService,
+            IProductService productService,
             IFactory<ShoppingCartItem> factory,
-            IPictureService pictureService)
-            :base(jsonFieldsSerializer, 
-                 aclService, 
-                 customerService, 
-                 storeMappingService, 
-                 storeService, 
+            IPictureService pictureService,
+            IProductAttributeConverter productAttributeConverter,
+            IDTOHelper dtoHelper,
+            IStoreContext storeContext)
+            : base(jsonFieldsSerializer,
+                 aclService,
+                 customerService,
+                 storeMappingService,
+                 storeService,
                  discountService,
                  customerActivityService,
                  localizationService,
@@ -66,6 +74,9 @@ namespace Nop.Plugin.Api.Controllers
             _shoppingCartService = shoppingCartService;
             _productService = productService;
             _factory = factory;
+            _productAttributeConverter = productAttributeConverter;
+            _dtoHelper = dtoHelper;
+            _storeContext = storeContext;
         }
 
         /// <summary>
@@ -91,13 +102,16 @@ namespace Nop.Plugin.Api.Controllers
 
             IList<ShoppingCartItem> shoppingCartItems = _shoppingCartItemApiService.GetShoppingCartItems(customerId: null,
                                                                                                          createdAtMin: parameters.CreatedAtMin,
-                                                                                                         createdAtMax: parameters.CreatedAtMax, 
+                                                                                                         createdAtMax: parameters.CreatedAtMax,
                                                                                                          updatedAtMin: parameters.UpdatedAtMin,
-                                                                                                         updatedAtMax: parameters.UpdatedAtMax, 
+                                                                                                         updatedAtMax: parameters.UpdatedAtMax,
                                                                                                          limit: parameters.Limit,
                                                                                                          page: parameters.Page);
 
-            List<ShoppingCartItemDto> shoppingCartItemsDtos = shoppingCartItems.Select(x => x.ToDto()).ToList();
+            List<ShoppingCartItemDto> shoppingCartItemsDtos = shoppingCartItems.Select(shoppingCartItem =>
+            {
+               return _dtoHelper.PrepareShoppingCartItemDTO(shoppingCartItem);
+            }).ToList();
 
             var shoppingCartsRootObject = new ShoppingCartItemsRootObject()
             {
@@ -148,7 +162,10 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.NotFound, "shopping_cart_item", "not found");
             }
 
-            List<ShoppingCartItemDto> shoppingCartItemsDtos = shoppingCartItems.Select(x => x.ToDto()).ToList();
+            List<ShoppingCartItemDto> shoppingCartItemsDtos = shoppingCartItems.Select(shoppingCartItem =>
+            {
+                return _dtoHelper.PrepareShoppingCartItemDTO(shoppingCartItem);
+            }).ToList();
 
             var shoppingCartsRootObject = new ShoppingCartItemsRootObject()
             {
@@ -161,8 +178,8 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpPost]
-        [ResponseType(typeof (ShoppingCartItemsRootObject))]
-        public IHttpActionResult CreateShoppingCartItem([ModelBinder(typeof (JsonModelBinder<ShoppingCartItemDto>))] Delta<ShoppingCartItemDto> shoppingCartItemDelta)
+        [ResponseType(typeof(ShoppingCartItemsRootObject))]
+        public IHttpActionResult CreateShoppingCartItem([ModelBinder(typeof(JsonModelBinder<ShoppingCartItemDto>))] Delta<ShoppingCartItemDto> shoppingCartItemDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -172,33 +189,37 @@ namespace Nop.Plugin.Api.Controllers
 
             ShoppingCartItem newShoppingCartItem = _factory.Initialize();
             shoppingCartItemDelta.Merge(newShoppingCartItem);
-            
+
             // We know that the product id and customer id will be provided because they are required by the validator.
             // TODO: validate
-            Product product = _productService.GetProductById(shoppingCartItemDelta.Dto.ProductId.Value);
+            Product product = _productService.GetProductById(newShoppingCartItem.ProductId);
 
             if (product == null)
             {
                 return Error(HttpStatusCode.NotFound, "product", "not found");
             }
 
-            Customer customer = _customerService.GetCustomerById(shoppingCartItemDelta.Dto.CustomerId.Value);
+            Customer customer = _customerService.GetCustomerById(newShoppingCartItem.CustomerId);
 
             if (customer == null)
             {
                 return Error(HttpStatusCode.NotFound, "customer", "not found");
             }
-            
+
             ShoppingCartType shoppingCartType = (ShoppingCartType)Enum.Parse(typeof(ShoppingCartType), shoppingCartItemDelta.Dto.ShoppingCartType);
-            
+
             if (!product.IsRental)
             {
                 newShoppingCartItem.RentalStartDateUtc = null;
                 newShoppingCartItem.RentalEndDateUtc = null;
             }
 
-            IList<string> warnings = _shoppingCartService.AddToCart(customer, product, shoppingCartType, 0, null, 0M, 
-                                        shoppingCartItemDelta.Dto.RentalStartDateUtc, shoppingCartItemDelta.Dto.RentalEndDateUtc,
+            string attributesXml =_productAttributeConverter.ConvertToXml(shoppingCartItemDelta.Dto.Attributes, product.Id);
+
+            int currentStoreId = _storeContext.CurrentStore.Id;
+
+            IList<string> warnings = _shoppingCartService.AddToCart(customer, product, shoppingCartType, currentStoreId, attributesXml, 0M,
+                                        newShoppingCartItem.RentalStartDateUtc, newShoppingCartItem.RentalEndDateUtc,
                                         shoppingCartItemDelta.Dto.Quantity ?? 1);
 
             if (warnings.Count > 0)
@@ -210,12 +231,13 @@ namespace Nop.Plugin.Api.Controllers
 
                 return Error(HttpStatusCode.BadRequest);
             }
+            else {
+                // the newly added shopping cart item should be the last one
+                newShoppingCartItem = customer.ShoppingCartItems.LastOrDefault();
+            }
 
             // Preparing the result dto of the new product category mapping
-            ShoppingCartItemDto newShoppingCartItemDto = newShoppingCartItem.ToDto();
-            newShoppingCartItemDto.ProductDto = product.ToDto();
-            newShoppingCartItemDto.CustomerDto = customer.ToCustomerForShoppingCartItemDto();
-            newShoppingCartItemDto.ShoppingCartType = shoppingCartType.ToString();
+            ShoppingCartItemDto newShoppingCartItemDto = _dtoHelper.PrepareShoppingCartItemDTO(newShoppingCartItem);
 
             var shoppingCartsRootObject = new ShoppingCartItemsRootObject();
 
@@ -245,38 +267,41 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.NotFound, "shopping_cart_item", "not found");
             }
 
-            // Here we make sure that  the product id and the customer id won't be modified.
-            int productId = shoppingCartItemForUpdate.ProductId;
-            int customerId = shoppingCartItemForUpdate.CustomerId;
+            shoppingCartItemDelta.Merge(shoppingCartItemForUpdate);            
 
-            shoppingCartItemDelta.Merge(shoppingCartItemForUpdate);
-
-            shoppingCartItemForUpdate.ProductId = productId;
-            shoppingCartItemForUpdate.CustomerId = customerId;
-            
             if (!shoppingCartItemForUpdate.Product.IsRental)
             {
                 shoppingCartItemForUpdate.RentalStartDateUtc = null;
                 shoppingCartItemForUpdate.RentalEndDateUtc = null;
             }
 
-            if (!string.IsNullOrEmpty(shoppingCartItemDelta.Dto.ShoppingCartType))
+            if (shoppingCartItemDelta.Dto.Attributes != null)
             {
-                ShoppingCartType shoppingCartType = (ShoppingCartType)Enum.Parse(typeof(ShoppingCartType), shoppingCartItemDelta.Dto.ShoppingCartType);
-                shoppingCartItemForUpdate.ShoppingCartType = shoppingCartType;
+                shoppingCartItemForUpdate.AttributesXml = _productAttributeConverter.ConvertToXml(shoppingCartItemDelta.Dto.Attributes, shoppingCartItemForUpdate.Product.Id);
             }
-            
+
             // The update time is set in the service.
-            _shoppingCartService.UpdateShoppingCartItem(shoppingCartItemForUpdate.Customer, shoppingCartItemForUpdate.Id,
-                shoppingCartItemForUpdate.AttributesXml, shoppingCartItemForUpdate.CustomerEnteredPrice, 
+            var warnings = _shoppingCartService.UpdateShoppingCartItem(shoppingCartItemForUpdate.Customer, shoppingCartItemForUpdate.Id,
+                shoppingCartItemForUpdate.AttributesXml, shoppingCartItemForUpdate.CustomerEnteredPrice,
                 shoppingCartItemForUpdate.RentalStartDateUtc, shoppingCartItemForUpdate.RentalEndDateUtc,
                 shoppingCartItemForUpdate.Quantity);
-            
+
+            if (warnings.Count > 0)
+            {
+                foreach (var warning in warnings)
+                {
+                    ModelState.AddModelError("shopping cart item", warning);
+                }
+
+                return Error(HttpStatusCode.BadRequest);
+            }
+            else
+            {
+                shoppingCartItemForUpdate = _shoppingCartItemApiService.GetShoppingCartItem(shoppingCartItemForUpdate.Id);
+            }
+
             // Preparing the result dto of the new product category mapping
-            ShoppingCartItemDto newShoppingCartItemDto = shoppingCartItemForUpdate.ToDto();
-            newShoppingCartItemDto.ProductDto = shoppingCartItemForUpdate.Product.ToDto();
-            newShoppingCartItemDto.CustomerDto = shoppingCartItemForUpdate.Customer.ToCustomerForShoppingCartItemDto();
-            newShoppingCartItemDto.ShoppingCartType = shoppingCartItemForUpdate.ShoppingCartType.ToString();
+            ShoppingCartItemDto newShoppingCartItemDto = _dtoHelper.PrepareShoppingCartItemDTO(shoppingCartItemForUpdate);
 
             var shoppingCartsRootObject = new ShoppingCartItemsRootObject();
 

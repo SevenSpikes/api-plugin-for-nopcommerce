@@ -16,6 +16,7 @@ using Nop.Plugin.Api.DTOs.Customers;
 using Nop.Plugin.Api.DTOs.Orders;
 using Nop.Plugin.Api.Services;
 using Nop.Services.Media;
+using Nop.Plugin.Api.DTOs.ShoppingCarts;
 
 namespace Nop.Plugin.Api.Helpers
 {
@@ -27,13 +28,15 @@ namespace Nop.Plugin.Api.Helpers
         private IPictureService _pictureService;
         private IProductAttributeService _productAttributeService;
         private ICustomerApiService _customerApiService;
+        private IProductAttributeConverter _productAttributeConverter;
 
         public DTOHelper(IProductService productService,
             IAclService aclService,
             IStoreMappingService storeMappingService,
             IPictureService pictureService,
             IProductAttributeService productAttributeService,
-            ICustomerApiService customerApiService)
+            ICustomerApiService customerApiService,
+            IProductAttributeConverter productAttributeConverter)
         {
             _productService = productService;
             _aclService = aclService;
@@ -41,6 +44,7 @@ namespace Nop.Plugin.Api.Helpers
             _pictureService = pictureService;
             _productAttributeService = productAttributeService;
             _customerApiService = customerApiService;
+            _productAttributeConverter = productAttributeConverter;
         }
 
         public ProductDto PrepareProductDTO(Product product)
@@ -97,6 +101,15 @@ namespace Nop.Plugin.Api.Helpers
             }
 
             return orderDto;
+        }
+
+        public ShoppingCartItemDto PrepareShoppingCartItemDTO(ShoppingCartItem shoppingCartItem)
+        {
+            var dto = shoppingCartItem.ToDto();
+            dto.ProductDto = PrepareProductDTO(shoppingCartItem.Product);
+            dto.CustomerDto = shoppingCartItem.Customer.ToCustomerForShoppingCartItemDto();
+            dto.Attributes = _productAttributeConverter.Parse(shoppingCartItem.AttributesXml);
+            return dto;
         }
 
         private void PrepareProductImages(IEnumerable<ProductPicture> productPictures, ProductDto productDto)
@@ -208,5 +221,6 @@ namespace Nop.Plugin.Api.Helpers
 
             return productAttributeValueDto;
         }
+       
     }
 }
