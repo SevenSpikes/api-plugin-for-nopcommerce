@@ -5,6 +5,7 @@ using Nop.Core.Domain.Orders;
 using Nop.Plugin.Api.DTOs.Customers;
 using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.Validators;
+using System.Collections.Generic;
 
 namespace Nop.Plugin.Api.DTOs.ShoppingCarts
 {
@@ -13,12 +14,29 @@ namespace Nop.Plugin.Api.DTOs.ShoppingCarts
     public class ShoppingCartItemDto
     {
         private int? _shoppingCartTypeId;
+        private List<ProductItemAttributeDto> _attributes;
 
         /// <summary>
         /// Gets or sets the id
         /// </summary>
         [JsonProperty("id")]
         public string Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the selected attributes
+        /// </summary>
+        [JsonProperty("product_attributes")]
+        public List<ProductItemAttributeDto> Attributes
+        {
+            get
+            {
+                return _attributes;
+            }
+            set
+            {
+                _attributes = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the price enter by a customer
