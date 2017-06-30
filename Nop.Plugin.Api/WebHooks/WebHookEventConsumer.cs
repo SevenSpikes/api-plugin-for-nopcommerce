@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNet.WebHooks;
+﻿using System;
+using Microsoft.AspNet.WebHooks;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Events;
@@ -40,8 +41,8 @@ namespace Nop.Plugin.Api.WebHooks
 
         public void HandleEvent(EntityInserted<Customer> eventMessage)
         {
-            // There is no need to send webhooks for guest customers.
-            if (eventMessage.Entity.IsGuest())
+            // There is no need to send webhooks for guest customers or customers that are in the Trade role
+            if (eventMessage.Entity.IsGuest() || eventMessage.Entity.IsInCustomerRole(BLBSettings.TradeCustomerRoleSystemName))
             {
                 return;
             }
@@ -52,17 +53,35 @@ namespace Nop.Plugin.Api.WebHooks
 
         public void HandleEvent(EntityUpdated<Customer> eventMessage)
         {
-            // There is no need to send webhooks for guest customers.
+            // There is no need to send webhooks for guest customers or customers that are in the Trade role
             if (eventMessage.Entity.IsGuest())
             {
                 return;
             }
 
-            CustomerDto customer = _customerApiService.GetCustomerById(eventMessage.Entity.Id, true);
-
             // In nopCommerce the Customer, Product, Category and Order entities are not deleted.
             // Instead the Deleted property of the entity is set to true.
             string webhookEvent = WebHookNames.CustomerUpdated;
+
+            if (eventMessage.Entity.IsInCustomerRole(BLBSettings.TradeCustomerRoleSystemName))
+            {
+                var createdDaysAgo = DateTime.UtcNow.Subtract(eventMessage.Entity.CreatedOnUtc).Days;
+                // since initially a customer could be created without any roles we don't know if it will be Trade or not and we process it
+                // So if the customer is updated within a date after its creation we ensure that it is removed
+                // after that we simply don't send a hook as there will be too many hooks
+                if (createdDaysAgo < 1)
+                {
+                    // customers that are recently created and are now Trade accounts should be removed
+                    webhookEvent = WebHookNames.CustomerDeleted;
+                }
+                else
+                {
+                    // no need to spam with hooks for Trade accounts updates
+                    return;
+                }
+            }
+
+            CustomerDto customer = _customerApiService.GetCustomerById(eventMessage.Entity.Id, true);
 
             if(customer.Deleted == true)
             {
@@ -116,6 +135,10 @@ namespace Nop.Plugin.Api.WebHooks
 
         public void HandleEvent(EntityInserted<Order> eventMessage)
         {
+            // we need to handle only BLB orders
+            if(eventMessage.Entity.StoreId != BLBSettings.BLBStoreId)
+                return;
+
             OrderDto orderDto = _dtoHelper.PrepareOrderDTO(eventMessage.Entity);
 
             _webHookManager.NotifyAllAsync(WebHookNames.OrderCreated, new { Item = orderDto });
@@ -123,6 +146,10 @@ namespace Nop.Plugin.Api.WebHooks
 
         public void HandleEvent(EntityUpdated<Order> eventMessage)
         {
+            // we need to handle only BLB orders
+            if (eventMessage.Entity.StoreId != BLBSettings.BLBStoreId)
+                return;
+
             OrderDto orderDto = _dtoHelper.PrepareOrderDTO(eventMessage.Entity);
 
             string webhookEvent = WebHookNames.OrderUpdated;
