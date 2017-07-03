@@ -312,7 +312,7 @@ namespace Nop.Plugin.Api.Services
         {
             var query = _customerRepository.TableNoTracking.Where(customer => !customer.Deleted && !customer.IsSystemAccount && customer.Active);
 
-            query = query.Where(customer => !customer.CustomerRoles.Any(cr => (cr.Active) && (cr.SystemName == SystemCustomerRoleNames.Guests)));
+            query = query.Where(customer => !customer.CustomerRoles.Any(cr => (cr.Active) && (cr.SystemName == SystemCustomerRoleNames.Guests || cr.SystemName == BLBSettings.TradeCustomerRoleSystemName)));
 
             if (createdAtMin != null)
             {
