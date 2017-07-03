@@ -128,7 +128,7 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid limit parameter");
             }
 
-            int currentStoreId = _storeContext.CurrentStore.Id;
+            int currentStoreId = BLBSettings.BLBStoreId; //_storeContext.CurrentStore.Id;
 
             IList<Order> orders = _orderApiService.GetOrders(parameters.Ids, parameters.CreatedAtMin,
                 parameters.CreatedAtMax,
