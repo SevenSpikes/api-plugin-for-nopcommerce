@@ -230,7 +230,9 @@ namespace Nop.Plugin.Api.Services
                      .Where(attr => attr.EntityId == customer.Id &&
                                     attr.KeyGroup.Equals(KeyGroup, StringComparison.InvariantCultureIgnoreCase) &&
                                     (attr.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase) ||
-                                    attr.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase))).DefaultIfEmpty()
+                                    attr.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase) ||
+                                    attr.Key.Equals(Gender, StringComparison.InvariantCultureIgnoreCase) ||
+                                    attr.Key.Equals(DateOfBirth, StringComparison.InvariantCultureIgnoreCase))).DefaultIfEmpty()
                  select new CustomerAttributeMappingDto()
                  {
                      Attribute = attribute,
@@ -247,6 +249,16 @@ namespace Nop.Plugin.Api.Services
                 if (searchParams.ContainsKey(LastName))
                 {
                     allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, LastName, searchParams[LastName]);
+                }
+
+                if (searchParams.ContainsKey(Gender))
+                {
+                    allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, Gender, searchParams[Gender]);
+                }
+
+                if (searchParams.ContainsKey(DateOfBirth))
+                {
+                    allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, DateOfBirth, searchParams[DateOfBirth]);
                 }
             }
 
