@@ -234,7 +234,7 @@ namespace Nop.Plugin.Api.Controllers
             
             _customerService.InsertCustomer(newCustomer);
 
-            InsertFirstAndLastNameGenericAttributes(customerDelta.Dto.FirstName, customerDelta.Dto.LastName, newCustomer);
+            InsertCustomerGenericAttributes(customerDelta.Dto.FirstName, customerDelta.Dto.LastName, customerDelta.Dto.Gender, customerDelta.Dto.DateOfBirth, newCustomer);
 
             //password
             if (!string.IsNullOrWhiteSpace(customerDelta.Dto.Password))
@@ -260,9 +260,11 @@ namespace Nop.Plugin.Api.Controllers
             // and the country will be left null. So we do it by hand here.
             PopulateAddressCountryNames(newCustomerDto);
 
-            // Set the fist and last name separately because they are not part of the customer entity, but are saved in the generic attributes.
+            // Set the fist, last name, gender and date of birth separately because they are not part of the customer entity, but are saved in the generic attributes.
             newCustomerDto.FirstName = customerDelta.Dto.FirstName;
             newCustomerDto.LastName = customerDelta.Dto.LastName;
+            newCustomerDto.Gender = customerDelta.Dto.Gender;
+            newCustomerDto.DateOfBirth = customerDelta.Dto.DateOfBirth;
 
             newCustomerDto.RoleIds = newCustomer.CustomerRoles.Select(x => x.Id).ToList();
 
@@ -333,7 +335,7 @@ namespace Nop.Plugin.Api.Controllers
 
             _customerService.UpdateCustomer(currentCustomer);
 
-            InsertFirstAndLastNameGenericAttributes(customerDelta.Dto.FirstName, customerDelta.Dto.LastName, currentCustomer);
+            InsertCustomerGenericAttributes(customerDelta.Dto.FirstName, customerDelta.Dto.LastName, customerDelta.Dto.Gender, customerDelta.Dto.DateOfBirth, currentCustomer);
 
             //password
             if (!string.IsNullOrWhiteSpace(customerDelta.Dto.Password))
@@ -352,7 +354,7 @@ namespace Nop.Plugin.Api.Controllers
             // so we do it by hand here.
             PopulateAddressCountryNames(updatedCustomer);
 
-            // Set the fist and last name separately because they are not part of the customer entity, but are saved in the generic attributes.
+            // Set the fist, last name, gender and date of birth separately because they are not part of the customer entity, but are saved in the generic attributes.
             var firstNameGenericAttribute = _genericAttributeService.GetAttributesForEntity(currentCustomer.Id, typeof(Customer).Name)
                 .FirstOrDefault(x => x.Key == "FirstName");
 
@@ -367,6 +369,22 @@ namespace Nop.Plugin.Api.Controllers
             if (lastNameGenericAttribute != null)
             {
                 updatedCustomer.LastName = lastNameGenericAttribute.Value;
+            }
+
+            var genderGenericAttribute = _genericAttributeService.GetAttributesForEntity(currentCustomer.Id, typeof(Customer).Name)
+                .FirstOrDefault(x => x.Key == "Gender");
+
+            if (genderGenericAttribute != null)
+            {
+                updatedCustomer.Gender = genderGenericAttribute.Value;
+            }
+
+            var dateOfBirthGenericAttribute = _genericAttributeService.GetAttributesForEntity(currentCustomer.Id, typeof(Customer).Name)
+               .FirstOrDefault(x => x.Key == "DateOfBirth");
+
+            if (dateOfBirthGenericAttribute != null)
+            {
+                updatedCustomer.DateOfBirth = dateOfBirthGenericAttribute.Value;
             }
 
             updatedCustomer.RoleIds = currentCustomer.CustomerRoles.Select(x => x.Id).ToList();
@@ -415,7 +433,7 @@ namespace Nop.Plugin.Api.Controllers
             return new RawJsonActionResult("{}");
         }
 
-        private void InsertFirstAndLastNameGenericAttributes(string firstName, string lastName, Customer newCustomer)
+        private void InsertCustomerGenericAttributes(string firstName, string lastName, string gender, string dateOfBirth, Customer newCustomer)
         {
             // we assume that if the first name is not sent then it will be null and in this case we don't want to update it
             if (firstName != null)
@@ -426,6 +444,16 @@ namespace Nop.Plugin.Api.Controllers
             if (lastName != null)
             {
                 _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.LastName, lastName);
+            }
+
+            if (gender != null)
+            {
+                _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.Gender, gender);
+            }
+
+            if (dateOfBirth != null)
+            {
+                _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.DateOfBirth, dateOfBirth);
             }
         }
 

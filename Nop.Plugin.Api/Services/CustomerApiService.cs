@@ -18,6 +18,8 @@ namespace Nop.Plugin.Api.Services
     {
         private const string FirstName = "firstname";
         private const string LastName = "lastname";
+        private const string Gender = "gender";
+        private const string DateOfBirth = "dateofbirth";
         private const string KeyGroup = "customer";
 
         private readonly IRepository<Customer> _customerRepository;
@@ -103,7 +105,9 @@ namespace Nop.Plugin.Api.Services
                                                                            where customer.Id == id && 
                                                                                  attribute.KeyGroup.Equals(KeyGroup, StringComparison.InvariantCultureIgnoreCase) &&
                                                                                  (attribute.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase) ||
-                                                                                  attribute.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase))
+                                                                                  attribute.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase) ||
+                                                                                  attribute.Key.Equals(Gender, StringComparison.InvariantCultureIgnoreCase) ||
+                                                                                  attribute.Key.Equals(DateOfBirth, StringComparison.InvariantCultureIgnoreCase))
                                                                            select new CustomerAttributeMappingDto()
                                                                            {
                                                                                Attribute = attribute,
@@ -132,6 +136,14 @@ namespace Nop.Plugin.Api.Services
                     else if (mapping.Attribute.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase))
                     {
                         customerDto.LastName = mapping.Attribute.Value;
+                    }
+                    else if (mapping.Attribute.Key.Equals(Gender, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        customerDto.Gender = mapping.Attribute.Value;
+                    }
+                    else if (mapping.Attribute.Key.Equals(DateOfBirth, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        customerDto.DateOfBirth = mapping.Attribute.Value;
                     }
                 }
             }
@@ -288,6 +300,14 @@ namespace Nop.Plugin.Api.Services
                     else if (attribute.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase))
                     {
                         customerDto.LastName = attribute.Value;
+                    }
+                    else if (attribute.Key.Equals(Gender, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        customerDto.Gender = attribute.Value;
+                    }
+                    else if (attribute.Key.Equals(DateOfBirth, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        customerDto.DateOfBirth = attribute.Value;
                     }
                 }
             }
