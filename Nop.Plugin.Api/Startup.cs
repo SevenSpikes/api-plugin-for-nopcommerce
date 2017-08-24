@@ -26,7 +26,8 @@ namespace Nop.Plugin.Api
     {
         public void Configuration(IAppBuilder app)
         {
-            app.UseCors(Microsoft.Owin.Cors.CorsOptions.AllowAll);
+            // uncomment only if the client is an angular application that directly calls the oauth endpoint
+            //app.UseCors(Microsoft.Owin.Cors.CorsOptions.AllowAll);
 
             ConfigureOAuth(app);
 
