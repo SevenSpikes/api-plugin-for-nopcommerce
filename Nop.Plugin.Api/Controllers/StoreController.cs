@@ -1,9 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.Net;
-using System.Web.Http;
-using System.Web.Http.Description;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.Attributes;
@@ -19,7 +14,12 @@ using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Stores;
-using static System.Decimal;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Web.Http;
+using System.Web.Http.Description;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -88,6 +88,45 @@ namespace Nop.Plugin.Api.Controllers
             var storesRootObject = new StoresRootObject();
 
             storesRootObject.Stores.Add(storeDto);
+
+            var json = _jsonFieldsSerializer.Serialize(storesRootObject, fields);
+
+            return new RawJsonActionResult(json);
+        }
+
+        /// <summary>
+        /// Retrieve all stores
+        /// </summary>
+        /// <param name="fields">Fields from the store you want your json to contain</param>
+        /// <response code="200">OK</response>
+        /// <response code="401">Unauthorized</response>
+        [HttpGet]
+        [ResponseType(typeof(StoresRootObject))]
+        [GetRequestsErrorInterceptorActionFilter]
+        public IHttpActionResult GetAllStores(string fields = "")
+        {
+            IList<Store> allStores = _storeService.GetAllStores();
+        
+            IList<StoreDto> storesAsDto = new List<StoreDto>();
+
+            foreach (var store in allStores)
+            {
+                var storeDto = store.ToDto();
+
+                Currency primaryCurrency = _currencyService.GetCurrencyById(_currencySettings.PrimaryStoreCurrencyId);
+
+                if (!String.IsNullOrEmpty(primaryCurrency.DisplayLocale))
+                {
+                    storeDto.PrimaryCurrencyDisplayLocale = primaryCurrency.DisplayLocale;
+                }
+
+                storesAsDto.Add(storeDto);
+            }
+
+            var storesRootObject = new StoresRootObject()
+            {
+                Stores = storesAsDto
+            };
 
             var json = _jsonFieldsSerializer.Serialize(storesRootObject, fields);
 

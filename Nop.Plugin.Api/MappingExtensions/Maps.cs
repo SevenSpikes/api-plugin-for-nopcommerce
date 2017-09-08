@@ -8,11 +8,14 @@ using System.Linq;
 using System.Web;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Directory;
+using Nop.Core.Domain.Localization;
 using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.AutoMapper;
 using Nop.Plugin.Api.Domain;
 using Nop.Plugin.Api.DTOs;
 using Nop.Plugin.Api.DTOs.Categories;
+using Nop.Plugin.Api.DTOs.CustomerRoles;
+using Nop.Plugin.Api.DTOs.Languages;
 using Nop.Plugin.Api.DTOs.OrderItems;
 using Nop.Plugin.Api.DTOs.Orders;
 using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
@@ -130,6 +133,10 @@ namespace Nop.Plugin.Api.MappingExtensions
             CreateMap<Store, StoreDto>();
 
             CreateMap<ProductCategory, ProductCategoryMappingDto>();
+
+            CreateMap<Language, LanguageDto>();
+
+            CreateMap<CustomerRole, CustomerRoleDto>();
 
             CreateAddressMap();
             CreateAddressDtoToEntityMap();
