@@ -62,6 +62,8 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<ShoppingCartItemsController>().InstancePerLifetimeScope();
             builder.RegisterType<OrderItemsController>().InstancePerLifetimeScope();
             builder.RegisterType<StoreController>().InstancePerLifetimeScope();
+            builder.RegisterType<LanguagesController>().InstancePerLifetimeScope();
+            builder.RegisterType<CustomerRolesController>().InstancePerLifetimeScope();
             builder.RegisterType<WebHookRegistrationsController>().InstancePerLifetimeScope();
             builder.RegisterType<WebHookFiltersController>().InstancePerLifetimeScope();
         }

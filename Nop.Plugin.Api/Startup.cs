@@ -340,8 +340,26 @@ namespace Nop.Plugin.Api
                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Delete) });
 
             config.Routes.MapHttpRoute(
-               name: "getCurrentStore",
+               name: "getAllLanguages",
+               routeTemplate: "api/languages",
+               defaults: new { controller = "Languages", action = "GetAllLanguages" },
+               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+
+            config.Routes.MapHttpRoute(
+               name: "getAllCustomerRoles",
+               routeTemplate: "api/customer_roles",
+               defaults: new { controller = "CustomerRoles", action = "GetAllCustomerRoles" },
+               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+
+            config.Routes.MapHttpRoute(
+               name: "getAllStores",
                routeTemplate: "api/stores",
+               defaults: new { controller = "Store", action = "GetAllStores" },
+               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+
+            config.Routes.MapHttpRoute(
+               name: "getCurrentStore",
+               routeTemplate: "api/current_store",
                defaults: new { controller = "Store", action = "GetCurrentStore" },
                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
 
@@ -407,7 +425,7 @@ namespace Nop.Plugin.Api
                     // http://stackoverflow.com/questions/36772032/swagger-5-2-3-supportedsubmitmethods-removed/36780806#36780806
                     c.InjectJavaScript(currentAssembly, string.Format("{0}.Scripts.swaggerPostPutTryItOutButtonsRemoval.js", currentAssemblyName));
                 });
-            
+
             app.UseWebApi(config);
 
             config.DependencyResolver = new AutofacWebApiDependencyResolver(EngineContext.Current.ContainerManager.Container);
