@@ -29,6 +29,7 @@ namespace Nop.Plugin.Api.Controllers
         private IStoreContext _storeContext;
         private readonly CurrencySettings _currencySettings;
         private readonly ICurrencyService _currencyService;
+        private readonly ILanguageService _languageService;
 
         public StoreController(IJsonFieldsSerializer jsonFieldsSerializer,
             IAclService aclService,
@@ -41,7 +42,8 @@ namespace Nop.Plugin.Api.Controllers
             IPictureService pictureService,
             IStoreContext storeContext,
             CurrencySettings currencySettings,
-            ICurrencyService currencyService)
+            ICurrencyService currencyService,
+            ILanguageService languageService)
             : base(jsonFieldsSerializer,
                   aclService,
                   customerService,
@@ -55,6 +57,7 @@ namespace Nop.Plugin.Api.Controllers
             _storeContext = storeContext;
             _currencySettings = currencySettings;
             _currencyService = currencyService;
+            _languageService = languageService;
         }
 
         /// <summary>
@@ -84,6 +87,8 @@ namespace Nop.Plugin.Api.Controllers
             {
                 storeDto.PrimaryCurrencyDisplayLocale = primaryCurrency.DisplayLocale;
             }
+
+            storeDto.LanguageIds = _languageService.GetAllLanguages(false, store.Id).Select(x => x.Id).ToList();
 
             var storesRootObject = new StoresRootObject();
 
@@ -119,6 +124,8 @@ namespace Nop.Plugin.Api.Controllers
                 {
                     storeDto.PrimaryCurrencyDisplayLocale = primaryCurrency.DisplayLocale;
                 }
+
+                storeDto.LanguageIds = _languageService.GetAllLanguages(false, store.Id).Select(x => x.Id).ToList();
 
                 storesAsDto.Add(storeDto);
             }

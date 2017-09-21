@@ -45,6 +45,7 @@ namespace Nop.Plugin.Api.Controllers
         private readonly ICountryService _countryService;
         private readonly IMappingHelper _mappingHelper;
         private readonly INewsLetterSubscriptionService _newsLetterSubscriptionService;
+        private readonly ILanguageService _languageService;
         private readonly IFactory<Customer> _factory;
 
         // We resolve the customer settings this way because of the tests.
@@ -81,7 +82,7 @@ namespace Nop.Plugin.Api.Controllers
             ICountryService countryService, 
             IMappingHelper mappingHelper, 
             INewsLetterSubscriptionService newsLetterSubscriptionService,
-            IPictureService pictureService) : 
+            IPictureService pictureService, ILanguageService languageService) : 
             base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService,pictureService)
         {
             _customerApiService = customerApiService;
@@ -89,6 +90,7 @@ namespace Nop.Plugin.Api.Controllers
             _countryService = countryService;
             _mappingHelper = mappingHelper;
             _newsLetterSubscriptionService = newsLetterSubscriptionService;
+            _languageService = languageService;
             _encryptionService = encryptionService;
             _genericAttributeService = genericAttributeService;
             _customerRolesHelper = customerRolesHelper;
@@ -236,6 +238,14 @@ namespace Nop.Plugin.Api.Controllers
 
             InsertFirstAndLastNameGenericAttributes(customerDelta.Dto.FirstName, customerDelta.Dto.LastName, newCustomer);
 
+            int languageId = 0;
+
+            if (!string.IsNullOrEmpty(customerDelta.Dto.LanguageId) && int.TryParse(customerDelta.Dto.LanguageId, out languageId)
+                && _languageService.GetLanguageById(languageId) != null)
+            {
+                _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.LanguageId, languageId);
+            }
+
             //password
             if (!string.IsNullOrWhiteSpace(customerDelta.Dto.Password))
             {
@@ -263,6 +273,8 @@ namespace Nop.Plugin.Api.Controllers
             // Set the fist and last name separately because they are not part of the customer entity, but are saved in the generic attributes.
             newCustomerDto.FirstName = customerDelta.Dto.FirstName;
             newCustomerDto.LastName = customerDelta.Dto.LastName;
+
+            newCustomerDto.LanguageId = customerDelta.Dto.LanguageId;
 
             newCustomerDto.RoleIds = newCustomer.CustomerRoles.Select(x => x.Id).ToList();
 
@@ -335,6 +347,15 @@ namespace Nop.Plugin.Api.Controllers
 
             InsertFirstAndLastNameGenericAttributes(customerDelta.Dto.FirstName, customerDelta.Dto.LastName, currentCustomer);
 
+
+            int languageId = 0;
+
+            if (!string.IsNullOrEmpty(customerDelta.Dto.LanguageId) && int.TryParse(customerDelta.Dto.LanguageId, out languageId)
+                && _languageService.GetLanguageById(languageId) != null)
+            {
+                _genericAttributeService.SaveAttribute(currentCustomer, SystemCustomerAttributeNames.LanguageId, languageId);
+            }
+
             //password
             if (!string.IsNullOrWhiteSpace(customerDelta.Dto.Password))
             {
@@ -367,6 +388,14 @@ namespace Nop.Plugin.Api.Controllers
             if (lastNameGenericAttribute != null)
             {
                 updatedCustomer.LastName = lastNameGenericAttribute.Value;
+            }
+
+            var languageIdGenericAttribute = _genericAttributeService.GetAttributesForEntity(currentCustomer.Id, typeof(Customer).Name)
+                .FirstOrDefault(x => x.Key == "LanguageId");
+
+            if (languageIdGenericAttribute != null)
+            {
+                updatedCustomer.LanguageId = languageIdGenericAttribute.Value;
             }
 
             updatedCustomer.RoleIds = currentCustomer.CustomerRoles.Select(x => x.Id).ToList();

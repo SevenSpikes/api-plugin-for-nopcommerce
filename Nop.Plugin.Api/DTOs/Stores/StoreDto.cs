@@ -1,10 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Nop.Plugin.Api.DTOs.Stores
 {
     [JsonObject(Title = "store")]
     public class StoreDto
     {
+        private List<int> _languageIds;
+
         /// <summary>
         /// Gets or sets the store ID
         /// </summary>
@@ -46,6 +49,22 @@ namespace Nop.Plugin.Api.DTOs.Stores
         /// </summary>
         [JsonProperty("default_language_id")]
         public int? DefaultLanguageId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the identifier of the language IDs for this store
+        /// </summary>
+        [JsonProperty("language_ids")]
+        public List<int> LanguageIds
+        {
+            get
+            {
+                return _languageIds;
+            }
+            set
+            {
+                _languageIds = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the display order

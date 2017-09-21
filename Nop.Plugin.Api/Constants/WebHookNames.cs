@@ -13,13 +13,17 @@
         public const string ProductCreated = "products/created";
         public const string ProductUpdated = "products/updated";
         public const string ProductDeleted = "products/deleted";
+        public const string ProductUnmapped = "products/unmapped";
 
         public const string CategoryCreated = "categories/created";
         public const string CategoryUpdated = "categories/updated";
         public const string CategoryDeleted = "categories/deleted";
+        public const string CategoryUnmapped = "categories/unmapped";
 
         public const string OrderCreated = "orders/created";
         public const string OrderUpdated = "orders/updated";
         public const string OrderDeleted = "orders/deleted";
+
+        public const string StoreUpdated = "stores/updated";
     }
 }

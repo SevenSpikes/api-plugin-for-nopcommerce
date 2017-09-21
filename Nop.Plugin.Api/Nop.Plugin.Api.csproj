@@ -258,6 +258,7 @@
     <Compile Include="Domain\WebHooks.cs" />
     <Compile Include="DTOs\Languages\LanguageDto.cs" />
     <Compile Include="DTOs\Languages\LanguagesRootObject.cs" />
+    <Compile Include="DTOs\Languages\LocalizedNameDto.cs" />
     <Compile Include="DTOs\OrderItems\OrderItemsCountRootObject.cs" />
     <Compile Include="DTOs\OrderItems\OrderItemsRootObject.cs" />
     <Compile Include="DTOs\ProductItemAttributeDto.cs" />
