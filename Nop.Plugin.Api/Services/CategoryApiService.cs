@@ -5,19 +5,23 @@ using Nop.Core.Data;
 using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.DataStructures;
+using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.Services
 {
     public class CategoryApiService : ICategoryApiService
     {
+        private readonly IStoreMappingService _storeMappingService;
         private readonly IRepository<Category> _categoryRepository;
         private readonly IRepository<ProductCategory> _productCategoryMappingRepository;
 
         public CategoryApiService(IRepository<Category> categoryRepository,
-            IRepository<ProductCategory> productCategoryMappingRepository)
+            IRepository<ProductCategory> productCategoryMappingRepository,
+            IStoreMappingService storeMappingService)
         {
             _categoryRepository = categoryRepository;
             _productCategoryMappingRepository = productCategoryMappingRepository;
+            _storeMappingService = storeMappingService;
         }
 
         public IList<Category> GetCategories(IList<int> ids = null,
@@ -26,8 +30,8 @@ namespace Nop.Plugin.Api.Services
             int? productId = null,
             bool? publishedStatus = null)
         {
-            var query = GetCategoriesQuery(createdAtMin, createdAtMax, updatedAtMin, updatedAtMax,
-                publishedStatus, productId, ids);
+            var query = GetCategoriesQuery(createdAtMin, createdAtMax, updatedAtMin, updatedAtMax, publishedStatus, productId, ids);
+
 
             if (sinceId > 0)
             {
@@ -54,7 +58,7 @@ namespace Nop.Plugin.Api.Services
             var query = GetCategoriesQuery(createdAtMin, createdAtMax, updatedAtMin, updatedAtMax,
                                            publishedStatus, productId);
 
-            return query.Count();
+            return query.ToList().Count(c => _storeMappingService.Authorize(c));
         }
 
         private IQueryable<Category> GetCategoriesQuery(

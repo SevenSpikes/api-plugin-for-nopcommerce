@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.DTOs.Images;
+using Nop.Plugin.Api.DTOs.Languages;
 using Nop.Plugin.Api.Validators;
 
 namespace Nop.Plugin.Api.DTOs.Products
@@ -18,6 +19,7 @@ namespace Nop.Plugin.Api.DTOs.Products
         private List<int> _discountIds;
         private List<int> _roleIds;
         private List<int> _manufacturerIds;
+        private List<LocalizedNameDto> _localizedNames;
         private List<ImageMappingDto> _images;
         private List<ProductAttributeMappingDto> _productAttributeMappings;
         private List<int> _associatedProductIds;
@@ -42,6 +44,23 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// </summary>
         [JsonProperty("name")]
         public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the localized names
+        /// </summary>
+        [JsonProperty("localized_names")]
+        public List<LocalizedNameDto> LocalizedNames
+        {
+            get
+            {
+                return _localizedNames;
+            }
+            set
+            {
+                _localizedNames = value;
+            }
+        }
+
         /// <summary>
         /// Gets or sets the short description
         /// </summary>

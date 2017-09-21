@@ -19,12 +19,15 @@ namespace Nop.Plugin.Api.WebHooks
         new WebHookFilter { Name = WebHookNames.ProductCreated, Description = "A product has been created."},
         new WebHookFilter { Name = WebHookNames.ProductUpdated, Description = "A product has been updated."},
         new WebHookFilter { Name = WebHookNames.ProductDeleted, Description = "A product has been deleted."},
+        new WebHookFilter { Name = WebHookNames.ProductUnmapped, Description = "A product has been unmapped from the store."},
         new WebHookFilter { Name = WebHookNames.CategoryCreated, Description = "A category has been created."},
         new WebHookFilter { Name = WebHookNames.CategoryUpdated, Description = "A category has been updated."},
         new WebHookFilter { Name = WebHookNames.CategoryDeleted, Description = "A category has been deleted."},
+        new WebHookFilter { Name = WebHookNames.CategoryUnmapped, Description = "A category has been unmapped from the store."},
         new WebHookFilter { Name = WebHookNames.OrderCreated, Description = "An order has been created."},
         new WebHookFilter { Name = WebHookNames.OrderUpdated, Description = "An order has been updated."},
-        new WebHookFilter { Name = WebHookNames.OrderDeleted, Description = "An order has been deleted."}
+        new WebHookFilter { Name = WebHookNames.OrderDeleted, Description = "An order has been deleted."},
+        new WebHookFilter { Name = WebHookNames.StoreUpdated, Description = "An store has been updated."}
     };
 
         public Task<Collection<WebHookFilter>> GetFiltersAsync()
