@@ -110,7 +110,8 @@ namespace Nop.Plugin.Api.Services
                                                                            where customer.Id == id && 
                                                                                  attribute.KeyGroup.Equals(KeyGroup, StringComparison.InvariantCultureIgnoreCase) &&
                                                                                  (attribute.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase) ||
-                                                                                  attribute.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase))
+                                                                                  attribute.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase) ||
+                                                                                  attribute.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase))
                                                                            select new CustomerAttributeMappingDto()
                                                                            {
                                                                                Attribute = attribute,
