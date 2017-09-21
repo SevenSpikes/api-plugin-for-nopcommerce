@@ -31,9 +31,10 @@ namespace Nop.Plugin.Api.Services
 
         public IList<Order> GetOrders(IList<int> ids = null, DateTime? createdAtMin = null, DateTime? createdAtMax = null,
            int limit = Configurations.DefaultLimit, int page = Configurations.DefaultPageValue, int sinceId = Configurations.DefaultSinceId, 
-           OrderStatus? status = null, PaymentStatus? paymentStatus = null, ShippingStatus? shippingStatus = null, int? customerId = null)
+           OrderStatus? status = null, PaymentStatus? paymentStatus = null, ShippingStatus? shippingStatus = null, int? customerId = null, 
+           int? storeId = null)
         {
-            var query = GetOrdersQuery(createdAtMin, createdAtMax, status, paymentStatus, shippingStatus, ids, customerId);
+            var query = GetOrdersQuery(createdAtMin, createdAtMax, status, paymentStatus, shippingStatus, ids, customerId, storeId);
 
             if (sinceId > 0)
             {
@@ -53,16 +54,16 @@ namespace Nop.Plugin.Api.Services
 
         public int GetOrdersCount(DateTime? createdAtMin = null, DateTime? createdAtMax = null, OrderStatus? status = null,
                                  PaymentStatus? paymentStatus = null, ShippingStatus? shippingStatus = null,
-                                 int? customerId = null)
+                                 int? customerId = null, int? storeId = null)
         {
-            var query = GetOrdersQuery(createdAtMin, createdAtMax, status, paymentStatus, shippingStatus, customerId: customerId);
+            var query = GetOrdersQuery(createdAtMin, createdAtMax, status, paymentStatus, shippingStatus, customerId: customerId, storeId: storeId);
 
             return query.Count();
         }
 
         private IQueryable<Order> GetOrdersQuery(DateTime? createdAtMin = null, DateTime? createdAtMax = null, OrderStatus? status = null,
             PaymentStatus? paymentStatus = null, ShippingStatus? shippingStatus = null, IList<int> ids = null, 
-            int? customerId = null)
+            int? customerId = null, int? storeId = null)
         {
             var query = _orderRepository.TableNoTracking;
 
@@ -101,6 +102,11 @@ namespace Nop.Plugin.Api.Services
             if (createdAtMax != null)
             {
                 query = query.Where(order => order.CreatedOnUtc < createdAtMax.Value.ToUniversalTime());
+            }
+
+            if (storeId != null)
+            {
+                query = query.Where(order => order.StoreId == storeId);
             }
 
             query = query.OrderBy(order => order.Id);

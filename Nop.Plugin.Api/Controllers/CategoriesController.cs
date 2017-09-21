@@ -87,10 +87,11 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid page parameter");
             }
 
-            IList<Category> allCategories = _categoryApiService.GetCategories(parameters.Ids, parameters.CreatedAtMin, parameters.CreatedAtMax,
+            var allCategories = _categoryApiService.GetCategories(parameters.Ids, parameters.CreatedAtMin, parameters.CreatedAtMax,
                                                                              parameters.UpdatedAtMin, parameters.UpdatedAtMax,
                                                                              parameters.Limit, parameters.Page, parameters.SinceId,
-                                                                             parameters.ProductId, parameters.PublishedStatus);
+                                                                             parameters.ProductId, parameters.PublishedStatus)
+                                                   .Where(c => _storeMappingService.Authorize(c));
 
             IList<CategoryDto> categoriesAsDtos = allCategories.Select(category =>
             {

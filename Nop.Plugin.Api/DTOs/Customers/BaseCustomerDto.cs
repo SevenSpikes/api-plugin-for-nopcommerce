@@ -25,11 +25,8 @@ namespace Nop.Plugin.Api.DTOs.Customers
         [JsonProperty("last_name")]
         public string LastName { get; set; }
 
-        [JsonProperty("gender")]
-        public string Gender { get; set; }
-
-        [JsonProperty("date_of_birth")]
-        public string DateOfBirth { get; set; }
+        [JsonProperty("language_id")]
+        public string LanguageId { get; set; }
 
         /// <summary>
         /// Gets or sets the admin comment
@@ -101,6 +98,12 @@ namespace Nop.Plugin.Api.DTOs.Customers
         /// </summary>
         [JsonProperty("last_activity_date_utc")]
         public DateTime? LastActivityDateUtc { get; set; }
+
+        /// <summary>
+        ///  Gets or sets the store identifier in which customer registered
+        /// </summary>
+        [JsonProperty("registered_in_store_id")]
+        public int? RegisteredInStoreId { get; set; }
 
         [JsonProperty("role_ids")]
         public List<int> RoleIds

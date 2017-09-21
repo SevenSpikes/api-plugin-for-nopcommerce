@@ -128,11 +128,13 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid limit parameter");
             }
 
+            var storeId = _storeContext.CurrentStore.Id;
+
             IList<Order> orders = _orderApiService.GetOrders(parameters.Ids, parameters.CreatedAtMin,
                 parameters.CreatedAtMax,
                 parameters.Limit, parameters.Page, parameters.SinceId,
                 parameters.Status, parameters.PaymentStatus, parameters.ShippingStatus,
-                parameters.CustomerId);
+                parameters.CustomerId, storeId);
 
             IList<OrderDto> ordersAsDtos = orders.Select(x => _dtoHelper.PrepareOrderDTO(x)).ToList();
 
@@ -156,8 +158,10 @@ namespace Nop.Plugin.Api.Controllers
         [GetRequestsErrorInterceptorActionFilter]
         public IHttpActionResult GetOrdersCount(OrdersCountParametersModel parameters)
         {
+            var storeId = _storeContext.CurrentStore.Id;
+
             int ordersCount = _orderApiService.GetOrdersCount(parameters.CreatedAtMin, parameters.CreatedAtMax, parameters.Status,
-                                                              parameters.PaymentStatus, parameters.ShippingStatus, parameters.CustomerId);
+                                                              parameters.PaymentStatus, parameters.ShippingStatus, parameters.CustomerId, storeId);
 
             var ordersCountRootObject = new OrdersCountRootObject()
             {

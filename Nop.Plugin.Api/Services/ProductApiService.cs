@@ -6,22 +6,26 @@ using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Vendors;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.DataStructures;
+using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.Services
 {
     public class ProductApiService : IProductApiService
     {
+        private readonly IStoreMappingService _storeMappingService;
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<ProductCategory> _productCategoryMappingRepository;
         private readonly IRepository<Vendor> _vendorRepository;
 
         public ProductApiService(IRepository<Product> productRepository,
             IRepository<ProductCategory> productCategoryMappingRepository,
-            IRepository<Vendor> vendorRepository)
+            IRepository<Vendor> vendorRepository,
+            IStoreMappingService storeMappingService)
         {
             _productRepository = productRepository;
             _productCategoryMappingRepository = productCategoryMappingRepository;
             _vendorRepository = vendorRepository;
+            _storeMappingService = storeMappingService;
         }
 
         public IList<Product> GetProducts(IList<int> ids = null,
@@ -29,9 +33,7 @@ namespace Nop.Plugin.Api.Services
            int limit = Configurations.DefaultLimit, int page = Configurations.DefaultPageValue, int sinceId = Configurations.DefaultSinceId,
            int? categoryId = null, string vendorName = null, bool? publishedStatus = null)
         {
-
-            var query = GetProductsQuery(createdAtMin, createdAtMax, updatedAtMin, updatedAtMax, vendorName,
-                publishedStatus, ids, categoryId);
+            var query = GetProductsQuery(createdAtMin, createdAtMax, updatedAtMin, updatedAtMax, vendorName, publishedStatus, ids, categoryId);
 
             if (sinceId > 0)
             {
@@ -48,7 +50,7 @@ namespace Nop.Plugin.Api.Services
             var query = GetProductsQuery(createdAtMin, createdAtMax, updatedAtMin, updatedAtMax, vendorName,
                                          publishedStatus, categoryId: categoryId);
 
-            return query.Count();
+            return query.ToList().Count(p => _storeMappingService.Authorize(p));
         }
 
         public Product GetProductById(int productId)

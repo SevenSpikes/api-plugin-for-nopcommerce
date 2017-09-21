@@ -18,6 +18,7 @@ using System.Net.Http;
 using System.Net;
 using Nop.Plugin.Api.Helpers;
 using System.Globalization;
+using Nop.Core;
 using Nop.Plugin.Api.Constants;
 using Nop.Services.Media;
 
@@ -31,6 +32,7 @@ namespace Nop.Plugin.Api.Controllers
         private IWebHookStore _store;
         private IWebHookUser _user;
         private readonly IAuthorizationHelper _authorizationHelper;
+        private readonly IStoreContext _storeContext;
         private const string PRIVATE_FILTER_PREFIX = "MS_Private_";
 
         public WebHookRegistrationsController(IJsonFieldsSerializer jsonFieldsSerializer,
@@ -42,7 +44,8 @@ namespace Nop.Plugin.Api.Controllers
             ICustomerActivityService customerActivityService,
             ILocalizationService localizationService,
             IPictureService pictureService,
-            IAuthorizationHelper authorizationHelper)
+            IAuthorizationHelper authorizationHelper, 
+            IStoreContext storeContext)
             : base(jsonFieldsSerializer,
                   aclService, customerService, 
                   storeMappingService, 
@@ -53,6 +56,7 @@ namespace Nop.Plugin.Api.Controllers
                   pictureService)
         {
             _authorizationHelper = authorizationHelper;
+            _storeContext = storeContext;
         }
 
         /// <summary>
@@ -108,6 +112,8 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             string userId = GetUserId();
+            int storeId = _storeContext.CurrentStore.Id;
+
             await VerifyFilters(webHook);
             await VerifyWebHook(webHook);
 
@@ -141,9 +147,10 @@ namespace Nop.Plugin.Api.Controllers
                 // Ensure we have a normalized ID for the WebHook
                 webHook.Id = null;
 
+                var webHookUser = userId + "-" + storeId;
 
                 // Add WebHook for this user.
-                StoreResult result = await _store.InsertWebHookAsync(userId, webHook);
+                StoreResult result = await _store.InsertWebHookAsync(webHookUser, webHook);
 
                 if (result == StoreResult.Success)
                 {

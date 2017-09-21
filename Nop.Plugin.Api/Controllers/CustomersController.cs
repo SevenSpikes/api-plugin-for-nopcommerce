@@ -45,6 +45,7 @@ namespace Nop.Plugin.Api.Controllers
         private readonly ICountryService _countryService;
         private readonly IMappingHelper _mappingHelper;
         private readonly INewsLetterSubscriptionService _newsLetterSubscriptionService;
+        private readonly ILanguageService _languageService;
         private readonly IFactory<Customer> _factory;
 
         // We resolve the customer settings this way because of the tests.
@@ -81,7 +82,7 @@ namespace Nop.Plugin.Api.Controllers
             ICountryService countryService, 
             IMappingHelper mappingHelper, 
             INewsLetterSubscriptionService newsLetterSubscriptionService,
-            IPictureService pictureService) : 
+            IPictureService pictureService, ILanguageService languageService) : 
             base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService,pictureService)
         {
             _customerApiService = customerApiService;
@@ -89,6 +90,7 @@ namespace Nop.Plugin.Api.Controllers
             _countryService = countryService;
             _mappingHelper = mappingHelper;
             _newsLetterSubscriptionService = newsLetterSubscriptionService;
+            _languageService = languageService;
             _encryptionService = encryptionService;
             _genericAttributeService = genericAttributeService;
             _customerRolesHelper = customerRolesHelper;
@@ -234,7 +236,15 @@ namespace Nop.Plugin.Api.Controllers
             
             _customerService.InsertCustomer(newCustomer);
 
-            InsertCustomerGenericAttributes(customerDelta.Dto.FirstName, customerDelta.Dto.LastName, customerDelta.Dto.Gender, customerDelta.Dto.DateOfBirth, newCustomer);
+            InsertFirstAndLastNameGenericAttributes(customerDelta.Dto.FirstName, customerDelta.Dto.LastName, newCustomer);
+
+            int languageId = 0;
+
+            if (!string.IsNullOrEmpty(customerDelta.Dto.LanguageId) && int.TryParse(customerDelta.Dto.LanguageId, out languageId)
+                && _languageService.GetLanguageById(languageId) != null)
+            {
+                _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.LanguageId, languageId);
+            }
 
             //password
             if (!string.IsNullOrWhiteSpace(customerDelta.Dto.Password))
@@ -260,11 +270,11 @@ namespace Nop.Plugin.Api.Controllers
             // and the country will be left null. So we do it by hand here.
             PopulateAddressCountryNames(newCustomerDto);
 
-            // Set the fist, last name, gender and date of birth separately because they are not part of the customer entity, but are saved in the generic attributes.
+            // Set the fist and last name separately because they are not part of the customer entity, but are saved in the generic attributes.
             newCustomerDto.FirstName = customerDelta.Dto.FirstName;
             newCustomerDto.LastName = customerDelta.Dto.LastName;
-            newCustomerDto.Gender = customerDelta.Dto.Gender;
-            newCustomerDto.DateOfBirth = customerDelta.Dto.DateOfBirth;
+
+            newCustomerDto.LanguageId = customerDelta.Dto.LanguageId;
 
             newCustomerDto.RoleIds = newCustomer.CustomerRoles.Select(x => x.Id).ToList();
 
@@ -335,7 +345,16 @@ namespace Nop.Plugin.Api.Controllers
 
             _customerService.UpdateCustomer(currentCustomer);
 
-            InsertCustomerGenericAttributes(customerDelta.Dto.FirstName, customerDelta.Dto.LastName, customerDelta.Dto.Gender, customerDelta.Dto.DateOfBirth, currentCustomer);
+            InsertFirstAndLastNameGenericAttributes(customerDelta.Dto.FirstName, customerDelta.Dto.LastName, currentCustomer);
+
+
+            int languageId = 0;
+
+            if (!string.IsNullOrEmpty(customerDelta.Dto.LanguageId) && int.TryParse(customerDelta.Dto.LanguageId, out languageId)
+                && _languageService.GetLanguageById(languageId) != null)
+            {
+                _genericAttributeService.SaveAttribute(currentCustomer, SystemCustomerAttributeNames.LanguageId, languageId);
+            }
 
             //password
             if (!string.IsNullOrWhiteSpace(customerDelta.Dto.Password))
@@ -354,7 +373,7 @@ namespace Nop.Plugin.Api.Controllers
             // so we do it by hand here.
             PopulateAddressCountryNames(updatedCustomer);
 
-            // Set the fist, last name, gender and date of birth separately because they are not part of the customer entity, but are saved in the generic attributes.
+            // Set the fist and last name separately because they are not part of the customer entity, but are saved in the generic attributes.
             var firstNameGenericAttribute = _genericAttributeService.GetAttributesForEntity(currentCustomer.Id, typeof(Customer).Name)
                 .FirstOrDefault(x => x.Key == "FirstName");
 
@@ -371,20 +390,12 @@ namespace Nop.Plugin.Api.Controllers
                 updatedCustomer.LastName = lastNameGenericAttribute.Value;
             }
 
-            var genderGenericAttribute = _genericAttributeService.GetAttributesForEntity(currentCustomer.Id, typeof(Customer).Name)
-                .FirstOrDefault(x => x.Key == "Gender");
+            var languageIdGenericAttribute = _genericAttributeService.GetAttributesForEntity(currentCustomer.Id, typeof(Customer).Name)
+                .FirstOrDefault(x => x.Key == "LanguageId");
 
-            if (genderGenericAttribute != null)
+            if (languageIdGenericAttribute != null)
             {
-                updatedCustomer.Gender = genderGenericAttribute.Value;
-            }
-
-            var dateOfBirthGenericAttribute = _genericAttributeService.GetAttributesForEntity(currentCustomer.Id, typeof(Customer).Name)
-               .FirstOrDefault(x => x.Key == "DateOfBirth");
-
-            if (dateOfBirthGenericAttribute != null)
-            {
-                updatedCustomer.DateOfBirth = dateOfBirthGenericAttribute.Value;
+                updatedCustomer.LanguageId = languageIdGenericAttribute.Value;
             }
 
             updatedCustomer.RoleIds = currentCustomer.CustomerRoles.Select(x => x.Id).ToList();
@@ -433,7 +444,7 @@ namespace Nop.Plugin.Api.Controllers
             return new RawJsonActionResult("{}");
         }
 
-        private void InsertCustomerGenericAttributes(string firstName, string lastName, string gender, string dateOfBirth, Customer newCustomer)
+        private void InsertFirstAndLastNameGenericAttributes(string firstName, string lastName, Customer newCustomer)
         {
             // we assume that if the first name is not sent then it will be null and in this case we don't want to update it
             if (firstName != null)
@@ -444,16 +455,6 @@ namespace Nop.Plugin.Api.Controllers
             if (lastName != null)
             {
                 _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.LastName, lastName);
-            }
-
-            if (gender != null)
-            {
-                _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.Gender, gender);
-            }
-
-            if (dateOfBirth != null)
-            {
-                _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.DateOfBirth, dateOfBirth);
             }
         }
 
@@ -499,28 +500,35 @@ namespace Nop.Plugin.Api.Controllers
         private void AddPassword(string newPassword, Customer customer)
         {
             // TODO: call this method before inserting the customer.
+            var customerPassword = new CustomerPassword
+            {
+                Customer = customer,
+                PasswordFormat = CustomerSettings.DefaultPasswordFormat,
+                CreatedOnUtc = DateTime.UtcNow
+            };
+
             switch (CustomerSettings.DefaultPasswordFormat)
             {
                 case PasswordFormat.Clear:
                     {
-                        customer.Password = newPassword;
+                        customerPassword.Password = newPassword;
                     }
                     break;
                 case PasswordFormat.Encrypted:
                     {
-                        customer.Password = _encryptionService.EncryptText(newPassword);
+                        customerPassword.Password = _encryptionService.EncryptText(newPassword);
                     }
                     break;
                 case PasswordFormat.Hashed:
                     {
                         string saltKey = _encryptionService.CreateSaltKey(5);
-                        customer.PasswordSalt = saltKey;
-                        customer.Password = _encryptionService.CreatePasswordHash(newPassword, saltKey, CustomerSettings.HashedPasswordFormat);
+                        customerPassword.PasswordSalt = saltKey;
+                        customerPassword.Password = _encryptionService.CreatePasswordHash(newPassword, saltKey, CustomerSettings.HashedPasswordFormat);
                     }
                     break;
             }
 
-            customer.PasswordFormat = CustomerSettings.DefaultPasswordFormat;
+            _customerService.InsertCustomerPassword(customerPassword);
 
             // TODO: remove this.
             _customerService.UpdateCustomer(customer);
