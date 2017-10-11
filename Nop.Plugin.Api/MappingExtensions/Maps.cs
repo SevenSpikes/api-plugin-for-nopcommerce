@@ -87,7 +87,8 @@ namespace Nop.Plugin.Api.MappingExtensions
                         y.MapFrom(
                             src =>
                                 src.ShoppingCartItems.GetWithDefault(x => x, new List<ShoppingCartItem>())
-                                    .Select(item => item.ToDto())));
+                                    .Select(item => item.ToDto())))
+                 .ForMember(x => x.RoleIds, y => y.MapFrom(src => src.CustomerRoles.Select(z => z.Id)));
         }
 
         public static void CreateCustomerToOrderCustomerDTOMap()

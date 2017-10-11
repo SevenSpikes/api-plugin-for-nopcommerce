@@ -275,8 +275,6 @@ namespace Nop.Plugin.Api.Controllers
 
             newCustomerDto.LanguageId = customerDelta.Dto.LanguageId;
 
-            newCustomerDto.RoleIds = newCustomer.CustomerRoles.Select(x => x.Id).ToList();
-
             //activity log
             _customerActivityService.InsertActivity("AddNewCustomer", _localizationService.GetResource("ActivityLog.AddNewCustomer"), newCustomer.Id);
 
@@ -396,8 +394,6 @@ namespace Nop.Plugin.Api.Controllers
             {
                 updatedCustomer.LanguageId = languageIdGenericAttribute.Value;
             }
-
-            updatedCustomer.RoleIds = currentCustomer.CustomerRoles.Select(x => x.Id).ToList();
 
             //activity log
             _customerActivityService.InsertActivity("UpdateCustomer", _localizationService.GetResource("ActivityLog.UpdateCustomer"), currentCustomer.Id);
