@@ -256,6 +256,15 @@ namespace Nop.Plugin.Api.DTOs.Products
         public bool? UseMultipleWarehouses { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating how to manage inventory.
+        /// 0 - do not track inventory
+        /// 1 - track inventory
+        /// 2 - track invetory by attributes
+        /// </summary>
+        [JsonProperty("manage_inventory_method_id")]
+        public int? ManageInventoryMethodId { get; set; }
+
+        /// <summary>
         /// Gets or sets the stock quantity
         /// </summary>
         [JsonProperty("stock_quantity")]
