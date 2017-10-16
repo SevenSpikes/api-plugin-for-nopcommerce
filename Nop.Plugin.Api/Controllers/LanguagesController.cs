@@ -61,7 +61,15 @@ namespace Nop.Plugin.Api.Controllers
         {
             IList<Language> allLanguages = _languageService.GetAllLanguages();
 
-            IList<LanguageDto> languagesAsDto = allLanguages.Select(language => language.ToDto()).ToList();
+            IList<LanguageDto> languagesAsDto = allLanguages.Select(language =>
+            {
+                var dto = language.ToDto();
+
+                dto.StoreIds = _storeMappingService.GetStoreMappings(language).Select(mapping => mapping.StoreId).ToList();
+
+                return dto;
+
+            }).ToList();
 
             var languagesRootObject = new LanguagesRootObject()
             {
