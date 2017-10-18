@@ -24,6 +24,10 @@
         public const string OrderUpdated = "orders/updated";
         public const string OrderDeleted = "orders/deleted";
 
+        public const string ProductCategoryMapCreated = "product_category_map/created";
+        public const string ProductCategoryMapUpdated = "product_category_map/updated";
+        public const string ProductCategoryMapDeleted = "product_category_map/deleted";
+
         public const string StoreUpdated = "stores/updated";
     }
 }
