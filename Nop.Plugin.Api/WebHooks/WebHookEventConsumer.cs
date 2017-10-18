@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNet.WebHooks;
+using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
@@ -15,8 +17,10 @@ using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.DTOs.Orders;
+using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
 using Nop.Plugin.Api.DTOs.Stores;
 using Nop.Plugin.Api.MappingExtensions;
+using Nop.Services.Catalog;
 using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.WebHooks
@@ -32,13 +36,20 @@ namespace Nop.Plugin.Api.WebHooks
         IConsumer<EntityInserted<StoreMapping>>,
         IConsumer<EntityDeleted<StoreMapping>>,
         IConsumer<EntityInserted<GenericAttribute>>,
-        IConsumer<EntityUpdated<Store>>
+        IConsumer<EntityUpdated<Store>>,
+        IConsumer<EntityInserted<ProductCategory>>,
+        IConsumer<EntityUpdated<ProductCategory>>,
+        IConsumer<EntityDeleted<ProductCategory>>
     {
         private IWebHookManager _webHookManager;
         private ICustomerApiService _customerApiService;
         private ICategoryApiService _categoryApiService;
         private IProductApiService _productApiService;
+        private IProductService _productService;
+        private ICategoryService _categoryService;
+        private IStoreMappingService _storeMappingService;
         private IStoreService _storeService;
+        private IStoreContext _storeContext;
 
         private IDTOHelper _dtoHelper;
 
@@ -50,6 +61,11 @@ namespace Nop.Plugin.Api.WebHooks
             _productApiService = EngineContext.Current.ContainerManager.Resolve<IProductApiService>();
             _dtoHelper = EngineContext.Current.ContainerManager.Resolve<IDTOHelper>();
             _storeService = EngineContext.Current.ContainerManager.Resolve<IStoreService>();
+
+            _productService = EngineContext.Current.ContainerManager.Resolve<IProductService>();
+            _categoryService = EngineContext.Current.ContainerManager.Resolve<ICategoryService>();
+            _storeMappingService = EngineContext.Current.ContainerManager.Resolve<IStoreMappingService>();
+            _storeContext = EngineContext.Current.ContainerManager.Resolve<IStoreContext>();
 
             _webHookManager = webHookService.GetHookManager();
         }
@@ -318,6 +334,55 @@ namespace Nop.Plugin.Api.WebHooks
             }
 
             return false;
+        }
+
+        public void HandleEvent(EntityInserted<ProductCategory> eventMessage)
+        {
+            NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapCreated);
+        }
+
+        public void HandleEvent(EntityUpdated<ProductCategory> eventMessage)
+        {
+            NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapUpdated);
+        }
+
+        public void HandleEvent(EntityDeleted<ProductCategory> eventMessage)
+        {
+            NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapDeleted);
+        }
+
+        private void NotifyProductCategoryMappingWebhook(ProductCategory productCategory, string eventName)
+        {
+            if (!ProductCategoryMapIsForTheCurrentStore(productCategory))
+            {
+                return;
+            }
+
+            ProductCategoryMappingDto productCategoryMappingDto = productCategory.ToDto();
+
+            var storeIds = new List<int> { _storeContext.CurrentStore.Id };
+
+            NotifyRegisteredWebHooks(productCategoryMappingDto, eventName, storeIds);
+        }
+
+        private bool ProductCategoryMapIsForTheCurrentStore(ProductCategory productCategory)
+        {
+            // Check if the product and category are available for the current store.
+            Product product = _productService.GetProductById(productCategory.ProductId);
+
+            if (product == null || !_storeMappingService.Authorize(product))
+            {
+                return false;
+            }
+
+            Category category = _categoryService.GetCategoryById(productCategory.CategoryId);
+
+            if (category == null || !_storeMappingService.Authorize(category))
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }
