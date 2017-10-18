@@ -27,6 +27,9 @@ namespace Nop.Plugin.Api.WebHooks
         new WebHookFilter { Name = WebHookNames.OrderCreated, Description = "An order has been created."},
         new WebHookFilter { Name = WebHookNames.OrderUpdated, Description = "An order has been updated."},
         new WebHookFilter { Name = WebHookNames.OrderDeleted, Description = "An order has been deleted."},
+        new WebHookFilter { Name = WebHookNames.ProductCategoryMapCreated, Description = "A product category map has been created."},
+        new WebHookFilter { Name = WebHookNames.ProductCategoryMapUpdated, Description = "A product category map has been updated."},
+        new WebHookFilter { Name = WebHookNames.ProductCategoryMapDeleted, Description = "A product category map has been deleted."},
         new WebHookFilter { Name = WebHookNames.StoreUpdated, Description = "An store has been updated."}
     };
 
