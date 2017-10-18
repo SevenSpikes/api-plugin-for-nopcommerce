@@ -112,7 +112,6 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             string userId = GetUserId();
-            int storeId = _storeContext.CurrentStore.Id;
 
             await VerifyFilters(webHook);
             await VerifyWebHook(webHook);
@@ -147,10 +146,8 @@ namespace Nop.Plugin.Api.Controllers
                 // Ensure we have a normalized ID for the WebHook
                 webHook.Id = null;
 
-                var webHookUser = userId + "-" + storeId;
-
                 // Add WebHook for this user.
-                StoreResult result = await _store.InsertWebHookAsync(webHookUser, webHook);
+                StoreResult result = await _store.InsertWebHookAsync(userId, webHook);
 
                 if (result == StoreResult.Success)
                 {
@@ -373,7 +370,11 @@ namespace Nop.Plugin.Api.Controllers
             // So there is a client ID and the client is active.
             var client = _authorizationHelper.GetCurrentClientFromClaims();
 
-            return client.ClientId;
+            var storeId = _storeContext.CurrentStore.Id;
+
+            var webHookUser = client.ClientId + "-" + storeId;
+
+            return webHookUser;
         }
 
         /// <summary>
