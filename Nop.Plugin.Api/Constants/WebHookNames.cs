@@ -6,28 +6,32 @@
 
         public const string GetWebhookByIdAction = "GetWebHookByIdAction";
 
-        public const string CustomerCreated = "customers/created";
-        public const string CustomerUpdated = "customers/updated";
-        public const string CustomerDeleted = "customers/deleted";
+        public const string CustomersCreate = "customers/create";
+        public const string CustomersUpdate = "customers/update";
+        public const string CustomersDelete = "customers/delete";
 
-        public const string ProductCreated = "products/created";
-        public const string ProductUpdated = "products/updated";
-        public const string ProductDeleted = "products/deleted";
-        public const string ProductUnmapped = "products/unmapped";
+        public const string ProductsCreate = "products/create";
+        public const string ProductsUpdate = "products/update";
+        public const string ProductsDelete = "products/delete";
+        public const string ProductsUnmap = "products/unmap";
 
-        public const string CategoryCreated = "categories/created";
-        public const string CategoryUpdated = "categories/updated";
-        public const string CategoryDeleted = "categories/deleted";
-        public const string CategoryUnmapped = "categories/unmapped";
+        public const string CategoriesCreate = "categories/create";
+        public const string CategoriesUpdate = "categories/update";
+        public const string CategoriesDelete = "categories/delete";
+        public const string CategoriesUnmap = "categories/unmap";
 
-        public const string OrderCreated = "orders/created";
-        public const string OrderUpdated = "orders/updated";
-        public const string OrderDeleted = "orders/deleted";
+        public const string OrdersCreate = "orders/create";
+        public const string OrdersUpdate = "orders/update";
+        public const string OrdersDelete = "orders/delete";
 
-        public const string ProductCategoryMapCreated = "product_category_map/created";
-        public const string ProductCategoryMapUpdated = "product_category_map/updated";
-        public const string ProductCategoryMapDeleted = "product_category_map/deleted";
+        public const string ProductCategoryMapsCreate = "product_category_maps/create";
+        public const string ProductCategoryMapsUpdate = "product_category_maps/update";
+        public const string ProductCategoryMapsDelete = "product_category_maps/delete";
 
-        public const string StoreUpdated = "stores/updated";
+        public const string StoresUpdate = "stores/update";
+
+        public const string LanguagesCreate = "languages/create";
+        public const string LanguagesUpdate = "languages/update";
+        public const string LanguagesDelete = "languages/delete";
     }
 }

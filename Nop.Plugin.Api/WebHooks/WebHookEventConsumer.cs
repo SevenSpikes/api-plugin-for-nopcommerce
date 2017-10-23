@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.AspNet.WebHooks;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
+using Nop.Core.Domain.Localization;
 using Nop.Core.Events;
 using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.Services;
@@ -16,6 +16,7 @@ using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Stores;
+using Nop.Plugin.Api.DTOs.Languages;
 using Nop.Plugin.Api.DTOs.Orders;
 using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
 using Nop.Plugin.Api.DTOs.Stores;
@@ -39,7 +40,10 @@ namespace Nop.Plugin.Api.WebHooks
         IConsumer<EntityUpdated<Store>>,
         IConsumer<EntityInserted<ProductCategory>>,
         IConsumer<EntityUpdated<ProductCategory>>,
-        IConsumer<EntityDeleted<ProductCategory>>
+        IConsumer<EntityDeleted<ProductCategory>>,
+        IConsumer<EntityInserted<Language>>,
+        IConsumer<EntityUpdated<Language>>,
+        IConsumer<EntityDeleted<Language>>
     {
         private IWebHookManager _webHookManager;
         private ICustomerApiService _customerApiService;
@@ -86,7 +90,7 @@ namespace Nop.Plugin.Api.WebHooks
                 storeIds.Add(customer.RegisteredInStoreId.Value);
             }
 
-            NotifyRegisteredWebHooks(customer, WebHookNames.CustomerCreated, storeIds);
+            NotifyRegisteredWebHooks(customer, WebHookNames.CustomersCreate, storeIds);
         }
 
         public void HandleEvent(EntityUpdated<Customer> eventMessage)
@@ -101,11 +105,11 @@ namespace Nop.Plugin.Api.WebHooks
 
             // In nopCommerce the Customer, Product, Category and Order entities are not deleted.
             // Instead the Deleted property of the entity is set to true.
-            string webhookEvent = WebHookNames.CustomerUpdated;
+            string webhookEvent = WebHookNames.CustomersUpdate;
 
             if (customer.Deleted == true)
             {
-                webhookEvent = WebHookNames.CustomerDeleted;
+                webhookEvent = WebHookNames.CustomersDelete;
             }
 
             var storeIds = new List<int>();
@@ -124,18 +128,18 @@ namespace Nop.Plugin.Api.WebHooks
 
             // The Store mappings of the product are still not saved, so all webhooks will be triggered
             // no matter for which store are registered.
-            NotifyRegisteredWebHooks(productDto, WebHookNames.ProductCreated, productDto.StoreIds);
+            NotifyRegisteredWebHooks(productDto, WebHookNames.ProductsCreate, productDto.StoreIds);
         }
 
         public void HandleEvent(EntityUpdated<Product> eventMessage)
         {
             ProductDto productDto = _dtoHelper.PrepareProductDTO(eventMessage.Entity);
 
-            string webhookEvent = WebHookNames.ProductUpdated;
+            string webhookEvent = WebHookNames.ProductsUpdate;
 
             if (productDto.Deleted == true)
             {
-                webhookEvent = WebHookNames.ProductDeleted;
+                webhookEvent = WebHookNames.ProductsDelete;
             }
 
             NotifyRegisteredWebHooks(productDto, webhookEvent, productDto.StoreIds);
@@ -147,18 +151,18 @@ namespace Nop.Plugin.Api.WebHooks
 
             // The Store mappings of the category are still not saved, so all webhooks will be triggered
             // no matter for which store are registered.
-            NotifyRegisteredWebHooks(categoryDto, WebHookNames.CategoryCreated, categoryDto.StoreIds);
+            NotifyRegisteredWebHooks(categoryDto, WebHookNames.CategoriesCreate, categoryDto.StoreIds);
         }
 
         public void HandleEvent(EntityUpdated<Category> eventMessage)
         {
             CategoryDto categoryDto = _dtoHelper.PrepareCategoryDTO(eventMessage.Entity);
 
-            string webhookEvent = WebHookNames.CategoryUpdated;
+            string webhookEvent = WebHookNames.CategoriesUpdate;
 
             if (categoryDto.Deleted == true)
             {
-                webhookEvent = WebHookNames.CategoryDeleted;
+                webhookEvent = WebHookNames.CategoriesDelete;
             }
 
             NotifyRegisteredWebHooks(categoryDto, webhookEvent, categoryDto.StoreIds);
@@ -175,18 +179,18 @@ namespace Nop.Plugin.Api.WebHooks
                 storeIds.Add(orderDto.StoreId.Value);
             }
 
-            NotifyRegisteredWebHooks(orderDto, WebHookNames.OrderCreated, storeIds);
+            NotifyRegisteredWebHooks(orderDto, WebHookNames.OrdersCreate, storeIds);
         }
 
         public void HandleEvent(EntityUpdated<Order> eventMessage)
         {
             OrderDto orderDto = _dtoHelper.PrepareOrderDTO(eventMessage.Entity);
 
-            string webhookEvent = WebHookNames.OrderUpdated;
+            string webhookEvent = WebHookNames.OrdersUpdate;
 
             if (orderDto.Deleted == true)
             {
-                webhookEvent = WebHookNames.OrderDeleted;
+                webhookEvent = WebHookNames.OrdersDelete;
             }
 
             var storeIds = new List<int>();
@@ -224,13 +228,13 @@ namespace Nop.Plugin.Api.WebHooks
                     storeIds.Add(customerDto.RegisteredInStoreId.Value);
                 }
 
-                NotifyRegisteredWebHooks(customerDto, WebHookNames.CustomerUpdated, storeIds);
+                NotifyRegisteredWebHooks(customerDto, WebHookNames.CustomersUpdate, storeIds);
             }
         }
 
         public void HandleEvent(EntityUpdated<Store> eventMessage)
         {
-            StoreDto storeDto = eventMessage.Entity.ToDto();
+            StoreDto storeDto = _dtoHelper.PrepareStoreDTO(eventMessage.Entity);
 
             int storeId;
 
@@ -239,116 +243,23 @@ namespace Nop.Plugin.Api.WebHooks
                 var storeIds = new List<int>();
                 storeIds.Add(storeId);
 
-                NotifyRegisteredWebHooks(storeDto, WebHookNames.StoreUpdated, storeIds);
+                NotifyRegisteredWebHooks(storeDto, WebHookNames.StoresUpdate, storeIds);
             }
         }
-
-        private void HandleStoreMappingEvent(int entityId, string entityName)
-        {
-            // When creating or editing a category after saving the store mapping the category is not updated
-            // so we should listen for StoreMapping update/delete and fire a webhook with the updated entityDto(with correct storeIds).
-            if (entityName == "Category")
-            {
-                var category = _categoryApiService.GetCategoryById(entityId);
-
-                if (category != null)
-                {
-                    CategoryDto categoryDto = _dtoHelper.PrepareCategoryDTO(category);
-
-                    string webhookEvent = WebHookNames.CategoryUpdated;
-
-                    if (categoryDto.Deleted == true)
-                    {
-                        webhookEvent = WebHookNames.CategoryDeleted;
-                    }
-
-                    NotifyRegisteredWebHooks(categoryDto, webhookEvent, categoryDto.StoreIds);
-                }
-            }
-            else if (entityName == "Product")
-            {
-                var product = _productApiService.GetProductById(entityId);
-
-                if (product != null)
-                {
-                    ProductDto productDto = _dtoHelper.PrepareProductDTO(product);
-
-                    string webhookEvent = WebHookNames.ProductUpdated;
-
-                    if (productDto.Deleted == true)
-                    {
-                        webhookEvent = WebHookNames.ProductDeleted;
-                    }
-
-                    NotifyRegisteredWebHooks(productDto, webhookEvent, productDto.StoreIds);
-                }
-            }
-        }
-
-        private void NotifyRegisteredWebHooks<T>(T entityDto, string webhookEvent, List<int> storeIds)
-        {
-            if (storeIds.Count > 0)
-            {
-                // Notify all webhooks that the entity is mapped to their store.
-                _webHookManager.NotifyAllAsync(webhookEvent, new { Item = entityDto }, (hook, hookUser) => IsEntityMatchingTheWebHookStoreId(hookUser, storeIds));
-
-                if (typeof(T) == typeof(ProductDto) || typeof(T) == typeof(CategoryDto))
-                {
-                    NotifyUnmappedEntityWebhooks(entityDto, storeIds);
-                }
-            }
-            else
-            {
-                _webHookManager.NotifyAllAsync(webhookEvent, new { Item = entityDto });
-            }
-        }
-
-        private void NotifyUnmappedEntityWebhooks<T>(T entityDto, List<int> storeIds)
-        {
-            if (typeof(T) == typeof(ProductDto))
-            {
-                // The product is not mapped to the store.
-                // Notify all webhooks that the entity is not mapped to their store.
-                _webHookManager.NotifyAllAsync(WebHookNames.ProductUnmapped, new { Item = entityDto },
-                    (hook, hookUser) => !IsEntityMatchingTheWebHookStoreId(hookUser, storeIds));
-            }
-            else if (typeof(T) == typeof(CategoryDto))
-            {
-                // The category is not mapped to the store.
-                // Notify all webhooks that the entity is not mapped to their store.
-                _webHookManager.NotifyAllAsync(WebHookNames.CategoryUnmapped, new { Item = entityDto },
-                    (hook, hookUser) => !IsEntityMatchingTheWebHookStoreId(hookUser, storeIds));
-            }
-        }
-
-        private bool IsEntityMatchingTheWebHookStoreId(string webHookUser, List<int> storeIds)
-        {
-            // When we register the webhooks we add "-storeId" at the end of the webHookUser string.
-            // That way we can check to which store is mapped the webHook.
-            foreach (var id in storeIds)
-            {
-                if (webHookUser.EndsWith("-" + id))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
+       
         public void HandleEvent(EntityInserted<ProductCategory> eventMessage)
         {
-            NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapCreated);
+            NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapsCreate);
         }
 
         public void HandleEvent(EntityUpdated<ProductCategory> eventMessage)
         {
-            NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapUpdated);
+            NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapsUpdate);
         }
 
         public void HandleEvent(EntityDeleted<ProductCategory> eventMessage)
         {
-            NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapDeleted);
+            NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapsDelete);
         }
 
         private void NotifyProductCategoryMappingWebhook(ProductCategory productCategory, string eventName)
@@ -384,5 +295,120 @@ namespace Nop.Plugin.Api.WebHooks
 
             return true;
         }
+
+        public void HandleEvent(EntityInserted<Language> eventMessage)
+        {
+            LanguageDto langaDto = eventMessage.Entity.ToDto();
+
+            NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesCreate, langaDto.StoreIds);
+        }
+
+        public void HandleEvent(EntityUpdated<Language> eventMessage)
+        {
+            LanguageDto langaDto = eventMessage.Entity.ToDto();
+
+            NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesUpdate, langaDto.StoreIds);
+        }
+
+        public void HandleEvent(EntityDeleted<Language> eventMessage)
+        {
+            LanguageDto langaDto = eventMessage.Entity.ToDto();
+
+            NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesDelete, langaDto.StoreIds);
+        }
+
+        private void HandleStoreMappingEvent(int entityId, string entityName)
+        {
+            // When creating or editing a category after saving the store mapping the category is not updated
+            // so we should listen for StoreMapping update/delete and fire a webhook with the updated entityDto(with correct storeIds).
+            if (entityName == "Category")
+            {
+                var category = _categoryApiService.GetCategoryById(entityId);
+
+                if (category != null)
+                {
+                    CategoryDto categoryDto = _dtoHelper.PrepareCategoryDTO(category);
+
+                    string webhookEvent = WebHookNames.CategoriesUpdate;
+
+                    if (categoryDto.Deleted == true)
+                    {
+                        webhookEvent = WebHookNames.CategoriesDelete;
+                    }
+
+                    NotifyRegisteredWebHooks(categoryDto, webhookEvent, categoryDto.StoreIds);
+                }
+            }
+            else if (entityName == "Product")
+            {
+                var product = _productApiService.GetProductById(entityId);
+
+                if (product != null)
+                {
+                    ProductDto productDto = _dtoHelper.PrepareProductDTO(product);
+
+                    string webhookEvent = WebHookNames.ProductsUpdate;
+
+                    if (productDto.Deleted == true)
+                    {
+                        webhookEvent = WebHookNames.ProductsDelete;
+                    }
+
+                    NotifyRegisteredWebHooks(productDto, webhookEvent, productDto.StoreIds);
+                }
+            }
+        }
+
+        private void NotifyRegisteredWebHooks<T>(T entityDto, string webhookEvent, List<int> storeIds)
+        {
+            if (storeIds.Count > 0)
+            {
+                // Notify all webhooks that the entity is mapped to their store.
+                _webHookManager.NotifyAllAsync(webhookEvent, new { Item = entityDto }, (hook, hookUser) => IsEntityMatchingTheWebHookStoreId(hookUser, storeIds));
+
+                if (typeof(T) == typeof(ProductDto) || typeof(T) == typeof(CategoryDto))
+                {
+                    NotifyUnmappedEntityWebhooks(entityDto, storeIds);
+                }
+            }
+            else
+            {
+                _webHookManager.NotifyAllAsync(webhookEvent, new { Item = entityDto });
+            }
+        }
+
+        private void NotifyUnmappedEntityWebhooks<T>(T entityDto, List<int> storeIds)
+        {
+            if (typeof(T) == typeof(ProductDto))
+            {
+                // The product is not mapped to the store.
+                // Notify all webhooks that the entity is not mapped to their store.
+                _webHookManager.NotifyAllAsync(WebHookNames.ProductsUnmap, new { Item = entityDto },
+                    (hook, hookUser) => !IsEntityMatchingTheWebHookStoreId(hookUser, storeIds));
+            }
+            else if (typeof(T) == typeof(CategoryDto))
+            {
+                // The category is not mapped to the store.
+                // Notify all webhooks that the entity is not mapped to their store.
+                _webHookManager.NotifyAllAsync(WebHookNames.CategoriesUnmap, new { Item = entityDto },
+                    (hook, hookUser) => !IsEntityMatchingTheWebHookStoreId(hookUser, storeIds));
+            }
+        }
+
+        private bool IsEntityMatchingTheWebHookStoreId(string webHookUser, List<int> storeIds)
+        {
+            // When we register the webhooks we add "-storeId" at the end of the webHookUser string.
+            // That way we can check to which store is mapped the webHook.
+            foreach (var id in storeIds)
+            {
+                if (webHookUser.EndsWith("-" + id))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
     }
 }
