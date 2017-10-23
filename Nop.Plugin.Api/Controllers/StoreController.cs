@@ -20,6 +20,7 @@ using System.Linq;
 using System.Net;
 using System.Web.Http;
 using System.Web.Http.Description;
+using Nop.Plugin.Api.Helpers;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -30,6 +31,7 @@ namespace Nop.Plugin.Api.Controllers
         private readonly CurrencySettings _currencySettings;
         private readonly ICurrencyService _currencyService;
         private readonly ILanguageService _languageService;
+        private readonly IDTOHelper _dtoHelper;
 
         public StoreController(IJsonFieldsSerializer jsonFieldsSerializer,
             IAclService aclService,
@@ -43,7 +45,8 @@ namespace Nop.Plugin.Api.Controllers
             IStoreContext storeContext,
             CurrencySettings currencySettings,
             ICurrencyService currencyService,
-            ILanguageService languageService)
+            ILanguageService languageService,
+            IDTOHelper dtoHelper)
             : base(jsonFieldsSerializer,
                   aclService,
                   customerService,
@@ -58,6 +61,7 @@ namespace Nop.Plugin.Api.Controllers
             _currencySettings = currencySettings;
             _currencyService = currencyService;
             _languageService = languageService;
+            _dtoHelper = dtoHelper;
         }
 
         /// <summary>
@@ -79,16 +83,7 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.NotFound, "store", "store not found");
             }
 
-            StoreDto storeDto = store.ToDto();
-
-            Currency primaryCurrency = _currencyService.GetCurrencyById(_currencySettings.PrimaryStoreCurrencyId);
-
-            if (!String.IsNullOrEmpty(primaryCurrency.DisplayLocale))
-            {
-                storeDto.PrimaryCurrencyDisplayLocale = primaryCurrency.DisplayLocale;
-            }
-
-            storeDto.LanguageIds = _languageService.GetAllLanguages(false, store.Id).Select(x => x.Id).ToList();
+            StoreDto storeDto = _dtoHelper.PrepareStoreDTO(store);
 
             var storesRootObject = new StoresRootObject();
 
@@ -116,16 +111,7 @@ namespace Nop.Plugin.Api.Controllers
 
             foreach (var store in allStores)
             {
-                var storeDto = store.ToDto();
-
-                Currency primaryCurrency = _currencyService.GetCurrencyById(_currencySettings.PrimaryStoreCurrencyId);
-
-                if (!String.IsNullOrEmpty(primaryCurrency.DisplayLocale))
-                {
-                    storeDto.PrimaryCurrencyDisplayLocale = primaryCurrency.DisplayLocale;
-                }
-
-                storeDto.LanguageIds = _languageService.GetAllLanguages(false, store.Id).Select(x => x.Id).ToList();
+                var storeDto = _dtoHelper.PrepareStoreDTO(store);
 
                 storesAsDto.Add(storeDto);
             }
