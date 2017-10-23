@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
+using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Localization;
 using Nop.Plugin.Api.DTOs.Products;
 using Nop.Services.Catalog;
@@ -12,6 +13,7 @@ using Nop.Services.Stores;
 using Nop.Plugin.Api.DTOs.Images;
 using Nop.Core.Domain.Media;
 using Nop.Core.Domain.Orders;
+using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.DTOs;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.DTOs.Categories;
@@ -21,6 +23,8 @@ using Nop.Plugin.Api.DTOs.Orders;
 using Nop.Plugin.Api.Services;
 using Nop.Services.Media;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
+using Nop.Plugin.Api.DTOs.Stores;
+using Nop.Services.Directory;
 using Nop.Services.Localization;
 
 namespace Nop.Plugin.Api.Helpers
@@ -34,6 +38,8 @@ namespace Nop.Plugin.Api.Helpers
         private IPictureService _pictureService;
         private IProductAttributeService _productAttributeService;
         private ILanguageService _languageService;
+        private ICurrencyService _currencyService;
+        private CurrencySettings _currencySettings;
         private ICustomerApiService _customerApiService;
         private IProductAttributeConverter _productAttributeConverter;
 
@@ -45,7 +51,9 @@ namespace Nop.Plugin.Api.Helpers
             IProductAttributeService productAttributeService,
             ICustomerApiService customerApiService,
             IProductAttributeConverter productAttributeConverter,
-            ILanguageService languageService)
+            ILanguageService languageService,
+            ICurrencyService currencyService,
+            CurrencySettings currencySettings)
         {
             _productService = productService;
             _aclService = aclService;
@@ -55,6 +63,8 @@ namespace Nop.Plugin.Api.Helpers
             _customerApiService = customerApiService;
             _productAttributeConverter = productAttributeConverter;
             _languageService = languageService;
+            _currencyService = currencyService;
+            _currencySettings = currencySettings;
             _storeContext = storeContext;
         }
 
@@ -151,6 +161,22 @@ namespace Nop.Plugin.Api.Helpers
             dto.CustomerDto = shoppingCartItem.Customer.ToCustomerForShoppingCartItemDto();
             dto.Attributes = _productAttributeConverter.Parse(shoppingCartItem.AttributesXml);
             return dto;
+        }
+
+        public StoreDto PrepareStoreDTO(Store store)
+        {
+            StoreDto storeDto = store.ToDto();
+
+            Currency primaryCurrency = _currencyService.GetCurrencyById(_currencySettings.PrimaryStoreCurrencyId);
+
+            if (!String.IsNullOrEmpty(primaryCurrency.DisplayLocale))
+            {
+                storeDto.PrimaryCurrencyDisplayLocale = primaryCurrency.DisplayLocale;
+            }
+
+            storeDto.LanguageIds = _languageService.GetAllLanguages(false, store.Id).Select(x => x.Id).ToList();
+
+            return storeDto;
         }
 
         private void PrepareProductImages(IEnumerable<ProductPicture> productPictures, ProductDto productDto)
