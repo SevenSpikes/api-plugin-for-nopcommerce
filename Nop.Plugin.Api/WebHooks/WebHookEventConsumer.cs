@@ -298,21 +298,21 @@ namespace Nop.Plugin.Api.WebHooks
 
         public void HandleEvent(EntityInserted<Language> eventMessage)
         {
-            LanguageDto langaDto = eventMessage.Entity.ToDto();
+            LanguageDto langaDto = _dtoHelper.PrepateLanguageDto(eventMessage.Entity);
 
             NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesCreate, langaDto.StoreIds);
         }
 
         public void HandleEvent(EntityUpdated<Language> eventMessage)
         {
-            LanguageDto langaDto = eventMessage.Entity.ToDto();
+            LanguageDto langaDto = _dtoHelper.PrepateLanguageDto(eventMessage.Entity);
 
             NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesUpdate, langaDto.StoreIds);
         }
 
         public void HandleEvent(EntityDeleted<Language> eventMessage)
         {
-            LanguageDto langaDto = eventMessage.Entity.ToDto();
+            LanguageDto langaDto = _dtoHelper.PrepateLanguageDto(eventMessage.Entity);
 
             NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesDelete, langaDto.StoreIds);
         }

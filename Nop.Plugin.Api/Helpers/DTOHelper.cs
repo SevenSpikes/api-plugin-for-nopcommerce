@@ -40,6 +40,7 @@ namespace Nop.Plugin.Api.Helpers
         private ILanguageService _languageService;
         private ICurrencyService _currencyService;
         private CurrencySettings _currencySettings;
+        private readonly IStoreService _storeService;
         private ICustomerApiService _customerApiService;
         private IProductAttributeConverter _productAttributeConverter;
 
@@ -53,7 +54,8 @@ namespace Nop.Plugin.Api.Helpers
             IProductAttributeConverter productAttributeConverter,
             ILanguageService languageService,
             ICurrencyService currencyService,
-            CurrencySettings currencySettings)
+            CurrencySettings currencySettings,
+            IStoreService storeService)
         {
             _productService = productService;
             _aclService = aclService;
@@ -65,6 +67,7 @@ namespace Nop.Plugin.Api.Helpers
             _languageService = languageService;
             _currencyService = currencyService;
             _currencySettings = currencySettings;
+            _storeService = storeService;
             _storeContext = storeContext;
         }
 
@@ -177,6 +180,20 @@ namespace Nop.Plugin.Api.Helpers
             storeDto.LanguageIds = _languageService.GetAllLanguages(false, store.Id).Select(x => x.Id).ToList();
 
             return storeDto;
+        }
+
+        public LanguageDto PrepateLanguageDto(Language language)
+        {
+            LanguageDto languageDto = language.ToDto();
+
+            languageDto.StoreIds = _storeMappingService.GetStoreMappings(language).Select(mapping => mapping.StoreId).ToList();
+
+            if (languageDto.StoreIds.Count == 0)
+            {
+                languageDto.StoreIds = _storeService.GetAllStores().Select(s => s.Id).ToList();
+            }
+
+            return languageDto;
         }
 
         private void PrepareProductImages(IEnumerable<ProductPicture> productPictures, ProductDto productDto)
