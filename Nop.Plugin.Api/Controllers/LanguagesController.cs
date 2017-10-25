@@ -7,6 +7,7 @@ using Nop.Core.Domain.Localization;
 using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.DTOs.Languages;
+using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.JSON.ActionResults;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.Serializers;
@@ -24,6 +25,7 @@ namespace Nop.Plugin.Api.Controllers
     public class LanguagesController : BaseApiController
     {
         private ILanguageService _languageService;
+        private readonly IDTOHelper _dtoHelper;
 
         public LanguagesController(IJsonFieldsSerializer jsonFieldsSerializer,
             IAclService aclService,
@@ -34,7 +36,8 @@ namespace Nop.Plugin.Api.Controllers
             ICustomerActivityService customerActivityService,
             ILocalizationService localizationService,
             IPictureService pictureService,
-            ILanguageService languageService)
+            ILanguageService languageService,
+            IDTOHelper dtoHelper)
             : base(jsonFieldsSerializer,
                   aclService,
                   customerService,
@@ -46,6 +49,7 @@ namespace Nop.Plugin.Api.Controllers
                   pictureService)
         {
             _languageService = languageService;
+            _dtoHelper = dtoHelper;
         }
 
         /// <summary>
@@ -61,15 +65,7 @@ namespace Nop.Plugin.Api.Controllers
         {
             IList<Language> allLanguages = _languageService.GetAllLanguages();
 
-            IList<LanguageDto> languagesAsDto = allLanguages.Select(language =>
-            {
-                var dto = language.ToDto();
-
-                dto.StoreIds = _storeMappingService.GetStoreMappings(language).Select(mapping => mapping.StoreId).ToList();
-
-                return dto;
-
-            }).ToList();
+            IList<LanguageDto> languagesAsDto = allLanguages.Select(language => _dtoHelper.PrepateLanguageDto(language)).ToList();
 
             var languagesRootObject = new LanguagesRootObject()
             {
