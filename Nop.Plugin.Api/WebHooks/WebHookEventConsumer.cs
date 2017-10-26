@@ -37,6 +37,7 @@ namespace Nop.Plugin.Api.WebHooks
         IConsumer<EntityInserted<StoreMapping>>,
         IConsumer<EntityDeleted<StoreMapping>>,
         IConsumer<EntityInserted<GenericAttribute>>,
+        IConsumer<EntityUpdated<GenericAttribute>>,
         IConsumer<EntityUpdated<Store>>,
         IConsumer<EntityInserted<ProductCategory>>,
         IConsumer<EntityUpdated<ProductCategory>>,
@@ -232,6 +233,25 @@ namespace Nop.Plugin.Api.WebHooks
             }
         }
 
+        public void HandleEvent(EntityUpdated<GenericAttribute> eventMessage)
+        {
+            if (eventMessage.Entity.Key == SystemCustomerAttributeNames.FirstName ||
+                eventMessage.Entity.Key == SystemCustomerAttributeNames.LastName ||
+                eventMessage.Entity.Key == SystemCustomerAttributeNames.LanguageId)
+            {
+                var customerDto = _customerApiService.GetCustomerById(eventMessage.Entity.EntityId);
+
+                var storeIds = new List<int>();
+
+                if (customerDto.RegisteredInStoreId.HasValue)
+                {
+                    storeIds.Add(customerDto.RegisteredInStoreId.Value);
+                }
+
+                NotifyRegisteredWebHooks(customerDto, WebHookNames.CustomersUpdate, storeIds);
+            }
+        }
+
         public void HandleEvent(EntityUpdated<Store> eventMessage)
         {
             StoreDto storeDto = _dtoHelper.PrepareStoreDTO(eventMessage.Entity);
@@ -409,6 +429,5 @@ namespace Nop.Plugin.Api.WebHooks
 
             return false;
         }
-
     }
 }
