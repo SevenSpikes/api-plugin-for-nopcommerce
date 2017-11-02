@@ -1,4 +1,4 @@
-﻿using Nop.Plugin.Api.AutoMapper;
+﻿using Nop.Admin.Extensions;
 using Nop.Core.Domain.Customers;
 using Nop.Plugin.Api.DTOs.CustomerRoles;
 

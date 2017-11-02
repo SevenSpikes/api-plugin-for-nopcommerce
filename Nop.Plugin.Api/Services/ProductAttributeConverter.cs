@@ -41,7 +41,6 @@ namespace Nop.Plugin.Api.Services
                     case AttributeControlType.DropdownList:
                     case AttributeControlType.RadioList:
                     case AttributeControlType.ColorSquares:
-                    case AttributeControlType.ImageSquares:
                         {
                             // there should be only one selected value for this attribute
                             var selectedAttribute = attributeDtos.Where(x => x.Id == attribute.Id).FirstOrDefault();
@@ -67,11 +66,8 @@ namespace Nop.Plugin.Api.Services
                                 bool isInt = int.TryParse(selectedAttribute.Value, out selectedAttributeValue);
                                 if (isInt && selectedAttributeValue > 0)
                                 {
-                                    // currently there is no support for attribute quantity
-                                    var quantity = 1;
-
                                     attributesXml = _productAttributeParser.AddProductAttribute(attributesXml,
-                                        attribute, selectedAttributeValue.ToString(), quantity);
+                                        attribute, selectedAttributeValue.ToString());
                                 }
 
                             }

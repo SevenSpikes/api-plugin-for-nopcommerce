@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Nop.Core.Data;
+using Nop.Web.Framework.Kendoui;
 using Nop.Core.Domain.Customers;
 using Nop.Plugin.Api.DTOs.Customers;
 using System.Linq;
-using System.Linq.Dynamic;
 using System.Text.RegularExpressions;
 using Nop.Core;
 using Nop.Core.Domain.Common;
@@ -55,8 +55,7 @@ namespace Nop.Plugin.Api.Services
 
         public int GetCustomersCount()
         {
-            return _customerRepository.TableNoTracking.Count(customer => !customer.Deleted
-                                      && (customer.RegisteredInStoreId == 0 || customer.RegisteredInStoreId == _storeContext.CurrentStore.Id));
+            return _customerRepository.TableNoTracking.Count(customer => !customer.Deleted);
         }
 
         // Need to work with dto object so we can map the first and last name from generic attributes table.
@@ -381,8 +380,7 @@ namespace Nop.Plugin.Api.Services
         {
             var query = _customerRepository.TableNoTracking.Where(customer => !customer.Deleted && !customer.IsSystemAccount && customer.Active);
 
-            query = query.Where(customer => !customer.CustomerRoles.Any(cr => (cr.Active) && (cr.SystemName == SystemCustomerRoleNames.Guests))
-            && (customer.RegisteredInStoreId == 0 || customer.RegisteredInStoreId == _storeContext.CurrentStore.Id));
+            query = query.Where(customer => !customer.CustomerRoles.Any(cr => (cr.Active) && (cr.SystemName == SystemCustomerRoleNames.Guests)));
 
             if (createdAtMin != null)
             {
