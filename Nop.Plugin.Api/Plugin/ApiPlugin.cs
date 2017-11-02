@@ -3,8 +3,10 @@ using Nop.Core;
 using Nop.Core.Infrastructure;
 using Nop.Core.Plugins;
 using Nop.Plugin.Api.Data;
+using Nop.Plugin.Api.Domain;
 using Nop.Plugin.Api.Helpers;
 using Nop.Services.Common;
+using Nop.Services.Configuration;
 using Nop.Web.Framework.Menu;
 using Nop.Services.Localization;
 
@@ -16,53 +18,13 @@ namespace Nop.Plugin.Api.Plugin
 
         private readonly ApiObjectContext _objectContext;
         private readonly IWebConfigMangerHelper _webConfigMangerHelper;
-        private ILocalizationService _localizationService;
-        private IWebHelper _webHelper;
-        private IWorkContext _workContext;
+        private readonly ISettingService _settingService;
 
-        protected ILocalizationService LocalizationService
-        {
-            get
-            {
-                if (_localizationService == null)
-                {
-                    _localizationService = EngineContext.Current.Resolve<ILocalizationService>();
-                }
-
-                return _localizationService;
-            }
-        }
-
-        protected IWebHelper WebHelper
-        {
-            get
-            {
-                if (_webHelper == null)
-                {
-                    _webHelper = EngineContext.Current.Resolve<IWebHelper>();
-                }
-
-                return _webHelper;
-            }
-        }
-
-        protected IWorkContext WorkContext
-        {
-            get
-            {
-                if (_workContext == null)
-                {
-                    _workContext = EngineContext.Current.Resolve<IWorkContext>();
-                }
-
-                return _workContext;
-            }
-        }
-
-        public ApiPlugin(ApiObjectContext objectContext, IWebConfigMangerHelper webConfigMangerHelper)
+        public ApiPlugin(ApiObjectContext objectContext, IWebConfigMangerHelper webConfigMangerHelper, ISettingService settingService)
         {
             _objectContext = objectContext;
             _webConfigMangerHelper = webConfigMangerHelper;
+            _settingService = settingService;
         }
 
         public override void Install()
@@ -133,6 +95,14 @@ namespace Nop.Plugin.Api.Plugin
             this.AddOrUpdatePluginLocaleResource("Api.WebHooks.CouldNotDeleteWebhook", "Could not delete WebHook due to error: {0}");
             this.AddOrUpdatePluginLocaleResource("Api.WebHooks.CouldNotDeleteWebhooks", "Could not delete WebHooks due to error: {0}");
             this.AddOrUpdatePluginLocaleResource("Api.WebHooks.InvalidFilters", "The following filters are not valid: '{0}'. A list of valid filters can be obtained from the path '{1}'.");
+
+            ApiSettings settings = new ApiSettings
+            {
+                EnableApi = true,
+                AllowRequestsFromSwagger = false
+            };
+
+            _settingService.SaveSetting(settings);
 
             base.Install();
 
