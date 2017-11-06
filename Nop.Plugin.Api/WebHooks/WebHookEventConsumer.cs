@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNet.WebHooks;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
@@ -284,36 +285,35 @@ namespace Nop.Plugin.Api.WebHooks
 
         private void NotifyProductCategoryMappingWebhook(ProductCategory productCategory, string eventName)
         {
-            if (!ProductCategoryMapIsForTheCurrentStore(productCategory))
+            var storeIds = GetStoreIdsForProductCategoryMap(productCategory);
+
+            if (storeIds == null)
             {
                 return;
             }
 
             ProductCategoryMappingDto productCategoryMappingDto = productCategory.ToDto();
 
-            var storeIds = new List<int> { _storeContext.CurrentStore.Id };
-
             NotifyRegisteredWebHooks(productCategoryMappingDto, eventName, storeIds);
         }
 
-        private bool ProductCategoryMapIsForTheCurrentStore(ProductCategory productCategory)
+        private List<int> GetStoreIdsForProductCategoryMap(ProductCategory productCategory)
         {
-            // Check if the product and category are available for the current store.
+            // Send a webhook event only for the stores that can access the product and category
+            // in the current product category map.
             Product product = _productService.GetProductById(productCategory.ProductId);
-
-            if (product == null || !_storeMappingService.Authorize(product))
-            {
-                return false;
-            }
-
             Category category = _categoryService.GetCategoryById(productCategory.CategoryId);
 
-            if (category == null || !_storeMappingService.Authorize(category))
+            if (product == null || category == null)
             {
-                return false;
+                return null;
             }
 
-            return true;
+            var productStoreIds = _storeMappingService.GetStoresIdsWithAccess(product);
+
+            var categoryStoreIds = _storeMappingService.GetStoresIdsWithAccess(category);
+
+            return productStoreIds.Intersect(categoryStoreIds).ToList();
         }
 
         public void HandleEvent(EntityInserted<Language> eventMessage)
