@@ -8,5 +8,7 @@ namespace Nop.Plugin.Api.Helpers
         IList<CustomerRole> GetValidCustomerRoles(List<int> roleIds);
         bool IsInGuestsRole(IList<CustomerRole> customerRoles);
         bool IsInRegisteredRole(IList<CustomerRole> customerRoles);
+        int getCustomerStore(Customer customer);
+        int getCustomerStoreByRoleIds(List<int> roleIds);
     }
 }

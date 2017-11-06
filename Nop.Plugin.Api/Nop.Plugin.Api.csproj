@@ -238,6 +238,7 @@
     <Compile Include="Attributes\ImageAttribute.cs" />
     <Compile Include="Attributes\ImageCollectionAttribute.cs" />
     <Compile Include="Attributes\ValidateVendor.cs" />
+    <Compile Include="Constants\BLBSettings.cs" />
     <Compile Include="Constants\WebHookNames.cs" />
     <Compile Include="Controllers\BaseApiController.cs" />
     <Compile Include="Controllers\CustomerRolesController.cs" />

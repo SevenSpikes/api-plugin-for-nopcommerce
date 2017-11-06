@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNet.WebHooks;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
@@ -55,10 +57,11 @@ namespace Nop.Plugin.Api.WebHooks
         private IStoreMappingService _storeMappingService;
         private IStoreService _storeService;
         private IStoreContext _storeContext;
+        private ICustomerRolesHelper _customerRolesHelper;
 
         private IDTOHelper _dtoHelper;
 
-        public WebHookEventConsumer(IStoreService storeService)
+        public WebHookEventConsumer()
         {
             IWebHookService webHookService = EngineContext.Current.ContainerManager.Resolve<IWebHookService>();
             _customerApiService = EngineContext.Current.ContainerManager.Resolve<ICustomerApiService>();
@@ -72,6 +75,8 @@ namespace Nop.Plugin.Api.WebHooks
             _storeMappingService = EngineContext.Current.ContainerManager.Resolve<IStoreMappingService>();
             _storeContext = EngineContext.Current.ContainerManager.Resolve<IStoreContext>();
 
+            _customerRolesHelper = EngineContext.Current.ContainerManager.Resolve<ICustomerRolesHelper>();
+
             _webHookManager = webHookService.GetHookManager();
         }
 
@@ -84,12 +89,8 @@ namespace Nop.Plugin.Api.WebHooks
             }
 
             CustomerDto customer = _customerApiService.GetCustomerById(eventMessage.Entity.Id);
-            var storeIds = new List<int>();
 
-            if (customer.RegisteredInStoreId.HasValue)
-            {
-                storeIds.Add(customer.RegisteredInStoreId.Value);
-            }
+            var storeIds = new List<int> {_customerRolesHelper.getCustomerStore(eventMessage.Entity)};
 
             NotifyRegisteredWebHooks(customer, WebHookNames.CustomersCreate, storeIds);
         }
@@ -113,12 +114,7 @@ namespace Nop.Plugin.Api.WebHooks
                 webhookEvent = WebHookNames.CustomersDelete;
             }
 
-            var storeIds = new List<int>();
-
-            if (customer.RegisteredInStoreId.HasValue)
-            {
-                storeIds.Add(customer.RegisteredInStoreId.Value);
-            }
+            var storeIds = new List<int> { _customerRolesHelper.getCustomerStore(eventMessage.Entity) };
 
             NotifyRegisteredWebHooks(customer, webhookEvent, storeIds);
         }
@@ -222,12 +218,7 @@ namespace Nop.Plugin.Api.WebHooks
             {
                 var customerDto = _customerApiService.GetCustomerById(eventMessage.Entity.EntityId);
 
-                var storeIds = new List<int>();
-
-                if (customerDto.RegisteredInStoreId.HasValue)
-                {
-                    storeIds.Add(customerDto.RegisteredInStoreId.Value);
-                }
+                var storeIds = new List<int> { _customerRolesHelper.getCustomerStoreByRoleIds(customerDto.RoleIds) };
 
                 NotifyRegisteredWebHooks(customerDto, WebHookNames.CustomersUpdate, storeIds);
             }
@@ -241,12 +232,7 @@ namespace Nop.Plugin.Api.WebHooks
             {
                 var customerDto = _customerApiService.GetCustomerById(eventMessage.Entity.EntityId);
 
-                var storeIds = new List<int>();
-
-                if (customerDto.RegisteredInStoreId.HasValue)
-                {
-                    storeIds.Add(customerDto.RegisteredInStoreId.Value);
-                }
+                var storeIds = new List<int> {_customerRolesHelper.getCustomerStoreByRoleIds(customerDto.RoleIds)};
 
                 NotifyRegisteredWebHooks(customerDto, WebHookNames.CustomersUpdate, storeIds);
             }
@@ -260,8 +246,7 @@ namespace Nop.Plugin.Api.WebHooks
 
             if (int.TryParse(storeDto.Id, out storeId))
             {
-                var storeIds = new List<int>();
-                storeIds.Add(storeId);
+                var storeIds = new List<int> {storeId};
 
                 NotifyRegisteredWebHooks(storeDto, WebHookNames.StoresUpdate, storeIds);
             }
@@ -284,36 +269,34 @@ namespace Nop.Plugin.Api.WebHooks
 
         private void NotifyProductCategoryMappingWebhook(ProductCategory productCategory, string eventName)
         {
-            if (!ProductCategoryMapIsForTheCurrentStore(productCategory))
+            var storeIds = GetStoreIdsForProductCategoryMap(productCategory);
+
+            if (storeIds == null)
             {
                 return;
             }
 
             ProductCategoryMappingDto productCategoryMappingDto = productCategory.ToDto();
 
-            var storeIds = new List<int> { _storeContext.CurrentStore.Id };
-
             NotifyRegisteredWebHooks(productCategoryMappingDto, eventName, storeIds);
         }
 
-        private bool ProductCategoryMapIsForTheCurrentStore(ProductCategory productCategory)
+        private List<int> GetStoreIdsForProductCategoryMap(ProductCategory productCategory)
         {
             // Check if the product and category are available for the current store.
             Product product = _productService.GetProductById(productCategory.ProductId);
-
-            if (product == null || !_storeMappingService.Authorize(product))
-            {
-                return false;
-            }
-
             Category category = _categoryService.GetCategoryById(productCategory.CategoryId);
 
-            if (category == null || !_storeMappingService.Authorize(category))
+            if (product == null || category == null)
             {
-                return false;
+                return null;
             }
 
-            return true;
+            var productStoreIds = _storeMappingService.GetStoresIdsWithAccess(product);
+           
+            var categoryStoreIds = _storeMappingService.GetStoresIdsWithAccess(category);
+
+            return productStoreIds.Intersect(categoryStoreIds).ToList();
         }
 
         public void HandleEvent(EntityInserted<Language> eventMessage)
