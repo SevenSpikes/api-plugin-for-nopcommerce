@@ -67,11 +67,8 @@ namespace Nop.Plugin.Api.Services
                                 bool isInt = int.TryParse(selectedAttribute.Value, out selectedAttributeValue);
                                 if (isInt && selectedAttributeValue > 0)
                                 {
-                                    // currently there is no support for attribute quantity
-                                    var quantity = 1;
-
                                     attributesXml = _productAttributeParser.AddProductAttribute(attributesXml,
-                                        attribute, selectedAttributeValue.ToString(), quantity);
+                                        attribute, selectedAttributeValue.ToString());
                                 }
 
                             }

@@ -4,7 +4,6 @@ using System.Reflection;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using Autofac.Integration.WebApi;
-using Microsoft.AspNet.WebHooks;
 using Microsoft.Owin;
 using Microsoft.Owin.Extensions;
 using Microsoft.Owin.Security.OAuth;
