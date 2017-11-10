@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using Nop.Core.Data;
+using Nop.Web.Framework.Kendoui;
 using Nop.Core.Domain.Customers;
 using Nop.Plugin.Api.DTOs.Customers;
 using System.Linq;
@@ -11,7 +13,6 @@ using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.DataStructures;
 using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.MappingExtensions;
-using Nop.Web.Framework.Kendoui;
 using Nop.Services.Localization;
 using Nop.Services.Stores;
 
@@ -22,6 +23,7 @@ namespace Nop.Plugin.Api.Services
         private const string FirstName = "firstname";
         private const string LastName = "lastname";
         private const string LanguageId = "languageid";
+        private const string RegisteredInStoreId = "registeredinstoreid";
         private const string KeyGroup = "customer";
 
         private readonly IStoreContext _storeContext;
@@ -262,12 +264,15 @@ namespace Nop.Plugin.Api.Services
                                     attr.KeyGroup.Equals(KeyGroup, StringComparison.InvariantCultureIgnoreCase) &&
                                     (attr.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase) ||
                                     attr.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase) ||
-                                    attr.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase))).DefaultIfEmpty()
+                                    attr.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase) ||
+                                    attr.Key.Equals(RegisteredInStoreId, StringComparison.InvariantCultureIgnoreCase))).DefaultIfEmpty()
                  select new CustomerAttributeMappingDto()
                  {
                      Attribute = attribute,
                      Customer = customer
                  }).GroupBy(x => x.Customer.Id);
+
+            allRecordsGroupedByCustomerId = FilterCustomersByRegisteredInStoreId(allRecordsGroupedByCustomerId);
 
             if (searchParams != null && searchParams.Count > 0)
             {
@@ -313,19 +318,50 @@ namespace Nop.Plugin.Api.Services
 
                 CustomerDto customerDto = Merge(mappingsForMerge, defaultLanguageId);
 
-                customerDtos.Add(customerDto);
+                if (customerDto != null)
+                {
+                    customerDtos.Add(customerDto);
+                }
             }
 
             // Needed so we can apply the order parameter
             return customerDtos.AsQueryable().OrderBy(order).ToList();
         }
 
+        private IQueryable<IGrouping<int, CustomerAttributeMappingDto>> FilterCustomersByRegisteredInStoreId(
+            IQueryable<IGrouping<int, CustomerAttributeMappingDto>> customerAttributesMappings)
+        {
+            var customerAtributeMappingsToReturn = new List<IGrouping<int, CustomerAttributeMappingDto>>();
+
+            foreach (var group in customerAttributesMappings.ToList())
+            {
+                List<GenericAttribute> attributes = group.Select(x => x.Attribute).ToList();
+
+                var customerRegisteredInStoreIdAttr =
+                    attributes.FirstOrDefault(a => a.Key.Equals(RegisteredInStoreId, StringComparison.InvariantCultureIgnoreCase));
+
+                if (customerRegisteredInStoreIdAttr != null)
+                {
+                    var registeredInStoreId = customerRegisteredInStoreIdAttr.Value;
+
+                    if (!registeredInStoreId.Equals(_storeContext.CurrentStore.Id.ToString(), StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        continue;
+                    }
+                }
+
+                customerAtributeMappingsToReturn.Add(group);
+            }
+
+            return customerAtributeMappingsToReturn.AsQueryable();
+        }
+
         private CustomerDto Merge(IList<CustomerAttributeMappingDto> mappingsForMerge, int defaultLanguageId)
         {
-            // We expect the customer to be always set.
-            var customerDto = mappingsForMerge.First().Customer.ToDto();
-
             List<GenericAttribute> attributes = mappingsForMerge.Select(x => x.Attribute).ToList();
+
+            // We expect the customer to be always set.
+            customerDto = mappingsForMerge.First().Customer.ToDto();
 
             // If there is no Language Id generic attribute create one with the default language id.
             if (!attributes.Any(atr => atr != null && atr.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase)))
