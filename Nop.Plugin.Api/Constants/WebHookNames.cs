@@ -6,20 +6,20 @@
 
         public const string GetWebhookByIdAction = "GetWebHookByIdAction";
 
-        public const string CustomerCreated = "customers/created";
-        public const string CustomerUpdated = "customers/updated";
-        public const string CustomerDeleted = "customers/deleted";
+        public const string CustomerCreated = "customers/create";
+        public const string CustomerUpdated = "customers/update";
+        public const string CustomerDeleted = "customers/delete";
 
-        public const string ProductCreated = "products/created";
-        public const string ProductUpdated = "products/updated";
-        public const string ProductDeleted = "products/deleted";
+        public const string ProductCreated = "products/create";
+        public const string ProductUpdated = "products/update";
+        public const string ProductDeleted = "products/delete";
 
-        public const string CategoryCreated = "categories/created";
-        public const string CategoryUpdated = "categories/updated";
-        public const string CategoryDeleted = "categories/deleted";
+        public const string CategoryCreated = "categories/create";
+        public const string CategoryUpdated = "categories/update";
+        public const string CategoryDeleted = "categories/delete";
 
-        public const string OrderCreated = "orders/created";
-        public const string OrderUpdated = "orders/updated";
-        public const string OrderDeleted = "orders/deleted";
+        public const string OrderCreated = "orders/create";
+        public const string OrderUpdated = "orders/update";
+        public const string OrderDeleted = "orders/delete";
     }
 }
