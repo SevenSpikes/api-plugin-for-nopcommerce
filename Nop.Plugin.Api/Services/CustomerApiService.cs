@@ -381,7 +381,7 @@ namespace Nop.Plugin.Api.Services
 
             foreach (IGrouping<int, CustomerAttributeMappingDto> group in customerAttributesMappings.ToList())
             {
-                if (CustomerIsForCurrentStore(group.ToList()))
+                if (group != null && CustomerIsForCurrentStore(group.ToList()))
                 {
                     customerAtributeMappingsToReturn.Add(group);
                 }
@@ -392,18 +392,26 @@ namespace Nop.Plugin.Api.Services
 
         private bool CustomerIsForCurrentStore(List<CustomerAttributeMappingDto> customerAttributeMappingDtos)
         {
-            List<GenericAttribute> attributes = customerAttributeMappingDtos.Select(x => x.Attribute).ToList();
-
-            var customerRegisteredInStoreIdAttr =
-                attributes.FirstOrDefault(a => a.Key.Equals(RegisteredInStoreId, StringComparison.InvariantCultureIgnoreCase));
-
-            if (customerRegisteredInStoreIdAttr != null)
+            if (customerAttributeMappingDtos != null)
             {
-                var registeredInStoreId = customerRegisteredInStoreIdAttr.Value;
+                List<GenericAttribute> attributes = customerAttributeMappingDtos.Select(x => x.Attribute).ToList();
 
-                if (!registeredInStoreId.Equals(_storeContext.CurrentStore.Id.ToString(), StringComparison.InvariantCultureIgnoreCase))
+                if (attributes.Any())
                 {
-                    return false;
+                    var customerRegisteredInStoreIdAttr =
+                        attributes.FirstOrDefault(a => a != null && a.Key != null &&
+                            a.Key.Equals(RegisteredInStoreId, StringComparison.InvariantCultureIgnoreCase));
+
+                    if (customerRegisteredInStoreIdAttr != null)
+                    {
+                        var registeredInStoreId = customerRegisteredInStoreIdAttr.Value;
+
+                        if (!registeredInStoreId.Equals(_storeContext.CurrentStore.Id.ToString(),
+                            StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            return false;
+                        }
+                    }
                 }
             }
 
@@ -444,6 +452,15 @@ namespace Nop.Plugin.Api.Services
                     else if (attribute.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase))
                     {
                         customerDto.LanguageId = attribute.Value;
+                    }
+                    else if (attribute.Key.Equals(RegisteredInStoreId, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        int registeredInStoreId;
+
+                        if (Int32.TryParse(attribute.Value, out registeredInStoreId))
+                        {
+                            customerDto.RegisteredInStoreId = registeredInStoreId;
+                        }
                     }
                 }
             }
