@@ -14,7 +14,6 @@ using Nop.Plugin.Api.DTOs.Images;
 using Nop.Core.Domain.Media;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Stores;
-using Nop.Plugin.Api.DTOs;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Plugin.Api.DTOs.Customers;
@@ -31,7 +30,6 @@ namespace Nop.Plugin.Api.Helpers
 {
     public class DTOHelper : IDTOHelper
     {
-        private IStoreContext _storeContext;
         private IProductService _productService;
         private IAclService _aclService;
         private IStoreMappingService _storeMappingService;
@@ -44,8 +42,7 @@ namespace Nop.Plugin.Api.Helpers
         private ICustomerApiService _customerApiService;
         private IProductAttributeConverter _productAttributeConverter;
 
-        public DTOHelper(IStoreContext storeContext,
-            IProductService productService,
+        public DTOHelper(IProductService productService,
             IAclService aclService,
             IStoreMappingService storeMappingService,
             IPictureService pictureService,
@@ -68,7 +65,6 @@ namespace Nop.Plugin.Api.Helpers
             _currencyService = currencyService;
             _currencySettings = currencySettings;
             _storeService = storeService;
-            _storeContext = storeContext;
         }
 
         public ProductDto PrepareProductDTO(Product product)
@@ -147,7 +143,7 @@ namespace Nop.Plugin.Api.Helpers
         {
             OrderDto orderDto = order.ToDto();
 
-            CustomerDto customerDto = _customerApiService.GetCustomerById(order.Customer.Id);
+            CustomerDto customerDto = _customerApiService.GetCustomerById(order.Customer.Id, false, false);
 
             if (customerDto != null)
             {

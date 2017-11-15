@@ -47,31 +47,26 @@ namespace Nop.Plugin.Api.WebHooks
         IConsumer<EntityUpdated<Language>>,
         IConsumer<EntityDeleted<Language>>
     {
-        private IWebHookManager _webHookManager;
-        private ICustomerApiService _customerApiService;
-        private ICategoryApiService _categoryApiService;
-        private IProductApiService _productApiService;
-        private IProductService _productService;
-        private ICategoryService _categoryService;
-        private IStoreMappingService _storeMappingService;
-        private IStoreService _storeService;
-        private IStoreContext _storeContext;
+        private readonly IWebHookManager _webHookManager;
+        private readonly ICustomerApiService _customerApiService;
+        private readonly ICategoryApiService _categoryApiService;
+        private readonly IProductApiService _productApiService;
+        private readonly IProductService _productService;
+        private readonly ICategoryService _categoryService;
+        private readonly IStoreMappingService _storeMappingService;
+        private readonly IDTOHelper _dtoHelper;
 
-        private IDTOHelper _dtoHelper;
-
-        public WebHookEventConsumer(IStoreService storeService)
+        public WebHookEventConsumer()
         {
             IWebHookService webHookService = EngineContext.Current.ContainerManager.Resolve<IWebHookService>();
             _customerApiService = EngineContext.Current.ContainerManager.Resolve<ICustomerApiService>();
             _categoryApiService = EngineContext.Current.ContainerManager.Resolve<ICategoryApiService>();
             _productApiService = EngineContext.Current.ContainerManager.Resolve<IProductApiService>();
             _dtoHelper = EngineContext.Current.ContainerManager.Resolve<IDTOHelper>();
-            _storeService = EngineContext.Current.ContainerManager.Resolve<IStoreService>();
 
             _productService = EngineContext.Current.ContainerManager.Resolve<IProductService>();
             _categoryService = EngineContext.Current.ContainerManager.Resolve<ICategoryService>();
             _storeMappingService = EngineContext.Current.ContainerManager.Resolve<IStoreMappingService>();
-            _storeContext = EngineContext.Current.ContainerManager.Resolve<IStoreContext>();
 
             _webHookManager = webHookService.GetHookManager();
         }
@@ -84,7 +79,7 @@ namespace Nop.Plugin.Api.WebHooks
                 return;
             }
 
-            CustomerDto customer = _customerApiService.GetCustomerById(eventMessage.Entity.Id);
+            CustomerDto customer = _customerApiService.GetCustomerById(eventMessage.Entity.Id, false, false);
             var storeIds = new List<int>();
 
             if (customer.RegisteredInStoreId.HasValue)
@@ -103,7 +98,7 @@ namespace Nop.Plugin.Api.WebHooks
                 return;
             }
 
-            CustomerDto customer = _customerApiService.GetCustomerById(eventMessage.Entity.Id, true);
+            CustomerDto customer = _customerApiService.GetCustomerById(eventMessage.Entity.Id, true, false);
 
             // In nopCommerce the Customer, Product, Category and Order entities are not deleted.
             // Instead the Deleted property of the entity is set to true.
@@ -221,7 +216,7 @@ namespace Nop.Plugin.Api.WebHooks
                 eventMessage.Entity.Key == SystemCustomerAttributeNames.LastName ||
                 eventMessage.Entity.Key == SystemCustomerAttributeNames.LanguageId)
             {
-                var customerDto = _customerApiService.GetCustomerById(eventMessage.Entity.EntityId);
+                var customerDto = _customerApiService.GetCustomerById(eventMessage.Entity.EntityId, false, false);
 
                 var storeIds = new List<int>();
 
@@ -240,7 +235,7 @@ namespace Nop.Plugin.Api.WebHooks
                 eventMessage.Entity.Key == SystemCustomerAttributeNames.LastName ||
                 eventMessage.Entity.Key == SystemCustomerAttributeNames.LanguageId)
             {
-                var customerDto = _customerApiService.GetCustomerById(eventMessage.Entity.EntityId);
+                var customerDto = _customerApiService.GetCustomerById(eventMessage.Entity.EntityId, false, false);
 
                 var storeIds = new List<int>();
 
