@@ -57,7 +57,27 @@ namespace Nop.Plugin.Api.Services
 
         public int GetCustomersCount()
         {
-            return _customerRepository.TableNoTracking.Count(customer => !customer.Deleted);
+            var query = _customerRepository.TableNoTracking.Where(customer => !customer.Deleted && !customer.IsSystemAccount 
+                && customer.Active && !customer.CustomerRoles.Any(cr => (cr.Active) && (cr.SystemName == SystemCustomerRoleNames.Guests)));
+
+            IQueryable<IGrouping<int, CustomerAttributeMappingDto>> allRecordsGroupedByCustomerId =
+            (from customer in query
+                from attribute in _genericAttributeRepository.TableNoTracking
+                    .Where(attr => attr.EntityId == customer.Id &&
+                                   attr.KeyGroup.Equals(KeyGroup, StringComparison.InvariantCultureIgnoreCase) &&
+                                   (attr.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase) ||
+                                    attr.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase) ||
+                                    attr.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase) ||
+                                    attr.Key.Equals(RegisteredInStoreId, StringComparison.InvariantCultureIgnoreCase))).DefaultIfEmpty()
+                select new CustomerAttributeMappingDto()
+                {
+                    Attribute = attribute,
+                    Customer = customer
+                }).GroupBy(x => x.Customer.Id);
+
+            allRecordsGroupedByCustomerId = FilterCustomersByRegisteredInStoreId(allRecordsGroupedByCustomerId);
+
+            return allRecordsGroupedByCustomerId.Count();
         }
 
         // Need to work with dto object so we can map the first and last name from generic attributes table.
@@ -108,7 +128,7 @@ namespace Nop.Plugin.Api.Services
             return customer;
         }
 
-        public CustomerDto GetCustomerById(int id, bool showDeleted = false)
+        public CustomerDto GetCustomerById(int id, bool showDeleted = false, bool checkRegisteredInStoreId = true)
         {
             if (id == 0)
                 return null;
@@ -120,7 +140,8 @@ namespace Nop.Plugin.Api.Services
                                                                                  attribute.KeyGroup.Equals(KeyGroup, StringComparison.InvariantCultureIgnoreCase) &&
                                                                                  (attribute.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase) ||
                                                                                   attribute.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase) ||
-                                                                                  attribute.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase))
+                                                                                  attribute.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase) ||
+                                                                                  attribute.Key.Equals(RegisteredInStoreId, StringComparison.InvariantCultureIgnoreCase))
                                                                            select new CustomerAttributeMappingDto()
                                                                            {
                                                                                Attribute = attribute,
@@ -129,67 +150,92 @@ namespace Nop.Plugin.Api.Services
 
             CustomerDto customerDto = null;
 
-            // This is in case we have first and last names set for the customer.
-            if (customerAttributeMappings.Count > 0)
+            bool customerIsForTheCurrentStore = true;
+
+            if (checkRegisteredInStoreId)
             {
-                Customer customer = customerAttributeMappings.First().Customer;
-                // The customer object is the same in all mappings.
-                customerDto = customer.ToDto();
-
-                var defaultStoreLanguageId = GetDefaultStoreLangaugeId();
-
-                // If there is no Language Id generic attribute create one with the default language id.
-                if (!customerAttributeMappings.Any(cam => cam != null && cam.Attribute != null && cam.Attribute.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase)))
-                {
-                    GenericAttribute languageId = new GenericAttribute
-                    {
-                        Key = LanguageId,
-                        Value = defaultStoreLanguageId.ToString()
-                    };
-
-                    CustomerAttributeMappingDto customerAttributeMappingDto = new CustomerAttributeMappingDto
-                    {
-                        Customer = customer,
-                        Attribute = languageId
-                    };
-
-                    customerAttributeMappings.Add(customerAttributeMappingDto);
-                }
-
-                foreach (var mapping in customerAttributeMappings)
-                {
-                    if (!showDeleted && mapping.Customer.Deleted)
-                    {
-                        continue;
-                    }
-
-                    if (mapping.Attribute != null)
-                    {
-                        if (mapping.Attribute.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            customerDto.FirstName = mapping.Attribute.Value;
-                        }
-                        else if (mapping.Attribute.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            customerDto.LastName = mapping.Attribute.Value;
-                        }
-                        else if (mapping.Attribute.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            customerDto.LanguageId = mapping.Attribute.Value;
-                        }
-                    }
-                }
+                customerIsForTheCurrentStore = CustomerIsForCurrentStore(customerAttributeMappings);
             }
-            else
-            {
-                // This is when we do not have first and last name set.
-                Customer currentCustomer = _customerRepository.TableNoTracking.FirstOrDefault(customer => customer.Id == id);
 
-                if (currentCustomer != null)
+            if (customerIsForTheCurrentStore)
+            {
+                // This is in case we have first and last names set for the customer.
+                if (customerAttributeMappings.Count > 0)
                 {
-                    if (showDeleted || !currentCustomer.Deleted)
+                    Customer customer = customerAttributeMappings.First().Customer;
+                    // The customer object is the same in all mappings.
+                    customerDto = customer.ToDto();
+
+                    var defaultStoreLanguageId = GetDefaultStoreLangaugeId();
+
+                    // If there is no Language Id generic attribute create one with the default language id.
+                    if (!customerAttributeMappings.Any(cam =>
+                        cam != null && cam.Attribute != null &&
+                        cam.Attribute.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        customerDto = currentCustomer.ToDto();
+                        GenericAttribute languageId = new GenericAttribute
+                        {
+                            Key = LanguageId,
+                            Value = defaultStoreLanguageId.ToString()
+                        };
+
+                        CustomerAttributeMappingDto customerAttributeMappingDto = new CustomerAttributeMappingDto
+                        {
+                            Customer = customer,
+                            Attribute = languageId
+                        };
+
+                        customerAttributeMappings.Add(customerAttributeMappingDto);
+                    }
+
+                    foreach (var mapping in customerAttributeMappings)
+                    {
+                        if (!showDeleted && mapping.Customer.Deleted)
+                        {
+                            continue;
+                        }
+
+                        if (mapping.Attribute != null)
+                        {
+                            if (mapping.Attribute.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                customerDto.FirstName = mapping.Attribute.Value;
+                            }
+                            else if (mapping.Attribute.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase)
+                            )
+                            {
+                                customerDto.LastName = mapping.Attribute.Value;
+                            }
+                            else if (mapping.Attribute.Key.Equals(LanguageId,
+                                StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                customerDto.LanguageId = mapping.Attribute.Value;
+                            }
+                            else if (mapping.Attribute.Key.Equals(RegisteredInStoreId,
+                                StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                int registeredInStoreId;
+
+                                if (Int32.TryParse(mapping.Attribute.Value, out registeredInStoreId))
+                                {
+                                    customerDto.RegisteredInStoreId = registeredInStoreId;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // This is when we do not have first and last name set.
+                    Customer currentCustomer =
+                        _customerRepository.TableNoTracking.FirstOrDefault(customer => customer.Id == id);
+
+                    if (currentCustomer != null)
+                    {
+                        if (showDeleted || !currentCustomer.Deleted)
+                        {
+                            customerDto = currentCustomer.ToDto();
+                        }
                     }
                 }
             }
@@ -333,27 +379,35 @@ namespace Nop.Plugin.Api.Services
         {
             var customerAtributeMappingsToReturn = new List<IGrouping<int, CustomerAttributeMappingDto>>();
 
-            foreach (var group in customerAttributesMappings.ToList())
+            foreach (IGrouping<int, CustomerAttributeMappingDto> group in customerAttributesMappings.ToList())
             {
-                List<GenericAttribute> attributes = group.Select(x => x.Attribute).ToList();
-
-                var customerRegisteredInStoreIdAttr =
-                    attributes.FirstOrDefault(a => a.Key.Equals(RegisteredInStoreId, StringComparison.InvariantCultureIgnoreCase));
-
-                if (customerRegisteredInStoreIdAttr != null)
+                if (CustomerIsForCurrentStore(group.ToList()))
                 {
-                    var registeredInStoreId = customerRegisteredInStoreIdAttr.Value;
-
-                    if (!registeredInStoreId.Equals(_storeContext.CurrentStore.Id.ToString(), StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        continue;
-                    }
+                    customerAtributeMappingsToReturn.Add(group);
                 }
-
-                customerAtributeMappingsToReturn.Add(group);
             }
 
             return customerAtributeMappingsToReturn.AsQueryable();
+        }
+
+        private bool CustomerIsForCurrentStore(List<CustomerAttributeMappingDto> customerAttributeMappingDtos)
+        {
+            List<GenericAttribute> attributes = customerAttributeMappingDtos.Select(x => x.Attribute).ToList();
+
+            var customerRegisteredInStoreIdAttr =
+                attributes.FirstOrDefault(a => a.Key.Equals(RegisteredInStoreId, StringComparison.InvariantCultureIgnoreCase));
+
+            if (customerRegisteredInStoreIdAttr != null)
+            {
+                var registeredInStoreId = customerRegisteredInStoreIdAttr.Value;
+
+                if (!registeredInStoreId.Equals(_storeContext.CurrentStore.Id.ToString(), StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private CustomerDto Merge(IList<CustomerAttributeMappingDto> mappingsForMerge, int defaultLanguageId)
