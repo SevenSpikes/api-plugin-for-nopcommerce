@@ -423,7 +423,7 @@ namespace Nop.Plugin.Api.Services
             List<GenericAttribute> attributes = mappingsForMerge.Select(x => x.Attribute).ToList();
 
             // We expect the customer to be always set.
-            customerDto = mappingsForMerge.First().Customer.ToDto();
+            var customerDto = mappingsForMerge.First().Customer.ToDto();
 
             // If there is no Language Id generic attribute create one with the default language id.
             if (!attributes.Any(atr => atr != null && atr.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase)))
