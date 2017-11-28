@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.Web.Http.ModelBinding;
 using Newtonsoft.Json;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.ModelBinders;
 
 namespace Nop.Plugin.Api.Models.ProductsParameters
 {
+    using Microsoft.AspNetCore.Mvc;
+
     // JsonProperty is used only for swagger
     [ModelBinder(typeof(ParametersModelBinder<ProductsParametersModel>))]
     public class ProductsParametersModel : BaseProductsParametersModel

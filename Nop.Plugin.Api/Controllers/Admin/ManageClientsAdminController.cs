@@ -1,21 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Mvc;
-using Nop.Admin.Controllers;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.Domain;
 using Nop.Plugin.Api.MappingExtensions;
-using Nop.Plugin.Api.Models;
 using Nop.Plugin.Api.Services;
 using Nop.Services.Localization;
-using Nop.Web.Framework.Controllers;
 using Nop.Web.Framework.Kendoui;
 
 namespace Nop.Plugin.Api.Controllers.Admin
 {
-    [AdminAuthorize]
-    public class ManageClientsAdminController : BaseAdminController
+    using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.Models;
+    using Nop.Web.Framework;
+    using Nop.Web.Framework.Controllers;
+    using Nop.Web.Framework.Mvc.Filters;
+
+    [AuthorizeAdmin]
+    [Area(AreaNames.Admin)]
+    public class ManageClientsAdminController : BasePluginController
     {
         private readonly IClientService _clientService;
         private readonly ILocalizationService _localizationService;
@@ -36,7 +39,7 @@ namespace Nop.Plugin.Api.Controllers.Admin
         [HttpPost]
         public ActionResult List(DataSourceRequest command)
         {
-            IList<ClientModel> gridModel = PrepareListModel();
+            IList<ClientApiModel> gridModel = PrepareListModel();
 
             var grids = new DataSourceResult()
             {
@@ -49,13 +52,13 @@ namespace Nop.Plugin.Api.Controllers.Admin
 
         public ActionResult Create()
         {
-            ClientModel clientModel = PrepareClientModel();
+            ClientApiModel clientModel = PrepareClientModel();
 
             return View(ViewNames.AdminApiClientsCreate, clientModel);
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        public ActionResult Create(ClientModel model, bool continueEditing)
+        public ActionResult Create(ClientApiModel model, bool continueEditing)
         {
             if (ModelState.IsValid)
             {
@@ -74,7 +77,7 @@ namespace Nop.Plugin.Api.Controllers.Admin
         {
             Client client = _clientService.GetClientById(id);
 
-            var clientModel = new ClientModel();
+            var clientModel = new ClientApiModel();
 
             if (client != null)
             {
@@ -85,7 +88,7 @@ namespace Nop.Plugin.Api.Controllers.Admin
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        public ActionResult Edit(ClientModel model, bool continueEditing)
+        public ActionResult Edit(ClientApiModel model, bool continueEditing)
         {
             if (ModelState.IsValid)
             {
@@ -123,11 +126,11 @@ namespace Nop.Plugin.Api.Controllers.Admin
             return RedirectToAction("List");
         }
         
-        private IList<ClientModel> PrepareListModel()
+        private IList<ClientApiModel> PrepareListModel()
         {
             IList<Client> clients = _clientService.GetAllClients();
 
-            var clientModels = new List<ClientModel>();
+            var clientModels = new List<ClientApiModel>();
 
             foreach (var client in clients)
             {
@@ -137,9 +140,9 @@ namespace Nop.Plugin.Api.Controllers.Admin
             return clientModels;
         }
 
-        private ClientModel PrepareClientModel()
+        private ClientApiModel PrepareClientModel()
         {
-            var clientModel = new ClientModel()
+            var clientModel = new ClientApiModel()
             {
                 ClientId = Guid.NewGuid().ToString(),
                 ClientSecret = Guid.NewGuid().ToString(),

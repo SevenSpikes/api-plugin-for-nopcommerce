@@ -1,15 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Net;
 using System.Linq;
-using System.Web.Http;
-using System.Web.Http.Description;
 using Nop.Core.Domain.Localization;
-using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.DTOs.Languages;
 using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.JSON.ActionResults;
-using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.Serializers;
 using Nop.Services.Customers;
 using Nop.Services.Discounts;
@@ -21,7 +16,11 @@ using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    [BearerTokenAuthorize]
+    using System.Net;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+
+    [Authorize]
     public class LanguagesController : BaseApiController
     {
         private ILanguageService _languageService;
@@ -59,9 +58,11 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [ResponseType(typeof(LanguagesRootObject))]
+        [Route("/api/languages")]
+        [ProducesResponseType(typeof(LanguagesRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult GetAllLanguages(string fields = "")
+        public IActionResult GetAllLanguages(string fields = "")
         {
             IList<Language> allLanguages = _languageService.GetAllLanguages();
 

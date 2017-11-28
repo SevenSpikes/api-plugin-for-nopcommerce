@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Web.Http.ModelBinding;
 using Newtonsoft.Json;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.ModelBinders;
 
 namespace Nop.Plugin.Api.Models.CustomersParameters
 {
+    using Microsoft.AspNetCore.Mvc;
+
     // JsonProperty is used only for swagger
     [ModelBinder(typeof(ParametersModelBinder<CustomersParametersModel>))]
     public class CustomersParametersModel

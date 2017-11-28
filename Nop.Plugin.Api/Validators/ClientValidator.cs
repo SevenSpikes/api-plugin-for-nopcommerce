@@ -1,10 +1,11 @@
 ﻿using FluentValidation;
-using Nop.Plugin.Api.Models;
 using Nop.Services.Localization;
 
 namespace Nop.Plugin.Api.Validators
 {
-    public class ClientValidator : AbstractValidator<ClientModel>
+    using Nop.Plugin.Api.Models;
+
+    public class ClientValidator : AbstractValidator<ClientApiModel>
     {
         public ClientValidator(ILocalizationService localizationService)
         {

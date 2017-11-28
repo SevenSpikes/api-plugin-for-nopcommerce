@@ -1,7 +1,5 @@
-﻿@using Nop.Web.Framework
-@using Nop.Plugin.Api.Models
+﻿@model ClientApiModel
 
-@model ClientModel
 <div class="content">
     <div class="form-horizontal">
 
@@ -10,53 +8,51 @@
                 <div class="panel-body">
                     <div class="form-group">
                         <div class="col-md-3">
-                            @Html.NopLabelFor(model => model.Name)
+                            <nop-label asp-for="Name" />
                         </div>
                         <div class="col-md-9">
-                            @Html.NopEditorFor(model => model.Name)
-                            @Html.ValidationMessageFor(model => model.Name)
+                            <nop-editor asp-for="Name" asp-required="true"/>
+                            <span asp-validation-for="Name"></span>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-md-3">
-                            @Html.NopLabelFor(model => model.ClientId)
+                            <nop-label asp-for="ClientId" />
                         </div>
                         <div class="col-md-9">
-                            @Html.NopEditorFor(model => model.ClientId)
-                            @Html.ValidationMessageFor(model => model.ClientId)
+                            <nop-editor asp-for="ClientId" asp-disabled="true" asp-required="true" />
+                            <span asp-validation-for="ClientId"></span>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-md-3">
-                            @Html.NopLabelFor(model => model.ClientSecret)
+                            <nop-label asp-for="ClientSecret" />
                         </div>
                         <div class="col-md-9">
-                            @Html.NopEditorFor(model => model.ClientSecret)
-                            @Html.ValidationMessageFor(model => model.ClientSecret)
+                            <nop-editor asp-for="ClientSecret" asp-disabled="true" asp-required="true" />
+                            <span asp-validation-for="ClientSecret"></span>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-md-3">
-                            @Html.NopLabelFor(model => model.CallbackUrl)
+                            <nop-label asp-for="CallbackUrl" />
                         </div>
                         <div class="col-md-9">
-                            @Html.NopEditorFor(model => model.CallbackUrl)
-                            @Html.ValidationMessageFor(model => model.CallbackUrl)
+                            <nop-editor asp-for="CallbackUrl" asp-required="true" />
+                            <span asp-validation-for="CallbackUrl"></span>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-md-3">
-                            @Html.NopLabelFor(model => model.IsActive)
+                            <nop-label asp-for="IsActive" />
                         </div>
                         <div class="col-md-9">
-                            @Html.NopEditorFor(model => model.IsActive)
-                            @Html.ValidationMessageFor(model => model.IsActive)
+                            <nop-editor asp-for="IsActive" />
+                            <span asp-validation-for="IsActive"></span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
-

@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web.Http;
 using Nop.Core;
-using Nop.Core.Domain.Customers;
-using Nop.Core.Domain.Discounts;
-using Nop.Core.Domain.Media;
 using Nop.Core.Domain.Security;
 using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.DTOs.Errors;
-using Nop.Plugin.Api.DTOs.Images;
 using Nop.Plugin.Api.JSON.ActionResults;
 using Nop.Plugin.Api.Serializers;
 using Nop.Services.Customers;
@@ -20,10 +14,11 @@ using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Stores;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    public class BaseApiController : ApiController
+    public class BaseApiController : Controller
     {
         protected readonly IJsonFieldsSerializer _jsonFieldsSerializer;
         protected readonly IAclService _aclService;
@@ -56,7 +51,7 @@ namespace Nop.Plugin.Api.Controllers
             _pictureService = pictureService;
         }
 
-        protected IHttpActionResult Error(HttpStatusCode statusCode = (HttpStatusCode)422, string propertyKey = "", string errorMessage = "")
+        protected IActionResult Error(HttpStatusCode statusCode = (HttpStatusCode)422, string propertyKey = "", string errorMessage = "")
         {
             var errors = new Dictionary<string, List<string>>();
 

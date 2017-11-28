@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web.Http;
-using System.Web.Http.Description;
-using System.Web.Http.ModelBinding;
 using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.Constants;
@@ -26,7 +23,10 @@ using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    [BearerTokenAuthorize]
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+
+    [Authorize]
     public class ProductCategoryMappingsController : BaseApiController
     {
         private readonly IProductCategoryMappingsApiService _productCategoryMappingsService;
@@ -62,9 +62,12 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="400">Bad Request</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [ResponseType(typeof(ProductCategoryMappingsRootObject))]
+        [Route("/api/product_category_mappings")]
+        [ProducesResponseType(typeof(ProductCategoryMappingsRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult GetMappings(ProductCategoryMappingsParametersModel parameters)
+        public IActionResult GetMappings(ProductCategoryMappingsParametersModel parameters)
         {
             if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
@@ -99,9 +102,12 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [ResponseType(typeof(ProductCategoryMappingsCountRootObject))]
+        [Route("/api/product_category_mappings/count")]
+        [ProducesResponseType(typeof(ProductCategoryMappingsCountRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult GetMappingsCount(ProductCategoryMappingsCountParametersModel parameters)
+        public IActionResult GetMappingsCount(ProductCategoryMappingsCountParametersModel parameters)
         {
             if (parameters.ProductId < 0)
             {
@@ -133,9 +139,13 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [ResponseType(typeof(ProductCategoryMappingsRootObject))]
+        [Route("/api/product_category_mappings/{id}")]
+        [ProducesResponseType(typeof(ProductCategoryMappingsRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult GetMappingById(int id, string fields = "")
+        public IActionResult GetMappingById(int id, string fields = "")
         {
             if (id <= 0)
             {
@@ -158,8 +168,13 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpPost]
-        [ResponseType(typeof(ProductCategoryMappingsRootObject))]
-        public IHttpActionResult CreateProductCategoryMapping([ModelBinder(typeof(JsonModelBinder<ProductCategoryMappingDto>))] Delta<ProductCategoryMappingDto> productCategoryDelta)
+        [Route("/api/product_category_mappings")]
+        [ProducesResponseType(typeof(ProductCategoryMappingsRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), 422)]
+        public IActionResult CreateProductCategoryMapping([ModelBinder(typeof(JsonModelBinder<ProductCategoryMappingDto>))] Delta<ProductCategoryMappingDto> productCategoryDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -208,8 +223,12 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpPut]
-        [ResponseType(typeof(ProductCategoryMappingsRootObject))]
-        public IHttpActionResult UpdateProductCategoryMapping([ModelBinder(typeof(JsonModelBinder<ProductCategoryMappingDto>))] Delta<ProductCategoryMappingDto> productCategoryDelta)
+        [Route("/api/product_category_mappings/{id}")]
+        [ProducesResponseType(typeof(ProductCategoryMappingsRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), 422)]
+        public IActionResult UpdateProductCategoryMapping([ModelBinder(typeof(JsonModelBinder<ProductCategoryMappingDto>))] Delta<ProductCategoryMappingDto> productCategoryDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -265,8 +284,13 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpDelete]
+        [Route("/api/product_category_mappings/{id}")]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult DeleteProductCategoryMapping(int id)
+        public IActionResult DeleteProductCategoryMapping(int id)
         {
             if (id <= 0)
             {

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Web.Http.ModelBinding;
 using Newtonsoft.Json;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.ModelBinders;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Nop.Plugin.Api.Models.CategoriesParameters
 {

@@ -1,10 +1,11 @@
-﻿using System.Web.Http.ModelBinding;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.ModelBinders;
 
 namespace Nop.Plugin.Api.Models.OrderItemsParameters
 {
+    using Microsoft.AspNetCore.Mvc;
+
     [ModelBinder(typeof(ParametersModelBinder<OrderItemsParametersModel>))]
     public class OrderItemsParametersModel
     {

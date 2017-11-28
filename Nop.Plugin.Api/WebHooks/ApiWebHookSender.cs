@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
-using Microsoft.AspNet.WebHooks;
-using Microsoft.AspNet.WebHooks.Diagnostics;
 using Newtonsoft.Json.Linq;
 
 namespace Nop.Plugin.Api.WebHooks
 {
+    using Microsoft.AspNet.WebHooks;
+    using Microsoft.AspNet.WebHooks.Diagnostics;
+
     public class ApiWebHookSender : DataflowWebHookSender
     {
         private const string WebHookIdKey = "WebHookId";

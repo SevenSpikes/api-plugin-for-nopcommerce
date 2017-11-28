@@ -1,20 +1,22 @@
-﻿using System.Web.Mvc;
-using Nop.Admin.Controllers;
-using Nop.Core;
-using Nop.Plugin.Api.Constants;
-using Nop.Plugin.Api.Domain;
-using Nop.Plugin.Api.MappingExtensions;
-using Nop.Plugin.Api.Models;
-using Nop.Services.Configuration;
-using Nop.Services.Localization;
-using Nop.Services.Logging;
-using Nop.Services.Stores;
-using Nop.Web.Framework.Controllers;
-
-namespace Nop.Plugin.Api.Controllers.Admin
+﻿namespace Nop.Plugin.Api.Controllers.Admin
 {
-    [AdminAuthorize]
-    public class ApiAdminController : BaseAdminController
+    using Microsoft.AspNetCore.Mvc;
+    using Nop.Core;
+    using Nop.Plugin.Api.Constants;
+    using Nop.Plugin.Api.Domain;
+    using Nop.Plugin.Api.MappingExtensions;
+    using Nop.Plugin.Api.Models;
+    using Nop.Services.Configuration;
+    using Nop.Services.Localization;
+    using Nop.Services.Logging;
+    using Nop.Services.Stores;
+    using Nop.Web.Framework;
+    using Nop.Web.Framework.Controllers;
+    using Nop.Web.Framework.Mvc.Filters;
+
+    [AuthorizeAdmin]
+    [Area(AreaNames.Admin)]
+    public class ApiAdminController : BasePluginController
     {
         private readonly IStoreService _storeService;
         private readonly IWorkContext _workContext;

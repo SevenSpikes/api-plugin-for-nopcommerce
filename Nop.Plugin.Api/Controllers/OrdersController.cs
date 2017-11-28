@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web.Http;
-using System.Web.Http.Description;
-using System.Web.Http.ModelBinding;
 using FluentValidation.Results;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
@@ -21,7 +18,6 @@ using Nop.Plugin.Api.DTOs.Orders;
 using Nop.Plugin.Api.Factories;
 using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.JSON.ActionResults;
-using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.ModelBinders;
 using Nop.Plugin.Api.Models.OrdersParameters;
 using Nop.Plugin.Api.Serializers;
@@ -39,10 +35,13 @@ using Nop.Services.Payments;
 using Nop.Services.Security;
 using Nop.Services.Shipping;
 using Nop.Services.Stores;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    [BearerTokenAuthorize]
+    using Microsoft.AspNetCore.Authorization;
+
+    [Authorize]
     public class OrdersController : BaseApiController
     {
         private readonly IOrderApiService _orderApiService;
@@ -114,9 +113,12 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="400">Bad Request</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [ResponseType(typeof(OrdersRootObject))]
+        [Route("/api/orders")]
+        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult GetOrders(OrdersParametersModel parameters)
+        public IActionResult GetOrders(OrdersParametersModel parameters)
         {
             if (parameters.Page < Configurations.DefaultPageValue)
             {
@@ -154,9 +156,11 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [ResponseType(typeof(OrdersCountRootObject))]
+        [Route("/api/orders/count")]
+        [ProducesResponseType(typeof(OrdersCountRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult GetOrdersCount(OrdersCountParametersModel parameters)
+        public IActionResult GetOrdersCount(OrdersCountParametersModel parameters)
         {
             var storeId = _storeContext.CurrentStore.Id;
 
@@ -180,9 +184,13 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [ResponseType(typeof(OrdersRootObject))]
+        [Route("/api/orders/{id}")]
+        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult GetOrderById(int id, string fields = "")
+        public IActionResult GetOrderById(int id, string fields = "")
         {
             if (id <= 0)
             {
@@ -213,9 +221,11 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [ResponseType(typeof(OrdersRootObject))]
+        [Route("/api/orders/customer/{customer_id}")]
+        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult GetOrdersByCustomerId(int customer_id)
+        public IActionResult GetOrdersByCustomerId(int customer_id)
         {
             IList<OrderDto> ordersForCustomer = _orderApiService.GetOrdersByCustomerId(customer_id).Select(x => _dtoHelper.PrepareOrderDTO(x)).ToList();
 
@@ -228,8 +238,13 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpPost]
-        [ResponseType(typeof(OrdersRootObject))]
-        public IHttpActionResult CreateOrder([ModelBinder(typeof(JsonModelBinder<OrderDto>))] Delta<OrderDto> orderDelta)
+        [Route("/api/orders")]
+        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), 422)]
+        public IActionResult CreateOrder([ModelBinder(typeof(JsonModelBinder<OrderDto>))] Delta<OrderDto> orderDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -337,8 +352,14 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpDelete]
+        [Route("/api/orders/{id}")]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), 422)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult DeleteOrder(int id)
+        public IActionResult DeleteOrder(int id)
         {
             if (id <= 0)
             {
@@ -361,8 +382,13 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpPut]
-        [ResponseType(typeof(OrdersRootObject))]
-        public IHttpActionResult UpdateOrder([ModelBinder(typeof(JsonModelBinder<OrderDto>))] Delta<OrderDto> orderDelta)
+        [Route("/api/orders/{id}")]
+        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), 422)]
+        public IActionResult UpdateOrder([ModelBinder(typeof(JsonModelBinder<OrderDto>))] Delta<OrderDto> orderDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)

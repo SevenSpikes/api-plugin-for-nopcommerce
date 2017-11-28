@@ -1,32 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Net;
-using System.Threading;
-using System.Web.Http.Filters;
 using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.DTOs.Errors;
 using Nop.Plugin.Api.JSON.ActionResults;
 using Nop.Plugin.Api.Serializers;
 using Nop.Services.Logging;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Nop.Plugin.Api.Attributes
 {
     public class ServerErrorHandlerAttribute : ExceptionFilterAttribute
     {
-        public override void OnException(HttpActionExecutedContext context)
+        // TODO: test this
+        public override void OnException(ExceptionContext context)
         {
             if (context != null && context.Exception != null)
             {
                 string responseErrorMessage = string.Empty;
-
-                var responseException = context.Exception as HttpResponseException;
-                if (responseException != null)
-                {
-                    responseErrorMessage = responseException.Response.ToString();
-                } else
-                {
-                    responseErrorMessage = context.Exception.Message;
-                }
+                
+                responseErrorMessage = context.Exception.Message;
 
                 var logger = EngineContext.Current.Resolve<ILogger>();
                 logger.Error(responseErrorMessage, context.Exception);
@@ -50,7 +42,9 @@ namespace Nop.Plugin.Api.Attributes
 
                 var errorResult = new ErrorActionResult(errorsJson, HttpStatusCode.InternalServerError);
 
-                context.Response = errorResult.ExecuteAsync(new CancellationToken()).Result;
+                context.Result = errorResult;
+
+                base.OnException(context);
             }
         }
     }

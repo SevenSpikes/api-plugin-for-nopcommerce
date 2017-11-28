@@ -1,10 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using Microsoft.AspNet.WebHooks;
 using Nop.Plugin.Api.Constants;
 
 namespace Nop.Plugin.Api.WebHooks
 {
+    using Microsoft.AspNet.WebHooks;
+
     public class FilterProvider : IWebHookFilterProvider
     {
         private readonly Collection<WebHookFilter> filters = new Collection<WebHookFilter>

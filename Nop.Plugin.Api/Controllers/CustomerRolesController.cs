@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Description;
 using Nop.Core.Domain.Customers;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.DTOs.CustomerRoles;
-using Nop.Plugin.Api.DTOs.Languages;
 using Nop.Plugin.Api.JSON.ActionResults;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.Serializers;
@@ -22,7 +16,11 @@ using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    [BearerTokenAuthorize]
+    using System.Net;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+
+    [Authorize]
     public class CustomerRolesController : BaseApiController
     {
         public CustomerRolesController(
@@ -54,9 +52,11 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [ResponseType(typeof(CustomerRolesRootObject))]
+        [Route("/api/customer_roles")]
+        [ProducesResponseType(typeof(CustomerRolesRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult GetAllCustomerRoles(string fields = "")
+        public IActionResult GetAllCustomerRoles(string fields = "")
         {
             IList<CustomerRole> allCustomerRoles = _customerService.GetAllCustomerRoles();
 
