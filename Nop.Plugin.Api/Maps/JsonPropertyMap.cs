@@ -11,15 +11,15 @@ namespace Nop.Plugin.Api.Maps
 {
     public class JsonPropertyMapper : IJsonPropertyMapper
     {
-        private ICacheManager _cacheManager;
+        private IStaticCacheManager _cacheManager;
 
-        private ICacheManager StaticCacheManager
+        private IStaticCacheManager StaticCacheManager
         {
             get
             {
                 if (_cacheManager == null)
                 {
-                    _cacheManager = EngineContext.Current.ContainerManager.Resolve<ICacheManager>("nop_cache_static");
+                    _cacheManager = EngineContext.Current.Resolve<IStaticCacheManager>();
                 }
 
                 return _cacheManager;

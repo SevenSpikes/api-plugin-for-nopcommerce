@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Web.Http.Controllers;
-using System.Web.Http.ModelBinding;
 using FluentValidation.Attributes;
 using FluentValidation.Results;
 using Newtonsoft.Json;
@@ -17,6 +15,8 @@ using Nop.Services.Localization;
 
 namespace Nop.Plugin.Api.ModelBinders
 {
+    using Microsoft.AspNetCore.Mvc.ModelBinding;
+
     public class JsonModelBinder<T> : IModelBinder where T : class, new()
     {
         private readonly IJsonHelper _jsonHelper;
@@ -43,15 +43,15 @@ namespace Nop.Plugin.Api.ModelBinders
             }
         }
 
-        public bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
+        public Task BindModelAsync(ModelBindingContext bindingContext)
         {
             bool modelBinded = false;
 
-            Dictionary<string, object> result = GetResult(actionContext, bindingContext);
+            Dictionary<string, object> result = GetResult(bindingContext);
 
             if (result == null)
             {
-                return modelBinded;
+                return Task.FromResult(modelBinded);
             }
             
             string rootProperty = GetRootProperty(bindingContext);
@@ -68,7 +68,7 @@ namespace Nop.Plugin.Api.ModelBinders
                 // You will have id parameter passed in the model binder only when you have put request.
                 // because get and delete do not use the model binder.
                 // Here we insert the id in the property value pairs to be validated by the dto validator in a later point.
-                object routeDataId = GetRouteDataId(actionContext);
+                object routeDataId = GetRouteDataId();
 
                 if (routeDataId != null)
                 {
@@ -86,7 +86,7 @@ namespace Nop.Plugin.Api.ModelBinders
                 if (bindingContext.ModelState.IsValid)
                 {
                     delta = new Delta<T>(propertyValuePaires);
-                    ValidateModel(actionContext, bindingContext, propertyValuePaires, delta.Dto);
+                    ValidateModel(bindingContext, propertyValuePaires, delta.Dto);
                 }
 
                 if (bindingContext.ModelState.IsValid)
@@ -96,35 +96,35 @@ namespace Nop.Plugin.Api.ModelBinders
                 }
             }
 
-            return modelBinded;
+            return Task.FromResult(modelBinded);
         }
 
-        private Dictionary<string, object> GetResult(HttpActionContext actionContext, ModelBindingContext bindingContext)
+        private Dictionary<string, object> GetResult(ModelBindingContext bindingContext)
         {
             Dictionary<string, object> result = null;
 
-            var requestPayload = actionContext.Request.Content.ReadAsStringAsync();
+            var requestPayload = bindingContext.ActionContext.HttpContext.Request.Body;
 
-            // We need to check if the request has a payload.
-            CheckIfJsonIsProvided(bindingContext, requestPayload);
+            //// We need to check if the request has a payload.
+            //CheckIfJsonIsProvided(bindingContext, requestPayload);
 
-            // After we are sure that the request payload and json are provided we need to deserialize this json.
-            result = DeserializeReqestPayload(bindingContext, requestPayload);
+            //// After we are sure that the request payload and json are provided we need to deserialize this json.
+            //result = DeserializeReqestPayload(bindingContext, requestPayload);
 
-            // Next we have to validate the json format.
-            ValidateJsonFormat(bindingContext, result);
+            //// Next we have to validate the json format.
+            //ValidateJsonFormat(bindingContext, result);
 
             return result;
         }
 
-        private object GetRouteDataId(HttpActionContext actionContext)
+        private object GetRouteDataId()
         {
             object routeDataId = null;
 
-            if (actionContext.RequestContext.RouteData.Values.ContainsKey("id"))
-            {
-                routeDataId = actionContext.RequestContext.RouteData.Values["id"];
-            }
+            //if (actionContext.RequestContext.RouteData.Values.ContainsKey("id"))
+            //{
+            //    routeDataId = actionContext.RequestContext.RouteData.Values["id"];
+            //}
 
             return routeDataId;
         }
@@ -222,9 +222,9 @@ namespace Nop.Plugin.Api.ModelBinders
             }
         }
         
-        private void ValidateModel(HttpActionContext actionContext, ModelBindingContext bindingContext, Dictionary<string, object> propertyValuePaires, T dto)
+        private void ValidateModel(ModelBindingContext bindingContext, Dictionary<string, object> propertyValuePaires, T dto)
         {
-            ValidationResult validationResult = GetValidationResult(actionContext, propertyValuePaires, dto);
+            ValidationResult validationResult = GetValidationResult(propertyValuePaires, dto);
 
             if (!validationResult.IsValid)
             {
@@ -240,7 +240,7 @@ namespace Nop.Plugin.Api.ModelBinders
             }
         }
 
-        private ValidationResult GetValidationResult(HttpActionContext actionContext, Dictionary<string, object> propertyValuePaires, T dto)
+        private ValidationResult GetValidationResult(Dictionary<string, object> propertyValuePaires, T dto)
         {
             var validationResult = new ValidationResult();
 
@@ -258,7 +258,8 @@ namespace Nop.Plugin.Api.ModelBinders
                 var validator = Activator.CreateInstance(validatorType,
                     new object[]
                     {
-                        actionContext.Request.Method.ToString(),
+                        //TODO: find this
+                        //actionContext.Request.Method.ToString(),
                         propertyValuePaires
                     });
 

@@ -1,3 +1,5 @@
+@model ClientApiModel
+
 @{
     Layout = ViewNames.AdminLayout;
 
@@ -7,15 +9,8 @@
     Html.SetActiveMenuItemSystemName("Api-Clients-Menu");
 }
 
-@using Nop.Plugin.Api.Constants
-@using Nop.Web.Framework
-@using Nop.Plugin.Api.Models
-@using Nop.Web.Framework.UI
-
-@model ClientModel
-
-@using (Html.BeginForm())
-{
+<form asp-controller="ManageClientsAdmin" asp-action="Edit" method="post">
+    
     @Html.AntiForgeryToken()
 
     <div class="content-header clearfix">
@@ -39,7 +34,8 @@
         </div>
     </div>
 
-    @Html.Partial(ViewNames.AdminApiClientsCreateOrUpdate, Model)  
-}
+    @await Html.PartialAsync(ViewNames.AdminApiClientsCreateOrUpdate, Model)
 
-@Html.DeleteConfirmation("client-delete")
+</form>
+
+<nop-delete-confirmation asp-model-id="@Model.Id" asp-button-id="client-delete" />

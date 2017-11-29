@@ -1,10 +1,7 @@
-﻿@using Nop.Plugin.Api.Constants
-@using Nop.Plugin.Api.Models
-
-@model ClientModel
+﻿@model ClientApiModel
 
 <div class="panel-group">
     <div class="panel panel-default">
-        @Html.Partial(ViewNames.AdminApiClientsSettings, Model)
+        @await Html.PartialAsync(ViewNames.AdminApiClientsSettings, Model)
     </div>
 </div>

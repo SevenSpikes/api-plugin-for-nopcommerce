@@ -1,10 +1,11 @@
-﻿using System.Web.Http.ModelBinding;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.ModelBinders;
 
 namespace Nop.Plugin.Api.Models.ProductCategoryMappingsParameters
 {
+    using Microsoft.AspNetCore.Mvc;
+
     // JsonProperty is used only for swagger
     [ModelBinder(typeof(ParametersModelBinder<ProductCategoryMappingsParametersModel>))]
     public class ProductCategoryMappingsParametersModel : BaseCategoryMappingsParametersModel

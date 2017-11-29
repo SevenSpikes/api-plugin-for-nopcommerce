@@ -9,11 +9,6 @@
 
 @Html.AntiForgeryToken()
 
-@using Nop.Core.Domain.Common;
-@using Nop.Core.Infrastructure;
-@using Nop.Plugin.Api.Constants
-@using Nop.Web.Framework.UI
-
 <div class="content-header clearfix">
     <h1 class="pull-left">
         @T("Plugins.Api.Admin.Page.Clients.Title")
@@ -88,13 +83,12 @@
                                         field: "IsActive",
                                         title: "@T("Plugins.Api.Admin.Client.IsActive")",
                                         editable: true
+                                    }, {
+                                        field: "Id",
+                                        title: "@T("Admin.Common.Edit")",
+                                        width: 100,
+                                        template: '<a href="Edit/#=Id#">@T("Admin.Common.Edit")</a>'
                                     }
-                                , {
-                                    field: "Id",
-                                    title: "@T("Admin.Common.Edit")",
-                                    width: 100,
-                                    template: '<a href="Edit/#=Id#">@T("Admin.Common.Edit")</a>'
-                                }
                                 ]
                             });
                         });

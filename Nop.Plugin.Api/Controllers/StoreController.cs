@@ -4,7 +4,6 @@ using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.DTOs.Stores;
 using Nop.Plugin.Api.JSON.ActionResults;
-using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.Serializers;
 using Nop.Services.Customers;
 using Nop.Services.Directory;
@@ -14,23 +13,19 @@ using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Stores;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Web.Http;
-using System.Web.Http.Description;
 using Nop.Plugin.Api.Helpers;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    [BearerTokenAuthorize]
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+
+    [Authorize]
     public class StoreController : BaseApiController
     {
-        private IStoreContext _storeContext;
-        private readonly CurrencySettings _currencySettings;
-        private readonly ICurrencyService _currencyService;
-        private readonly ILanguageService _languageService;
+        private readonly IStoreContext _storeContext;
         private readonly IDTOHelper _dtoHelper;
 
         public StoreController(IJsonFieldsSerializer jsonFieldsSerializer,
@@ -43,9 +38,6 @@ namespace Nop.Plugin.Api.Controllers
             ILocalizationService localizationService,
             IPictureService pictureService,
             IStoreContext storeContext,
-            CurrencySettings currencySettings,
-            ICurrencyService currencyService,
-            ILanguageService languageService,
             IDTOHelper dtoHelper)
             : base(jsonFieldsSerializer,
                   aclService,
@@ -58,9 +50,6 @@ namespace Nop.Plugin.Api.Controllers
                   pictureService)
         {
             _storeContext = storeContext;
-            _currencySettings = currencySettings;
-            _currencyService = currencyService;
-            _languageService = languageService;
             _dtoHelper = dtoHelper;
         }
 
@@ -72,9 +61,12 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [ResponseType(typeof(StoresRootObject))]
+        [Route("/api/current_store")]
+        [ProducesResponseType(typeof(StoresRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult GetCurrentStore(string fields = "")
+        public IActionResult GetCurrentStore(string fields = "")
         {
             Store store = _storeContext.CurrentStore;
 
@@ -101,9 +93,11 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [ResponseType(typeof(StoresRootObject))]
+        [Route("/api/stores")]
+        [ProducesResponseType(typeof(StoresRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult GetAllStores(string fields = "")
+        public IActionResult GetAllStores(string fields = "")
         {
             IList<Store> allStores = _storeService.GetAllStores();
         

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNet.WebHooks;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Common;
@@ -27,6 +26,8 @@ using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.WebHooks
 {
+    using Microsoft.AspNet.WebHooks;
+
     public class WebHookEventConsumer : IConsumer<EntityInserted<Customer>>,
         IConsumer<EntityUpdated<Customer>>,
         IConsumer<EntityInserted<Product>>,
@@ -61,17 +62,17 @@ namespace Nop.Plugin.Api.WebHooks
 
         public WebHookEventConsumer(IStoreService storeService)
         {
-            IWebHookService webHookService = EngineContext.Current.ContainerManager.Resolve<IWebHookService>();
-            _customerApiService = EngineContext.Current.ContainerManager.Resolve<ICustomerApiService>();
-            _categoryApiService = EngineContext.Current.ContainerManager.Resolve<ICategoryApiService>();
-            _productApiService = EngineContext.Current.ContainerManager.Resolve<IProductApiService>();
-            _dtoHelper = EngineContext.Current.ContainerManager.Resolve<IDTOHelper>();
-            _storeService = EngineContext.Current.ContainerManager.Resolve<IStoreService>();
+            IWebHookService webHookService = EngineContext.Current.Resolve<IWebHookService>();
+            _customerApiService = EngineContext.Current.Resolve<ICustomerApiService>();
+            _categoryApiService = EngineContext.Current.Resolve<ICategoryApiService>();
+            _productApiService = EngineContext.Current.Resolve<IProductApiService>();
+            _dtoHelper = EngineContext.Current.Resolve<IDTOHelper>();
+            _storeService = EngineContext.Current.Resolve<IStoreService>();
 
-            _productService = EngineContext.Current.ContainerManager.Resolve<IProductService>();
-            _categoryService = EngineContext.Current.ContainerManager.Resolve<ICategoryService>();
-            _storeMappingService = EngineContext.Current.ContainerManager.Resolve<IStoreMappingService>();
-            _storeContext = EngineContext.Current.ContainerManager.Resolve<IStoreContext>();
+            _productService = EngineContext.Current.Resolve<IProductService>();
+            _categoryService = EngineContext.Current.Resolve<ICategoryService>();
+            _storeMappingService = EngineContext.Current.Resolve<IStoreMappingService>();
+            _storeContext = EngineContext.Current.Resolve<IStoreContext>();
 
             _webHookManager = webHookService.GetHookManager();
         }

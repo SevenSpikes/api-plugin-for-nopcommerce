@@ -1,42 +1,42 @@
-﻿using Nop.Core;
-using Nop.Core.Infrastructure;
-using Nop.Core.Plugins;
-using Nop.Plugin.Api.Data;
-using Nop.Plugin.Api.Domain;
-using Nop.Plugin.Api.Helpers;
-using Nop.Services.Configuration;
-using Nop.Web.Framework.Menu;
-using Nop.Services.Localization;
-
-namespace Nop.Plugin.Api.Plugin
+﻿namespace Nop.Plugin.Api
 {
+    using Nop.Core;
+    using Nop.Core.Plugins;
+    using Nop.Plugin.Api.Data;
+    using Nop.Plugin.Api.Domain;
+    using Nop.Services.Configuration;
+    using Nop.Services.Localization;
+    using Nop.Web.Framework.Menu;
+
     public class ApiPlugin : BasePlugin, IAdminMenuPlugin
     {
-        private const string ControllersNamespace = "Nop.Plugin.Api.Controllers";
-
-        private readonly ApiObjectContext _objectContext;
-        private readonly IWebConfigMangerHelper _webConfigMangerHelper;
+        //private readonly IWebConfigMangerHelper _webConfigMangerHelper;
         private readonly ISettingService _settingService;
         private readonly IWorkContext _workContext;
-        private readonly ILocalizationService _localizationService;
         private readonly IWebHelper _webHelper;
+        private readonly ILocalizationService _localizationService;
+        private readonly ApiObjectContext _objectContext;
 
-        public ApiPlugin(ApiObjectContext objectContext, IWebConfigMangerHelper webConfigMangerHelper, ISettingService settingService, IWorkContext workContext,
-            ILocalizationService localizationService, IWebHelper webHelper)
+        public ApiPlugin(/*IWebConfigMangerHelper webConfigMangerHelper,*/ ISettingService settingService, IWorkContext workContext,
+            ILocalizationService localizationService, IWebHelper webHelper, ApiObjectContext objectContext
+/*, IConfiguration configuration*/)
         {
-            _objectContext = objectContext;
-            _webConfigMangerHelper = webConfigMangerHelper;
+            //_webConfigMangerHelper = webConfigMangerHelper;
             _settingService = settingService;
             _workContext = workContext;
             _localizationService = localizationService;
             _webHelper = webHelper;
+            _objectContext = objectContext;
+            //_configuration = configuration;
         }
+
+        //private readonly IConfiguration _configuration;
 
         public override void Install()
         {
             // Add the nopCommerce connection string to the web.config file. This is required by the WebHooks.
-            IWebConfigMangerHelper webConfigManagerHelper = EngineContext.Current.ContainerManager.Resolve<IWebConfigMangerHelper>();
-            webConfigManagerHelper.AddConnectionString();
+            //IWebConfigMangerHelper webConfigManagerHelper = EngineContext.Current.Resolve<IWebConfigMangerHelper>();
+            //webConfigManagerHelper.AddConnectionString();
 
             _objectContext.Install();
 
@@ -113,7 +113,7 @@ namespace Nop.Plugin.Api.Plugin
 
             // Changes to Web.Config trigger application restart.
             // This doesn't appear to affect the Install function, but just to be safe we will made web.config changes after the plugin was installed.
-            _webConfigMangerHelper.AddConfiguration();
+            //_webConfigMangerHelper.AddConfiguration();
         }
 
         public override void Uninstall()
@@ -165,7 +165,7 @@ namespace Nop.Plugin.Api.Plugin
 
             // Changes to Web.Config trigger application restart.
             // This doesn't appear to affect the uninstall function, but just to be safe we will made web.config changes after the plugin was uninstalled.
-            _webConfigMangerHelper.RemoveConfiguration();
+            //_webConfigMangerHelper.RemoveConfiguration();
         }
 
         public void ManageSiteMap(SiteMapNode rootNode)
@@ -176,7 +176,7 @@ namespace Nop.Plugin.Api.Plugin
 
             string manageClientsMenuName = _localizationService.GetResource("Plugins.Api.Admin.Menu.Clients.Title", languageId: _workContext.WorkingLanguage.Id, defaultValue: "API");
 
-            const string adminUrlPart = "Plugins/";
+            const string adminUrlPart = "Admin/";
 
             var pluginMainMenu = new SiteMapNode
             {

@@ -1,13 +1,12 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Nop.Plugin.Api.JSON.ActionResults
 {
-    public class ErrorActionResult : IHttpActionResult 
+    public class ErrorActionResult : IActionResult 
     {
         private readonly string _jsonString;
         private readonly HttpStatusCode _statusCode;
@@ -17,8 +16,8 @@ namespace Nop.Plugin.Api.JSON.ActionResults
             _jsonString = jsonString;
             _statusCode = statusCode;
         }
-
-        public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        
+        public Task ExecuteResultAsync(ActionContext context)
         {
             var content = new StringContent(_jsonString);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");

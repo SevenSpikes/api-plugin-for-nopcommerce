@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web.Http;
-using System.Web.Http.Description;
-using System.Web.Http.ModelBinding;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Directory;
@@ -35,7 +32,10 @@ using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    [BearerTokenAuthorize]
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+
+    [Authorize]
     public class CustomersController : BaseApiController
     {
         private readonly ICustomerApiService _customerApiService;
@@ -103,9 +103,12 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [ResponseType(typeof(CustomersRootObject))]
+        [Route("/api/customers")]
+        [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult GetCustomers(CustomersParametersModel parameters)
+        public IActionResult GetCustomers(CustomersParametersModel parameters)
         {
             if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
@@ -138,9 +141,13 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [ResponseType(typeof(CustomersRootObject))]
+        [Route("/api/customers/{id}")]
+        [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult GetCustomerById(int id, string fields = "")
+        public IActionResult GetCustomerById(int id, string fields = "")
         {
             if (id <= 0)
             {
@@ -169,8 +176,10 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [ResponseType(typeof(CustomersCountRootObject))]
-        public IHttpActionResult GetCustomersCount()
+        [Route("/api/customers/count")]
+        [ProducesResponseType(typeof(CustomersCountRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        public IActionResult GetCustomersCount()
         {
             var allCustomersCount = _customerApiService.GetCustomersCount();
 
@@ -189,7 +198,11 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="400">Bad Request</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        public IHttpActionResult Search(CustomersSearchParametersModel parameters)
+        [Route("/api/customers/search")]
+        [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        public IActionResult Search(CustomersSearchParametersModel parameters)
         {
             if (parameters.Limit <= Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
@@ -214,8 +227,11 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpPost]
-        [ResponseType(typeof(CustomersRootObject))]
-        public IHttpActionResult CreateCustomer([ModelBinder(typeof(JsonModelBinder<CustomerDto>))] Delta<CustomerDto> customerDelta)
+        [Route("/api/customers")]
+        [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), 422)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        public IActionResult CreateCustomer([ModelBinder(typeof(JsonModelBinder<CustomerDto>))] Delta<CustomerDto> customerDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -289,8 +305,12 @@ namespace Nop.Plugin.Api.Controllers
         }
         
         [HttpPut]
-        [ResponseType(typeof(CustomersRootObject))]
-        public IHttpActionResult UpdateCustomer([ModelBinder(typeof(JsonModelBinder<CustomerDto>))] Delta<CustomerDto> customerDelta)
+        [Route("/api/customers/{id}")]
+        [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), 422)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        public IActionResult UpdateCustomer([ModelBinder(typeof(JsonModelBinder<CustomerDto>))] Delta<CustomerDto> customerDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -409,8 +429,12 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpDelete]
+        [Route("/api/customers/{id}")]
         [GetRequestsErrorInterceptorActionFilter]
-        public IHttpActionResult DeleteCustomer(int id)
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        public IActionResult DeleteCustomer(int id)
         {
             if (id <= 0)
             {

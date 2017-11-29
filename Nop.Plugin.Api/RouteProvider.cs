@@ -1,58 +1,50 @@
-﻿using System.Web.Mvc;
-using System.Web.Routing;
-using Nop.Web.Framework.Mvc.Routes;
-using Nop.Plugin.Api.Helpers;
-using Nop.Core.Infrastructure;
+﻿using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Builder;
+using Nop.Web.Framework.Mvc.Routing;
 
 namespace Nop.Plugin.Api
 {
     public class RouteProvider : IRouteProvider
     {
-        public void RegisterRoutes(RouteCollection routes)
+        public void RegisterRoutes(IRouteBuilder routeBuilder)
         {
-            routes.MapRoute("Plugin.Api.Settings",
-                 "Plugins/ApiAdmin/Settings",
-                 new { controller = "ApiAdmin", action = "Settings", },
-                 new[] { "Nop.Plugin.Api.Controllers.Admin" }
+            routeBuilder.MapRoute("Plugin.Api.Settings",
+                "Admin/ApiAdmin/Settings",
+                new { controller = "ApiAdmin", action = "Settings" }
             );
 
-            routes.MapRoute("Plugin.Api.ManageClients.List",
-                 "Plugins/ManageClientsAdmin/List",
-                 new { controller = "ManageClientsAdmin", action = "List" },
-                 new[] { "Nop.Plugin.Api.Controllers.Admin" }
+            routeBuilder.MapRoute("Plugin.Api.ManageClients.List",
+                "Admin/ManageClientsAdmin/List",
+                new { controller = "ManageClientsAdmin", action = "List" }
             );
 
-            routes.MapRoute("Plugin.Api.ManageClients.Create",
-                 "Plugins/ManageClientsAdmin/Create",
-                 new { controller = "ManageClientsAdmin", action = "Create" },
-                 new[] { "Nop.Plugin.Api.Controllers.Admin" }
+            routeBuilder.MapRoute("Plugin.Api.ManageClients.Create",
+                "Admin/ManageClientsAdmin/Create",
+                new { controller = "ManageClientsAdmin", action = "Create" }
             );
 
-            routes.MapRoute("Plugin.Api.ManageClients.Edit",
-                 "Plugins/ManageClientsAdmin/Edit/{id}",
-                 new { controller = "ManageClientsAdmin", action = "Edit", id = @"\d+" },
-                 new[] { "Nop.Plugin.Api.Controllers.Admin" }
+            routeBuilder.MapRoute("Plugin.Api.ManageClients.Edit",
+                "Admin/ManageClientsAdmin/Edit/{id}",
+                new { controller = "ManageClientsAdmin", action = "Edit", id = @"\d+" }
             );
 
-            routes.MapRoute("Plugin.Api.ManageClients.Delete",
-                 "Plugins/ManageClientsAdmin/Delete/{id}",
-                 new { controller = "ManageClientsAdmin", action = "Delete" , id = @"\d+" },
-                 new[] { "Nop.Plugin.Api.Controllers.Admin" }
+            routeBuilder.MapRoute("Plugin.Api.ManageClients.Delete",
+                "Admin/ManageClientsAdmin/Delete/{id}",
+                new { controller = "ManageClientsAdmin", action = "Delete", id = @"\d+" }
             );
 
-
-            IWebConfigMangerHelper webConfigManagerHelper = EngineContext.Current.ContainerManager.Resolve<IWebConfigMangerHelper>();
+            //IWebConfigMangerHelper webConfigManagerHelper = EngineContext.Current.Resolve<IWebConfigMangerHelper>();
 
             // make sure the connection string is added in the Web.config
-            webConfigManagerHelper.AddConnectionString();
+            //webConfigManagerHelper.AddConnectionString();
 
             // make sure the OwinAutomaticAppStartup is enabled in the Web.config
-            webConfigManagerHelper.AddConfiguration();
+            //webConfigManagerHelper.AddConfiguration();
         }
 
         public int Priority
         {
-            get { return 0; }
+            get { return -1; }
         }
     }
 }

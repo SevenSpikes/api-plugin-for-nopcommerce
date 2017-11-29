@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNet.WebHooks;
-using Microsoft.AspNet.WebHooks.Diagnostics;
-using Microsoft.AspNet.WebHooks.Services;
-using Nop.Plugin.Api.WebHooks;
+﻿using Nop.Plugin.Api.WebHooks;
 
 namespace Nop.Plugin.Api.Services
 {
+    using Microsoft.AspNet.WebHooks;
+    using Microsoft.AspNet.WebHooks.Diagnostics;
+    using Microsoft.AspNet.WebHooks.Services;
+
     public class WebHookService : IWebHookService
     {
         private IWebHookManager _webHookManager;

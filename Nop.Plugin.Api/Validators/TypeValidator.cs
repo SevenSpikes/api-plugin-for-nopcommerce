@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
-using AutoMapper.Configuration;
 using Newtonsoft.Json;
 using Nop.Plugin.Api.Helpers;
 

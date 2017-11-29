@@ -1,8 +1,8 @@
-﻿using System.Web.Http.ModelBinding;
-using Nop.Plugin.Api.ModelBinders;
-
+﻿using Nop.Plugin.Api.ModelBinders;
 namespace Nop.Plugin.Api.Models.CategoriesParameters
 {
+    using Microsoft.AspNetCore.Mvc;
+
     [ModelBinder(typeof(ParametersModelBinder<CategoriesCountParametersModel>))]
     public class CategoriesCountParametersModel : BaseCategoriesParametersModel
     {
