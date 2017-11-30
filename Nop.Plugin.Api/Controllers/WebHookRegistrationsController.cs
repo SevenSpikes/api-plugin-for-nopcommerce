@@ -22,9 +22,10 @@ using Microsoft.AspNet.WebHooks;
 namespace Nop.Plugin.Api.Controllers
 {
     using System.Security;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
 
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class WebHookRegistrationsController : BaseApiController
     {
         private const string ErrorPropertyKey = "webhook";

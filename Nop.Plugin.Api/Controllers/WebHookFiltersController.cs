@@ -15,9 +15,10 @@ namespace Nop.Plugin.Api.Controllers
 {
     using System.Net;
     using Microsoft.AspNet.WebHooks;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
 
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class WebHookFiltersController : BaseApiController
     {
         private readonly IWebHookFilterManager _filterManager;

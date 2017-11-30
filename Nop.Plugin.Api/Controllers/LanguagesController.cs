@@ -17,10 +17,11 @@ using Nop.Services.Stores;
 namespace Nop.Plugin.Api.Controllers
 {
     using System.Net;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class LanguagesController : BaseApiController
     {
         private ILanguageService _languageService;

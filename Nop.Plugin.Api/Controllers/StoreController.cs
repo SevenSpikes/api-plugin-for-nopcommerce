@@ -1,12 +1,10 @@
 ﻿using Nop.Core;
-using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.DTOs.Stores;
 using Nop.Plugin.Api.JSON.ActionResults;
 using Nop.Plugin.Api.Serializers;
 using Nop.Services.Customers;
-using Nop.Services.Directory;
 using Nop.Services.Discounts;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
@@ -19,10 +17,11 @@ using Nop.Plugin.Api.Helpers;
 
 namespace Nop.Plugin.Api.Controllers
 {
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class StoreController : BaseApiController
     {
         private readonly IStoreContext _storeContext;
