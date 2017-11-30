@@ -10,7 +10,7 @@
 }
 
 <form asp-controller="ManageClientsAdmin" asp-action="Create" method="post">
-    @Html.HiddenFor(model => model.Id)
+    @Html.HiddenFor(model => model.ClientId)
     @Html.AntiForgeryToken()
 
     <div class="content-header clearfix">

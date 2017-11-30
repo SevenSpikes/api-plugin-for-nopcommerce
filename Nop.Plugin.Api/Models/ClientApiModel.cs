@@ -1,16 +1,11 @@
 ﻿namespace Nop.Plugin.Api.Models
 {
-    using FluentValidation.Attributes;
-    using Nop.Plugin.Api.Validators;
-    using Nop.Web.Framework.Mvc.Models;
-
-    [Validator(typeof(ClientValidator))]
-    public class ClientApiModel : BaseNopEntityModel
+    public class ClientApiModel
     {
-        public string Name { get; set; }
+        public string ClientName { get; set; }
         public string ClientId { get; set; }
-        public string ClientSecret { get; set; }
-        public string CallbackUrl { get; set; }
-        public bool IsActive { get; set; }
+        public string ClientSecretDescription { get; set; }
+        public string RedirectUrl { get; set; }
+        public bool Enabled { get; set; }
     }
 }

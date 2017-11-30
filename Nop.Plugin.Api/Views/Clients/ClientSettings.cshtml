@@ -8,11 +8,11 @@
                 <div class="panel-body">
                     <div class="form-group">
                         <div class="col-md-3">
-                            <nop-label asp-for="Name" />
+                            <nop-label asp-for="ClientName" />
                         </div>
                         <div class="col-md-9">
-                            <nop-editor asp-for="Name" asp-required="true"/>
-                            <span asp-validation-for="Name"></span>
+                            <nop-editor asp-for="ClientName" asp-required="true"/>
+                            <span asp-validation-for="ClientName"></span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -26,29 +26,29 @@
                     </div>
                     <div class="form-group">
                         <div class="col-md-3">
-                            <nop-label asp-for="ClientSecret" />
+                            <nop-label asp-for="ClientSecretDescription" />
                         </div>
                         <div class="col-md-9">
-                            <nop-editor asp-for="ClientSecret" asp-disabled="true" asp-required="true" />
-                            <span asp-validation-for="ClientSecret"></span>
+                            <nop-editor asp-for="ClientSecretDescription" asp-disabled="true" asp-required="true" />
+                            <span asp-validation-for="ClientSecretDescription"></span>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-md-3">
-                            <nop-label asp-for="CallbackUrl" />
+                            <nop-label asp-for="RedirectUrl" />
                         </div>
                         <div class="col-md-9">
-                            <nop-editor asp-for="CallbackUrl" asp-required="true" />
-                            <span asp-validation-for="CallbackUrl"></span>
+                            <nop-editor asp-for="RedirectUrl" asp-required="true" />
+                            <span asp-validation-for="RedirectUrl"></span>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-md-3">
-                            <nop-label asp-for="IsActive" />
+                            <nop-label asp-for="Enabled" />
                         </div>
                         <div class="col-md-9">
-                            <nop-editor asp-for="IsActive" />
-                            <span asp-validation-for="IsActive"></span>
+                            <nop-editor asp-for="Enabled" />
+                            <span asp-validation-for="Enabled"></span>
                         </div>
                     </div>
                 </div>

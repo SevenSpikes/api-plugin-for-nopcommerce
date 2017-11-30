@@ -4,6 +4,7 @@
     using System.Linq;
     using System.Net;
     using global::AutoMapper;
+    using IdentityServer4.EntityFramework.Entities;
     using Nop.Core.Domain.Catalog;
     using Nop.Core.Domain.Common;
     using Nop.Core.Domain.Customers;
@@ -38,9 +39,6 @@
             CreateMap<Category, CategoryDto>();
             CreateMap<CategoryDto, Category>();
 
-            CreateMap<Client, ClientApiModel>();
-            CreateMap<ClientApiModel, Client>();
-
             CreateMap<Store, StoreDto>();
 
             CreateMap<ProductCategory, ProductCategoryMappingDto>();
@@ -48,7 +46,9 @@
             CreateMap<Language, LanguageDto>();
 
             CreateMap<CustomerRole, CustomerRoleDto>();
-            
+
+            CreateClientToClientApiModelMap();
+
             CreateAddressMap();
             CreateAddressDtoToEntityMap();
             CreateShoppingCartItemMap();
@@ -70,7 +70,15 @@
         {
             return AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<TSource, TDestination>().IgnoreAllNonExisting();
         }
-        
+
+        private void CreateClientToClientApiModelMap()
+        {
+            AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Client, ClientApiModel>()
+                .IgnoreAllNonExisting()
+                .ForMember(x => x.ClientSecretDescription, y => y.MapFrom(src => src.ClientSecrets.FirstOrDefault().Description))
+                .ForMember(x => x.RedirectUrl, y => y.MapFrom(src => src.RedirectUris.FirstOrDefault()));
+        }
+
         private void CreateOrderEntityToOrderDtoMap()
         {
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Order, OrderDto>()

@@ -1,45 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Nop.Plugin.Api.Constants;
-using Nop.Plugin.Api.Domain;
-using Nop.Plugin.Api.MappingExtensions;
-using Nop.Plugin.Api.Services;
-using Nop.Services.Localization;
-using Nop.Web.Framework.Kendoui;
-
-namespace Nop.Plugin.Api.Controllers.Admin
+﻿namespace Nop.Plugin.Api.Controllers.Admin
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using IdentityModel;
+    using IdentityServer4.Models;
+    using IdentityServer4.Stores;
     using Microsoft.AspNetCore.Mvc;
-    using Nop.Plugin.Api.Models;
+    using Nop.Plugin.Api.Constants;
+    using Nop.Services.Localization;
     using Nop.Web.Framework;
     using Nop.Web.Framework.Controllers;
+    using Nop.Web.Framework.Kendoui;
     using Nop.Web.Framework.Mvc.Filters;
+    using Nop.Plugin.Api.Models;
+    using Nop.Plugin.Api.Services;
 
     [AuthorizeAdmin]
     [Area(AreaNames.Admin)]
+    [Route("admin/manageClientsAdmin/")]
     public class ManageClientsAdminController : BasePluginController
     {
+        private readonly IClientStore _clientStore;
         private readonly IClientService _clientService;
         private readonly ILocalizationService _localizationService;
 
-        public ManageClientsAdminController(IClientService clientService,
-            ILocalizationService localizationService)
+        public ManageClientsAdminController(IClientStore clientStore,
+            ILocalizationService localizationService, IClientService clientService)
         {
-            _clientService = clientService;
+            _clientStore = clientStore;
             _localizationService = localizationService;
+            _clientService = clientService;
         }
 
         [HttpGet]
+        [Route("list")]
         public ActionResult List()
         {
             return View(ViewNames.AdminApiClientsList);
         }
 
         [HttpPost]
+        [Route("list")]
         public ActionResult List(DataSourceRequest command)
         {
-            IList<ClientApiModel> gridModel = PrepareListModel();
+            IList<ClientApiModel> gridModel = _clientService.GetAllClients();
 
             var grids = new DataSourceResult()
             {
@@ -50,6 +56,8 @@ namespace Nop.Plugin.Api.Controllers.Admin
             return Json(grids);
         }
 
+        [HttpGet]
+        [Route("create")]
         public ActionResult Create()
         {
             ClientApiModel clientModel = PrepareClientModel();
@@ -58,95 +66,89 @@ namespace Nop.Plugin.Api.Controllers.Admin
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
+        [Route("create")]
         public ActionResult Create(ClientApiModel model, bool continueEditing)
         {
             if (ModelState.IsValid)
             {
-                Client client = model.ToEntity();
-
-                _clientService.InsertClient(client);
+                _clientService.InsertClient(model);
 
                 SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Created"));
-                return continueEditing ? RedirectToAction("Edit", new { id = client.Id }) : RedirectToAction("List");
+                return continueEditing ? RedirectToAction("Edit", new { clientId = model.ClientId }) : RedirectToAction("List");
             }
 
             return RedirectToAction("List");
         }
 
-        public ActionResult Edit(int id)
+        [HttpGet]
+        [Route("edit/{clientId}")]
+        public async Task<IActionResult> Edit(string clientId)
         {
-            Client client = _clientService.GetClientById(id);
+            var client = await _clientStore.FindClientByIdAsync(clientId);
 
-            var clientModel = new ClientApiModel();
-
-            if (client != null)
+            var clientModel = new ClientApiModel()
             {
-                clientModel = client.ToModel();
-            }
-
+                ClientId = client.ClientId,
+                RedirectUrl = client.RedirectUris?.FirstOrDefault(),
+                Enabled = client.Enabled,
+                ClientName = client.ClientName,
+                ClientSecretDescription = client.ClientSecrets?.FirstOrDefault()?.Description
+            };
+            
             return View(ViewNames.AdminApiClientsEdit, clientModel);
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        public ActionResult Edit(ClientApiModel model, bool continueEditing)
+        [Route("edit/{clientId}")]
+        public async Task<IActionResult> Edit(ClientApiModel model, bool continueEditing)
         {
             if (ModelState.IsValid)
             {
-                Client editedClient = _clientService.GetClientById(model.Id);
-
-                editedClient = model.ToEntity(editedClient);
-
-                _clientService.UpdateClient(editedClient);
-
+                _clientService.UpdateClient(model);
+              
                 SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Edit"));
-                return continueEditing ? RedirectToAction("Edit", new { id = editedClient.Id }) : RedirectToAction("List");
+                return continueEditing ? RedirectToAction("Edit", new { clientId = model.ClientId }) : RedirectToAction("List");
             }
 
             return RedirectToAction("List");
         }
 
-        public ActionResult DeleteClient(int id, DataSourceRequest command)
+        [HttpPost]
+        [Route("delete/{clientId}")]
+        public IActionResult DeleteClient(string clientId, DataSourceRequest command)
         {
-            Client client = _clientService.GetClientById(id);
-            if (client == null)
-                throw new ArgumentException("No client found with the specified id");
+            if (string.IsNullOrEmpty(clientId))
+                throw new ArgumentException("Client Id must not be empty");
 
-            _clientService.DeleteClient(client);
+            _clientService.DeleteClient(clientId);
 
             return List(command);
         }
 
         [HttpPost, ActionName("Delete")]
-        public ActionResult DeleteConfirmed(int id)
+        [Route("delete/{clientId}")]
+        public IActionResult DeleteConfirmed(string clientId)
         {
-            Client client = _clientService.GetClientById(id);
-            _clientService.DeleteClient(client);
+            if (string.IsNullOrEmpty(clientId))
+                throw new ArgumentException("Client Id must not be empty");
+
+            _clientService.DeleteClient(clientId);
 
             SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Deleted"));
             return RedirectToAction("List");
         }
-        
-        private IList<ClientApiModel> PrepareListModel()
-        {
-            IList<Client> clients = _clientService.GetAllClients();
-
-            var clientModels = new List<ClientApiModel>();
-
-            foreach (var client in clients)
-            {
-                clientModels.Add(client.ToModel());
-            }
-
-            return clientModels;
-        }
 
         private ClientApiModel PrepareClientModel()
         {
+            string clientSecretRaw = Guid.NewGuid().ToString();
+
             var clientModel = new ClientApiModel()
             {
                 ClientId = Guid.NewGuid().ToString(),
-                ClientSecret = Guid.NewGuid().ToString(),
-                IsActive = true
+                Enabled = true,
+                RedirectUrl = string.Empty,
+                ClientName = string.Empty,
+                ClientSecretDescription = clientSecretRaw
             };
 
             return clientModel;

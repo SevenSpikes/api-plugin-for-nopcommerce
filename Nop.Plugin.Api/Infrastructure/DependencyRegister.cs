@@ -7,37 +7,22 @@ using Nop.Plugin.Api.Services;
 namespace Nop.Plugin.Api.Infrastructure
 {
     using System;
-    using Autofac.Core;
-    using Nop.Core.Data;
     using Nop.Core.Domain.Catalog;
     using Nop.Core.Domain.Common;
     using Nop.Core.Domain.Customers;
     using Nop.Core.Domain.Orders;
-    using Nop.Data;
     using Nop.Plugin.Api.Controllers;
     using Nop.Plugin.Api.Converters;
-    using Nop.Plugin.Api.Data;
-    using Nop.Plugin.Api.Domain;
     using Nop.Plugin.Api.Factories;
     using Nop.Plugin.Api.Helpers;
     using Nop.Plugin.Api.ModelBinders;
     using Nop.Plugin.Api.Serializers;
     using Nop.Plugin.Api.Validators;
-    using Nop.Web.Framework.Infrastructure;
 
     public class DependencyRegister : IDependencyRegistrar
     {
-        private const string ObjectContextName = "nop_object_context_web_api";
-
         public void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
         {
-            this.RegisterPluginDataContext<ApiObjectContext>(builder, ObjectContextName);
-
-            builder.RegisterType<EfRepository<Client>>()
-                .As<IRepository<Client>>()
-                .WithParameter(ResolvedParameter.ForNamed<IDbContext>(ObjectContextName))
-                .InstancePerLifetimeScope();
-
             RegisterPluginServices(builder);
 
             RegisterControllers(builder);

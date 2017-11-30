@@ -68,26 +68,26 @@
                                 scrollable: false,
                                 columns: [
                                     {
-                                        field: "Name",
+                                        field: "ClientName",
                                         title: "@T("Plugins.Api.Admin.Client.Name")"
                                     }, {
                                         field: "ClientId",
                                         title: "@T("Plugins.Api.Admin.Client.ClientId")"
                                     }, {
-                                        field: "ClientSecret",
+                                        field: "ClientSecretDescription",
                                         title: "@T("Plugins.Api.Admin.Client.ClientSecret")"
                                     }, {
-                                        field: "CallbackUrl",
+                                        field: "RedirectUrl",
                                         title: "@T("Plugins.Api.Admin.Client.CallbackUrl")"
                                     }, {
-                                        field: "IsActive",
+                                        field: "Enabled",
                                         title: "@T("Plugins.Api.Admin.Client.IsActive")",
                                         editable: true
                                     }, {
-                                        field: "Id",
+                                        field: "ClientId",
                                         title: "@T("Admin.Common.Edit")",
                                         width: 100,
-                                        template: '<a href="Edit/#=Id#">@T("Admin.Common.Edit")</a>'
+                                        template: '<a href="Edit/#=ClientId#">@T("Admin.Common.Edit")</a>'
                                     }
                                 ]
                             });

@@ -15,7 +15,7 @@
 
     <div class="content-header clearfix">
         <h1 class="pull-left">
-            @T("Plugins.Api.Admin.Page.Clients.Edit.Title") - @Model.Name
+            @T("Plugins.Api.Admin.Page.Clients.Edit.Title") - @Model.ClientName
             <small><i class="fa fa-arrow-circle-left"></i>@Html.ActionLink(T("Plugins.Api.Admin.Client.BackToList").Text, "List")</small>
         </h1>
         <div class="pull-right">
@@ -38,4 +38,4 @@
 
 </form>
 
-<nop-delete-confirmation asp-model-id="@Model.Id" asp-button-id="client-delete" />
+<nop-delete-confirmation asp-model-id="@Model.ClientId" asp-button-id="client-delete" />

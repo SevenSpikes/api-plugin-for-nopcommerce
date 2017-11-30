@@ -3,16 +3,16 @@ using Nop.Services.Localization;
 
 namespace Nop.Plugin.Api.Validators
 {
-    using Nop.Plugin.Api.Models;
+    using IdentityServer4.Models;
 
-    public class ClientValidator : AbstractValidator<ClientApiModel>
+    public class ClientValidator : AbstractValidator<Client>
     {
         public ClientValidator(ILocalizationService localizationService)
         {
-            RuleFor(x => x.Name).NotEmpty().WithMessage(localizationService.GetResource("Plugins.Api.Admin.Entities.Client.FieldValidationMessages.Name"));
+            RuleFor(x => x.ClientName).NotEmpty().WithMessage(localizationService.GetResource("Plugins.Api.Admin.Entities.Client.FieldValidationMessages.Name"));
             RuleFor(x => x.ClientId).NotEmpty().WithMessage(localizationService.GetResource("Plugins.Api.Admin.Entities.Client.FieldValidationMessages.ClientId"));
-            RuleFor(x => x.ClientSecret).NotEmpty().WithMessage(localizationService.GetResource("Plugins.Api.Admin.Entities.Client.FieldValidationMessages.ClientSecret"));
-            RuleFor(x => x.CallbackUrl).NotEmpty().WithMessage(localizationService.GetResource("Plugins.Api.Admin.Entities.Client.FieldValidationMessages.CallbackUrl"));
+            RuleFor(x => x.ClientSecrets).NotEmpty().WithMessage(localizationService.GetResource("Plugins.Api.Admin.Entities.Client.FieldValidationMessages.ClientSecret"));
+            RuleFor(x => x.RedirectUris).NotEmpty().WithMessage(localizationService.GetResource("Plugins.Api.Admin.Entities.Client.FieldValidationMessages.CallbackUrl"));
         }
     }
 }

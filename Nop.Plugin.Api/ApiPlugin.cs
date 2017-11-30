@@ -1,8 +1,11 @@
 ﻿namespace Nop.Plugin.Api
 {
+    using IdentityServer4.EntityFramework.DbContexts;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
+    using Microsoft.EntityFrameworkCore.Migrations;
     using Nop.Core;
+    using Nop.Core.Infrastructure;
     using Nop.Core.Plugins;
-    using Nop.Plugin.Api.Data;
     using Nop.Plugin.Api.Domain;
     using Nop.Services.Configuration;
     using Nop.Services.Localization;
@@ -15,10 +18,9 @@
         private readonly IWorkContext _workContext;
         private readonly IWebHelper _webHelper;
         private readonly ILocalizationService _localizationService;
-        private readonly ApiObjectContext _objectContext;
 
         public ApiPlugin(/*IWebConfigMangerHelper webConfigMangerHelper,*/ ISettingService settingService, IWorkContext workContext,
-            ILocalizationService localizationService, IWebHelper webHelper, ApiObjectContext objectContext
+            ILocalizationService localizationService, IWebHelper webHelper
 /*, IConfiguration configuration*/)
         {
             //_webConfigMangerHelper = webConfigMangerHelper;
@@ -26,7 +28,6 @@
             _workContext = workContext;
             _localizationService = localizationService;
             _webHelper = webHelper;
-            _objectContext = objectContext;
             //_configuration = configuration;
         }
 
@@ -37,9 +38,7 @@
             // Add the nopCommerce connection string to the web.config file. This is required by the WebHooks.
             //IWebConfigMangerHelper webConfigManagerHelper = EngineContext.Current.Resolve<IWebConfigMangerHelper>();
             //webConfigManagerHelper.AddConnectionString();
-
-            _objectContext.Install();
-
+            
             //locales
             this.AddOrUpdatePluginLocaleResource("Plugins.Api", "Api plugin");
             this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Menu.ManageClients", "Manage Api Clients");
@@ -118,7 +117,11 @@
 
         public override void Uninstall()
         {
-            _objectContext.Uninstall();
+            var persistedGrantMigrator = EngineContext.Current.Resolve<PersistedGrantDbContext>().GetService<IMigrator>();
+            persistedGrantMigrator.Migrate("0");
+            
+            var configurationMigrator = EngineContext.Current.Resolve<ConfigurationDbContext>().GetService<IMigrator>();
+            configurationMigrator.Migrate("0");
 
             // TODO: Delete all resources
             //locales

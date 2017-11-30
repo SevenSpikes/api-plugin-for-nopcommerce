@@ -1,5 +1,6 @@
 ﻿namespace Nop.Plugin.Api.Authorization.Requirements
 {
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
 
@@ -9,7 +10,7 @@
         {
             if (requestHeaders != null && 
                 requestHeaders.ContainsKey("Authorization") && 
-                requestHeaders["Authorization"].ToString().Contains("Bearer"))
+                requestHeaders["Authorization"].ToString().Contains(JwtBearerDefaults.AuthenticationScheme))
             {
                 return true;
             }
