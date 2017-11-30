@@ -4,8 +4,6 @@
     using System.IdentityModel.Tokens.Jwt;
     using System.Linq.Dynamic;
     using System.Reflection;
-    using System.Security.Cryptography;
-    using IdentityModel;
     using IdentityServer4.EntityFramework.DbContexts;
     using IdentityServer4.EntityFramework.Entities;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,6 +17,7 @@
     using Nop.Core.Infrastructure;
     using Nop.Plugin.Api.Authorization.Policies;
     using Nop.Plugin.Api.Authorization.Requirements;
+    using Nop.Plugin.Api.Helpers;
     using Nop.Plugin.Api.IdentityServer.Generators;
 
     public class ApiStartup : INopStartup
@@ -26,7 +25,7 @@
         public void ConfigureServices(IServiceCollection services, IConfigurationRoot configuration)
         {
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-            
+
             AddAuthorizationPipeline(services);
             AddTokenGenerationPipeline(services);
         }
@@ -96,7 +95,7 @@
 
             var migrationsAssembly = typeof(ApiStartup).GetTypeInfo().Assembly.GetName().Name;
 
-            RsaSecurityKey signingKey = CreateRsaSecurityKey();
+            RsaSecurityKey signingKey = CryptoHelper.CreateRsaSecurityKey();
 
             services.AddIdentityServer()
                 .AddSigningCredential(signingKey)
@@ -153,29 +152,6 @@
                     configurationContext.SaveChanges();
                 }
             }
-        }
-
-        private RsaSecurityKey CreateRsaSecurityKey()
-        {
-            var rsa = RSA.Create();
-            RsaSecurityKey key;
-
-            if (rsa is RSACryptoServiceProvider)
-            {
-                rsa.Dispose();
-                var cng = new RSACng(2048);
-
-                var parameters = cng.ExportParameters(includePrivateParameters: true);
-                key = new RsaSecurityKey(parameters);
-            }
-            else
-            {
-                rsa.KeySize = 2048;
-                key = new RsaSecurityKey(rsa);
-            }
-
-            key.KeyId = CryptoRandom.CreateUniqueId(16);
-            return key;
         }
 
         public int Order { get; }
