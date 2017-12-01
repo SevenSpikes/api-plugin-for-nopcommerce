@@ -26,8 +26,9 @@
         {
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-            AddAuthorizationPipeline(services);
             AddTokenGenerationPipeline(services);
+
+            AddAuthorizationPipeline(services);
         }
 
         public void Configure(IApplicationBuilder app)
@@ -76,7 +77,7 @@
 
             services.AddSingleton<IAuthorizationHandler, ActiveApiPluginAuthorizationPolicy>();
             services.AddSingleton<IAuthorizationHandler, ValidSchemeAuthorizationPolicy>();
-            services.AddSingleton<IAuthorizationHandler, ActiveApiPluginAuthorizationPolicy>();
+            services.AddSingleton<IAuthorizationHandler, ActiveClientAuthorizationPolicy>();
             services.AddSingleton<IAuthorizationHandler, RequestsFromSwaggerAuthorizationPolicy>();
         }
 
