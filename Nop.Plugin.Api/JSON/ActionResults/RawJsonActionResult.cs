@@ -1,26 +1,39 @@
-﻿using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Nop.Plugin.Api.JSON.ActionResults
 {
+    using System;
+    using System.IO;
+    using System.Text;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.WebUtilities;
+
     public class RawJsonActionResult : IActionResult
     {
         private readonly string _jsonString;
-
-        public RawJsonActionResult(string jsonString)
+        
+        public RawJsonActionResult(object value)
         {
-            _jsonString = jsonString;
+            _jsonString = value.ToString();
         }
 
         public Task ExecuteResultAsync(ActionContext context)
         {
-            var content = new StringContent(_jsonString);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = content };
-            return Task.FromResult(response);
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
+            HttpResponse response = context.HttpContext.Response;
+            
+            response.StatusCode = 200;
+            response.ContentType = "application/json";
+
+            using (TextWriter writer = new HttpResponseStreamWriter(response.Body, Encoding.UTF8))
+            {
+                writer.Write(_jsonString);
+            }
+
+            return Task.CompletedTask;
         }
     }
 }
