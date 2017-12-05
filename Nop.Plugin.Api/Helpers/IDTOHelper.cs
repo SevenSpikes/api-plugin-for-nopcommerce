@@ -5,6 +5,7 @@ using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Plugin.Api.DTOs.Languages;
 using Nop.Plugin.Api.DTOs.Orders;
+using Nop.Plugin.Api.DTOs.ProductAttributes;
 using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
 using Nop.Plugin.Api.DTOs.Stores;
@@ -19,5 +20,6 @@ namespace Nop.Plugin.Api.Helpers
         ShoppingCartItemDto PrepareShoppingCartItemDTO(ShoppingCartItem shoppingCartItem);
         StoreDto PrepareStoreDTO(Store store);
         LanguageDto PrepateLanguageDto(Language language);
+        ProductAttributeDto PrepareProductAttributeDTO(ProductAttribute productAttribute);
     }
 }

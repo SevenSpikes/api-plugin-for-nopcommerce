@@ -26,6 +26,7 @@ using Nop.Plugin.Api.DTOs.ShoppingCarts;
 using Nop.Plugin.Api.DTOs.Stores;
 using Nop.Services.Directory;
 using Nop.Services.Localization;
+using Nop.Plugin.Api.DTOs.ProductAttributes;
 
 namespace Nop.Plugin.Api.Helpers
 {
@@ -306,5 +307,9 @@ namespace Nop.Plugin.Api.Helpers
             return productAttributeValueDto;
         }
 
+        public ProductAttributeDto PrepareProductAttributeDTO(ProductAttribute productAttribute)
+        {
+            return productAttribute.ToDto();
+        }
     }
 }

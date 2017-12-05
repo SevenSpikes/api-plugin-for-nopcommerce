@@ -57,6 +57,7 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<CustomersController>().InstancePerLifetimeScope();
             builder.RegisterType<CategoriesController>().InstancePerLifetimeScope();
             builder.RegisterType<ProductsController>().InstancePerLifetimeScope();
+            builder.RegisterType<ProductAttributesController>().InstancePerLifetimeScope();
             builder.RegisterType<ProductCategoryMappingsController>().InstancePerLifetimeScope();
             builder.RegisterType<OrdersController>().InstancePerLifetimeScope();
             builder.RegisterType<ShoppingCartItemsController>().InstancePerLifetimeScope();
@@ -84,6 +85,8 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<OrderApiService>().As<IOrderApiService>().InstancePerLifetimeScope();
             builder.RegisterType<ShoppingCartItemApiService>().As<IShoppingCartItemApiService>().InstancePerLifetimeScope();
             builder.RegisterType<OrderItemApiService>().As<IOrderItemApiService>().InstancePerLifetimeScope();
+            builder.RegisterType<ProductAttributesApiService>().As<IProductAttributesApiService>().InstancePerLifetimeScope();
+
             builder.RegisterType<ProductAttributeConverter>().As<IProductAttributeConverter>().InstancePerLifetimeScope();
 
             builder.RegisterType<MappingHelper>().As<IMappingHelper>().InstancePerLifetimeScope();

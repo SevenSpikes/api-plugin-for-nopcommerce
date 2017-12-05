@@ -248,6 +248,7 @@
     <Compile Include="Controllers\CustomerRolesController.cs" />
     <Compile Include="Controllers\LanguagesController.cs" />
     <Compile Include="Controllers\OrderItemsController.cs" />
+    <Compile Include="Controllers\ProductAttributesController.cs" />
     <Compile Include="DTOs\CustomerRoles\CustomerRoleDto.cs" />
     <Compile Include="DTOs\CustomerRoles\CustomerRolesRootObject.cs" />
     <Compile Include="DTOs\Images\ImageMappingDto.cs" />
@@ -262,6 +263,9 @@
     <Compile Include="DTOs\OrderItems\OrderItemsCountRootObject.cs" />
     <Compile Include="DTOs\OrderItems\OrderItemsRootObject.cs" />
     <Compile Include="DTOs\ProductItemAttributeDto.cs" />
+    <Compile Include="DTOs\ProductAttributes\ProductAttributeDto.cs" />
+    <Compile Include="DTOs\ProductAttributes\ProductAttributesCountRootObject.cs" />
+    <Compile Include="DTOs\ProductAttributes\ProductAttributesRootObjectDto.cs" />
     <Compile Include="DTOs\Products\ProductAttributeValueDto.cs" />
     <Compile Include="DTOs\Stores\StoreDto.cs" />
     <Compile Include="DTOs\Products\ProductAttributeMappingDto.cs" />
@@ -285,10 +289,12 @@
     <Compile Include="JSON\ActionResults\RawJsonActionResult.cs" />
     <Compile Include="MappingExtensions\CustomerRoleDtoMappings.cs" />
     <Compile Include="MappingExtensions\LanguageDtoMappings.cs" />
+    <Compile Include="MappingExtensions\ProductAttributeDtoMappings.cs" />
     <Compile Include="MappingExtensions\StoreDtoMappings.cs" />
     <Compile Include="Maps\IJsonPropertyMap.cs" />
     <Compile Include="Maps\JsonPropertyMap.cs" />
     <Compile Include="ModelBinders\JsonModelBinder.cs" />
+    <Compile Include="Models\ProductAttributesParameters\ProductAttributesParametersModel.cs" />
     <Compile Include="Models\DefaultWeApiErrorsModel.cs" />
     <Compile Include="Models\OrderItemsParameters\OrderItemsParametersModel.cs" />
     <Compile Include="OAuth\Attributes\BearerTokenAuthorizeAttribute.cs" />
@@ -395,6 +401,7 @@
     <Compile Include="Services\ICategoryApiService.cs" />
     <Compile Include="Services\IOrderItemApiService.cs" />
     <Compile Include="Services\IProductAttributeConverter.cs" />
+    <Compile Include="Services\IProductAttributesApiService.cs" />
     <Compile Include="Services\IProductCategoryMappingsApiService.cs" />
     <Compile Include="Services\IClientService.cs" />
     <Compile Include="Services\ICustomerApiService.cs" />
@@ -406,6 +413,7 @@
     <Compile Include="Services\OrderItemApiService.cs" />
     <Compile Include="Services\ProductApiService.cs" />
     <Compile Include="Services\ProductAttributeConverter.cs" />
+    <Compile Include="Services\ProductAttributesApiService.cs" />
     <Compile Include="Services\ProductCategoryMappingsApiService.cs" />
     <Compile Include="Services\ShoppingCartItemApiService.cs" />
     <Compile Include="Services\WebHookService.cs" />
@@ -418,6 +426,7 @@
     <Compile Include="Validators\OrderItemDtoValidator.cs" />
     <Compile Include="Validators\ProductCategoryMappingDtoValidator.cs" />
     <Compile Include="Validators\CustomerDtoValidator.cs" />
+    <Compile Include="Validators\ProductAttributeDtoValidator.cs" />
     <Compile Include="Validators\ProductDtoValidator.cs" />
     <Compile Include="Validators\CategoryDtoValidator.cs" />
     <Compile Include="Validators\ClientValidator.cs" />
