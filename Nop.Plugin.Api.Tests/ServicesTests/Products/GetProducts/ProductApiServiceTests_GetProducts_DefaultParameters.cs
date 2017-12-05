@@ -9,6 +9,8 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ServicesTests.Products.GetProducts
 {
+    using Nop.Services.Stores;
+
     [TestFixture]
     public class ProductApiServiceTests_GetProducts_DefaultParameters
     {
@@ -22,8 +24,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Products.GetProducts
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
             var vendorRepo = MockRepository.GenerateStub<IRepository<Vendor>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new ProductApiService(productsRepo, productCategoryRepo, vendorRepo);
+            var cut = new ProductApiService(productsRepo, productCategoryRepo, vendorRepo, storeMappingService);
             var products = cut.GetProducts();
 
             // Assert
@@ -44,8 +48,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Products.GetProducts
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
             var vendorRepo = MockRepository.GenerateStub<IRepository<Vendor>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new ProductApiService(productRepo, productCategoryRepo, vendorRepo);
+            var cut = new ProductApiService(productRepo, productCategoryRepo, vendorRepo, storeMappingService);
             var products = cut.GetProducts();
 
             // Assert
@@ -69,8 +75,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Products.GetProducts
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
             var vendorRepo = MockRepository.GenerateStub<IRepository<Vendor>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new ProductApiService(productRepo, productCategoryRepo, vendorRepo);
+            var cut = new ProductApiService(productRepo, productCategoryRepo, vendorRepo, storeMappingService);
             var products = cut.GetProducts();
 
             // Assert
@@ -96,8 +104,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Products.GetProducts
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
             var vendorRepo = MockRepository.GenerateStub<IRepository<Vendor>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new ProductApiService(productRepo, productCategoryRepo, vendorRepo);
+            var cut = new ProductApiService(productRepo, productCategoryRepo, vendorRepo, storeMappingService);
             var products = cut.GetProducts();
 
             // Assert

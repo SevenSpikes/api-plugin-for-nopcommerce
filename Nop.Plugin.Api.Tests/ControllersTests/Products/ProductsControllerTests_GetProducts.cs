@@ -35,7 +35,7 @@
 //            var cut = new ProductsController(productApiServiceStub, jsonFieldsSerializerStub);
 
 //            //Act
-//            IHttpActionResult result = cut.GetProducts(parameters);
+//            IActionResult result = cut.GetProducts(parameters);
 
 //            //Assert
 //            Assert.IsInstanceOf<BadRequestErrorMessageResult>(result);
@@ -59,7 +59,7 @@
 //            var cut = new ProductsController(productApiServiceStub, jsonFieldsSerializerStub);
 
 //            //Act
-//            IHttpActionResult result = cut.GetProducts(parameters);
+//            IActionResult result = cut.GetProducts(parameters);
 
 //            //Assert
 //            Assert.IsInstanceOf<BadRequestErrorMessageResult>(result);

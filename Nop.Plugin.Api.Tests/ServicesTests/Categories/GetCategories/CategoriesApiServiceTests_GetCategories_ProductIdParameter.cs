@@ -8,6 +8,8 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategories
 {
+    using Nop.Services.Stores;
+
     [TestFixture]
     public class CategoriesApiServiceTests_GetCategories_ProductIdParameter
     {
@@ -45,7 +47,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategories
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
             productCategoryRepo.Stub(x => x.TableNoTracking).Return(_existingCategoryMappings.AsQueryable());
 
-            _categoryApiService = new CategoryApiService(categoryRepo, productCategoryRepo);
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+            storeMappingService.Stub(x => x.Authorize(Arg<Category>.Is.Anything)).Return(true);
+
+            _categoryApiService = new CategoryApiService(categoryRepo, productCategoryRepo, storeMappingService);
         }
 
         [Test]

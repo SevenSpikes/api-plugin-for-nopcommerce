@@ -14,7 +14,8 @@ namespace Nop.Plugin.Api.Tests
         public void RunBeforeAnyTests()
         {
             // We need to create all the mappings before any of the test are run
-            MappingExtensions.Maps.CreateAllMappings();
+            // All maps are created in the ApiMapperConfiguration constructor.
+            ApiMapperConfiguration mapps = new ApiMapperConfiguration();
         }
     }
 }

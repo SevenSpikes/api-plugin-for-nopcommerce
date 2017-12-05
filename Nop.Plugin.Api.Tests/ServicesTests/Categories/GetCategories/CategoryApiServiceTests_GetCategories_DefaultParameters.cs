@@ -8,6 +8,8 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategories
 {
+    using Nop.Services.Stores;
+
     //TODO: improve using sequence equal
     [TestFixture]
     public class CategoryApiServiceTests_GetCategories_DefaultParameters
@@ -21,8 +23,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategories
 
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new CategoryApiService(categoryRepo, productCategoryRepo);
+            var cut = new CategoryApiService(categoryRepo, productCategoryRepo, storeMappingService);
             var categories = cut.GetCategories();
 
             // Assert
@@ -42,8 +46,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategories
 
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new CategoryApiService(categoryRepo, productCategoryRepo);
+            var cut = new CategoryApiService(categoryRepo, productCategoryRepo, storeMappingService);
             var categories = cut.GetCategories();
 
             // Assert
@@ -64,8 +70,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategories
 
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new CategoryApiService(categoryRepo, productCategoryRepo);
+            var cut = new CategoryApiService(categoryRepo, productCategoryRepo, storeMappingService);
             var categories = cut.GetCategories();
 
             // Assert
@@ -90,8 +98,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategories
 
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new CategoryApiService(categoryRepo, productCategoryRepo);
+            var cut = new CategoryApiService(categoryRepo, productCategoryRepo, storeMappingService);
             var categories = cut.GetCategories();
 
             // Assert

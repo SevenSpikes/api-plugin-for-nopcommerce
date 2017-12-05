@@ -1,6 +1,4 @@
-﻿using System.Web.Http;
-using System.Web.Http.Results;
-using AutoMock;
+﻿using AutoMock;
 using Nop.Plugin.Api.Controllers;
 using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Plugin.Api.Models.CategoriesParameters;
@@ -10,6 +8,8 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
 {
+    using Microsoft.AspNetCore.Mvc;
+
     [TestFixture]
     public class CategoriesControllerTests_GetCategoriesCount
     {
@@ -23,11 +23,22 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             autoMocker.Get<ICategoryApiService>().Stub(x => x.GetCategoriesCount()).IgnoreArguments().Return(0);
 
             //  act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetCategoriesCount(parameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetCategoriesCount(parameters);
 
             // assert
-            Assert.IsInstanceOf<OkNegotiatedContentResult<CategoriesCountRootObject>>(result);
-            Assert.AreEqual(0, ((OkNegotiatedContentResult<CategoriesCountRootObject>)result).Content.Count);
+            Assert.IsInstanceOf<OkObjectResult>(result);
+
+            var okObjectResult = result as OkObjectResult;
+
+            Assert.NotNull(okObjectResult);
+
+            Assert.IsInstanceOf<CategoriesCountRootObject>(okObjectResult.Value);
+
+            var rootObject = okObjectResult.Value as CategoriesCountRootObject;
+
+            Assert.NotNull(rootObject);
+
+            Assert.AreEqual(0, rootObject.Count);
         }
 
         [Test]
@@ -40,11 +51,22 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             autoMocker.Get<ICategoryApiService>().Stub(x => x.GetCategoriesCount()).IgnoreArguments().Return(1);
 
             // act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetCategoriesCount(parameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetCategoriesCount(parameters);
 
             // assert
-            Assert.IsInstanceOf<OkNegotiatedContentResult<CategoriesCountRootObject>>(result);
-            Assert.AreEqual(1, ((OkNegotiatedContentResult<CategoriesCountRootObject>)result).Content.Count);
+            Assert.IsInstanceOf<OkObjectResult>(result);
+
+            var okObjectResult = result as OkObjectResult;
+
+            Assert.NotNull(okObjectResult);
+
+            Assert.IsInstanceOf<CategoriesCountRootObject>(okObjectResult.Value);
+
+            var rootObject = okObjectResult.Value as CategoriesCountRootObject;
+
+            Assert.NotNull(rootObject);
+
+            Assert.AreEqual(1, rootObject.Count);
         }
 
         [Test]
@@ -58,11 +80,22 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             autoMocker.Get<ICategoryApiService>().Stub(x => x.GetCategoriesCount()).IgnoreArguments().Return(categoriesCount);
 
             // act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetCategoriesCount(categoriesCountParametersModel);
+            IActionResult result = autoMocker.ClassUnderTest.GetCategoriesCount(categoriesCountParametersModel);
 
             // assert
-            Assert.IsInstanceOf<OkNegotiatedContentResult<CategoriesCountRootObject>>(result);
-            Assert.AreEqual(categoriesCount, ((OkNegotiatedContentResult<CategoriesCountRootObject>)result).Content.Count);
+            Assert.IsInstanceOf<OkObjectResult>(result);
+
+            var okObjectResult = result as OkObjectResult;
+
+            Assert.NotNull(okObjectResult);
+
+            Assert.IsInstanceOf<CategoriesCountRootObject>(okObjectResult.Value);
+
+            var rootObject = okObjectResult.Value as CategoriesCountRootObject;
+
+            Assert.NotNull(rootObject);
+
+            Assert.AreEqual(categoriesCount, rootObject.Count);
         }
     }
 }

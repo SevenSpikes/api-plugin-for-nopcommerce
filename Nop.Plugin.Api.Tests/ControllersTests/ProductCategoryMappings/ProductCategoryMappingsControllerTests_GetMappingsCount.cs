@@ -10,6 +10,8 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
 {
+    using Microsoft.AspNetCore.Mvc;
+
     [TestFixture]
     public class ProductCategoryMappingsControllerTests_GetMappingsCount
     {
@@ -24,7 +26,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
             autoMocker.Get<IProductCategoryMappingsApiService>().Stub(x => x.GetMappingsCount()).IgnoreArguments().Return(0);
 
             // act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetMappingsCount(parameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetMappingsCount(parameters);
 
             // assert
             Assert.IsInstanceOf<OkNegotiatedContentResult<ProductCategoryMappingsCountRootObject>>(result);
@@ -41,7 +43,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
 
             autoMocker.Get<IProductCategoryMappingsApiService>().Stub(x => x.GetMappingsCount()).IgnoreArguments().Return(1);
             // act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetMappingsCount(parameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetMappingsCount(parameters);
 
             // assert
             Assert.IsInstanceOf<OkNegotiatedContentResult<ProductCategoryMappingsCountRootObject>>(result);
@@ -60,7 +62,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
             autoMocker.Get<IProductCategoryMappingsApiService>().Stub(x => x.GetMappingsCount()).IgnoreArguments().Return(mappingsCount);
 
             // act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetMappingsCount(mappingsCountParametersModel);
+            IActionResult result = autoMocker.ClassUnderTest.GetMappingsCount(mappingsCountParametersModel);
 
             // assert
             Assert.IsInstanceOf<OkNegotiatedContentResult<ProductCategoryMappingsCountRootObject>>(result);

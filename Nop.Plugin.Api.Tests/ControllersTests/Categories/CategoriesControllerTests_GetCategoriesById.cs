@@ -18,6 +18,10 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
 {
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.Tests.Helpers;
+
     [TestFixture]
     public class CategoriesControllerTests_GetCategoriesById
     {
@@ -34,10 +38,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
                                                            .Return(string.Empty);
 
             // Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetCategoryById(nonPositiveCategoryId);
+            IActionResult result = autoMocker.ClassUnderTest.GetCategoryById(nonPositiveCategoryId);
 
             // Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, statusCode);
         }
@@ -73,10 +77,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
                                                            .Return(string.Empty);
 
             // Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetCategoryById(nonExistingCategoryId);
+            IActionResult result = autoMocker.ClassUnderTest.GetCategoryById(nonExistingCategoryId);
 
             // Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.NotFound, statusCode);
         }

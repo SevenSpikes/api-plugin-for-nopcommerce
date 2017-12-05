@@ -9,6 +9,9 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ServicesTests.ShoppingCartItems.GetShoppingCartItems
 {
+    using Nop.Core;
+    using Nop.Core.Domain.Stores;
+
     [TestFixture]
     public class ShoppingCartItemsTests_GetShoppingCartItems_PageParameters
     {
@@ -31,7 +34,13 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.ShoppingCartItems.GetShoppingCartIt
             var shoppingCartItemRepo = MockRepository.GenerateStub<IRepository<ShoppingCartItem>>();
             shoppingCartItemRepo.Stub(x => x.TableNoTracking).Return(_existigShoppingCartItems.AsQueryable());
 
-            _shoppingCartItemApiService = new ShoppingCartItemApiService(shoppingCartItemRepo);
+            var storeContext = MockRepository.GenerateStub<IStoreContext>();
+            storeContext.Stub(x => x.CurrentStore).Return(new Store()
+            {
+                Id = 0
+            });
+
+            _shoppingCartItemApiService = new ShoppingCartItemApiService(shoppingCartItemRepo, storeContext);
         }
 
         [Test]

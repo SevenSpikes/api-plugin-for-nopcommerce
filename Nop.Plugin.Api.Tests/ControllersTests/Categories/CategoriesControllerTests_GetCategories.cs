@@ -1,28 +1,41 @@
 ﻿using System.Collections.Generic;
 using System.Net;
-using System.Threading;
-using System.Web.Http;
-using System.Web.Http.Results;
 using AutoMock;
 using Nop.Core.Domain.Catalog;
-using Nop.Core.Domain.Security;
-using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.Controllers;
 using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Plugin.Api.Models.CategoriesParameters;
 using Nop.Plugin.Api.Serializers;
 using Nop.Plugin.Api.Services;
-using Nop.Services.Security;
 using Nop.Services.Stores;
 using NUnit.Framework;
 using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
 {
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.Tests.Helpers;
+
     [TestFixture]
     public class CategoriesControllerTests_GetCategories
     {
+        private RhinoAutoMocker<CategoriesController> _authMocker;
+
+        [SetUp]
+        public void Setup()
+        {
+            _authMocker = new RhinoAutoMocker<CategoriesController>();
+
+            _authMocker.Get<IStoreMappingService>().Stub(x => x.Authorize(Arg<Category>.Is.Anything)).Return(true);
+
+            _authMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(Arg<CategoriesRootObject>.Is.Anything, Arg<string>.Is.Anything))
+                .IgnoreArguments()
+                .Return(string.Empty);
+        }
+
         [Test]
         [TestCase(Configurations.MinLimit - 1)]
         [TestCase(Configurations.MaxLimit + 1)]
@@ -34,18 +47,16 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             };
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<CategoriesController>();
-
-            autoMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(Arg<CategoriesRootObject>.Is.Anything, Arg<string>.Is.Anything))
+            _authMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(Arg<CategoriesRootObject>.Is.Anything, Arg<string>.Is.Anything))
                                                            .IgnoreArguments()
                                                            .Return(string.Empty);
 
             //Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetCategories(parameters);
+            IActionResult result = _authMocker.ClassUnderTest.GetCategories(parameters);
 
             //Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
-                
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
+
             Assert.AreEqual(HttpStatusCode.BadRequest, statusCode);
         }
 
@@ -60,17 +71,15 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             };
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<CategoriesController>();
-
-            autoMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(Arg<CategoriesRootObject>.Is.Anything, Arg<string>.Is.Anything))
+            _authMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(Arg<CategoriesRootObject>.Is.Anything, Arg<string>.Is.Anything))
                                                            .IgnoreArguments()
                                                            .Return(string.Empty);
 
             //Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetCategories(parameters);
+            IActionResult result = _authMocker.ClassUnderTest.GetCategories(parameters);
 
             //Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, statusCode);
         }
@@ -81,8 +90,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             var parameters = new CategoriesParametersModel();
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<CategoriesController>();
-            autoMocker.Get<ICategoryApiService>()
+            _authMocker.Get<ICategoryApiService>()
                 .Expect(x => x.GetCategories(parameters.Ids,
                                                     parameters.CreatedAtMin,
                                                     parameters.CreatedAtMax,
@@ -95,10 +103,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
                                                     parameters.PublishedStatus)).Return(new List<Category>());
 
             //Act
-            autoMocker.ClassUnderTest.GetCategories(parameters);
+            _authMocker.ClassUnderTest.GetCategories(parameters);
 
             //Assert
-            autoMocker.Get<ICategoryApiService>().VerifyAllExpectations();
+            _authMocker.Get<ICategoryApiService>().VerifyAllExpectations();
         }
 
         // The static method category.GetSeName() breaks this test as we can't stub static methods :(
@@ -139,14 +147,13 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             };
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<CategoriesController>();
-            autoMocker.Get<ICategoryApiService>().Stub(x => x.GetCategories()).Return(new List<Category>());
+            _authMocker.Get<ICategoryApiService>().Stub(x => x.GetCategories()).Return(new List<Category>());
 
             //Act
-            autoMocker.ClassUnderTest.GetCategories(parameters);
+            _authMocker.ClassUnderTest.GetCategories(parameters);
 
             //Assert
-            autoMocker.Get<IJsonFieldsSerializer>().AssertWasCalled(
+            _authMocker.Get<IJsonFieldsSerializer>().AssertWasCalled(
                 x => x.Serialize(Arg<CategoriesRootObject>.Is.Anything, Arg<string>.Is.Equal(parameters.Fields)));
         }
 
@@ -156,18 +163,15 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
             var parameters = new CategoriesParametersModel();
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<CategoriesController>();
-            autoMocker.Get<ICategoryApiService>().Stub(x => x.GetCategories()).Return(new List<Category>());
+            _authMocker.Get<ICategoryApiService>().Stub(x => x.GetCategories()).Return(new List<Category>());
 
             //Act
-            autoMocker.ClassUnderTest.GetCategories(parameters);
+            _authMocker.ClassUnderTest.GetCategories(parameters);
 
             //Assert
-            autoMocker.Get<IJsonFieldsSerializer>().AssertWasCalled(
+            _authMocker.Get<IJsonFieldsSerializer>().AssertWasCalled(
                 x => x.Serialize(Arg<CategoriesRootObject>.Matches(r => r.Categories.Count == 0),
                 Arg<string>.Is.Equal(parameters.Fields)));
         }
-
-
     }
 }

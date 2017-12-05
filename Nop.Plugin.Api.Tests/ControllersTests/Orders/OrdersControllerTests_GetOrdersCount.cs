@@ -15,6 +15,8 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
 {
+    using Microsoft.AspNetCore.Mvc;
+
     [TestFixture]
     public class OrdersControllerTests_GetOrdersCount
     {
@@ -30,7 +32,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
             autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrdersCount()).IgnoreArguments().Return(0);
 
             // act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetOrdersCount(ordersCountParameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetOrdersCount(ordersCountParameters);
 
             // assert
             Assert.IsInstanceOf<OkNegotiatedContentResult<OrdersCountRootObject>>(result);
@@ -49,7 +51,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
             autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrdersCount()).IgnoreArguments().Return(1);
 
             // act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetOrdersCount(ordersCountParameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetOrdersCount(ordersCountParameters);
 
             // assert
             Assert.IsInstanceOf<OkNegotiatedContentResult<OrdersCountRootObject>>(result);
@@ -68,7 +70,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
             autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrdersCount()).IgnoreArguments().Return(20000);
 
             // act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetOrdersCount(ordersCountParameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetOrdersCount(ordersCountParameters);
 
             // assert
             Assert.IsInstanceOf<OkNegotiatedContentResult<OrdersCountRootObject>>(result);

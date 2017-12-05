@@ -13,6 +13,9 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.Tests.Helpers;
+
     [TestFixture]
     public class ProductCategoryMappingsControllerTests_GetMappingById
     {
@@ -29,10 +32,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
                                                    .Return(string.Empty);
 
             // Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetMappingById(nonPositiveProductCategoryMappingId);
+            IActionResult result = autoMocker.ClassUnderTest.GetMappingById(nonPositiveProductCategoryMappingId);
 
             // Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, statusCode);
         }
@@ -69,10 +72,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
                                                    .Return(string.Empty);
 
             // Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetMappingById(nonExistingMappingId);
+            IActionResult result = autoMocker.ClassUnderTest.GetMappingById(nonExistingMappingId);
 
             // Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.NotFound, statusCode);
         }
@@ -80,7 +83,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
         [Test]
         public void WhenIdEqualsToExistingMappingId_ShouldSerializeThatMapping()
         {
-            MappingExtensions.Maps.CreateMap<ProductCategory, ProductCategoryMappingDto>();
+            //MappingExtensions.Maps.CreateMap<ProductCategory, ProductCategoryMappingDto>();
 
             int existingMappingId = 5;
             var existingMapping = new ProductCategory() { Id = existingMappingId };
@@ -106,7 +109,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
         [Test]
         public void WhenIdEqualsToExistingProductCategoryMappingIdAndFieldsSet_ShouldReturnJsonForThatProductCategoryMappingWithSpecifiedFields()
         {
-            MappingExtensions.Maps.CreateMap<ProductCategory, ProductCategoryMappingDto>();
+            //MappingExtensions.Maps.CreateMap<ProductCategory, ProductCategoryMappingDto>();
 
             int existingMappingId = 5;
             var existingMapping = new ProductCategory() { Id = existingMappingId };

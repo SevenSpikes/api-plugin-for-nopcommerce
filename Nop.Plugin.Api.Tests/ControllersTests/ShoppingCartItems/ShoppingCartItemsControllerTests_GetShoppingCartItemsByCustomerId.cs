@@ -15,6 +15,9 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.ShoppingCartItems
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.Tests.Helpers;
+
     [TestFixture]
     public class ShoppingCartItemsControllerTests_GetShoppingCartItemsByCustomerId
     {
@@ -33,10 +36,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ShoppingCartItems
                                                        .Return(string.Empty);
 
             // Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetShoppingCartItemsByCustomerId(nonPositiveCustomerId, parameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetShoppingCartItemsByCustomerId(nonPositiveCustomerId, parameters);
 
             // Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, statusCode);
         }
@@ -76,10 +79,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ShoppingCartItems
                                                        .Return(string.Empty);
 
             // Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetShoppingCartItemsByCustomerId(nonExistingShoppingCartItemId, parameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetShoppingCartItemsByCustomerId(nonExistingShoppingCartItemId, parameters);
 
             // Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.NotFound, statusCode);
         }
@@ -87,7 +90,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ShoppingCartItems
         [Test]
         public void WhenIdEqualsToExistingShoppingCartItemId_ShouldSerializeThatShoppingCartItem()
         {
-            MappingExtensions.Maps.CreateMap<ShoppingCartItem, ShoppingCartItemDto>();
+            //MappingExtensions.Maps.CreateMap<ShoppingCartItem, ShoppingCartItemDto>();
 
             int existingShoppingCartItemId = 5;
             var existingShoppingCartItems = new List<ShoppingCartItem>()
@@ -118,7 +121,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ShoppingCartItems
         [Test]
         public void WhenIdEqualsToExistingShoppingCartItemIdAndFieldsSet_ShouldReturnJsonForThatShoppingCartItemWithSpecifiedFields()
         {
-            MappingExtensions.Maps.CreateMap<ShoppingCartItem, ShoppingCartItemDto>();
+            //MappingExtensions.Maps.CreateMap<ShoppingCartItem, ShoppingCartItemDto>();
 
             int existingShoppingCartItemId = 5;
             var existingShoppingCartItems = new List<ShoppingCartItem>()

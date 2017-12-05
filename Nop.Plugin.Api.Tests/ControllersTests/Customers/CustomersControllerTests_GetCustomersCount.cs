@@ -10,6 +10,8 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.Customers
 {
+    using Microsoft.AspNetCore.Mvc;
+
     [TestFixture]
     public class CustomersControllerTests_GetCustomersCount
     {
@@ -23,7 +25,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Customers
             autoMocker.Get<ICustomerApiService>().Stub(x => x.GetCustomersCount()).Return(0);
 
             // act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetCustomersCount();
+            IActionResult result = autoMocker.ClassUnderTest.GetCustomersCount();
 
             // assert
             Assert.IsInstanceOf<OkNegotiatedContentResult<CustomersCountRootObject>>(result);
@@ -40,7 +42,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Customers
             autoMocker.Get<ICustomerApiService>().Stub(x => x.GetCustomersCount()).Return(1);
 
             // act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetCustomersCount();
+            IActionResult result = autoMocker.ClassUnderTest.GetCustomersCount();
 
             // assert
             Assert.IsInstanceOf<OkNegotiatedContentResult<CustomersCountRootObject>>(result);
@@ -57,7 +59,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Customers
             autoMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(null, null)).Return(string.Empty);
 
             // act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetCustomersCount();
+            IActionResult result = autoMocker.ClassUnderTest.GetCustomersCount();
             
             // assert
             Assert.IsInstanceOf<OkNegotiatedContentResult<CustomersCountRootObject>>(result);

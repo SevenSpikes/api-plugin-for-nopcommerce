@@ -9,6 +9,8 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ServicesTests.Products.GetProductById
 {
+    using Nop.Services.Stores;
+
     [TestFixture]
     public class ProductApiServiceTests_GetProductById
     {
@@ -25,8 +27,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Products.GetProductById
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
             var vendorRepo = MockRepository.GenerateStub<IRepository<Vendor>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new ProductApiService(productRepo, productCategoryRepo, vendorRepo);
+            var cut = new ProductApiService(productRepo, productCategoryRepo, vendorRepo, storeMappingService);
             var result = cut.GetProductById(productId);
 
             // Assert
@@ -45,8 +49,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Products.GetProductById
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
             var vendorRepo = MockRepository.GenerateStub<IRepository<Vendor>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new ProductApiService(productRepoStub, productCategoryRepo, vendorRepo);
+            var cut = new ProductApiService(productRepoStub, productCategoryRepo, vendorRepo, storeMappingService);
             var result = cut.GetProductById(negativeOrZeroProductId);
 
             // Assert
@@ -71,8 +77,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Products.GetProductById
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
             var vendorRepo = MockRepository.GenerateStub<IRepository<Vendor>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new ProductApiService(productRepo, productCategoryRepo, vendorRepo);
+            var cut = new ProductApiService(productRepo, productCategoryRepo, vendorRepo, storeMappingService);
             var result = cut.GetProductById(productId);
 
             // Assert

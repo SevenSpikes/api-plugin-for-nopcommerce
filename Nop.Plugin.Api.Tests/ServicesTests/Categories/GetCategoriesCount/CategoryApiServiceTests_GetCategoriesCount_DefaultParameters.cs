@@ -8,6 +8,8 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategoriesCount
 {
+    using Nop.Services.Stores;
+
     [TestFixture]
     public class CategoryApiServiceTests_GetCategoriesCount_DefaultParameters
     {
@@ -20,8 +22,11 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategoriesCount
 
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+            storeMappingService.Stub(x => x.Authorize(Arg<Category>.Is.Anything)).Return(true);
+
             // Act
-            var cut = new CategoryApiService(categoryRepo, productCategoryRepo);
+            var cut = new CategoryApiService(categoryRepo, productCategoryRepo, storeMappingService);
             var categoriesCount = cut.GetCategoriesCount();
 
             // Assert
@@ -41,8 +46,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategoriesCount
 
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new CategoryApiService(categoryRepo, productCategoryRepo);
+            var cut = new CategoryApiService(categoryRepo, productCategoryRepo, storeMappingService);
             var countResult = cut.GetCategoriesCount();
 
             // Assert
@@ -63,8 +70,11 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategoriesCount
 
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+            storeMappingService.Stub(x => x.Authorize(Arg<Category>.Is.Anything)).Return(true);
+
             // Act
-            var cut = new CategoryApiService(categoryRepo, productCategoryRepo);
+            var cut = new CategoryApiService(categoryRepo, productCategoryRepo, storeMappingService);
             var countResult = cut.GetCategoriesCount();
 
             // Assert
@@ -85,8 +95,11 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategoriesCount
 
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+            storeMappingService.Stub(x => x.Authorize(Arg<Category>.Is.Anything)).Return(true);
+
             // Act
-            var cut = new CategoryApiService(categoryRepo, productCategoryRepo);
+            var cut = new CategoryApiService(categoryRepo, productCategoryRepo, storeMappingService);
             var countResult = cut.GetCategoriesCount();
 
             // Assert

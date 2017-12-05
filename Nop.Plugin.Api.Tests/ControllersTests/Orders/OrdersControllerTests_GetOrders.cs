@@ -16,6 +16,9 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.Tests.Helpers;
+
     [TestFixture]
     public class OrdersControllerTests_GetOrders
     {
@@ -135,10 +138,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
                                                     .Return(string.Empty);
 
             //Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetOrders(parameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetOrders(parameters);
 
             //Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, statusCode);
         }
@@ -161,10 +164,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
                                                     .Return(string.Empty);
 
             //Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetOrders(parameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetOrders(parameters);
 
             //Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, statusCode);
         }

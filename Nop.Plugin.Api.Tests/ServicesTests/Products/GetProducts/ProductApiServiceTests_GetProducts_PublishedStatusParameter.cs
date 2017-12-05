@@ -9,6 +9,8 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ServicesTests.Products.GetProducts
 {
+    using Nop.Services.Stores;
+
     [TestFixture]
     public class ProductApiServiceTests_GetProducts_PublishedStatusParameter
     {
@@ -35,7 +37,9 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Products.GetProducts
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
             var vendorRepo = MockRepository.GenerateStub<IRepository<Vendor>>();
 
-            _productApiService = new ProductApiService(productRepo, productCategoryRepo, vendorRepo);
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
+            _productApiService = new ProductApiService(productRepo, productCategoryRepo, vendorRepo, storeMappingService);
         }
 
         [Test]

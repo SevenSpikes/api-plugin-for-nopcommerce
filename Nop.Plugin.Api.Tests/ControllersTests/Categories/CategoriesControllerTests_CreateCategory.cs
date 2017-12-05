@@ -17,7 +17,7 @@
 //            //var autoMocker = new RhinoAutoMocker<CategoriesController>();
 
 //            //// Act
-//            //IHttpActionResult result = autoMocker.ClassUnderTest.CreateCategory(null);
+//            //IActionResult result = autoMocker.ClassUnderTest.CreateCategory(null);
 
 //            //// Assert
 //            //Assert.IsInstanceOf<BadRequestErrorMessageResult>(result);
@@ -30,7 +30,7 @@
 //            //var autoMocker = new RhinoAutoMocker<CategoriesController>();
 
 //            //// Act
-//            //IHttpActionResult result = autoMocker.ClassUnderTest.CreateCategory(new Dictionary<string, object>());
+//            //IActionResult result = autoMocker.ClassUnderTest.CreateCategory(new Dictionary<string, object>());
 
 //            //// Assert
 //            //Assert.IsInstanceOf<BadRequestErrorMessageResult>(result);
@@ -43,7 +43,7 @@
 //            //var autoMocker = new RhinoAutoMocker<CategoriesController>();
 
 //            //// Act
-//            //IHttpActionResult result = autoMocker.ClassUnderTest.CreateCategory(new Dictionary<string, object>()
+//            //IActionResult result = autoMocker.ClassUnderTest.CreateCategory(new Dictionary<string, object>()
 //            //{
 //            //    {
 //            //        "this should be category",

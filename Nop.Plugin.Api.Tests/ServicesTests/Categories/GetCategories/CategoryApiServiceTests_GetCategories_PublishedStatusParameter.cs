@@ -8,6 +8,8 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategories
 {
+    using Nop.Services.Stores;
+
     [TestFixture]
     public class CategoryApiServiceTests_GetCategories_PublishedStatusParameter
     {
@@ -33,7 +35,9 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategories
 
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
 
-            _categoryApiService = new CategoryApiService(categoryRepo, productCategoryRepo);
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
+            _categoryApiService = new CategoryApiService(categoryRepo, productCategoryRepo, storeMappingService);
         }
 
         [Test]

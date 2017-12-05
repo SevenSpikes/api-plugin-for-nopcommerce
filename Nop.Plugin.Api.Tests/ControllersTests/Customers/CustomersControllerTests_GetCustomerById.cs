@@ -1,7 +1,4 @@
 ﻿using System.Net;
-using System.Threading;
-using System.Web.Http;
-using System.Web.Http.Results;
 using AutoMock;
 using Nop.Plugin.Api.Controllers;
 using Nop.Plugin.Api.DTOs.Customers;
@@ -12,6 +9,9 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.Customers
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.Tests.Helpers;
+
     [TestFixture]
     public class CustomersControllerTests_GetCustomerById
     {
@@ -30,10 +30,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Customers
                                                 .Return(string.Empty);
 
             // Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetCustomerById(nonExistingCustomerId);
+            IActionResult result = autoMocker.ClassUnderTest.GetCustomerById(nonExistingCustomerId);
 
             // Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.NotFound, statusCode);
         }
@@ -51,10 +51,11 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Customers
                                                             .Return(string.Empty);
 
             // Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetCustomerById(nonPositiveCustomerId);
+            IActionResult result = autoMocker.ClassUnderTest.GetCustomerById(nonPositiveCustomerId);
 
             // Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, statusCode);
         }
@@ -115,6 +116,5 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Customers
                     Arg<CustomersRootObject>.Matches(objectToSerialize => objectToSerialize.Customers[0] == existingCustomerDto),
                 Arg<string>.Matches(fieldsParameter => fieldsParameter == fields)));
         }
-
     }
 }

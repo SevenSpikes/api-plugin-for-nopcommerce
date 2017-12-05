@@ -27,7 +27,7 @@
 //            var cut = new ProductsController(productsApiServiceStub, jsonFieldsSerializer);
 
 //            // act
-//            IHttpActionResult result = cut.GetProductsCount(parameters);
+//            IActionResult result = cut.GetProductsCount(parameters);
 
 //            // assert
 //            Assert.IsInstanceOf<OkNegotiatedContentResult<ProductsCountRootObject>>(result);
@@ -48,7 +48,7 @@
 //            var cut = new ProductsController(productsApiServiceStub, jsonFieldsSerializer);
 
 //            // act
-//            IHttpActionResult result = cut.GetProductsCount(parameters);
+//            IActionResult result = cut.GetProductsCount(parameters);
 
 //            // assert
 //            Assert.IsInstanceOf<OkNegotiatedContentResult<ProductsCountRootObject>>(result);
@@ -70,7 +70,7 @@
 //            var cut = new ProductsController(productsApiServiceStub, jsonFieldsSerializer);
 
 //            // act
-//            IHttpActionResult result = cut.GetProductsCount(productsCountParametersModel);
+//            IActionResult result = cut.GetProductsCount(productsCountParametersModel);
 
 //            // assert
 //            Assert.IsInstanceOf<OkNegotiatedContentResult<ProductsCountRootObject>>(result);

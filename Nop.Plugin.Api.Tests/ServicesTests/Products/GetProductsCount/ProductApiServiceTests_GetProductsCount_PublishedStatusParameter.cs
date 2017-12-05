@@ -9,6 +9,9 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategoriesCount
 {
+    using Nop.Core.Domain.Stores;
+    using Nop.Services.Stores;
+
     [TestFixture]
     public class ProductApiServiceTests_GetProductsCount_PublishedStatusParameter
     {
@@ -34,8 +37,11 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategoriesCount
 
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
             var vendorRepo = MockRepository.GenerateStub<IRepository<Vendor>>();
+            
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+            storeMappingService.Stub(x => x.Authorize(Arg<Product>.Is.Anything)).Return(true);
 
-            _productApiService = new ProductApiService(productRepo, productCategoryRepo, vendorRepo);
+            _productApiService = new ProductApiService(productRepo, productCategoryRepo, vendorRepo, storeMappingService);
         }
 
         [Test]

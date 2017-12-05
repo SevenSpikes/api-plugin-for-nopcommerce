@@ -26,7 +26,7 @@
 //            var cut = new ProductsController(productApiServiceStub, jsonFieldsSerializer);
 
 //            // Act
-//            IHttpActionResult result = cut.GetProductById(nonPositiveProductId);
+//            IActionResult result = cut.GetProductById(nonPositiveProductId);
 
 //            // Assert
 //            Assert.IsInstanceOf<NotFoundResult>(result);
@@ -66,7 +66,7 @@
 //            var cut = new ProductsController(productApiServiceStub, jsonFieldsSerializer);
 
 //            // Act
-//            IHttpActionResult result = cut.GetProductById(nonExistingProductId);
+//            IActionResult result = cut.GetProductById(nonExistingProductId);
 
 //            // Assert
 //            Assert.IsInstanceOf<NotFoundResult>(result);

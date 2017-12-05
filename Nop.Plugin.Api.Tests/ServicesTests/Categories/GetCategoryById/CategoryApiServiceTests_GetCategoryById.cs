@@ -8,6 +8,8 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategoryById
 {
+    using Nop.Services.Stores;
+
     [TestFixture]
     public class CategoryApiServiceTests_GetCategoryById
     {
@@ -23,8 +25,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategoryById
 
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new CategoryApiService(categoryRepo, productCategoryRepo);
+            var cut = new CategoryApiService(categoryRepo, productCategoryRepo, storeMappingService);
             var result = cut.GetCategoryById(categoryId);
 
             // Assert
@@ -40,8 +44,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategoryById
             var categoryRepoStub = MockRepository.GenerateStub<IRepository<Category>>();
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new CategoryApiService(categoryRepoStub, productCategoryRepo);
+            var cut = new CategoryApiService(categoryRepoStub, productCategoryRepo, storeMappingService);
             var result = cut.GetCategoryById(negativeOrZeroCategoryId);
 
             // Assert
@@ -66,8 +72,10 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Categories.GetCategoryById
 
             var productCategoryRepo = MockRepository.GenerateStub<IRepository<ProductCategory>>();
 
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
             // Act
-            var cut = new CategoryApiService(categoryRepo, productCategoryRepo);
+            var cut = new CategoryApiService(categoryRepo, productCategoryRepo, storeMappingService);
             var result = cut.GetCategoryById(categoryId);
 
             // Assert

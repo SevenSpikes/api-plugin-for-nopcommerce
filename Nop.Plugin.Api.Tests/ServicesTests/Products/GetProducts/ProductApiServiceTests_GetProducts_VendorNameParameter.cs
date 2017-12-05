@@ -9,6 +9,8 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ServicesTests.Products.GetProducts
 {
+    using Nop.Services.Stores;
+
     [TestFixture]
     public class ProductApiServiceTests_GetProducts_VendorNameParameter
     {
@@ -49,7 +51,9 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Products.GetProducts
             var vendorRepo = MockRepository.GenerateStub<IRepository<Vendor>>();
             vendorRepo.Stub(x => x.TableNoTracking).Return(_existingVendors.AsQueryable());
 
-            _productApiService = new ProductApiService(productRepo, productCategoryRepo, vendorRepo);
+            var storeMappingService = MockRepository.GenerateStub<IStoreMappingService>();
+
+            _productApiService = new ProductApiService(productRepo, productCategoryRepo, vendorRepo, storeMappingService);
         }
 
         [Test]

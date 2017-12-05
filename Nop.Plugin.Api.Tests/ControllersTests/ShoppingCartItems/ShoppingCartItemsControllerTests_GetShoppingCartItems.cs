@@ -18,6 +18,9 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.ShoppingCartItems
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.Tests.Helpers;
+
     [TestFixture]
     public class ShoppingCartItemsControllerTests_GetShoppingCartItems
     {
@@ -38,10 +41,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ShoppingCartItems
                                                         .IgnoreArguments()
                                                         .Return(string.Empty);
             //Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetShoppingCartItems(parameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetShoppingCartItems(parameters);
 
             //Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, statusCode);
         }
@@ -64,10 +67,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ShoppingCartItems
                                                         .Return(string.Empty);
 
             //Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetShoppingCartItems(parameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetShoppingCartItems(parameters);
 
             //Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, statusCode);
         }
@@ -136,7 +139,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ShoppingCartItems
         [Test]
         public void WhenSomeProductsExist_ShouldCallTheSerializerWithTheseProducts()
         {
-            MappingExtensions.Maps.CreateMap<ShoppingCartItem, ShoppingCartItemDto>();
+            //MappingExtensions.Maps.CreateMap<ShoppingCartItem, ShoppingCartItemDto>();
 
             var returnedShoppingCartItemsDtoCollection = new List<ShoppingCartItem>()
             {

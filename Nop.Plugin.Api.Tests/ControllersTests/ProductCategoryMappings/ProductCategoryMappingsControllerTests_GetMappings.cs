@@ -17,6 +17,9 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.Tests.Helpers;
+
     [TestFixture]
     public class ProductCategoryMappingsControllerTests_GetMappings
     {
@@ -64,10 +67,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
                                                  .Return(string.Empty);
 
             //Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetMappings(parameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetMappings(parameters);
 
             //Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, statusCode);
         }
@@ -90,10 +93,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
                                                 .Return(string.Empty);
 
             //Act
-            IHttpActionResult result = autoMocker.ClassUnderTest.GetMappings(parameters);
+            IActionResult result = autoMocker.ClassUnderTest.GetMappings(parameters);
 
             //Assert
-            var statusCode = result.ExecuteAsync(new CancellationToken()).Result.StatusCode;
+            var statusCode = ActionResultExecutor.ExecuteResult(result);
 
             Assert.AreEqual(HttpStatusCode.BadRequest, statusCode);
         }
@@ -143,7 +146,7 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
         [Test]
         public void WhenSomeProductCategoryMappingsExist_ShouldCallTheSerializerWithTheseProductCategoryMappings()
         {
-            MappingExtensions.Maps.CreateMap<ProductCategory, ProductCategoryMappingDto>();
+            //MappingExtensions.Maps.CreateMap<ProductCategory, ProductCategoryMappingDto>();
 
             var returnedMappingsDtoCollection = new List<ProductCategory>()
             {
