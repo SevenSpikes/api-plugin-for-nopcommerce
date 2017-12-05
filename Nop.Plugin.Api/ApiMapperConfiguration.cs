@@ -74,9 +74,8 @@
         private void CreateClientToClientApiModelMap()
         {
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Client, ClientApiModel>()
-                .IgnoreAllNonExisting()
                 .ForMember(x => x.ClientSecretDescription, y => y.MapFrom(src => src.ClientSecrets.FirstOrDefault().Description))
-                .ForMember(x => x.RedirectUrl, y => y.MapFrom(src => src.RedirectUris.FirstOrDefault()));
+                .ForMember(x => x.RedirectUrl, y => y.MapFrom(src => src.RedirectUris.FirstOrDefault().RedirectUri));
         }
 
         private void CreateOrderEntityToOrderDtoMap()

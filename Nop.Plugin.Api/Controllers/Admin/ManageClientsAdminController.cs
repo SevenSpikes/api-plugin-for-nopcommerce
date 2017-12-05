@@ -4,9 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using IdentityModel;
-    using IdentityServer4.Models;
-    using IdentityServer4.Stores;
     using Microsoft.AspNetCore.Mvc;
     using Nop.Plugin.Api.Constants;
     using Nop.Services.Localization;
@@ -22,14 +19,11 @@
     [Route("admin/manageClientsAdmin/")]
     public class ManageClientsAdminController : BasePluginController
     {
-        private readonly IClientStore _clientStore;
         private readonly IClientService _clientService;
         private readonly ILocalizationService _localizationService;
 
-        public ManageClientsAdminController(IClientStore clientStore,
-            ILocalizationService localizationService, IClientService clientService)
+        public ManageClientsAdminController(ILocalizationService localizationService, IClientService clientService)
         {
-            _clientStore = clientStore;
             _localizationService = localizationService;
             _clientService = clientService;
         }
@@ -74,32 +68,23 @@
                 _clientService.InsertClient(model);
 
                 SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Created"));
-                return continueEditing ? RedirectToAction("Edit", new { clientId = model.ClientId }) : RedirectToAction("List");
+                return continueEditing ? RedirectToAction("Edit", new { id = model.Id }) : RedirectToAction("List");
             }
 
             return RedirectToAction("List");
         }
 
         [HttpGet]
-        [Route("edit/{clientId}")]
-        public async Task<IActionResult> Edit(string clientId)
+        [Route("edit/{id}")]
+        public IActionResult Edit(int id)
         {
-            var client = await _clientStore.FindClientByIdAsync(clientId);
-
-            var clientModel = new ClientApiModel()
-            {
-                ClientId = client.ClientId,
-                RedirectUrl = client.RedirectUris?.FirstOrDefault(),
-                Enabled = client.Enabled,
-                ClientName = client.ClientName,
-                ClientSecretDescription = client.ClientSecrets?.FirstOrDefault()?.Description
-            };
+            ClientApiModel clientModel = _clientService.FindClientByIdAsync(id);
             
             return View(ViewNames.AdminApiClientsEdit, clientModel);
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        [Route("edit/{clientId}")]
+        [Route("edit/{id}")]
         public async Task<IActionResult> Edit(ClientApiModel model, bool continueEditing)
         {
             if (ModelState.IsValid)
@@ -107,32 +92,17 @@
                 _clientService.UpdateClient(model);
               
                 SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Edit"));
-                return continueEditing ? RedirectToAction("Edit", new { clientId = model.ClientId }) : RedirectToAction("List");
+                return continueEditing ? RedirectToAction("Edit", new { id = model.Id }) : RedirectToAction("List");
             }
 
             return RedirectToAction("List");
         }
 
-        [HttpPost]
-        [Route("delete/{clientId}")]
-        public IActionResult DeleteClient(string clientId, DataSourceRequest command)
-        {
-            if (string.IsNullOrEmpty(clientId))
-                throw new ArgumentException("Client Id must not be empty");
-
-            _clientService.DeleteClient(clientId);
-
-            return List(command);
-        }
-
         [HttpPost, ActionName("Delete")]
-        [Route("delete/{clientId}")]
-        public IActionResult DeleteConfirmed(string clientId)
+        [Route("delete/{id}")]
+        public IActionResult DeleteConfirmed(int id)
         {
-            if (string.IsNullOrEmpty(clientId))
-                throw new ArgumentException("Client Id must not be empty");
-
-            _clientService.DeleteClient(clientId);
+            _clientService.DeleteClient(id);
 
             SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Deleted"));
             return RedirectToAction("List");

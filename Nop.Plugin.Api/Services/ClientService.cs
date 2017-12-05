@@ -4,12 +4,12 @@ using System.Linq;
 
 namespace Nop.Plugin.Api.Services
 {
-    using System.Data.Entity;
     using IdentityModel;
     using IdentityServer4;
     using IdentityServer4.EntityFramework.Entities;
     using IdentityServer4.EntityFramework.Interfaces;
     using IdentityServer4.Models;
+    using Microsoft.EntityFrameworkCore;
     using Nop.Plugin.Api.MappingExtensions;
     using Nop.Plugin.Api.Models;
     using Client = IdentityServer4.EntityFramework.Entities.Client;
@@ -25,14 +25,13 @@ namespace Nop.Plugin.Api.Services
         
         public IList<ClientApiModel> GetAllClients()
         {
-            IList<Client> clients = _configurationDbContext.Clients
+            IQueryable<Client> clientsQuery = _configurationDbContext.Clients
                 .Include(x => x.ClientSecrets)
-                .Include(x => x.RedirectUris)
-                .Include(x => x.AllowedScopes)
-                .Include(x => x.AllowedGrantTypes)
-                .ToList();
+                .Include(x => x.RedirectUris);
 
-            IList<ClientApiModel> clientApiModels = clients.Select(x => x.ToApiModel()).ToList();
+            IList<Client> clients = clientsQuery.ToList();
+
+            IList<ClientApiModel> clientApiModels = clients.Select(client => client.ToApiModel()).ToList();
 
             return clientApiModels;
         }
@@ -111,9 +110,11 @@ namespace Nop.Plugin.Api.Services
             {
                 throw new ArgumentNullException(nameof(model));
             }
-
-            // TODO: this does not return the navigation properties???
-            Client currentClient = _configurationDbContext.Clients.FirstOrDefault(x => x.ClientId == model.ClientId);
+            
+            Client currentClient = _configurationDbContext.Clients
+                .Include(client => client.ClientSecrets)
+                .Include(client => client.RedirectUris)
+                .FirstOrDefault(client => client.ClientId == model.ClientId);
 
             if (currentClient == null)
             {
@@ -131,12 +132,22 @@ namespace Nop.Plugin.Api.Services
             _configurationDbContext.SaveChanges();
         }
 
-        public void DeleteClient(string clientId)
+        public ClientApiModel FindClientByIdAsync(int id)
         {
-            if (string.IsNullOrEmpty(clientId))
-                throw new ArgumentException("Invalid clientId");
+            Client currentClient = _configurationDbContext.Clients
+                .Include(client => client.ClientSecrets)
+                .Include(client => client.RedirectUris)
+                .FirstOrDefault(client => client.Id == id);
 
-            Client client = _configurationDbContext.Clients.FirstOrDefault(x => x.ClientId == clientId);
+            return currentClient?.ToApiModel();
+        }
+
+        public void DeleteClient(int id)
+        {
+            Client client = _configurationDbContext.Clients
+                .Include(entity => entity.ClientSecrets)
+                .Include(entity => entity.RedirectUris)
+                .FirstOrDefault(x => x.Id == id);
 
             if (client != null)
             {
@@ -186,7 +197,6 @@ namespace Nop.Plugin.Api.Services
             if ((currentClientSecret != null && currentClientSecret.Description != modelClientSecretDescription) ||
                 currentClientSecret == null)
             {
-                // TODO: this does not delete the secrets from the db for some reason.
                 // Remove all secrets as we may have only one valid.
                 currentClient.ClientSecrets.Clear();
 

@@ -10,7 +10,7 @@
 }
 
 <form asp-controller="ManageClientsAdmin" asp-action="Edit" method="post">
-    
+    @Html.HiddenFor(model => model.Id)
     @Html.AntiForgeryToken()
 
     <div class="content-header clearfix">
@@ -38,4 +38,4 @@
 
 </form>
 
-<nop-delete-confirmation asp-model-id="@Model.ClientId" asp-button-id="client-delete" />
+<nop-delete-confirmation asp-model-id="@Model.Id" asp-button-id="client-delete" />
