@@ -42,8 +42,6 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<StoreController>().InstancePerLifetimeScope();
             builder.RegisterType<LanguagesController>().InstancePerLifetimeScope();
             builder.RegisterType<CustomerRolesController>().InstancePerLifetimeScope();
-            builder.RegisterType<WebHookRegistrationsController>().InstancePerLifetimeScope();
-            builder.RegisterType<WebHookFiltersController>().InstancePerLifetimeScope();
         }
 
         private void RegisterModelBinders(ContainerBuilder builder)
@@ -73,8 +71,6 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<JsonFieldsSerializer>().As<IJsonFieldsSerializer>().InstancePerLifetimeScope();
 
             builder.RegisterType<FieldsValidator>().As<IFieldsValidator>().InstancePerLifetimeScope();
-
-            builder.RegisterType<WebHookService>().As<IWebHookService>().SingleInstance();
 
             builder.RegisterType<ObjectConverter>().As<IObjectConverter>().InstancePerLifetimeScope();
             builder.RegisterType<ApiTypeConverter>().As<IApiTypeConverter>().InstancePerLifetimeScope();

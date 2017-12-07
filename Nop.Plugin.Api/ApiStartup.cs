@@ -22,6 +22,7 @@
 
     public class ApiStartup : INopStartup
     {
+        // TODO: extract all methods into extensions.
         public void ConfigureServices(IServiceCollection services, IConfigurationRoot configuration)
         {
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -56,8 +57,6 @@
             //        options.InjectOnCompleteJavaScript($"{currentAssemblyName}.Scripts.swaggerPostPutTryItOutButtonsRemoval.js");
             //    }
             //);
-
-            //app.UseMiddleware<WebhooksMiddleware>();
         }
         
         private void AddAuthorizationPipeline(IServiceCollection services)
@@ -154,7 +153,7 @@
                 }
             }
         }
-
+        
         public int Order { get; }
     }
 }
