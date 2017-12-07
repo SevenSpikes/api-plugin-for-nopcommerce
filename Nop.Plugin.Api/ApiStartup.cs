@@ -2,10 +2,13 @@
 {
     using System.Collections.Generic;
     using System.IdentityModel.Tokens.Jwt;
+    using System.IO;
+    using System.Linq;
     using System.Linq.Dynamic;
     using System.Reflection;
     using IdentityServer4.EntityFramework.DbContexts;
     using IdentityServer4.EntityFramework.Entities;
+    using IdentityServer4.Models;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
@@ -13,12 +16,14 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.IdentityModel.Tokens;
+    using Nop.Core;
     using Nop.Core.Data;
     using Nop.Core.Infrastructure;
     using Nop.Plugin.Api.Authorization.Policies;
     using Nop.Plugin.Api.Authorization.Requirements;
     using Nop.Plugin.Api.Helpers;
     using Nop.Plugin.Api.IdentityServer.Generators;
+    using ApiResource = IdentityServer4.EntityFramework.Entities.ApiResource;
 
     public class ApiStartup : INopStartup
     {
@@ -36,8 +41,8 @@
         {
             // This needs to be called here because in the plugin install method identity server is not yet registered.
             ApplyIdentityServerMigrations(app);
-            // In the simple case an API has exactly one scope. But there are cases where you might want to sub-divide the functionality of an API, and give different clients access to different parts. 
-            InsertIdentityServerApiResource(app);
+
+            SeedData(app);
 
             ////uncomment only if the client is an angular application that directly calls the oauth endpoint
             //// app.UseCors(Microsoft.Owin.Cors.CorsOptions.AllowAll);
@@ -127,14 +132,15 @@
             }
         }
 
-        private void InsertIdentityServerApiResource(IApplicationBuilder app)
+        private void SeedData(IApplicationBuilder app)
         {
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var configurationContext = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
 
-                if (!configurationContext.ApiResources.Any())
+                if (!DynamicQueryable.Any(configurationContext.ApiResources))
                 {
+                    // In the simple case an API has exactly one scope. But there are cases where you might want to sub-divide the functionality of an API, and give different clients access to different parts. 
                     configurationContext.ApiResources.Add(new ApiResource()
                     {
                         Enabled = true,
@@ -150,10 +156,32 @@
                     });
 
                     configurationContext.SaveChanges();
+
+                    // If there are no api resources we can assume that this is the first start after the upgrade and run the upgrade script.
+                    string upgradeScript = LoadUpgradeScript();
+                    configurationContext.Database.ExecuteSqlCommand(upgradeScript);
+
+                    // All client secrets must be hashed otherwise the identity server validation will fail.
+                    var allClients = Enumerable.ToList(configurationContext.Clients.Include(client => client.ClientSecrets));
+                    foreach (var client in allClients)
+                    {
+                        foreach (var clientSecret in client.ClientSecrets)
+                        {
+                            clientSecret.Value = HashExtensions.Sha256(clientSecret.Value);
+                        }
+                    }
                 }
             }
         }
-        
+
+        private string LoadUpgradeScript()
+        {
+            string path = CommonHelper.MapPath("~/Plugins/Nop.Plugin.Api/upgrade_script.sql");
+            string script = File.ReadAllText(path);
+
+            return script;
+        }
+
         public int Order { get; }
     }
 }
