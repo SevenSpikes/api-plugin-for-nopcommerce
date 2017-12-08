@@ -170,6 +170,8 @@
                             clientSecret.Value = HashExtensions.Sha256(clientSecret.Value);
                         }
                     }
+
+                    configurationContext.SaveChanges();
                 }
             }
         }
