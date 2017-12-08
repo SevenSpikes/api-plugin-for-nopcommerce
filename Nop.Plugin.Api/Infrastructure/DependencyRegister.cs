@@ -7,6 +7,7 @@ using Nop.Plugin.Api.Services;
 namespace Nop.Plugin.Api.Infrastructure
 {
     using System;
+    using Microsoft.Extensions.DependencyInjection;
     using Nop.Core.Domain.Catalog;
     using Nop.Core.Domain.Common;
     using Nop.Core.Domain.Customers;
@@ -25,23 +26,7 @@ namespace Nop.Plugin.Api.Infrastructure
         {
             RegisterPluginServices(builder);
 
-            RegisterControllers(builder);
-
             RegisterModelBinders(builder);
-        }
-
-        private void RegisterControllers(ContainerBuilder builder)
-        {
-            builder.RegisterType<CustomersController>().InstancePerLifetimeScope();
-            builder.RegisterType<CategoriesController>().InstancePerLifetimeScope();
-            builder.RegisterType<ProductsController>().InstancePerLifetimeScope();
-            builder.RegisterType<ProductCategoryMappingsController>().InstancePerLifetimeScope();
-            builder.RegisterType<OrdersController>().InstancePerLifetimeScope();
-            builder.RegisterType<ShoppingCartItemsController>().InstancePerLifetimeScope();
-            builder.RegisterType<OrderItemsController>().InstancePerLifetimeScope();
-            builder.RegisterType<StoreController>().InstancePerLifetimeScope();
-            builder.RegisterType<LanguagesController>().InstancePerLifetimeScope();
-            builder.RegisterType<CustomerRolesController>().InstancePerLifetimeScope();
         }
 
         private void RegisterModelBinders(ContainerBuilder builder)

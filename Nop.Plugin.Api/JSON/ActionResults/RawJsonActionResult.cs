@@ -9,6 +9,7 @@ namespace Nop.Plugin.Api.JSON.ActionResults
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.WebUtilities;
 
+    // TODO: Move to BaseApiController as method.
     public class RawJsonActionResult : IActionResult
     {
         private readonly string _jsonString;
