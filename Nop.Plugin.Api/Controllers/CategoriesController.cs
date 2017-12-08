@@ -31,7 +31,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace Nop.Plugin.Api.Controllers
 {
     using Microsoft.AspNetCore.Authentication.JwtBearer;
-    
+    using Nop.Plugin.Api.DTOs.Errors;
+
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CategoriesController : BaseApiController
     {
@@ -72,8 +73,7 @@ namespace Nop.Plugin.Api.Controllers
         [HttpGet]
         [Route("/api/categories")] 
         [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetCategories(CategoriesParametersModel parameters)
         {
@@ -118,6 +118,7 @@ namespace Nop.Plugin.Api.Controllers
         [Route("/api/categories/count")]
         [ProducesResponseType(typeof(CategoriesCountRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetCategoriesCount(CategoriesCountParametersModel parameters)
         {
@@ -144,7 +145,7 @@ namespace Nop.Plugin.Api.Controllers
         [HttpGet]
         [Route("/api/categories/{id}")]
         [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetCategoryById(int id, string fields = "")
@@ -175,7 +176,8 @@ namespace Nop.Plugin.Api.Controllers
         [HttpPost]
         [Route("/api/categories/categories")]
         [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), 422)]
+        [ProducesResponseType(typeof(ErrorsRootObject), 422)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         public IActionResult CreateCategory([ModelBinder(typeof(JsonModelBinder<CategoryDto>))] Delta<CategoryDto> categoryDelta)
         {
@@ -238,9 +240,10 @@ namespace Nop.Plugin.Api.Controllers
         [HttpPut]
         [Route("/api/categories/{id}")]
         [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), 422)]
+        [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         public IActionResult UpdateCategory(
             [ModelBinder(typeof (JsonModelBinder<CategoryDto>))] Delta<CategoryDto> categoryDelta)
         {
@@ -300,7 +303,7 @@ namespace Nop.Plugin.Api.Controllers
         [HttpDelete]
         [Route("/api/categories/{id}")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]

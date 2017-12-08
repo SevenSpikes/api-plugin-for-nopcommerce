@@ -35,6 +35,7 @@ namespace Nop.Plugin.Api.Controllers
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.DTOs.Errors;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CustomersController : BaseApiController
@@ -106,7 +107,7 @@ namespace Nop.Plugin.Api.Controllers
         [HttpGet]
         [Route("/api/customers")]
         [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetCustomers(CustomersParametersModel parameters)
@@ -144,7 +145,7 @@ namespace Nop.Plugin.Api.Controllers
         [HttpGet]
         [Route("/api/customers/{id}")]
         [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
@@ -180,6 +181,7 @@ namespace Nop.Plugin.Api.Controllers
         [Route("/api/customers/count")]
         [ProducesResponseType(typeof(CustomersCountRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         public IActionResult GetCustomersCount()
         {
             var allCustomersCount = _customerApiService.GetCustomersCount();
@@ -201,7 +203,7 @@ namespace Nop.Plugin.Api.Controllers
         [HttpGet]
         [Route("/api/customers/search")]
         [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         public IActionResult Search(CustomersSearchParametersModel parameters)
         {
@@ -230,7 +232,7 @@ namespace Nop.Plugin.Api.Controllers
         [HttpPost]
         [Route("/api/customers")]
         [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), 422)]
+        [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         public IActionResult CreateCustomer([ModelBinder(typeof(JsonModelBinder<CustomerDto>))] Delta<CustomerDto> customerDelta)
         {
@@ -308,7 +310,8 @@ namespace Nop.Plugin.Api.Controllers
         [HttpPut]
         [Route("/api/customers/{id}")]
         [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), 422)]
+        [ProducesResponseType(typeof(ErrorsRootObject), 422)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         public IActionResult UpdateCustomer([ModelBinder(typeof(JsonModelBinder<CustomerDto>))] Delta<CustomerDto> customerDelta)
@@ -433,6 +436,7 @@ namespace Nop.Plugin.Api.Controllers
         [Route("/api/customers/{id}")]
         [GetRequestsErrorInterceptorActionFilter]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         public IActionResult DeleteCustomer(int id)

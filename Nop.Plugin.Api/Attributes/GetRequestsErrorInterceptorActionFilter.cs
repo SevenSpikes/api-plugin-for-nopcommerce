@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Net;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json;
 using Nop.Core.Infrastructure;
@@ -10,7 +9,10 @@ using Nop.Plugin.Api.Serializers;
 namespace Nop.Plugin.Api.Attributes
 {
     using System.IO;
-    using System.Text;
+    using System.Net;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.JSON.ActionResults;
 
     public class GetRequestsErrorInterceptorActionFilter : ActionFilterAttribute
     {
@@ -23,7 +25,16 @@ namespace Nop.Plugin.Api.Attributes
 
         public override void OnActionExecuted(ActionExecutedContext actionExecutedContext)
         {
-            if (actionExecutedContext.HttpContext.Response != null && (HttpStatusCode)actionExecutedContext.HttpContext.Response.StatusCode != HttpStatusCode.OK)
+            if (actionExecutedContext.Exception != null && !actionExecutedContext.ExceptionHandled)
+            {
+                var error = new KeyValuePair<string, List<string>>("internal_server_error", new List<string>() { "please, contact the store owner" });
+
+                actionExecutedContext.Exception = null;
+                actionExecutedContext.ExceptionHandled = true;
+                SetError(actionExecutedContext, error);
+            }
+            else if (actionExecutedContext.HttpContext.Response != null && 
+                (HttpStatusCode)actionExecutedContext.HttpContext.Response.StatusCode != HttpStatusCode.OK)
             {
                 string responseBody = string.Empty;
 
@@ -42,28 +53,29 @@ namespace Nop.Plugin.Api.Attributes
                 if (!string.IsNullOrEmpty(defaultWebApiErrorsModel.Message) &&
                     !string.IsNullOrEmpty(defaultWebApiErrorsModel.MessageDetail))
                 {
-                    Dictionary<string, List<string>> bindingError = new Dictionary<string, List<string>>()
-                    {
-                        {
-                            "lookup_error",
-                            new List<string>() {"not found"}
-                        }
-                    };
 
-                    var errorsRootObject = new ErrorsRootObject()
-                    {
-                        Errors = bindingError
-                    };
+                    var error = new KeyValuePair<string, List<string>>("lookup_error", new List<string>() { "not found" });
 
-                    string errorJson = _jsonFieldsSerializer.Serialize(errorsRootObject, null);
-
-                    // TODO: test this.
-                    actionExecutedContext.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    actionExecutedContext.HttpContext.Response.Body = new MemoryStream(Encoding.UTF8.GetBytes(errorJson));
+                    SetError(actionExecutedContext, error);
                 }
             }
 
             base.OnActionExecuted(actionExecutedContext);
+        }
+
+        private void SetError(ActionExecutedContext actionExecutedContext, KeyValuePair<string, List<string>> error)
+        {
+            var bindingError = new Dictionary<string, List<string>>();
+            bindingError.Add(error.Key, error.Value);
+
+            var errorsRootObject = new ErrorsRootObject()
+            {
+                Errors = bindingError
+            };
+
+            string errorJson = _jsonFieldsSerializer.Serialize(errorsRootObject, null);
+
+            actionExecutedContext.Result = new ErrorActionResult(errorJson, HttpStatusCode.BadRequest);
         }
     }
 }

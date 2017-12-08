@@ -18,8 +18,8 @@ namespace Nop.Plugin.Api.Controllers
 {
     using System.Net;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.DTOs.Errors;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class LanguagesController : BaseApiController
@@ -62,6 +62,7 @@ namespace Nop.Plugin.Api.Controllers
         [Route("/api/languages")]
         [ProducesResponseType(typeof(LanguagesRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetAllLanguages(string fields = "")
         {

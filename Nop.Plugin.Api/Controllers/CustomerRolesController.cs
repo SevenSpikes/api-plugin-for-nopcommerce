@@ -18,8 +18,8 @@ namespace Nop.Plugin.Api.Controllers
 {
     using System.Net;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.DTOs.Errors;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CustomerRolesController : BaseApiController
@@ -55,6 +55,7 @@ namespace Nop.Plugin.Api.Controllers
         [HttpGet]
         [Route("/api/customer_roles")]
         [ProducesResponseType(typeof(CustomerRolesRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetAllCustomerRoles(string fields = "")
