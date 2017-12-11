@@ -36,7 +36,7 @@ namespace Nop.Plugin.Api.Services
             return clientApiModels;
         }
         
-        public void InsertClient(ClientApiModel model)
+        public int InsertClient(ClientApiModel model)
         {
             if (model == null)
             {
@@ -49,7 +49,9 @@ namespace Nop.Plugin.Api.Services
                 Enabled = model.Enabled,
                 ClientName = model.ClientName,
                 // Needed to be able to obtain refresh token.
-                AllowOfflineAccess = true
+                AllowOfflineAccess = true,
+                AccessTokenLifetime = model.AccessTokenLifetime,
+                AbsoluteRefreshTokenLifetime = model.RefreshTokenLifetime
             };
 
             AddOrUpdateClientSecret(client, model.ClientSecretDescription);
@@ -99,9 +101,11 @@ namespace Nop.Plugin.Api.Services
                 }
 
             };
-            
+
             _configurationDbContext.Clients.Add(client);
             _configurationDbContext.SaveChanges();
+
+            return client.Id;
         }
 
         public void UpdateClient(ClientApiModel model)
@@ -127,6 +131,8 @@ namespace Nop.Plugin.Api.Services
             currentClient.ClientId = model.ClientId;
             currentClient.ClientName = model.ClientName;
             currentClient.Enabled = model.Enabled;
+            currentClient.AccessTokenLifetime = model.AccessTokenLifetime;
+            currentClient.AbsoluteRefreshTokenLifetime = model.RefreshTokenLifetime;
 
             _configurationDbContext.Clients.Update(currentClient);
             _configurationDbContext.SaveChanges();

@@ -44,6 +44,24 @@
                     </div>
                     <div class="form-group">
                         <div class="col-md-3">
+                            <nop-label asp-for="AccessTokenLifetime" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="AccessTokenLifetime" asp-required="true" />
+                            <span asp-validation-for="AccessTokenLifetime"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="RefreshTokenLifetime" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="RefreshTokenLifetime" asp-required="true" />
+                            <span asp-validation-for="RefreshTokenLifetime"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
                             <nop-label asp-for="Enabled" />
                         </div>
                         <div class="col-md-9">

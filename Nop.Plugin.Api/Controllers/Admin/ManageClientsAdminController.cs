@@ -54,7 +54,10 @@
         [Route("create")]
         public ActionResult Create()
         {
-            ClientApiModel clientModel = PrepareClientModel();
+            var clientModel = new ClientApiModel
+            {
+                Enabled = true
+            };
 
             return View(ViewNames.AdminApiClientsCreate, clientModel);
         }
@@ -65,10 +68,10 @@
         {
             if (ModelState.IsValid)
             {
-                _clientService.InsertClient(model);
+                int clientId = _clientService.InsertClient(model);
 
                 SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Created"));
-                return continueEditing ? RedirectToAction("Edit", new { id = model.Id }) : RedirectToAction("List");
+                return continueEditing ? RedirectToAction("Edit", new { id = clientId }) : RedirectToAction("List");
             }
 
             return RedirectToAction("List");
@@ -106,22 +109,6 @@
 
             SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Deleted"));
             return RedirectToAction("List");
-        }
-
-        private ClientApiModel PrepareClientModel()
-        {
-            string clientSecretRaw = Guid.NewGuid().ToString();
-
-            var clientModel = new ClientApiModel()
-            {
-                ClientId = Guid.NewGuid().ToString(),
-                Enabled = true,
-                RedirectUrl = string.Empty,
-                ClientName = string.Empty,
-                ClientSecretDescription = clientSecretRaw
-            };
-
-            return clientModel;
         }
     }
 }

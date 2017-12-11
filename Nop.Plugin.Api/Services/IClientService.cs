@@ -8,7 +8,7 @@ namespace Nop.Plugin.Api.Services
     {
         IList<ClientApiModel> GetAllClients();
         void DeleteClient(int id);
-        void InsertClient(ClientApiModel model);
+        int InsertClient(ClientApiModel model);
         void UpdateClient(ClientApiModel model);
         ClientApiModel FindClientByIdAsync(int id);
     }
