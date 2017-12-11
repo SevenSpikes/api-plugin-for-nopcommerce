@@ -21,6 +21,7 @@
     using Nop.Core.Infrastructure;
     using Nop.Plugin.Api.Authorization.Policies;
     using Nop.Plugin.Api.Authorization.Requirements;
+    using Nop.Plugin.Api.Constants;
     using Nop.Plugin.Api.Helpers;
     using Nop.Plugin.Api.IdentityServer.Generators;
     using ApiResource = IdentityServer4.EntityFramework.Entities.ApiResource;
@@ -169,6 +170,9 @@
                         {
                             clientSecret.Value = HashExtensions.Sha256(clientSecret.Value);
                         }
+
+                        client.AccessTokenLifetime = Configurations.DefaultAccessTokenExpiration;
+                        client.AbsoluteRefreshTokenLifetime = Configurations.DefaultRefreshTokenExpiration;
                     }
 
                     configurationContext.SaveChanges();
