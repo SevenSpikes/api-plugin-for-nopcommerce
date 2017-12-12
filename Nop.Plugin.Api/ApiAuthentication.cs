@@ -1,6 +1,8 @@
 ﻿namespace Nop.Plugin.Api
 {
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Security.Cryptography.X509Certificates;
     using IdentityModel;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,12 +10,13 @@
     using Microsoft.IdentityModel.Tokens;
     using Nop.Plugin.Api.Helpers;
     using Nop.Services.Authentication.External;
+    using Org.BouncyCastle.Asn1.X509.Qualified;
 
     public class ApiAuthentication : IExternalAuthenticationRegistrar
     {
         public void Configure(AuthenticationBuilder builder)
         {
-            RsaSecurityKey signingKey = CryptoHelper.CreateRsaSecurityKey();
+           // RsaSecurityKey signingKey = CryptoHelper.CreateRsaSecurityKey();
 
             //builder.Services
             //    .AddAuthentication("Bearer")
@@ -23,6 +26,8 @@
             //        options.RequireHttpsMetadata = false;
             //        options.ApiName = "nop_api";
             //    });
+            
+            X509Certificate2 cert = CryptoHelper.GetTokenSigningCertificate();
 
             builder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwt =>
                 {
@@ -35,14 +40,9 @@
                         RoleClaimType = JwtClaimTypes.Role,
                         // Uncomment this if you are using an certificate to sign your tokens.
                         // IssuerSigningKey = new X509SecurityKey(cert),
-                        IssuerSigningKey = signingKey,
                         IssuerSigningKeyResolver = (string token, SecurityToken securityToken, string kid,
                                 TokenValidationParameters validationParameters) =>
-                                new List<RsaSecurityKey> { signingKey }
-                                // Uncomment this if you are using an certificate to sign your tokens.
-                                //IssuerSigningKeyResolver = (string token, SecurityToken securityToken, string kid,
-                                //        TokenValidationParameters validationParameters) =>
-                                //        new List<X509SecurityKey> { new X509SecurityKey(cert) }
+                                new List<X509SecurityKey> { new X509SecurityKey(cert) }
                     };
                 });
         }

@@ -1,11 +1,14 @@
 ﻿namespace Nop.Plugin.Api
 {
+    using System;
     using System.Collections.Generic;
     using System.IdentityModel.Tokens.Jwt;
     using System.IO;
     using System.Linq;
     using System.Linq.Dynamic;
     using System.Reflection;
+    using System.Security.Cryptography;
+    using System.Security.Cryptography.X509Certificates;
     using IdentityServer4.EntityFramework.DbContexts;
     using IdentityServer4.EntityFramework.Entities;
     using IdentityServer4.Models;
@@ -88,11 +91,7 @@
 
         private void AddTokenGenerationPipeline(IServiceCollection services)
         {
-            // The recomended way to sign a JWT is using a verified certificate!
-            // You can use the bellow commented code to change the signing credentials.
-            //IServiceProvider serviceProvider = services.BuildServiceProvider();
-            //var config = serviceProvider.GetService<IConfig>();
-            //X509Certificate2 cert = config.GetTokenSigningCertificate();
+            X509Certificate2 cert = CryptoHelper.GetTokenSigningCertificate();
 
             DataSettingsManager dataSettingsManager = new DataSettingsManager();
 
@@ -100,11 +99,9 @@
             string connectionStringFromNop = dataSettings.DataConnectionString;
 
             var migrationsAssembly = typeof(ApiStartup).GetTypeInfo().Assembly.GetName().Name;
-
-            RsaSecurityKey signingKey = CryptoHelper.CreateRsaSecurityKey();
-
+            
             services.AddIdentityServer()
-                .AddSigningCredential(signingKey)
+                .AddSigningCredential(cert)
                 .AddConfigurationStore(options =>
                 {
                     options.ConfigureDbContext = builder =>

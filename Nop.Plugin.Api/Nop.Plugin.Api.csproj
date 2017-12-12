@@ -36,6 +36,17 @@
     <None Remove="Views\_ViewImports.cshtml" />
   </ItemGroup>
   <ItemGroup>
+    <COMReference Include="CERTENROLLLib.dll">
+      <Guid>728ab348-217d-11da-b2a4-000e7bbb2b09</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>false</Isolated>
+      <Private>true</Private>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="Views\Clients\ClientSettings.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
