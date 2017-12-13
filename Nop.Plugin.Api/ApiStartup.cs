@@ -1,5 +1,6 @@
 ﻿namespace Nop.Plugin.Api
 {
+    using System;
     using System.Collections.Generic;
     using System.IdentityModel.Tokens.Jwt;
     using System.IO;
@@ -158,24 +159,7 @@
 
                     configurationContext.SaveChanges();
 
-                    // If there are no api resources we can assume that this is the first start after the upgrade and run the upgrade script.
-                    string upgradeScript = LoadUpgradeScript();
-                    configurationContext.Database.ExecuteSqlCommand(upgradeScript);
-
-                    // All client secrets must be hashed otherwise the identity server validation will fail.
-                    var allClients = Enumerable.ToList(configurationContext.Clients.Include(client => client.ClientSecrets));
-                    foreach (var client in allClients)
-                    {
-                        foreach (var clientSecret in client.ClientSecrets)
-                        {
-                            clientSecret.Value = HashExtensions.Sha256(clientSecret.Value);
-                        }
-
-                        client.AccessTokenLifetime = Configurations.DefaultAccessTokenExpiration;
-                        client.AbsoluteRefreshTokenLifetime = Configurations.DefaultRefreshTokenExpiration;
-                    }
-
-                    configurationContext.SaveChanges();
+                    TryRunUpgradeScript(configurationContext);
                 }
             }
         }
@@ -186,6 +170,36 @@
             string script = File.ReadAllText(path);
 
             return script;
+        }
+
+        private void TryRunUpgradeScript(ConfigurationDbContext configurationContext)
+        {
+            try
+            {
+                // If there are no api resources we can assume that this is the first start after the upgrade and run the upgrade script.
+                string upgradeScript = LoadUpgradeScript();
+                configurationContext.Database.ExecuteSqlCommand(upgradeScript);
+
+                // All client secrets must be hashed otherwise the identity server validation will fail.
+                var allClients =
+                    Enumerable.ToList(configurationContext.Clients.Include(client => client.ClientSecrets));
+                foreach (var client in allClients)
+                {
+                    foreach (var clientSecret in client.ClientSecrets)
+                    {
+                        clientSecret.Value = HashExtensions.Sha256(clientSecret.Value);
+                    }
+
+                    client.AccessTokenLifetime = Configurations.DefaultAccessTokenExpiration;
+                    client.AbsoluteRefreshTokenLifetime = Configurations.DefaultRefreshTokenExpiration;
+                }
+
+                configurationContext.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                // Probably the upgrade script was already executed and we don't need to do anything.
+            }
         }
 
         public int Order { get; }
