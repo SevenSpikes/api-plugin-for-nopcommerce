@@ -13,6 +13,7 @@
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,7 @@
     using Nop.Plugin.Api.Authorization.Requirements;
     using Nop.Plugin.Api.Constants;
     using Nop.Plugin.Api.Helpers;
+    using Nop.Plugin.Api.IdentityServer.Endpoints;
     using Nop.Plugin.Api.IdentityServer.Generators;
     using ApiResource = IdentityServer4.EntityFramework.Entities.ApiResource;
 
@@ -118,7 +120,10 @@
                         builder.UseSqlServer(connectionStringFromNop,
                             sql => sql.MigrationsAssembly(migrationsAssembly));
                 })
-                .AddAuthorizeInteractionResponseGenerator<NopApiAuthorizeInteractionResponseGenerator>();
+                .AddAuthorizeInteractionResponseGenerator<NopApiAuthorizeInteractionResponseGenerator>()
+                .AddEndpoint<AuthorizeCallbackEndpoint>("Authorize", "/oauth/authorize/callback")
+                .AddEndpoint<AuthorizeEndpoint>("Authorize", "/oauth/authorize")
+                .AddEndpoint<TokenEndpoint>("Token", "/oauth/token");
         }
 
         private void ApplyIdentityServerMigrations(IApplicationBuilder app)
