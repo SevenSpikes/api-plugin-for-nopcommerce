@@ -44,7 +44,7 @@
         // The recomended way to sign a JWT is using a verified certificate!
         public static void CreateSelfSignedCertificate(string subjectName)
         {
-            string pathToCertificate = CommonHelper.MapPath($"~/Plugins/Nop.Plugin.Api/Certificates/{TokenSigningCertificateName}");
+            string pathToCertificate = CommonHelper.MapPath($"~/Plugins/Nop.Plugin.Api/{TokenSigningCertificateName}");
 
             if (!File.Exists(pathToCertificate))
             {
@@ -105,7 +105,7 @@
 
         public static X509Certificate2 GetTokenSigningCertificate()
         {
-            string pathToCertificate = CommonHelper.MapPath($"~/Plugins/Nop.Plugin.Api/Certificates/{TokenSigningCertificateName}");
+            string pathToCertificate = CommonHelper.MapPath($"~/Plugins/Nop.Plugin.Api/{TokenSigningCertificateName}");
             
             X509Certificate2 certificate = new X509Certificate2(pathToCertificate, "");
 
