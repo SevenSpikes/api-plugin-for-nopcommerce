@@ -99,7 +99,7 @@
                 var base64encoded = enroll.CreatePFX("", // no password, this is for internal consumption
                     PFXExportOptions.PFXExportChainWithRoot);
 
-                File.WriteAllText(pathToCertificate, base64encoded);
+                File.WriteAllBytes(pathToCertificate, Convert.FromBase64String(base64encoded));
             }
         }
 
