@@ -15,6 +15,7 @@
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,7 @@
     using Nop.Plugin.Api.Authorization.Requirements;
     using Nop.Plugin.Api.Constants;
     using Nop.Plugin.Api.Helpers;
+    using Nop.Plugin.Api.IdentityServer.Endpoints;
     using Nop.Plugin.Api.IdentityServer.Generators;
     using ApiResource = IdentityServer4.EntityFramework.Entities.ApiResource;
 
@@ -114,7 +116,10 @@
                         builder.UseSqlServer(connectionStringFromNop,
                             sql => sql.MigrationsAssembly(migrationsAssembly));
                 })
-                .AddAuthorizeInteractionResponseGenerator<NopApiAuthorizeInteractionResponseGenerator>();
+                .AddAuthorizeInteractionResponseGenerator<NopApiAuthorizeInteractionResponseGenerator>()
+                .AddEndpoint<AuthorizeCallbackEndpoint>("Authorize", "/oauth/authorize/callback")
+                .AddEndpoint<AuthorizeEndpoint>("Authorize", "/oauth/authorize")
+                .AddEndpoint<TokenEndpoint>("Token", "/oauth/token");
         }
 
         private void ApplyIdentityServerMigrations(IApplicationBuilder app)
@@ -155,24 +160,7 @@
 
                     configurationContext.SaveChanges();
 
-                    // If there are no api resources we can assume that this is the first start after the upgrade and run the upgrade script.
-                    string upgradeScript = LoadUpgradeScript();
-                    configurationContext.Database.ExecuteSqlCommand(upgradeScript);
-
-                    // All client secrets must be hashed otherwise the identity server validation will fail.
-                    var allClients = Enumerable.ToList(configurationContext.Clients.Include(client => client.ClientSecrets));
-                    foreach (var client in allClients)
-                    {
-                        foreach (var clientSecret in client.ClientSecrets)
-                        {
-                            clientSecret.Value = HashExtensions.Sha256(clientSecret.Value);
-                        }
-
-                        client.AccessTokenLifetime = Configurations.DefaultAccessTokenExpiration;
-                        client.AbsoluteRefreshTokenLifetime = Configurations.DefaultRefreshTokenExpiration;
-                    }
-
-                    configurationContext.SaveChanges();
+                    TryRunUpgradeScript(configurationContext);
                 }
             }
         }
@@ -183,6 +171,36 @@
             string script = File.ReadAllText(path);
 
             return script;
+        }
+
+        private void TryRunUpgradeScript(ConfigurationDbContext configurationContext)
+        {
+            try
+            {
+                // If there are no api resources we can assume that this is the first start after the upgrade and run the upgrade script.
+                string upgradeScript = LoadUpgradeScript();
+                configurationContext.Database.ExecuteSqlCommand(upgradeScript);
+
+                // All client secrets must be hashed otherwise the identity server validation will fail.
+                var allClients =
+                    Enumerable.ToList(configurationContext.Clients.Include(client => client.ClientSecrets));
+                foreach (var client in allClients)
+                {
+                    foreach (var clientSecret in client.ClientSecrets)
+                    {
+                        clientSecret.Value = HashExtensions.Sha256(clientSecret.Value);
+                    }
+
+                    client.AccessTokenLifetime = Configurations.DefaultAccessTokenExpiration;
+                    client.AbsoluteRefreshTokenLifetime = Configurations.DefaultRefreshTokenExpiration;
+                }
+
+                configurationContext.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                // Probably the upgrade script was already executed and we don't need to do anything.
+            }
         }
 
         public int Order { get; }
