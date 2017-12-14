@@ -29,6 +29,7 @@
     using Nop.Plugin.Api.Helpers;
     using Nop.Plugin.Api.IdentityServer.Endpoints;
     using Nop.Plugin.Api.IdentityServer.Generators;
+    using Nop.Plugin.Api.IdentityServer.Middlewares;
     using ApiResource = IdentityServer4.EntityFramework.Entities.ApiResource;
 
     public class ApiStartup : INopStartup
@@ -37,7 +38,7 @@
         public void ConfigureServices(IServiceCollection services, IConfigurationRoot configuration)
         {
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-
+            
             AddTokenGenerationPipeline(services);
 
             AddAuthorizationPipeline(services);
@@ -49,6 +50,8 @@
             ApplyIdentityServerMigrations(app);
 
             SeedData(app);
+
+            app.UseMiddleware<IdentityServerScopeParameterMiddleware>();
 
             ////uncomment only if the client is an angular application that directly calls the oauth endpoint
             //// app.UseCors(Microsoft.Owin.Cors.CorsOptions.AllowAll);
