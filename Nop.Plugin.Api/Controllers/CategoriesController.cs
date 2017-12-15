@@ -9,7 +9,6 @@ using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Plugin.Api.Models.CategoriesParameters;
-using Nop.Plugin.Api.Serializers;
 using Nop.Plugin.Api.Services;
 using Nop.Services.Catalog;
 using Nop.Services.Localization;
@@ -32,6 +31,7 @@ namespace Nop.Plugin.Api.Controllers
 {
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Nop.Plugin.Api.DTOs.Errors;
+    using Nop.Plugin.Api.JSON.Serializers;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CategoriesController : BaseApiController

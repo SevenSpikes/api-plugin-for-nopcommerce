@@ -1,12 +1,12 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
-using IdentityServer4.EntityFramework.DbContexts;
-
-namespace KabukiApps.Web.Migrations.IdentityServer.PersitedGrantDb
+﻿namespace Nop.Plugin.Api.Migrations.IdentityServer.PersitedGrantDb
 {
+    using System;
+    using IdentityServer4.EntityFramework.DbContexts;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
+    using Microsoft.EntityFrameworkCore.Metadata;
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     [DbContext(typeof(PersistedGrantDbContext))]
     [Migration("20170319181710_Grants")]
     partial class Grants

@@ -1,4 +1,4 @@
-﻿namespace KabukiApps.Web.Migrations.IdentityServer.ConfigurationDb
+﻿namespace Nop.Plugin.Api.Migrations.IdentityServer.ConfigurationDb
 {
     using System;
     using Microsoft.EntityFrameworkCore.Metadata;

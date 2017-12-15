@@ -3,7 +3,7 @@ using System.Net;
 using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.DTOs.Errors;
 using Nop.Plugin.Api.JSON.ActionResults;
-using Nop.Plugin.Api.Serializers;
+using Nop.Plugin.Api.JSON.Serializers;
 using Nop.Services.Logging;
 using Microsoft.AspNetCore.Mvc.Filters;
 

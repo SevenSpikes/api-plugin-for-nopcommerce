@@ -16,8 +16,8 @@ namespace Nop.Plugin.Api.Infrastructure
     using Nop.Plugin.Api.Converters;
     using Nop.Plugin.Api.Factories;
     using Nop.Plugin.Api.Helpers;
+    using Nop.Plugin.Api.JSON.Serializers;
     using Nop.Plugin.Api.ModelBinders;
-    using Nop.Plugin.Api.Serializers;
     using Nop.Plugin.Api.Validators;
 
     public class DependencyRegister : IDependencyRegistrar

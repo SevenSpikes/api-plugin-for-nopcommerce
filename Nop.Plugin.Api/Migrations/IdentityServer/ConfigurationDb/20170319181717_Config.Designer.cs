@@ -1,11 +1,11 @@
-﻿namespace KabukiApps.Web.Migrations.IdentityServer.ConfigurationDb
+﻿namespace Nop.Plugin.Api.Migrations.IdentityServer.ConfigurationDb
 {
     using System;
+    using IdentityServer4.EntityFramework.DbContexts;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Infrastructure;
     using Microsoft.EntityFrameworkCore.Metadata;
     using Microsoft.EntityFrameworkCore.Migrations;
-    using IdentityServer4.EntityFramework.DbContexts;
 
     [DbContext(typeof(ConfigurationDbContext))]
     [Migration("20170319181717_Config")]

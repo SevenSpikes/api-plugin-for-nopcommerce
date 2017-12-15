@@ -1,4 +1,4 @@
-﻿namespace KabukiApps.Web.Migrations.IdentityServer.PersitedGrantDb
+﻿namespace Nop.Plugin.Api.Migrations.IdentityServer.PersitedGrantDb
 {
     using System;
     using Microsoft.EntityFrameworkCore.Migrations;

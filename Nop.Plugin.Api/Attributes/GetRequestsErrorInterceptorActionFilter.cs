@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.DTOs.Errors;
 using Nop.Plugin.Api.Models;
-using Nop.Plugin.Api.Serializers;
 
 namespace Nop.Plugin.Api.Attributes
 {
@@ -13,6 +12,7 @@ namespace Nop.Plugin.Api.Attributes
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Nop.Plugin.Api.JSON.ActionResults;
+    using Nop.Plugin.Api.JSON.Serializers;
 
     public class GetRequestsErrorInterceptorActionFilter : ActionFilterAttribute
     {

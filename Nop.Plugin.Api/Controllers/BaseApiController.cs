@@ -6,7 +6,6 @@ using Nop.Core.Domain.Security;
 using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.DTOs.Errors;
 using Nop.Plugin.Api.JSON.ActionResults;
-using Nop.Plugin.Api.Serializers;
 using Nop.Services.Customers;
 using Nop.Services.Discounts;
 using Nop.Services.Localization;
@@ -18,6 +17,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Nop.Plugin.Api.Controllers
 {
+    using Nop.Plugin.Api.JSON.Serializers;
+
     public class BaseApiController : Controller
     {
         protected readonly IJsonFieldsSerializer _jsonFieldsSerializer;
