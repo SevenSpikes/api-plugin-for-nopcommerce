@@ -105,11 +105,17 @@
 
         public static X509Certificate2 GetTokenSigningCertificate()
         {
-            string pathToCertificate = CommonHelper.MapPath($"~/Plugins/Nop.Plugin.Api/{TokenSigningCertificateName}");
-            
-            X509Certificate2 certificate = new X509Certificate2(pathToCertificate, "");
+            string pathToCertificate =
+                CommonHelper.MapPath($"~/Plugins/Nop.Plugin.Api/{TokenSigningCertificateName}");
 
-            return certificate;
+            if (File.Exists(pathToCertificate))
+            {
+                X509Certificate2 certificate = new X509Certificate2(pathToCertificate, "");
+
+                return certificate;
+            }
+
+            return null;
         }
     }
 }

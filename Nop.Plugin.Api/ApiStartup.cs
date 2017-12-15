@@ -104,6 +104,13 @@
         {
             X509Certificate2 cert = CryptoHelper.GetTokenSigningCertificate();
 
+            // This is in case you had the plugin installed in some prev version of nopCommerce.
+            if (cert == null)
+            {
+                CryptoHelper.CreateSelfSignedCertificate("nop-api-certificate");
+                cert = CryptoHelper.GetTokenSigningCertificate();
+            }
+
             DataSettingsManager dataSettingsManager = new DataSettingsManager();
 
             DataSettings dataSettings = dataSettingsManager.LoadSettings();
