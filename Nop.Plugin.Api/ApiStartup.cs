@@ -53,8 +53,9 @@
             SeedData(app);
             
             var options = new RewriteOptions()
-                .AddRedirect("oauth/(.*)", "connect/$1", 307);
-                 
+                .AddRedirect("oauth/(.*)", "connect/$1", 307)
+                .AddRedirect("api/token", "connect/token", 307);
+
             app.UseRewriter(options);
 
             app.UseMiddleware<IdentityServerScopeParameterMiddleware>();
