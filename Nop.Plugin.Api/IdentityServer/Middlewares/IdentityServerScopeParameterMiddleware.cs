@@ -6,7 +6,6 @@
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Internal;
     using Microsoft.Extensions.Primitives;
-    using Nop.Plugin.Api.IdentityServer.Extensions;
 
     public class IdentityServerScopeParameterMiddleware
     {

@@ -16,6 +16,7 @@
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Rewrite;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -50,6 +51,11 @@
             ApplyIdentityServerMigrations(app);
 
             SeedData(app);
+            
+            var options = new RewriteOptions()
+                .AddRedirect("oauth/(.*)", "connect/$1", 307);
+                 
+            app.UseRewriter(options);
 
             app.UseMiddleware<IdentityServerScopeParameterMiddleware>();
 
