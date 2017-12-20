@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using FluentValidation.Attributes;
 using Newtonsoft.Json;
 using Nop.Plugin.Api.Attributes;
@@ -11,6 +12,30 @@ namespace Nop.Plugin.Api.DTOs.OrderItems
     [JsonObject(Title = "order_item")]
     public class OrderItemDto
     {
+        private List<ProductItemAttributeDto> _attributes;
+
+        /// <summary>
+        /// Gets or sets the id
+        /// </summary>
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the selected attributes
+        /// </summary>
+        [JsonProperty("product_attributes")]
+        public List<ProductItemAttributeDto> Attributes
+        {
+            get
+            {
+                return _attributes;
+            }
+            set
+            {
+                _attributes = value;
+            }
+        }
+
         /// <summary>
         /// Gets or sets the quantity
         /// </summary>
