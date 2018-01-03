@@ -6,6 +6,7 @@ using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Localization;
+using Nop.Core.Domain.Media;
 using Nop.Core.Events;
 using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.Services;
@@ -48,7 +49,8 @@ namespace Nop.Plugin.Api.WebHooks
         IConsumer<EntityDeleted<Language>>,
         IConsumer<EntityInserted<ProductPicture>>,
         IConsumer<EntityUpdated<ProductPicture>>,
-        IConsumer<EntityDeleted<ProductPicture>>
+        IConsumer<EntityDeleted<ProductPicture>>,
+        IConsumer<EntityUpdated<Picture>>
     {
         private readonly IWebHookManager _webHookManager;
         private readonly ICustomerApiService _customerApiService;
@@ -57,19 +59,26 @@ namespace Nop.Plugin.Api.WebHooks
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
         private readonly IStoreMappingService _storeMappingService;
-        private readonly IDTOHelper _dtoHelper;
+        private readonly IProductPictureService _productPictureService;
+        private IStoreService _storeService;
+        private IStoreContext _storeContext;
 
-        public WebHookEventConsumer()
+        private IDTOHelper _dtoHelper;
+
+        public WebHookEventConsumer(IStoreService storeService)
         {
             IWebHookService webHookService = EngineContext.Current.ContainerManager.Resolve<IWebHookService>();
             _customerApiService = EngineContext.Current.ContainerManager.Resolve<ICustomerApiService>();
             _categoryApiService = EngineContext.Current.ContainerManager.Resolve<ICategoryApiService>();
             _productApiService = EngineContext.Current.ContainerManager.Resolve<IProductApiService>();
             _dtoHelper = EngineContext.Current.ContainerManager.Resolve<IDTOHelper>();
+            _storeService = EngineContext.Current.ContainerManager.Resolve<IStoreService>();
+            _productPictureService = EngineContext.Current.ContainerManager.Resolve<IProductPictureService>();
 
             _productService = EngineContext.Current.ContainerManager.Resolve<IProductService>();
             _categoryService = EngineContext.Current.ContainerManager.Resolve<ICategoryService>();
             _storeMappingService = EngineContext.Current.ContainerManager.Resolve<IStoreMappingService>();
+            _storeContext = EngineContext.Current.ContainerManager.Resolve<IStoreContext>();
 
             _webHookManager = webHookService.GetHookManager();
         }
@@ -82,7 +91,7 @@ namespace Nop.Plugin.Api.WebHooks
                 return;
             }
 
-            CustomerDto customer = _customerApiService.GetCustomerById(eventMessage.Entity.Id, false, false);
+            CustomerDto customer = _customerApiService.GetCustomerById(eventMessage.Entity.Id);
             var storeIds = new List<int>();
 
             if (customer.RegisteredInStoreId.HasValue)
@@ -101,7 +110,7 @@ namespace Nop.Plugin.Api.WebHooks
                 return;
             }
 
-            CustomerDto customer = _customerApiService.GetCustomerById(eventMessage.Entity.Id, true, false);
+            CustomerDto customer = _customerApiService.GetCustomerById(eventMessage.Entity.Id, true);
 
             // In nopCommerce the Customer, Product, Category and Order entities are not deleted.
             // Instead the Deleted property of the entity is set to true.
@@ -212,7 +221,7 @@ namespace Nop.Plugin.Api.WebHooks
                 eventMessage.Entity.Key == SystemCustomerAttributeNames.LastName ||
                 eventMessage.Entity.Key == SystemCustomerAttributeNames.LanguageId)
             {
-                var customerDto = _customerApiService.GetCustomerById(eventMessage.Entity.EntityId, false, false);
+                var customerDto = _customerApiService.GetCustomerById(eventMessage.Entity.EntityId);
 
                 var storeIds = new List<int>();
 
@@ -231,7 +240,7 @@ namespace Nop.Plugin.Api.WebHooks
                 eventMessage.Entity.Key == SystemCustomerAttributeNames.LastName ||
                 eventMessage.Entity.Key == SystemCustomerAttributeNames.LanguageId)
             {
-                var customerDto = _customerApiService.GetCustomerById(eventMessage.Entity.EntityId, false, false);
+                var customerDto = _customerApiService.GetCustomerById(eventMessage.Entity.EntityId);
 
                 var storeIds = new List<int>();
 
@@ -272,39 +281,6 @@ namespace Nop.Plugin.Api.WebHooks
         public void HandleEvent(EntityDeleted<ProductCategory> eventMessage)
         {
             NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapsDelete);
-        }
-
-        private void NotifyProductCategoryMappingWebhook(ProductCategory productCategory, string eventName)
-        {
-            var storeIds = GetStoreIdsForProductCategoryMap(productCategory);
-
-            if (storeIds == null)
-            {
-                return;
-            }
-
-            ProductCategoryMappingDto productCategoryMappingDto = productCategory.ToDto();
-
-            NotifyRegisteredWebHooks(productCategoryMappingDto, eventName, storeIds);
-        }
-
-        private List<int> GetStoreIdsForProductCategoryMap(ProductCategory productCategory)
-        {
-            // Send a webhook event only for the stores that can access the product and category
-            // in the current product category map.
-            Product product = _productService.GetProductById(productCategory.ProductId);
-            Category category = _categoryService.GetCategoryById(productCategory.CategoryId);
-
-            if (product == null || category == null)
-            {
-                return null;
-            }
-
-            var productStoreIds = _storeMappingService.GetStoresIdsWithAccess(product);
-
-            var categoryStoreIds = _storeMappingService.GetStoresIdsWithAccess(category);
-
-            return productStoreIds.Intersect(categoryStoreIds).ToList();
         }
 
         public void HandleEvent(EntityInserted<Language> eventMessage)
@@ -362,6 +338,60 @@ namespace Nop.Plugin.Api.WebHooks
 
                 ProductUpdated(productDto);
             }
+        }
+
+        // We trigger a product updated WebHook when a picture used in a product is updated.
+        // This is required, because when the product title is changed, the product is updated first
+        // and then the picture urls are chaged. In order for the WebHook consumer to have the latest
+        // product picture urls the following code is used.
+        public void HandleEvent(EntityUpdated<Picture> eventMessage)
+        {
+            var productPicture = _productPictureService.GetProductPictureByPictureId(eventMessage.Entity.Id);
+
+            if (productPicture != null)
+            {
+                var product = _productApiService.GetProductById(productPicture.ProductId);
+
+                if (product != null)
+                {
+                    ProductDto productDto = _dtoHelper.PrepareProductDTO(product);
+
+                    ProductUpdated(productDto);
+                }
+            }
+        }
+
+        private void NotifyProductCategoryMappingWebhook(ProductCategory productCategory, string eventName)
+        {
+            var storeIds = GetStoreIdsForProductCategoryMap(productCategory);
+
+            if (storeIds == null)
+            {
+                return;
+            }
+
+            ProductCategoryMappingDto productCategoryMappingDto = productCategory.ToDto();
+
+            NotifyRegisteredWebHooks(productCategoryMappingDto, eventName, storeIds);
+        }
+
+        private List<int> GetStoreIdsForProductCategoryMap(ProductCategory productCategory)
+        {
+            // Send a webhook event only for the stores that can access the product and category
+            // in the current product category map.
+            Product product = _productService.GetProductById(productCategory.ProductId);
+            Category category = _categoryService.GetCategoryById(productCategory.CategoryId);
+
+            if (product == null || category == null)
+            {
+                return null;
+            }
+
+            var productStoreIds = _storeMappingService.GetStoresIdsWithAccess(product);
+
+            var categoryStoreIds = _storeMappingService.GetStoresIdsWithAccess(category);
+
+            return productStoreIds.Intersect(categoryStoreIds).ToList();
         }
 
         private void ProductUpdated(ProductDto productDto)
