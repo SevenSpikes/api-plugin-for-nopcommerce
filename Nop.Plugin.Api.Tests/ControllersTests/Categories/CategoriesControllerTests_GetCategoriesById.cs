@@ -1,25 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Net;
-using System.Threading;
-using System.Web.Http;
-using System.Web.Http.Results;
+﻿using System.Net;
 using AutoMock;
-using Nop.Core.Domain.Catalog;
-using Nop.Core.Domain.Security;
-using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.Controllers;
 using Nop.Plugin.Api.DTOs.Categories;
-using Nop.Plugin.Api.Serializers;
 using Nop.Plugin.Api.Services;
-using Nop.Services.Security;
-using Nop.Services.Stores;
 using NUnit.Framework;
 using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
 {
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.JSON.Serializers;
     using Nop.Plugin.Api.Tests.Helpers;
 
     [TestFixture]

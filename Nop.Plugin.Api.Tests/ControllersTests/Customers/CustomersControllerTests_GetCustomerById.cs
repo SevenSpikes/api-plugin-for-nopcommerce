@@ -2,7 +2,6 @@
 using AutoMock;
 using Nop.Plugin.Api.Controllers;
 using Nop.Plugin.Api.DTOs.Customers;
-using Nop.Plugin.Api.Serializers;
 using Nop.Plugin.Api.Services;
 using NUnit.Framework;
 using Rhino.Mocks;
@@ -10,6 +9,7 @@ using Rhino.Mocks;
 namespace Nop.Plugin.Api.Tests.ControllersTests.Customers
 {
     using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.JSON.Serializers;
     using Nop.Plugin.Api.Tests.Helpers;
 
     [TestFixture]

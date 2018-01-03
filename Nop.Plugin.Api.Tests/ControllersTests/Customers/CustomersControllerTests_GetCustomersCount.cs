@@ -1,9 +1,6 @@
-﻿using System.Web.Http;
-using System.Web.Http.Results;
-using AutoMock;
+﻿using AutoMock;
 using Nop.Plugin.Api.Controllers;
 using Nop.Plugin.Api.DTOs.Customers;
-using Nop.Plugin.Api.Serializers;
 using Nop.Plugin.Api.Services;
 using NUnit.Framework;
 using Rhino.Mocks;
@@ -11,6 +8,7 @@ using Rhino.Mocks;
 namespace Nop.Plugin.Api.Tests.ControllersTests.Customers
 {
     using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.JSON.Serializers;
 
     [TestFixture]
     public class CustomersControllerTests_GetCustomersCount
@@ -28,8 +26,8 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Customers
             IActionResult result = autoMocker.ClassUnderTest.GetCustomersCount();
 
             // assert
-            Assert.IsInstanceOf<OkNegotiatedContentResult<CustomersCountRootObject>>(result);
-            Assert.AreEqual(0,((OkNegotiatedContentResult<CustomersCountRootObject>)result).Content.Count);
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            Assert.AreEqual(0, ((CustomersCountRootObject)((OkObjectResult)result).Value).Count);
         }
 
         [Test]
@@ -45,8 +43,8 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Customers
             IActionResult result = autoMocker.ClassUnderTest.GetCustomersCount();
 
             // assert
-            Assert.IsInstanceOf<OkNegotiatedContentResult<CustomersCountRootObject>>(result);
-            Assert.AreEqual(1, ((OkNegotiatedContentResult<CustomersCountRootObject>)result).Content.Count);
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            Assert.AreEqual(1, ((CustomersCountRootObject)((OkObjectResult)result).Value).Count);
         }
 
         [Test]
@@ -60,10 +58,10 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Customers
 
             // act
             IActionResult result = autoMocker.ClassUnderTest.GetCustomersCount();
-            
+
             // assert
-            Assert.IsInstanceOf<OkNegotiatedContentResult<CustomersCountRootObject>>(result);
-            Assert.AreEqual(20000, ((OkNegotiatedContentResult<CustomersCountRootObject>)result).Content.Count);
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            Assert.AreEqual(20000, ((CustomersCountRootObject)((OkObjectResult)result).Value).Count);
         }
     }
 }

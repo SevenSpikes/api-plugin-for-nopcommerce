@@ -1,24 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Net;
-using System.Runtime.Serialization;
-using System.Threading;
-using System.Web.Http;
-using System.Web.Http.Results;
 using AutoMock;
 using Nop.Core.Domain.Orders;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.Controllers;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
 using Nop.Plugin.Api.Models.ShoppingCartsParameters;
-using Nop.Plugin.Api.Serializers;
 using Nop.Plugin.Api.Services;
-using Nop.Plugin.Api.Tests.ModelBinderTests.DummyObjects;
 using NUnit.Framework;
 using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.ShoppingCartItems
 {
     using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.JSON.Serializers;
     using Nop.Plugin.Api.Tests.Helpers;
 
     [TestFixture]

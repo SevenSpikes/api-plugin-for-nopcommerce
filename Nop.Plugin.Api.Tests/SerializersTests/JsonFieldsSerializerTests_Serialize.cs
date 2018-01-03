@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using Newtonsoft.Json;
 using Nop.Plugin.Api.DTOs;
-using Nop.Plugin.Api.Serializers;
 using Nop.Plugin.Api.Tests.SerializersTests.DummyObjects;
 using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.SerializersTests
 {
+    using Nop.Plugin.Api.JSON.Serializers;
+
     [TestFixture]
     public class JsonFieldsSerializerTests_Serialize
     {

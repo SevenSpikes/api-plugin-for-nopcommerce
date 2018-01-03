@@ -1,6 +1,4 @@
-﻿using System.Web.Http;
-using System.Web.Http.Results;
-using AutoMock;
+﻿using AutoMock;
 using Nop.Plugin.Api.Controllers;
 using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
 using Nop.Plugin.Api.Models.ProductCategoryMappingsParameters;
@@ -29,8 +27,8 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
             IActionResult result = autoMocker.ClassUnderTest.GetMappingsCount(parameters);
 
             // assert
-            Assert.IsInstanceOf<OkNegotiatedContentResult<ProductCategoryMappingsCountRootObject>>(result);
-            Assert.AreEqual(0, ((OkNegotiatedContentResult<ProductCategoryMappingsCountRootObject>)result).Content.Count);
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            Assert.AreEqual(0, ((ProductCategoryMappingsCountRootObject)((OkObjectResult)result).Value).Count);
         }
 
         [Test]
@@ -46,8 +44,8 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
             IActionResult result = autoMocker.ClassUnderTest.GetMappingsCount(parameters);
 
             // assert
-            Assert.IsInstanceOf<OkNegotiatedContentResult<ProductCategoryMappingsCountRootObject>>(result);
-            Assert.AreEqual(1, ((OkNegotiatedContentResult<ProductCategoryMappingsCountRootObject>)result).Content.Count);
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            Assert.AreEqual(1, ((ProductCategoryMappingsCountRootObject)((OkObjectResult)result).Value).Count);
         }
 
         [Test]
@@ -65,8 +63,8 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
             IActionResult result = autoMocker.ClassUnderTest.GetMappingsCount(mappingsCountParametersModel);
 
             // assert
-            Assert.IsInstanceOf<OkNegotiatedContentResult<ProductCategoryMappingsCountRootObject>>(result);
-            Assert.AreEqual(mappingsCount, ((OkNegotiatedContentResult<ProductCategoryMappingsCountRootObject>)result).Content.Count);
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            Assert.AreEqual(mappingsCount, ((ProductCategoryMappingsCountRootObject)((OkObjectResult)result).Value).Count);
         }
     }
 }

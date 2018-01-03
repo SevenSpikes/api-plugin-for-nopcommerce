@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Web.Http;
-using System.Web.Http.Results;
 using AutoMock;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Payments;
 using Nop.Core.Domain.Shipping;
 using Nop.Plugin.Api.Controllers;
-using Nop.Plugin.Api.DTOs.Orders;
 using Nop.Plugin.Api.Models.OrdersParameters;
-using Nop.Plugin.Api.Serializers;
 using Nop.Plugin.Api.Services;
 using NUnit.Framework;
 using Rhino.Mocks;
@@ -16,27 +12,38 @@ using Rhino.Mocks;
 namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
 {
     using Microsoft.AspNetCore.Mvc;
+    using Nop.Core;
+    using Nop.Core.Domain.Stores;
+    using Nop.Plugin.Api.DTOs.Orders;
+    using Nop.Plugin.Api.JSON.Serializers;
 
     [TestFixture]
     public class OrdersControllerTests_GetOrdersCount
     {
+        private RhinoAutoMocker<OrdersController> _autoMocker;
+
+        [SetUp]
+        public void StartUp()
+        {
+            _autoMocker = new RhinoAutoMocker<OrdersController>();
+            _autoMocker.Get<IStoreContext>().Stub(x => x.CurrentStore).Return(new Store());
+        }
+
         [Test]
         public void WhenNoOrdersExist_ShouldReturnOKResultWithCountEqualToZero()
         {
             // arrange
             var ordersCountParameters = new OrdersCountParametersModel();
-            
-            var autoMocker = new RhinoAutoMocker<OrdersController>();
 
-            autoMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(null, null)).Return(string.Empty);
-            autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrdersCount()).IgnoreArguments().Return(0);
+            _autoMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(null, null)).Return(string.Empty);
+            _autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrdersCount()).IgnoreArguments().Return(0);
 
             // act
-            IActionResult result = autoMocker.ClassUnderTest.GetOrdersCount(ordersCountParameters);
+            IActionResult result = _autoMocker.ClassUnderTest.GetOrdersCount(ordersCountParameters);
 
             // assert
-            Assert.IsInstanceOf<OkNegotiatedContentResult<OrdersCountRootObject>>(result);
-            Assert.AreEqual(0, ((OkNegotiatedContentResult<OrdersCountRootObject>)result).Content.Count);
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            Assert.AreEqual(0, ((OrdersCountRootObject)((OkObjectResult)result).Value).Count);
         }
 
         [Test]
@@ -44,18 +51,16 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
         {
             // arrange
             var ordersCountParameters = new OrdersCountParametersModel();
-            
-            var autoMocker = new RhinoAutoMocker<OrdersController>();
 
-            autoMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(null, null)).Return(string.Empty);
-            autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrdersCount()).IgnoreArguments().Return(1);
+            _autoMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(null, null)).Return(string.Empty);
+            _autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrdersCount()).IgnoreArguments().Return(1);
 
             // act
-            IActionResult result = autoMocker.ClassUnderTest.GetOrdersCount(ordersCountParameters);
+            IActionResult result = _autoMocker.ClassUnderTest.GetOrdersCount(ordersCountParameters);
 
             // assert
-            Assert.IsInstanceOf<OkNegotiatedContentResult<OrdersCountRootObject>>(result);
-            Assert.AreEqual(1, ((OkNegotiatedContentResult<OrdersCountRootObject>)result).Content.Count);
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            Assert.AreEqual(1, ((OrdersCountRootObject)((OkObjectResult)result).Value).Count);
         }
 
         [Test]
@@ -63,18 +68,16 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
         {
             // arrange
             var ordersCountParameters = new OrdersCountParametersModel();
-            
-            var autoMocker = new RhinoAutoMocker<OrdersController>();
 
-            autoMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(null, null)).Return(string.Empty);
-            autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrdersCount()).IgnoreArguments().Return(20000);
+            _autoMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(null, null)).Return(string.Empty);
+            _autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrdersCount()).IgnoreArguments().Return(20000);
 
             // act
-            IActionResult result = autoMocker.ClassUnderTest.GetOrdersCount(ordersCountParameters);
+            IActionResult result = _autoMocker.ClassUnderTest.GetOrdersCount(ordersCountParameters);
 
             // assert
-            Assert.IsInstanceOf<OkNegotiatedContentResult<OrdersCountRootObject>>(result);
-            Assert.AreEqual(20000, ((OkNegotiatedContentResult<OrdersCountRootObject>)result).Content.Count);
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            Assert.AreEqual(20000, ((OrdersCountRootObject)((OkObjectResult)result).Value).Count);
         }
 
         [Test]
@@ -91,20 +94,18 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
             };
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<OrdersController>();
-
-            autoMocker.Get<IOrderApiService>().Expect(x => x.GetOrdersCount(parameters.CreatedAtMin,
+            _autoMocker.Get<IOrderApiService>().Expect(x => x.GetOrdersCount(parameters.CreatedAtMin,
                                                             parameters.CreatedAtMax,
                                                             parameters.Status,
                                                             parameters.PaymentStatus,
                                                             parameters.ShippingStatus,
-                                                            parameters.CustomerId)).Return(1);
+                                                            parameters.CustomerId)).IgnoreArguments().Return(1);
 
             //Act
-            autoMocker.ClassUnderTest.GetOrdersCount(parameters);
+            _autoMocker.ClassUnderTest.GetOrdersCount(parameters);
 
             //Assert
-            autoMocker.Get<IOrderApiService>().VerifyAllExpectations();
+            _autoMocker.Get<IOrderApiService>().VerifyAllExpectations();
         }
 
         [Test]
@@ -118,20 +119,18 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
             };
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<OrdersController>();
-
-            autoMocker.Get<IOrderApiService>().Expect(x => x.GetOrdersCount(parameters.CreatedAtMin,
+            _autoMocker.Get<IOrderApiService>().Expect(x => x.GetOrdersCount(parameters.CreatedAtMin,
                                                             parameters.CreatedAtMax,
                                                             parameters.Status,
                                                             parameters.PaymentStatus,
                                                             parameters.ShippingStatus,
-                                                            parameters.CustomerId)).Return(0);
+                                                            parameters.CustomerId)).IgnoreArguments().Return(0);
 
             //Act
-            autoMocker.ClassUnderTest.GetOrdersCount(parameters);
+            _autoMocker.ClassUnderTest.GetOrdersCount(parameters);
 
             //Assert
-            autoMocker.Get<IOrderApiService>().VerifyAllExpectations();
+            _autoMocker.Get<IOrderApiService>().VerifyAllExpectations();
         }
     }
 }

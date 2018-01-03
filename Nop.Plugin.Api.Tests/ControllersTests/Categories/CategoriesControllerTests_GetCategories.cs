@@ -6,7 +6,6 @@ using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.Controllers;
 using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Plugin.Api.Models.CategoriesParameters;
-using Nop.Plugin.Api.Serializers;
 using Nop.Plugin.Api.Services;
 using Nop.Services.Stores;
 using NUnit.Framework;
@@ -14,9 +13,8 @@ using Rhino.Mocks;
 
 namespace Nop.Plugin.Api.Tests.ControllersTests.Categories
 {
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.JSON.Serializers;
     using Nop.Plugin.Api.Tests.Helpers;
 
     [TestFixture]

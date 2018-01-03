@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Threading;
-using System.Web.Http;
 using AutoMock;
 using Nop.Core.Domain.Orders;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.Controllers;
 using Nop.Plugin.Api.DTOs.Orders;
 using Nop.Plugin.Api.Models.OrdersParameters;
-using Nop.Plugin.Api.Serializers;
 using Nop.Plugin.Api.Services;
 using NUnit.Framework;
 using Rhino.Mocks;
@@ -17,11 +14,23 @@ using Rhino.Mocks;
 namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
 {
     using Microsoft.AspNetCore.Mvc;
+    using Nop.Core;
+    using Nop.Core.Domain.Stores;
+    using Nop.Plugin.Api.JSON.Serializers;
     using Nop.Plugin.Api.Tests.Helpers;
 
     [TestFixture]
     public class OrdersControllerTests_GetOrders
     {
+        private RhinoAutoMocker<OrdersController> _autoMocker;
+
+        [SetUp]
+        public void StartUp()
+        {
+            _autoMocker = new RhinoAutoMocker<OrdersController>();
+            _autoMocker.Get<IStoreContext>().Stub(x => x.CurrentStore).Return(new Store());
+        }
+
         [Test]
         public void WhenSomeValidParametersPassed_ShouldCallTheServiceWithTheSameParameters()
         {
@@ -36,20 +45,19 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
             };
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<OrdersController>();
-
-            autoMocker.Get<IOrderApiService>().Expect(x => x.GetOrders(parameters.Ids,
-                                                    parameters.CreatedAtMin,
-                                                    parameters.CreatedAtMax,
-                                                    parameters.Limit,
-                                                    parameters.Page,
-                                                    parameters.SinceId)).Return(new List<Order>());
+            _autoMocker.Get<IOrderApiService>()
+                .Expect(x => x.GetOrders(parameters.Ids,
+                                         parameters.CreatedAtMin,
+                                         parameters.CreatedAtMax,
+                                         parameters.Limit,
+                                         parameters.Page,
+                                         parameters.SinceId)).IgnoreArguments().Return(new List<Order>());
 
             //Act
-            autoMocker.ClassUnderTest.GetOrders(parameters);
+            _autoMocker.ClassUnderTest.GetOrders(parameters);
 
             //Assert
-            autoMocker.Get<IOrderApiService>().VerifyAllExpectations();
+            _autoMocker.Get<IOrderApiService>().VerifyAllExpectations();
         }
 
         [Test]
@@ -64,15 +72,13 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
             var parameters = new OrdersParametersModel();
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<OrdersController>();
-
-            autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrders()).IgnoreArguments().Return(returnedOrdersCollection);
+            _autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrders()).IgnoreArguments().Return(returnedOrdersCollection);
 
             //Act
-            autoMocker.ClassUnderTest.GetOrders(parameters);
+            _autoMocker.ClassUnderTest.GetOrders(parameters);
 
             //Assert
-            autoMocker.Get<IJsonFieldsSerializer>().AssertWasCalled(
+            _autoMocker.Get<IJsonFieldsSerializer>().AssertWasCalled(
                 x => x.Serialize(Arg<OrdersRootObject>.Matches(r => r.Orders.Count == returnedOrdersCollection.Count),
                 Arg<string>.Is.Equal(parameters.Fields)));
         }
@@ -85,15 +91,13 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
             var parameters = new OrdersParametersModel();
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<OrdersController>();
-
-            autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrders()).IgnoreArguments().Return(returnedOrdersDtoCollection);
+            _autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrders()).IgnoreArguments().Return(returnedOrdersDtoCollection);
 
             //Act
-            autoMocker.ClassUnderTest.GetOrders(parameters);
+            _autoMocker.ClassUnderTest.GetOrders(parameters);
 
             //Assert
-            autoMocker.Get<IJsonFieldsSerializer>().AssertWasCalled(
+            _autoMocker.Get<IJsonFieldsSerializer>().AssertWasCalled(
                 x => x.Serialize(Arg<OrdersRootObject>.Matches(r => r.Orders.Count == returnedOrdersDtoCollection.Count),
                 Arg<string>.Is.Equal(parameters.Fields)));
         }
@@ -109,14 +113,13 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
             var returnedOrdersDtoCollection = new List<Order>();
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<OrdersController>();
-            autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrders()).IgnoreArguments().Return(returnedOrdersDtoCollection);
+            _autoMocker.Get<IOrderApiService>().Stub(x => x.GetOrders()).IgnoreArguments().Return(returnedOrdersDtoCollection);
 
             //Act
-            autoMocker.ClassUnderTest.GetOrders(parameters);
+            _autoMocker.ClassUnderTest.GetOrders(parameters);
 
             //Assert
-            autoMocker.Get<IJsonFieldsSerializer>().AssertWasCalled(
+            _autoMocker.Get<IJsonFieldsSerializer>().AssertWasCalled(
                 x => x.Serialize(Arg<OrdersRootObject>.Is.Anything, Arg<string>.Is.Equal(parameters.Fields)));
         }
 
@@ -131,14 +134,12 @@ namespace Nop.Plugin.Api.Tests.ControllersTests.Orders
             };
 
             //Arange
-            var autoMocker = new RhinoAutoMocker<OrdersController>();
-
-            autoMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(Arg<OrdersRootObject>.Is.Anything, Arg<string>.Is.Anything))
+            _autoMocker.Get<IJsonFieldsSerializer>().Stub(x => x.Serialize(Arg<OrdersRootObject>.Is.Anything, Arg<string>.Is.Anything))
                                                     .IgnoreArguments()
                                                     .Return(string.Empty);
 
             //Act
-            IActionResult result = autoMocker.ClassUnderTest.GetOrders(parameters);
+            IActionResult result = _autoMocker.ClassUnderTest.GetOrders(parameters);
 
             //Assert
             var statusCode = ActionResultExecutor.ExecuteResult(result);

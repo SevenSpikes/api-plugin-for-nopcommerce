@@ -1,12 +1,8 @@
 ﻿using System.Net;
-using System.Threading;
-using System.Web.Http;
-using System.Web.Http.Results;
 using AutoMock;
 using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.Controllers;
 using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
-using Nop.Plugin.Api.Serializers;
 using Nop.Plugin.Api.Services;
 using NUnit.Framework;
 using Rhino.Mocks;
@@ -14,6 +10,7 @@ using Rhino.Mocks;
 namespace Nop.Plugin.Api.Tests.ControllersTests.ProductCategoryMappings
 {
     using Microsoft.AspNetCore.Mvc;
+    using Nop.Plugin.Api.JSON.Serializers;
     using Nop.Plugin.Api.Tests.Helpers;
 
     [TestFixture]
