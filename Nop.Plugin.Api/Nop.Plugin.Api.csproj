@@ -99,9 +99,6 @@
     <ProjectReference Include="..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Web" />
-  </ItemGroup>
-  <ItemGroup>
     <None Update="plugin.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
