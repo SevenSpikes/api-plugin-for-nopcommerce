@@ -190,6 +190,43 @@ namespace Nop.Plugin.Api
                 defaults: new { controller = "Products", action = "GetProductById" },
                 constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
 
+            // product attributes
+            config.Routes.MapHttpRoute(
+                name: "productAttributes",
+                routeTemplate: "api/productattributes",
+                defaults: new { controller = "ProductAttributes", action = "GetProductAttributes" },
+                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+
+            config.Routes.MapHttpRoute(
+              name: "createProductAttribute",
+              routeTemplate: "api/productattributes",
+              defaults: new { controller = "ProductAttributes", action = "CreateProductAttribute" },
+              constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Post) });
+
+            config.Routes.MapHttpRoute(
+              name: "updateProductAttribute",
+              routeTemplate: "api/productattributes/{id}",
+              defaults: new { controller = "ProductAttributes", action = "UpdateProductAttribute" },
+              constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Put) });
+
+            config.Routes.MapHttpRoute(
+              name: "deleteProductAttribute",
+              routeTemplate: "api/productattributes/{id}",
+              defaults: new { controller = "ProductAttributes", action = "DeleteProductAttribute" },
+              constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Delete) });
+
+            config.Routes.MapHttpRoute(
+                name: "productAttributesCount",
+                routeTemplate: "api/productattributes/count",
+                defaults: new { controller = "ProductAttributes", action = "GetProductAttributesCount" },
+                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+
+            config.Routes.MapHttpRoute(
+                name: "productAttributeById",
+                routeTemplate: "api/productattributes/{id}",
+                defaults: new { controller = "ProductAttributes", action = "GetProductAttributeById" },
+                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+
             config.Routes.MapHttpRoute(
              name: "orders",
              routeTemplate: "api/orders",

@@ -26,6 +26,8 @@ using Nop.Plugin.Api.DTOs.ShoppingCarts;
 using Nop.Plugin.Api.DTOs.Stores;
 using Nop.Services.Directory;
 using Nop.Services.Localization;
+using Nop.Plugin.Api.DTOs.ProductAttributes;
+using Nop.Plugin.Api.DTOs.OrderItems;
 
 namespace Nop.Plugin.Api.Helpers
 {
@@ -147,6 +149,8 @@ namespace Nop.Plugin.Api.Helpers
         {
             OrderDto orderDto = order.ToDto();
 
+            orderDto.OrderItemDtos = order.OrderItems.Select(orderItem => PrepareOrderItemDTO(orderItem)).ToList();
+
             CustomerDto customerDto = _customerApiService.GetCustomerById(order.Customer.Id);
 
             if (customerDto != null)
@@ -163,6 +167,14 @@ namespace Nop.Plugin.Api.Helpers
             dto.ProductDto = PrepareProductDTO(shoppingCartItem.Product);
             dto.CustomerDto = shoppingCartItem.Customer.ToCustomerForShoppingCartItemDto();
             dto.Attributes = _productAttributeConverter.Parse(shoppingCartItem.AttributesXml);
+            return dto;
+        }
+
+        public OrderItemDto PrepareOrderItemDTO(OrderItem orderItem)
+        {
+            var dto = orderItem.ToDto();
+            dto.Product = PrepareProductDTO(orderItem.Product);            
+            dto.Attributes = _productAttributeConverter.Parse(orderItem.AttributesXml);
             return dto;
         }
 
@@ -306,5 +318,9 @@ namespace Nop.Plugin.Api.Helpers
             return productAttributeValueDto;
         }
 
+        public ProductAttributeDto PrepareProductAttributeDTO(ProductAttribute productAttribute)
+        {
+            return productAttribute.ToDto();
+        }        
     }
 }

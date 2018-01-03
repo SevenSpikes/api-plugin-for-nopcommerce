@@ -23,6 +23,7 @@ using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
 using Nop.Plugin.Api.DTOs.Stores;
 using Nop.Plugin.Api.Models;
+using Nop.Plugin.Api.DTOs.ProductAttributes;
 
 namespace Nop.Plugin.Api.MappingExtensions
 {
@@ -154,6 +155,8 @@ namespace Nop.Plugin.Api.MappingExtensions
             CreateProductMap();
 
             CreateMap<ProductAttributeValue, ProductAttributeValueDto>();
+
+            CreateMap<ProductAttribute, ProductAttributeDto>();
         }
     }
 }
