@@ -407,6 +407,7 @@
     <Compile Include="Services\ICustomerApiService.cs" />
     <Compile Include="Services\IOrderApiService.cs" />
     <Compile Include="Services\IProductApiService.cs" />
+    <Compile Include="Services\IProductPictureService.cs" />
     <Compile Include="Services\IShoppingCartItemApiService.cs" />
     <Compile Include="Services\IWebHookService.cs" />
     <Compile Include="Services\OrderApiService.cs" />
@@ -415,6 +416,7 @@
     <Compile Include="Services\ProductAttributeConverter.cs" />
     <Compile Include="Services\ProductAttributesApiService.cs" />
     <Compile Include="Services\ProductCategoryMappingsApiService.cs" />
+    <Compile Include="Services\ProductPictureService.cs" />
     <Compile Include="Services\ShoppingCartItemApiService.cs" />
     <Compile Include="Services\WebHookService.cs" />
     <Compile Include="Startup.cs" />
