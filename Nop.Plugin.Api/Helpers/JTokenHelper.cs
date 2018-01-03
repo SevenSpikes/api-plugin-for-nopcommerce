@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-
-namespace Nop.Plugin.Api.Helpers
+﻿namespace Nop.Plugin.Api.Helpers
 {
+    using System.Collections.Generic;
+    using Newtonsoft.Json.Linq;
+
     public static class JTokenHelper
     {
         public static JToken RemoveEmptyChildrenAndFilterByFields(this JToken token, IList<string> jsonFields, int level = 1)

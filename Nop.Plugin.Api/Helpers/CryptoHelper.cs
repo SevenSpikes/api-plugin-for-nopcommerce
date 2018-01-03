@@ -2,10 +2,8 @@
 {
     using System;
     using System.IO;
-    using System.Security.Cryptography;
     using System.Security.Cryptography.X509Certificates;
     using CERTENROLLLib;
-    using IdentityModel;
     using Microsoft.IdentityModel.Tokens;
     using Nop.Core;
 
@@ -14,33 +12,7 @@
         // Need to ensure that the key would be the same through the application lifetime.
         private static RsaSecurityKey _key;
         private const string TokenSigningCertificateName = "token-signing-certificate.pfx";
-
-        public static RsaSecurityKey CreateRsaSecurityKey()
-        {
-            if (_key == null)
-            {
-                var rsa = RSA.Create();
-
-                if (rsa is RSACryptoServiceProvider)
-                {
-                    rsa.Dispose();
-                    var cng = new RSACng(2048);
-
-                    var parameters = cng.ExportParameters(includePrivateParameters: true);
-                    _key = new RsaSecurityKey(parameters);
-                }
-                else
-                {
-                    rsa.KeySize = 2048;
-                    _key = new RsaSecurityKey(rsa);
-                }
-
-                _key.KeyId = CryptoRandom.CreateUniqueId(16);
-            }
-
-            return _key;
-        }
-
+        
         // The recomended way to sign a JWT is using a verified certificate!
         public static void CreateSelfSignedCertificate(string subjectName)
         {

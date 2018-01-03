@@ -10,9 +10,9 @@ namespace Nop.Plugin.Api.DataStructures
 
         public ApiList(IQueryable<T> source, int pageIndex, int pageSize)
         {
-            this.PageSize = pageSize;
-            this.PageIndex = pageIndex;
-            this.AddRange(source.Skip(pageIndex * pageSize).Take(pageSize).ToList());
+            PageSize = pageSize;
+            PageIndex = pageIndex;
+            AddRange(source.Skip(pageIndex * pageSize).Take(pageSize).ToList());
         }
     }
 }
