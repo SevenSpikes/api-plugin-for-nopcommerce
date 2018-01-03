@@ -45,7 +45,10 @@ namespace Nop.Plugin.Api.WebHooks
         IConsumer<EntityDeleted<ProductCategory>>,
         IConsumer<EntityInserted<Language>>,
         IConsumer<EntityUpdated<Language>>,
-        IConsumer<EntityDeleted<Language>>
+        IConsumer<EntityDeleted<Language>>,
+        IConsumer<EntityInserted<ProductPicture>>,
+        IConsumer<EntityUpdated<ProductPicture>>,
+        IConsumer<EntityDeleted<ProductPicture>>
     {
         private readonly IWebHookManager _webHookManager;
         private readonly ICustomerApiService _customerApiService;
@@ -132,14 +135,7 @@ namespace Nop.Plugin.Api.WebHooks
         {
             ProductDto productDto = _dtoHelper.PrepareProductDTO(eventMessage.Entity);
 
-            string webhookEvent = WebHookNames.ProductsUpdate;
-
-            if (productDto.Deleted == true)
-            {
-                webhookEvent = WebHookNames.ProductsDelete;
-            }
-
-            NotifyRegisteredWebHooks(productDto, webhookEvent, productDto.StoreIds);
+            ProductUpdated(productDto);
         }
 
         public void HandleEvent(EntityInserted<Category> eventMessage)
@@ -262,7 +258,7 @@ namespace Nop.Plugin.Api.WebHooks
                 NotifyRegisteredWebHooks(storeDto, WebHookNames.StoresUpdate, storeIds);
             }
         }
-       
+
         public void HandleEvent(EntityInserted<ProductCategory> eventMessage)
         {
             NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapsCreate);
@@ -330,6 +326,54 @@ namespace Nop.Plugin.Api.WebHooks
             LanguageDto langaDto = _dtoHelper.PrepateLanguageDto(eventMessage.Entity);
 
             NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesDelete, langaDto.StoreIds);
+        }
+
+        public void HandleEvent(EntityInserted<ProductPicture> eventMessage)
+        {
+            var product = _productApiService.GetProductById(eventMessage.Entity.ProductId);
+
+            if (product != null)
+            {
+                ProductDto productDto = _dtoHelper.PrepareProductDTO(product);
+
+                ProductUpdated(productDto);
+            }
+        }
+
+        public void HandleEvent(EntityUpdated<ProductPicture> eventMessage)
+        {
+            var product = _productApiService.GetProductById(eventMessage.Entity.ProductId);
+
+            if (product != null)
+            {
+                ProductDto productDto = _dtoHelper.PrepareProductDTO(product);
+
+                ProductUpdated(productDto);
+            }
+        }
+
+        public void HandleEvent(EntityDeleted<ProductPicture> eventMessage)
+        {
+            var product = _productApiService.GetProductById(eventMessage.Entity.ProductId);
+
+            if (product != null)
+            {
+                ProductDto productDto = _dtoHelper.PrepareProductDTO(product);
+
+                ProductUpdated(productDto);
+            }
+        }
+
+        private void ProductUpdated(ProductDto productDto)
+        {
+            string webhookEvent = WebHookNames.ProductsUpdate;
+
+            if (productDto.Deleted == true)
+            {
+                webhookEvent = WebHookNames.ProductsDelete;
+            }
+
+            NotifyRegisteredWebHooks(productDto, webhookEvent, productDto.StoreIds);
         }
 
         private void HandleStoreMappingEvent(int entityId, string entityName)
