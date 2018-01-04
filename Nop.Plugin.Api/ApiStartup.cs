@@ -7,7 +7,6 @@
     using System.Linq;
     using System.Linq.Dynamic;
     using System.Reflection;
-    using System.Security.Cryptography;
     using System.Security.Cryptography.X509Certificates;
     using IdentityServer4.EntityFramework.DbContexts;
     using IdentityServer4.EntityFramework.Entities;
@@ -15,12 +14,10 @@
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Rewrite;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.IdentityModel.Tokens;
     using Nop.Core;
     using Nop.Core.Data;
     using Nop.Core.Infrastructure;
@@ -47,16 +44,34 @@
 
         public void Configure(IApplicationBuilder app)
         {
+            //AddBindingRedirects(app);
+
+            // The default route templates for the Swagger docs and swagger - ui are "swagger/docs/{apiVersion}" and "swagger/ui/index#/{assetPath}" respectively.
+            //app.UseSwagger();
+            //app.UseSwaggerUI(options =>
+            //    {
+            //        //var currentAssembly = Assembly.GetAssembly(this.GetType());
+            //        //var currentAssemblyName = currentAssembly.GetName().Name;
+
+            //        //Needeed for removing the "Try It Out" button from the post and put methods.
+            //        //http://stackoverflow.com/questions/36772032/swagger-5-2-3-supportedsubmitmethods-removed/36780806#36780806
+
+            //        //options.InjectOnCompleteJavaScript($"{currentAssemblyName}.Scripts.swaggerPostPutTryItOutButtonsRemoval.js");
+
+            //        options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            //    }
+            //);
+
             // This needs to be called here because in the plugin install method identity server is not yet registered.
             ApplyIdentityServerMigrations(app);
 
             SeedData(app);
             
-            var options = new RewriteOptions()
+            var rewriteOptions = new RewriteOptions()
                 .AddRedirect("oauth/(.*)", "connect/$1", 307)
                 .AddRedirect("api/token", "connect/token", 307);
 
-            app.UseRewriter(options);
+            app.UseRewriter(rewriteOptions);
 
             app.UseMiddleware<IdentityServerScopeParameterMiddleware>();
 
@@ -64,22 +79,15 @@
             //// app.UseCors(Microsoft.Owin.Cors.CorsOptions.AllowAll);
             app.UseAuthentication();
             app.UseIdentityServer();
-
-            //// The default route templates for the Swagger docs and swagger - ui are "swagger/docs/{apiVersion}" and "swagger/ui/index#/{assetPath}" respectively.
-            //app.UseSwagger();
-            //app.UseSwaggerUI(options =>
-            //    {
-            //        var currentAssembly = Assembly.GetAssembly(this.GetType());
-            //        var currentAssemblyName = currentAssembly.GetName().Name;
-
-            //        //         Needeed for removing the "Try It Out" button from the post and put methods.
-            //        //         http://stackoverflow.com/questions/36772032/swagger-5-2-3-supportedsubmitmethods-removed/36780806#36780806
-
-            //        options.InjectOnCompleteJavaScript($"{currentAssemblyName}.Scripts.swaggerPostPutTryItOutButtonsRemoval.js");
-            //    }
-            //);
         }
-        
+
+        private void AddBindingRedirects(IApplicationBuilder app)
+        {
+            var configManagerHelper = EngineContext.Current.Resolve<IConfigMangerHelper>();
+
+            configManagerHelper.AddStaticFilesBindingRedirect();
+        }
+
         private void AddAuthorizationPipeline(IServiceCollection services)
         {
             services.AddAuthorization(options =>

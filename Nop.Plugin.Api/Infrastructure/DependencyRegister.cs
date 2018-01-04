@@ -7,12 +7,10 @@ using Nop.Plugin.Api.Services;
 namespace Nop.Plugin.Api.Infrastructure
 {
     using System;
-    using Microsoft.Extensions.DependencyInjection;
     using Nop.Core.Domain.Catalog;
     using Nop.Core.Domain.Common;
     using Nop.Core.Domain.Customers;
     using Nop.Core.Domain.Orders;
-    using Nop.Plugin.Api.Controllers;
     using Nop.Plugin.Api.Converters;
     using Nop.Plugin.Api.Factories;
     using Nop.Plugin.Api.Helpers;
@@ -51,6 +49,7 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<CustomerRolesHelper>().As<ICustomerRolesHelper>().InstancePerLifetimeScope();
             builder.RegisterType<JsonHelper>().As<IJsonHelper>().InstancePerLifetimeScope();
             builder.RegisterType<DTOHelper>().As<IDTOHelper>().InstancePerLifetimeScope();
+            builder.RegisterType<NopConfigMangerHelper>().As<IConfigMangerHelper>().InstancePerLifetimeScope();
 
             builder.RegisterType<JsonFieldsSerializer>().As<IJsonFieldsSerializer>().InstancePerLifetimeScope();
 
