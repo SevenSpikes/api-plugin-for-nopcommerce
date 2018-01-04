@@ -169,10 +169,9 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.NotFound, "shopping_cart_item", "not found");
             }
 
-            List<ShoppingCartItemDto> shoppingCartItemsDtos = shoppingCartItems.Select(shoppingCartItem =>
-            {
-                return _dtoHelper.PrepareShoppingCartItemDTO(shoppingCartItem);
-            }).ToList();
+            List<ShoppingCartItemDto> shoppingCartItemsDtos = shoppingCartItems
+                .Select(shoppingCartItem => _dtoHelper.PrepareShoppingCartItemDTO(shoppingCartItem))
+                .ToList();
 
             var shoppingCartsRootObject = new ShoppingCartItemsRootObject()
             {

@@ -16,7 +16,10 @@ namespace Nop.Plugin.Api.JSON.ActionResults
         
         public RawJsonActionResult(object value)
         {
-            _jsonString = value.ToString();
+            if (value != null)
+            {
+                _jsonString = value.ToString();
+            }
         }
 
         public Task ExecuteResultAsync(ActionContext context)
