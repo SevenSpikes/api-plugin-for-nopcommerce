@@ -56,6 +56,8 @@ namespace Nop.Plugin.Api.Infrastructure
 
             builder.RegisterType<FieldsValidator>().As<IFieldsValidator>().InstancePerLifetimeScope();
 
+            builder.RegisterType<WebHookService>().As<IWebHookService>().SingleInstance();
+
             builder.RegisterType<ObjectConverter>().As<IObjectConverter>().InstancePerLifetimeScope();
             builder.RegisterType<ApiTypeConverter>().As<IApiTypeConverter>().InstancePerLifetimeScope();
 
