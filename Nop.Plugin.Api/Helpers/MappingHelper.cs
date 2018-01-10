@@ -66,7 +66,7 @@ namespace Nop.Plugin.Api.Helpers
                         // Check if there is registered factory for this type.
                         Type factoryType = typeof(IFactory<>);
                         var factoryTypeForCurrentProperty = factoryType.MakeGenericType(new Type[] { propertyToUpdate.PropertyType });
-                        var initializerFactory = EngineContext.Current.Resolve(factoryTypeForCurrentProperty);
+                        var initializerFactory = ((NopEngine)EngineContext.Current).ServiceProvider.GetService(factoryTypeForCurrentProperty);
 
                         if (initializerFactory != null)
                         {

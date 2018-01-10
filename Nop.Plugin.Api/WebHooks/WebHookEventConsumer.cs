@@ -5,6 +5,7 @@ using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Localization;
+using Nop.Core.Domain.Media;
 using Nop.Core.Events;
 using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.Services;
@@ -46,15 +47,20 @@ namespace Nop.Plugin.Api.WebHooks
         IConsumer<EntityDeleted<ProductCategory>>,
         IConsumer<EntityInserted<Language>>,
         IConsumer<EntityUpdated<Language>>,
-        IConsumer<EntityDeleted<Language>>
+        IConsumer<EntityDeleted<Language>>,
+        IConsumer<EntityInserted<ProductPicture>>,
+        IConsumer<EntityUpdated<ProductPicture>>,
+        IConsumer<EntityDeleted<ProductPicture>>,
+        IConsumer<EntityUpdated<Picture>>
     {
-        private IWebHookManager _webHookManager;
-        private ICustomerApiService _customerApiService;
-        private ICategoryApiService _categoryApiService;
-        private IProductApiService _productApiService;
-        private IProductService _productService;
-        private ICategoryService _categoryService;
-        private IStoreMappingService _storeMappingService;
+        private readonly IWebHookManager _webHookManager;
+        private readonly ICustomerApiService _customerApiService;
+        private readonly ICategoryApiService _categoryApiService;
+        private readonly IProductApiService _productApiService;
+        private readonly IProductService _productService;
+        private readonly ICategoryService _categoryService;
+        private readonly IStoreMappingService _storeMappingService;
+        private readonly IProductPictureService _productPictureService;
         private IStoreService _storeService;
         private IStoreContext _storeContext;
 
@@ -68,7 +74,7 @@ namespace Nop.Plugin.Api.WebHooks
             _productApiService = EngineContext.Current.Resolve<IProductApiService>();
             _dtoHelper = EngineContext.Current.Resolve<IDTOHelper>();
             _storeService = EngineContext.Current.Resolve<IStoreService>();
-
+            _productPictureService = EngineContext.Current.Resolve<IProductPictureService>();
             _productService = EngineContext.Current.Resolve<IProductService>();
             _categoryService = EngineContext.Current.Resolve<ICategoryService>();
             _storeMappingService = EngineContext.Current.Resolve<IStoreMappingService>();
@@ -138,14 +144,7 @@ namespace Nop.Plugin.Api.WebHooks
         {
             ProductDto productDto = _dtoHelper.PrepareProductDTO(eventMessage.Entity);
 
-            string webhookEvent = WebHookNames.ProductsUpdate;
-
-            if (productDto.Deleted == true)
-            {
-                webhookEvent = WebHookNames.ProductsDelete;
-            }
-
-            NotifyRegisteredWebHooks(productDto, webhookEvent, productDto.StoreIds);
+            ProductUpdated(productDto);
         }
 
         public void HandleEvent(EntityInserted<Category> eventMessage)
@@ -268,7 +267,7 @@ namespace Nop.Plugin.Api.WebHooks
                 NotifyRegisteredWebHooks(storeDto, WebHookNames.StoresUpdate, storeIds);
             }
         }
-       
+
         public void HandleEvent(EntityInserted<ProductCategory> eventMessage)
         {
             NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapsCreate);
@@ -282,6 +281,84 @@ namespace Nop.Plugin.Api.WebHooks
         public void HandleEvent(EntityDeleted<ProductCategory> eventMessage)
         {
             NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapsDelete);
+        }
+
+        public void HandleEvent(EntityInserted<Language> eventMessage)
+        {
+            LanguageDto langaDto = _dtoHelper.PrepateLanguageDto(eventMessage.Entity);
+
+            NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesCreate, langaDto.StoreIds);
+        }
+
+        public void HandleEvent(EntityUpdated<Language> eventMessage)
+        {
+            LanguageDto langaDto = _dtoHelper.PrepateLanguageDto(eventMessage.Entity);
+
+            NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesUpdate, langaDto.StoreIds);
+        }
+
+        public void HandleEvent(EntityDeleted<Language> eventMessage)
+        {
+            LanguageDto langaDto = _dtoHelper.PrepateLanguageDto(eventMessage.Entity);
+
+            NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesDelete, langaDto.StoreIds);
+        }
+
+        public void HandleEvent(EntityInserted<ProductPicture> eventMessage)
+        {
+            var product = _productApiService.GetProductById(eventMessage.Entity.ProductId);
+
+            if (product != null)
+            {
+                ProductDto productDto = _dtoHelper.PrepareProductDTO(product);
+
+                ProductUpdated(productDto);
+            }
+        }
+
+        public void HandleEvent(EntityUpdated<ProductPicture> eventMessage)
+        {
+            var product = _productApiService.GetProductById(eventMessage.Entity.ProductId);
+
+            if (product != null)
+            {
+                ProductDto productDto = _dtoHelper.PrepareProductDTO(product);
+
+                ProductUpdated(productDto);
+            }
+        }
+
+        public void HandleEvent(EntityDeleted<ProductPicture> eventMessage)
+        {
+            var product = _productApiService.GetProductById(eventMessage.Entity.ProductId);
+
+            if (product != null)
+            {
+                ProductDto productDto = _dtoHelper.PrepareProductDTO(product);
+
+                ProductUpdated(productDto);
+            }
+        }
+
+        // We trigger a product updated WebHook when a picture used in a product is updated.
+        // This is required, because when the product title is changed, the product is updated first
+        // and then the picture urls are chaged. In order for the WebHook consumer to have the latest
+        // product picture urls the following code is used.
+        public void HandleEvent(EntityUpdated<Picture> eventMessage)
+        {
+            var productPicture = _productPictureService.GetProductPictureByPictureId(eventMessage.Entity.Id);
+
+            if (productPicture != null)
+            {
+                var product = _productApiService.GetProductById(productPicture.ProductId);
+
+                if (product != null)
+                {
+                    ProductDto productDto = _dtoHelper.PrepareProductDTO(product);
+
+                    ProductUpdated(productDto);
+                }
+            }
         }
 
         private void NotifyProductCategoryMappingWebhook(ProductCategory productCategory, string eventName)
@@ -317,25 +394,16 @@ namespace Nop.Plugin.Api.WebHooks
             return productStoreIds.Intersect(categoryStoreIds).ToList();
         }
 
-        public void HandleEvent(EntityInserted<Language> eventMessage)
+        private void ProductUpdated(ProductDto productDto)
         {
-            LanguageDto langaDto = _dtoHelper.PrepateLanguageDto(eventMessage.Entity);
+            string webhookEvent = WebHookNames.ProductsUpdate;
 
-            NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesCreate, langaDto.StoreIds);
-        }
+            if (productDto.Deleted == true)
+            {
+                webhookEvent = WebHookNames.ProductsDelete;
+            }
 
-        public void HandleEvent(EntityUpdated<Language> eventMessage)
-        {
-            LanguageDto langaDto = _dtoHelper.PrepateLanguageDto(eventMessage.Entity);
-
-            NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesUpdate, langaDto.StoreIds);
-        }
-
-        public void HandleEvent(EntityDeleted<Language> eventMessage)
-        {
-            LanguageDto langaDto = _dtoHelper.PrepateLanguageDto(eventMessage.Entity);
-
-            NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesDelete, langaDto.StoreIds);
+            NotifyRegisteredWebHooks(productDto, webhookEvent, productDto.StoreIds);
         }
 
         private void HandleStoreMappingEvent(int entityId, string entityName)

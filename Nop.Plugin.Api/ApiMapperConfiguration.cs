@@ -22,6 +22,7 @@
     using Nop.Plugin.Api.DTOs.Languages;
     using Nop.Plugin.Api.DTOs.OrderItems;
     using Nop.Plugin.Api.DTOs.Orders;
+    using Nop.Plugin.Api.DTOs.ProductAttributes;
     using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
     using Nop.Plugin.Api.DTOs.Products;
     using Nop.Plugin.Api.DTOs.ShoppingCarts;
@@ -64,6 +65,8 @@
             CreateProductMap();
 
             CreateMap<ProductAttributeValue, ProductAttributeValueDto>();
+
+            CreateMap<ProductAttribute, ProductAttributeDto>();
         }
 
         private IMappingExpression<TSource, TDestination> CreateMap<TSource, TDestination>()

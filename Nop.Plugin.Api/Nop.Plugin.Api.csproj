@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework> 
-    <Copyright>Copyright © Nop Templates</Copyright> 
-    <Company>Nop Templates, Ltd</Company> 
-    <Authors>Nop Templates, Ltd</Authors> 
-    <Version>2.00</Version> 
+    <Copyright>Copyright © Seven Spikes, Ltd</Copyright> 
+    <Company>Seven Spikes, Ltd</Company> 
+    <Authors>Seven Spikes, Ltd</Authors> 
+    <Version>4.00</Version> 
     <Description>This plugin allows you to access/create Nop resources outside of the system</Description> 
     <PackageLicenseUrl></PackageLicenseUrl> 
   </PropertyGroup>

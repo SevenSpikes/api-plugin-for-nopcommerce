@@ -52,7 +52,8 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IGenericAttributeService _genericAttributeService;
         private readonly IShippingService _shippingService;
-        private readonly IDTOHelper _dtoHelper;
+        private readonly IDTOHelper _dtoHelper;        
+        private readonly IProductAttributeConverter _productAttributeConverter;
         private readonly IStoreContext _storeContext;
         private readonly IFactory<Order> _factory;
 
@@ -91,7 +92,8 @@ namespace Nop.Plugin.Api.Controllers
             IStoreContext storeContext,
             IShippingService shippingService,
             IPictureService pictureService,
-            IDTOHelper dtoHelper)
+            IDTOHelper dtoHelper,
+            IProductAttributeConverter productAttributeConverter)
             : base(jsonFieldsSerializer, aclService, customerService, storeMappingService,
                  storeService, discountService, customerActivityService, localizationService,pictureService)
         {
@@ -105,6 +107,7 @@ namespace Nop.Plugin.Api.Controllers
             _shippingService = shippingService;
             _dtoHelper = dtoHelper;
             _productService = productService;
+            _productAttributeConverter = productAttributeConverter;
         }
 
         /// <summary>
@@ -632,9 +635,17 @@ namespace Nop.Plugin.Api.Controllers
             {
                 Product product = _productService.GetProductById(orderItem.ProductId.Value);
 
+                if (!product.IsRental)
+                {
+                    orderItem.RentalStartDateUtc = null;
+                    orderItem.RentalEndDateUtc = null;
+                }
+
+                string attributesXml = _productAttributeConverter.ConvertToXml(orderItem.Attributes, product.Id);                
+
                 IList<string> errors = _shoppingCartService.AddToCart(customer, product,
-                    ShoppingCartType.ShoppingCart, storeId,
-                    null, 0M, orderItem.RentalStartDateUtc, orderItem.RentalEndDateUtc,
+                    ShoppingCartType.ShoppingCart, storeId,attributesXml,
+                    0M, orderItem.RentalStartDateUtc, orderItem.RentalEndDateUtc,
                     orderItem.Quantity ?? 1);
 
                 if (errors.Count > 0)

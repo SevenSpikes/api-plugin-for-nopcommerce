@@ -8,6 +8,7 @@ using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.Delta;
 using Nop.Plugin.Api.DTOs.OrderItems;
+using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.JSON.ActionResults;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.ModelBinders;
@@ -40,6 +41,8 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IProductApiService _productApiService;
         private readonly IPriceCalculationService _priceCalculationService;
         private readonly ITaxService _taxService;
+        private readonly IDTOHelper _dtoHelper;
+        private readonly IProductAttributeConverter _productAttributeConverter;
 
         public OrderItemsController(IJsonFieldsSerializer jsonFieldsSerializer, 
             IAclService aclService, 
@@ -55,7 +58,7 @@ namespace Nop.Plugin.Api.Controllers
             IProductApiService productApiService, 
             IPriceCalculationService priceCalculationService, 
             ITaxService taxService,
-            IPictureService pictureService) 
+            IPictureService pictureService, IDTOHelper dtoHelper) 
             : base(jsonFieldsSerializer, 
                   aclService, 
                   customerService, 
@@ -72,6 +75,7 @@ namespace Nop.Plugin.Api.Controllers
             _productApiService = productApiService;
             _priceCalculationService = priceCalculationService;
             _taxService = taxService;
+            _dtoHelper = dtoHelper;
         }
         
         [HttpGet]
@@ -104,7 +108,7 @@ namespace Nop.Plugin.Api.Controllers
 
             var orderItemsRootObject = new OrderItemsRootObject()
             {
-                OrderItems = allOrderItemsForOrder.Select(item => item.ToDto()).ToList()
+                OrderItems = allOrderItemsForOrder.Select(item => _dtoHelper.PrepareOrderItemDTO(item)).ToList()
             };
 
             var json = _jsonFieldsSerializer.Serialize(orderItemsRootObject, parameters.Fields);
@@ -162,7 +166,7 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             var orderItemDtos = new List<OrderItemDto>();
-            orderItemDtos.Add(orderItem.ToDto());
+            orderItemDtos.Add(_dtoHelper.PrepareOrderItemDTO(orderItem));
 
             var orderItemsRootObject = new OrderItemsRootObject()
             {
