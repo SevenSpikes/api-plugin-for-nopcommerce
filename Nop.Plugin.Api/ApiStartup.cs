@@ -2,15 +2,19 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IdentityModel.Tokens.Jwt;
     using System.IO;
     using System.Linq;
     using System.Linq.Dynamic;
     using System.Reflection;
     using System.Security.Cryptography.X509Certificates;
+    using System.Xml.Linq;
+    using System.Xml.XPath;
     using IdentityServer4.EntityFramework.DbContexts;
     using IdentityServer4.EntityFramework.Entities;
     using IdentityServer4.Models;
+    using Microsoft.AspNet.WebHooks.Diagnostics;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
@@ -28,6 +32,7 @@
     using Nop.Plugin.Api.IdentityServer.Endpoints;
     using Nop.Plugin.Api.IdentityServer.Generators;
     using Nop.Plugin.Api.IdentityServer.Middlewares;
+    using Nop.Plugin.Api.WebHooks;
     using ApiResource = IdentityServer4.EntityFramework.Entities.ApiResource;
 
     public class ApiStartup : INopStartup
@@ -35,17 +40,19 @@
         // TODO: extract all methods into extensions.
         public void ConfigureServices(IServiceCollection services, IConfigurationRoot configuration)
         {
+            AddRequiredConfiguration();
+
+            AddBindingRedirectsFallbacks();
+
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             
             AddTokenGenerationPipeline(services);
 
             AddAuthorizationPipeline(services);
         }
-
+      
         public void Configure(IApplicationBuilder app)
         {
-            //AddBindingRedirects(app);
-
             // The default route templates for the Swagger docs and swagger - ui are "swagger/docs/{apiVersion}" and "swagger/ui/index#/{assetPath}" respectively.
             //app.UseSwagger();
             //app.UseSwaggerUI(options =>
@@ -81,11 +88,34 @@
             app.UseIdentityServer();
         }
 
-        private void AddBindingRedirects(IApplicationBuilder app)
+        private void AddRequiredConfiguration()
         {
-            var configManagerHelper = EngineContext.Current.Resolve<IConfigMangerHelper>();
+            var configManagerHelper = new NopConfigManagerHelper();
 
-            configManagerHelper.AddStaticFilesBindingRedirect();
+            // some of third party libaries that we use for WebHooks and Swagger use older versions
+            // of certain assemblies so we need to redirect them to the once that nopCommerce uses
+            configManagerHelper.AddBindingRedirects();
+
+            // required by the WebHooks support
+            configManagerHelper.AddConnectionString();
+
+            var dataSettings = configManagerHelper.DataSettings;
+            Microsoft.AspNet.WebHooks.Config.SettingsDictionary settings = new Microsoft.AspNet.WebHooks.Config.SettingsDictionary();
+            settings.Add("MS_SqlStoreConnectionString", dataSettings.DataConnectionString);
+            settings.Connections.Add("MS_SqlStoreConnectionString", new Microsoft.AspNet.WebHooks.Config.ConnectionSettings("MS_SqlStoreConnectionString", dataSettings.DataConnectionString));
+
+            ILogger logger = new NopWebHooksLogger();
+            Microsoft.AspNet.WebHooks.IWebHookStore store = new Microsoft.AspNet.WebHooks.SqlWebHookStore(settings, logger);
+
+            Microsoft.AspNet.WebHooks.Services.CustomServices.SetStore(store);
+
+            // This is required only in development.
+            // It it is required only when you want to send a web hook to an https address with an invalid SSL certificate. (self-signed)
+            // The code marks all certificates as valid.
+            // We may want to extract this as a setting in the future.
+
+            // NOTE: If this code is commented the certificates will be validated.
+            System.Net.ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
         }
 
         private void AddAuthorizationPipeline(IServiceCollection services)
@@ -228,6 +258,35 @@
             }
         }
 
-        public int Order { get; }
+        public void AddBindingRedirectsFallbacks()
+        {
+            // If no binding redirects are present in the config file then this will perform the binding redirect
+            RedirectAssembly("Microsoft.AspNetCore.DataProtection.Abstractions", new Version(2, 0, 0, 0), "adb9793829ddae60");
+        }
+
+        ///<summary>Adds an AssemblyResolve handler to redirect all attempts to load a specific assembly name to the specified version.</summary>
+        public static void RedirectAssembly(string shortName, Version targetVersion, string publicKeyToken)
+        {
+            ResolveEventHandler handler = null;
+
+            handler = (sender, args) =>
+            {
+                // Use latest strong name & version when trying to load SDK assemblies
+                var requestedAssembly = new AssemblyName(args.Name);
+                if (requestedAssembly.Name != shortName)
+                    return null;
+                
+                requestedAssembly.Version = targetVersion;
+                requestedAssembly.SetPublicKeyToken(new AssemblyName("x, PublicKeyToken=" + publicKeyToken).GetPublicKeyToken());
+                requestedAssembly.CultureInfo = CultureInfo.InvariantCulture;
+
+                AppDomain.CurrentDomain.AssemblyResolve -= handler;
+
+                return Assembly.Load(requestedAssembly);
+            };
+            AppDomain.CurrentDomain.AssemblyResolve += handler;
+        }
+
+        public int Order { get; }       
     }
 }
