@@ -33,7 +33,7 @@ namespace Nop.Plugin.Api.Controllers
     using Nop.Plugin.Api.DTOs.Errors;
     using Nop.Plugin.Api.JSON.Serializers;
 
-    [ApiAuthorize]
+    [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ShoppingCartItemsController : BaseApiController
     {
         private readonly IShoppingCartItemApiService _shoppingCartItemApiService;
