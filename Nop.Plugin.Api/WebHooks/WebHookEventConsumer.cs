@@ -53,7 +53,7 @@ namespace Nop.Plugin.Api.WebHooks
         IConsumer<EntityDeleted<ProductPicture>>,
         IConsumer<EntityUpdated<Picture>>
     {
-        private readonly IWebHookManager _webHookManager;
+        private IWebHookManager _webHookManager;
         private readonly ICustomerApiService _customerApiService;
         private readonly ICategoryApiService _categoryApiService;
         private readonly IProductApiService _productApiService;
@@ -68,7 +68,6 @@ namespace Nop.Plugin.Api.WebHooks
 
         public WebHookEventConsumer(IStoreService storeService)
         {
-            IWebHookService webHookService = EngineContext.Current.Resolve<IWebHookService>();
             _customerApiService = EngineContext.Current.Resolve<ICustomerApiService>();
             _categoryApiService = EngineContext.Current.Resolve<ICategoryApiService>();
             _productApiService = EngineContext.Current.Resolve<IProductApiService>();
@@ -79,8 +78,20 @@ namespace Nop.Plugin.Api.WebHooks
             _categoryService = EngineContext.Current.Resolve<ICategoryService>();
             _storeMappingService = EngineContext.Current.Resolve<IStoreMappingService>();
             _storeContext = EngineContext.Current.Resolve<IStoreContext>();
+        }
 
-            _webHookManager = webHookService.GetWebHookManager();
+        private IWebHookManager WebHookManager
+        {
+            get
+            {
+                if (_webHookManager == null)
+                {
+                    IWebHookService webHookService = EngineContext.Current.Resolve<IWebHookService>();
+                    _webHookManager = webHookService.GetWebHookManager();
+                }
+
+                return _webHookManager;
+            }
         }
 
         public void HandleEvent(EntityInserted<Customer> eventMessage)
@@ -453,7 +464,7 @@ namespace Nop.Plugin.Api.WebHooks
             if (storeIds.Count > 0)
             {
                 // Notify all webhooks that the entity is mapped to their store.
-                _webHookManager.NotifyAllAsync(webhookEvent, new { Item = entityDto }, (hook, hookUser) => IsEntityMatchingTheWebHookStoreId(hookUser, storeIds));
+                WebHookManager.NotifyAllAsync(webhookEvent, new { Item = entityDto }, (hook, hookUser) => IsEntityMatchingTheWebHookStoreId(hookUser, storeIds));
 
                 if (typeof(T) == typeof(ProductDto) || typeof(T) == typeof(CategoryDto))
                 {
@@ -462,7 +473,7 @@ namespace Nop.Plugin.Api.WebHooks
             }
             else
             {
-                _webHookManager.NotifyAllAsync(webhookEvent, new { Item = entityDto });
+                WebHookManager.NotifyAllAsync(webhookEvent, new { Item = entityDto });
             }
         }
 
@@ -472,14 +483,14 @@ namespace Nop.Plugin.Api.WebHooks
             {
                 // The product is not mapped to the store.
                 // Notify all webhooks that the entity is not mapped to their store.
-                _webHookManager.NotifyAllAsync(WebHookNames.ProductsUnmap, new { Item = entityDto },
+                WebHookManager.NotifyAllAsync(WebHookNames.ProductsUnmap, new { Item = entityDto },
                     (hook, hookUser) => !IsEntityMatchingTheWebHookStoreId(hookUser, storeIds));
             }
             else if (typeof(T) == typeof(CategoryDto))
             {
                 // The category is not mapped to the store.
                 // Notify all webhooks that the entity is not mapped to their store.
-                _webHookManager.NotifyAllAsync(WebHookNames.CategoriesUnmap, new { Item = entityDto },
+                WebHookManager.NotifyAllAsync(WebHookNames.CategoriesUnmap, new { Item = entityDto },
                     (hook, hookUser) => !IsEntityMatchingTheWebHookStoreId(hookUser, storeIds));
             }
         }

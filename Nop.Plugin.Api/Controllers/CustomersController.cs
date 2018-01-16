@@ -37,7 +37,7 @@ namespace Nop.Plugin.Api.Controllers
     using Nop.Plugin.Api.DTOs.Errors;
     using Nop.Plugin.Api.JSON.Serializers;
 
-    [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [ApiAuthorize]
     public class CustomersController : BaseApiController
     {
         private readonly ICustomerApiService _customerApiService;
@@ -68,7 +68,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         public CustomersController(
-            ICustomerApiService customerApiService, 
+            ICustomerApiService customerApiService,
             IJsonFieldsSerializer jsonFieldsSerializer,
             IAclService aclService,
             ICustomerService customerService,
@@ -80,12 +80,12 @@ namespace Nop.Plugin.Api.Controllers
             ICustomerRolesHelper customerRolesHelper,
             IGenericAttributeService genericAttributeService,
             IEncryptionService encryptionService,
-            IFactory<Customer> factory, 
-            ICountryService countryService, 
-            IMappingHelper mappingHelper, 
+            IFactory<Customer> factory,
+            ICountryService countryService,
+            IMappingHelper mappingHelper,
             INewsLetterSubscriptionService newsLetterSubscriptionService,
-            IPictureService pictureService, ILanguageService languageService) : 
-            base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService,pictureService)
+            IPictureService pictureService, ILanguageService languageService) :
+            base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService, pictureService)
         {
             _customerApiService = customerApiService;
             _factory = factory;
@@ -162,7 +162,7 @@ namespace Nop.Plugin.Api.Controllers
             {
                 return Error(HttpStatusCode.NotFound, "customer", "not found");
             }
-            
+
             var customersRootObject = new CustomersRootObject();
             customersRootObject.Customers.Add(customer);
 
@@ -209,14 +209,14 @@ namespace Nop.Plugin.Api.Controllers
         {
             if (parameters.Limit <= Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
             {
-                return Error(HttpStatusCode.BadRequest, "limit" ,"Invalid limit parameter");
+                return Error(HttpStatusCode.BadRequest, "limit", "Invalid limit parameter");
             }
 
             if (parameters.Page <= 0)
             {
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid page parameter");
             }
-            
+
             IList<CustomerDto> customersDto = _customerApiService.Search(parameters.Query, parameters.Order, parameters.Page, parameters.Limit);
 
             var customersRootObject = new CustomersRootObject()
@@ -252,7 +252,7 @@ namespace Nop.Plugin.Api.Controllers
             {
                 newCustomer.Addresses.Add(address.ToEntity());
             }
-            
+
             _customerService.InsertCustomer(newCustomer);
 
             InsertFirstAndLastNameGenericAttributes(customerDelta.Dto.FirstName, customerDelta.Dto.LastName, newCustomer);
@@ -270,7 +270,7 @@ namespace Nop.Plugin.Api.Controllers
             {
                 AddPassword(customerDelta.Dto.Password, newCustomer);
             }
-            
+
             // We need to insert the entity first so we can have its id in order to map it to anything.
             // TODO: Localization
             // TODO: move this before inserting the customer.
@@ -306,7 +306,7 @@ namespace Nop.Plugin.Api.Controllers
 
             return new RawJsonActionResult(json);
         }
-        
+
         [HttpPut]
         [Route("/api/customers/{id}")]
         [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
@@ -323,7 +323,7 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             //If the validation has passed the customerDelta object won't be null for sure so we don't need to check for this.
-            
+
             // Updateting the customer
             Customer currentCustomer = _customerApiService.GetCustomerEntityById(int.Parse(customerDelta.Dto.Id));
 
@@ -383,9 +383,9 @@ namespace Nop.Plugin.Api.Controllers
             {
                 AddPassword(customerDelta.Dto.Password, currentCustomer);
             }
-            
+
             // TODO: Localization
-           
+
             // Preparing the result dto of the new customer
             // We do not prepare the shopping cart items because we have a separate endpoint for them.
             CustomerDto updatedCustomer = currentCustomer.ToDto();
@@ -465,7 +465,7 @@ namespace Nop.Plugin.Api.Controllers
 
             //activity log
             _customerActivityService.InsertActivity("DeleteCustomer", _localizationService.GetResource("ActivityLog.DeleteCustomer"), customer.Id);
-            
+
             return new RawJsonActionResult("{}");
         }
 

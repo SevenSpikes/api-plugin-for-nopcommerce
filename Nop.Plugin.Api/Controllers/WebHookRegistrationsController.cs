@@ -32,7 +32,7 @@ namespace Nop.Plugin.Api.Controllers
     using Microsoft.AspNetCore.Http;
     using Nop.Plugin.Api.JSON.Serializers;
 
-    [Authorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [ApiAuthorize]
     public class WebHookRegistrationsController : BaseApiController
     {
         private const string ErrorPropertyKey = "webhook";

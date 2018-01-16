@@ -32,7 +32,7 @@ namespace Nop.Plugin.Api.Controllers
     using Nop.Plugin.Api.DTOs.Errors;
     using Nop.Plugin.Api.JSON.Serializers;
 
-    [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [ApiAuthorize]
     public class OrderItemsController : BaseApiController
     {
         private readonly IOrderItemApiService _orderItemApiService;

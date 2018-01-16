@@ -21,7 +21,7 @@ namespace Nop.Plugin.Api.Controllers
     using Nop.Plugin.Api.DTOs.Errors;
     using Nop.Plugin.Api.JSON.Serializers;
 
-    [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [ApiAuthorize]
     public class StoreController : BaseApiController
     {
         private readonly IStoreContext _storeContext;
