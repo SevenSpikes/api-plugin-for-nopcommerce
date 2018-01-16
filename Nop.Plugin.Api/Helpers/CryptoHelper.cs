@@ -7,14 +7,16 @@
     using CERTENROLLLib;
     using IdentityModel;
     using Microsoft.IdentityModel.Tokens;
+    using Newtonsoft.Json;
     using Nop.Core;
 
     public static class CryptoHelper
     {
         // Need to ensure that the key would be the same through the application lifetime.
         private static RsaSecurityKey _key;
-        private const string TokenSigningCertificateName = "token-signing-certificate.pfx";
-        
+        private const string TokenSigningCertificateName = "api-token-signing-certificate.pfx";
+        private const string TokenSigningKeyFileName = "api-token-signing-key.json";
+
         // The recomended way to sign a JWT is using a verified certificate!
         public static void CreateSelfSignedCertificate(string subjectName)
         {
@@ -96,26 +98,87 @@
         {
             if (_key == null)
             {
-                var rsa = RSA.Create();
+                string pathToKey = CommonHelper.MapPath($"~/App_Data/{TokenSigningKeyFileName}");
 
-                if (rsa is RSACryptoServiceProvider)
+                if (!File.Exists(pathToKey))
                 {
-                    rsa.Dispose();
-                    var cng = new RSACng(2048);
+                    // generate random parameters
+                    var randomParameters = GetRandomParameters();
 
-                    var parameters = cng.ExportParameters(includePrivateParameters: true);
-                    _key = new RsaSecurityKey(parameters);
-                }
-                else
-                {
-                    rsa.KeySize = 2048;
-                    _key = new RsaSecurityKey(rsa);
+                    var rsaParams = new RSAParametersWithPrivate();
+                    rsaParams.SetParameters(randomParameters);
+                    string serializedParameters = JsonConvert.SerializeObject(rsaParams);
+
+                    // create file and save the key
+                    File.WriteAllText(pathToKey, serializedParameters);
                 }
 
-                _key.KeyId = CryptoRandom.CreateUniqueId(16);
+                // load the key
+                if (!File.Exists(pathToKey))
+                    throw new FileNotFoundException("Check configuration - cannot find auth key file: " + pathToKey);
+
+                var keyParams = JsonConvert.DeserializeObject<RSAParametersWithPrivate>(File.ReadAllText(pathToKey));
+
+                // create signing key by the key above
+                _key = new RsaSecurityKey(keyParams.ToRSAParameters());
             }
 
             return _key;
+        }
+
+        public static RSAParameters GetRandomParameters()
+        {       
+            using (var rsa = new RSACryptoServiceProvider(2048))
+            {
+                try
+                {
+                    return rsa.ExportParameters(true);
+                }
+                finally
+                {
+                    rsa.PersistKeyInCsp = false;
+                }
+            }
+        }
+
+        // https://github.com/mrsheepuk/ASPNETSelfCreatedTokenAuthExample/blob/master/src/TokenAuthExampleWebApplication/RSAKeyUtils.cs
+        private class RSAParametersWithPrivate
+        {
+            public byte[] D { get; set; }
+            public byte[] DP { get; set; }
+            public byte[] DQ { get; set; }
+            public byte[] Exponent { get; set; }
+            public byte[] InverseQ { get; set; }
+            public byte[] Modulus { get; set; }
+            public byte[] P { get; set; }
+            public byte[] Q { get; set; }
+
+            public void SetParameters(RSAParameters p)
+            {
+                D = p.D;
+                DP = p.DP;
+                DQ = p.DQ;
+                Exponent = p.Exponent;
+                InverseQ = p.InverseQ;
+                Modulus = p.Modulus;
+                P = p.P;
+                Q = p.Q;
+            }
+            public RSAParameters ToRSAParameters()
+            {
+                return new RSAParameters()
+                {
+                    D = this.D,
+                    DP = this.DP,
+                    DQ = this.DQ,
+                    Exponent = this.Exponent,
+                    InverseQ = this.InverseQ,
+                    Modulus = this.Modulus,
+                    P = this.P,
+                    Q = this.Q
+
+                };
+            }
         }
     }
 }
