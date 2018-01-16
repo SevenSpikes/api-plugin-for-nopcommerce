@@ -16,19 +16,8 @@
     {
         public void Configure(AuthenticationBuilder builder)
         {
-           // RsaSecurityKey signingKey = CryptoHelper.CreateRsaSecurityKey();
-
-            //builder.Services
-            //    .AddAuthentication("Bearer")
-            //    .AddIdentityServerAuthentication(options =>
-            //    {
-            //        options.Authority = "http://localhost:57919";
-            //        options.RequireHttpsMetadata = false;
-            //        options.ApiName = "nop_api";
-            //    });
-            
-            X509Certificate2 cert = CryptoHelper.GetTokenSigningCertificate();
-
+           RsaSecurityKey signingKey = CryptoHelper.CreateRsaSecurityKey();                        
+           
             builder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwt =>
                 {
                     jwt.Audience = "nop_api";
@@ -42,7 +31,7 @@
                         // IssuerSigningKey = new X509SecurityKey(cert),
                         IssuerSigningKeyResolver = (string token, SecurityToken securityToken, string kid,
                                 TokenValidationParameters validationParameters) =>
-                                new List<X509SecurityKey> { new X509SecurityKey(cert) }
+                               new List<RsaSecurityKey> { signingKey }
                     };
                 });
         }

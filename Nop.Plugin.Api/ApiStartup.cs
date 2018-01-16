@@ -22,6 +22,7 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.IdentityModel.Tokens;
     using Nop.Core;
     using Nop.Core.Data;
     using Nop.Core.Infrastructure;
@@ -150,6 +151,8 @@
                 cert = CryptoHelper.GetTokenSigningCertificate();
             }
 
+            RsaSecurityKey signingKey = CryptoHelper.CreateRsaSecurityKey();
+
             DataSettingsManager dataSettingsManager = new DataSettingsManager();
 
             DataSettings dataSettings = dataSettingsManager.LoadSettings();
@@ -158,7 +161,7 @@
             var migrationsAssembly = typeof(ApiStartup).GetTypeInfo().Assembly.GetName().Name;
             
             services.AddIdentityServer()
-                .AddSigningCredential(cert)
+                .AddSigningCredential(signingKey)
                 .AddConfigurationStore(options =>
                 {
                     options.ConfigureDbContext = builder =>
