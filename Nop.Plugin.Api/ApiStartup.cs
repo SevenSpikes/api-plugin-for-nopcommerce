@@ -13,6 +13,7 @@
     using System.Xml.XPath;
     using IdentityServer4.EntityFramework.DbContexts;
     using IdentityServer4.EntityFramework.Entities;
+    using IdentityServer4.Hosting;
     using IdentityServer4.Models;
     using Microsoft.AspNet.WebHooks.Diagnostics;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -46,12 +47,12 @@
             AddBindingRedirectsFallbacks();
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-            
+
             AddTokenGenerationPipeline(services);
 
             AddAuthorizationPipeline(services);
         }
-      
+
         public void Configure(IApplicationBuilder app)
         {
             // The default route templates for the Swagger docs and swagger - ui are "swagger/docs/{apiVersion}" and "swagger/ui/index#/{assetPath}" respectively.
@@ -74,7 +75,7 @@
             ApplyIdentityServerMigrations(app);
 
             SeedData(app);
-            
+
             var rewriteOptions = new RewriteOptions()
                 .AddRedirect("oauth/(.*)", "connect/$1", 307)
                 .AddRedirect("api/token", "connect/token", 307);
@@ -85,8 +86,21 @@
 
             ////uncomment only if the client is an angular application that directly calls the oauth endpoint
             //// app.UseCors(Microsoft.Owin.Cors.CorsOptions.AllowAll);
-            app.UseAuthentication();
-            app.UseIdentityServer();
+            UseIdentityServer(app);
+        }
+
+        private void UseIdentityServer(IApplicationBuilder app)
+        {
+            // The code below is a copy of app.UseIdentityServer();
+            // but the nopCommerce AuthenticationMiddleware is added by nopCommmerce and
+            // it has a try catch for the non-configured properly external authentication providers i.e Facebook
+            // So there is no need to call UseAuthentication again and thus not being able to catch exceptions thrown by Facebook
+
+            //app.Validate();
+            UseMiddlewareExtensions.UseMiddleware<BaseUrlMiddleware>(app);
+            app.ConfigureCors();
+            //app.UseAuthentication();
+            UseMiddlewareExtensions.UseMiddleware<IdentityServerMiddleware>(app);
         }
 
         private void AddRequiredConfiguration()
@@ -161,7 +175,7 @@
             string connectionStringFromNop = dataSettings.DataConnectionString;
 
             var migrationsAssembly = typeof(ApiStartup).GetTypeInfo().Assembly.GetName().Name;
-            
+
             services.AddIdentityServer()
                 .AddSigningCredential(signingKey)
                 .AddConfigurationStore(options =>
@@ -280,7 +294,7 @@
                 var requestedAssembly = new AssemblyName(args.Name);
                 if (requestedAssembly.Name != shortName)
                     return null;
-                
+
                 requestedAssembly.Version = targetVersion;
                 requestedAssembly.SetPublicKeyToken(new AssemblyName("x, PublicKeyToken=" + publicKeyToken).GetPublicKeyToken());
                 requestedAssembly.CultureInfo = CultureInfo.InvariantCulture;
@@ -292,6 +306,6 @@
             AppDomain.CurrentDomain.AssemblyResolve += handler;
         }
 
-        public int Order { get; }       
+        public int Order { get; }
     }
 }
