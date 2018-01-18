@@ -155,18 +155,7 @@
         }
 
         private void AddTokenGenerationPipeline(IServiceCollection services)
-        {
-            // In order to create self-signed certificates you will need to be Administrator which in most cases will not be true
-            // so this code becomes quite obsolate but in case you have a certificate you can use it as an example
-            //X509Certificate2 cert = CryptoHelper.GetTokenSigningCertificate();
-
-            //// This is in case you had the plugin installed in some prev version of nopCommerce.
-            //if (cert == null)
-            //{
-            //    CryptoHelper.CreateSelfSignedCertificate("nop-api-certificate");
-            //    cert = CryptoHelper.GetTokenSigningCertificate();
-            //}
-
+        {       
             RsaSecurityKey signingKey = CryptoHelper.CreateRsaSecurityKey();
 
             DataSettingsManager dataSettingsManager = new DataSettingsManager();

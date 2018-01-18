@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework> 
     <Copyright>Copyright © Seven Spikes, Ltd</Copyright> 
-    <Company>Seven Spikes, Ltd</Company> 
-    <Authors>Seven Spikes, Ltd</Authors> 
+    <Company>Seven Spikes, Ltd (Nop-Templates.com)</Company> 
+    <Authors>Seven Spikes, Ltd (Nop-Templates.com)</Authors> 
     <Version>4.00</Version> 
     <Description>This plugin allows you to access/create Nop resources outside of the system</Description> 
     <PackageLicenseUrl></PackageLicenseUrl> 
@@ -34,18 +34,7 @@
     <None Remove="Views\Clients\_ViewStart.cshtml" />
     <None Remove="Views\Settings.cshtml" />
     <None Remove="Views\_ViewImports.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <COMReference Include="CERTENROLLLib.dll">
-      <Guid>728ab348-217d-11da-b2a4-000e7bbb2b09</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>false</Isolated>
-      <Private>true</Private>
-    </COMReference>
-  </ItemGroup>
+  </ItemGroup> 
   <ItemGroup>
     <Content Include="Views\Clients\ClientSettings.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -111,5 +100,4 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
 </Project>

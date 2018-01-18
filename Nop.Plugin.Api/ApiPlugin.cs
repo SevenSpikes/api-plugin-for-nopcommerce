@@ -38,9 +38,7 @@
         {
             // Add the nopCommerce connection string to the web.config file. This is required by the WebHooks.
             //IWebConfigMangerHelper webConfigManagerHelper = EngineContext.Current.Resolve<IWebConfigMangerHelper>();
-            //webConfigManagerHelper.AddConnectionString();
-
-            CryptoHelper.CreateSelfSignedCertificate("nop-api-certificate");
+            //webConfigManagerHelper.AddConnectionString();            
 
             //locales
             this.AddOrUpdatePluginLocaleResource("Plugins.Api", "Api plugin");

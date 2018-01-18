@@ -1,3 +1,5 @@
+-- Used to migrate the clients tables used prior to 4.0 into the tables used by the Identity Server --
+
 BEGIN TRANSACTION;  
 
 	-- Clients --
