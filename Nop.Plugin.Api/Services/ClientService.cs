@@ -148,6 +148,16 @@ namespace Nop.Plugin.Api.Services
             return currentClient?.ToApiModel();
         }
 
+        public ClientApiModel FindClientByClientId(string clientId)
+        {
+            Client currentClient = _configurationDbContext.Clients
+                .Include(client => client.ClientSecrets)
+                .Include(client => client.RedirectUris)
+                .FirstOrDefault(client => client.ClientId == clientId);
+
+            return currentClient?.ToApiModel();
+        }
+
         public void DeleteClient(int id)
         {
             Client client = _configurationDbContext.Clients

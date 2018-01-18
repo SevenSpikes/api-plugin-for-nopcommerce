@@ -11,5 +11,6 @@ namespace Nop.Plugin.Api.Services
         int InsertClient(ClientApiModel model);
         void UpdateClient(ClientApiModel model);
         ClientApiModel FindClientByIdAsync(int id);
+        ClientApiModel FindClientByClientId(string clientId);
     }
 }
