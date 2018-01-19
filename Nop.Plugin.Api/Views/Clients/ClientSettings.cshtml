@@ -47,7 +47,7 @@
                             <nop-label asp-for="AccessTokenLifetime" />
                         </div>
                         <div class="col-md-9">
-                            <nop-editor asp-for="AccessTokenLifetime" asp-required="true" />
+                            <nop-editor asp-for="AccessTokenLifetime" asp-required="true" asp-postfix="sec"/>
                             <span asp-validation-for="AccessTokenLifetime"></span>
                         </div>
                     </div>
@@ -56,7 +56,7 @@
                             <nop-label asp-for="RefreshTokenLifetime" />
                         </div>
                         <div class="col-md-9">
-                            <nop-editor asp-for="RefreshTokenLifetime" asp-required="true" />
+                            <nop-editor asp-for="RefreshTokenLifetime" asp-required="true" asp-postfix="sec"/>
                             <span asp-validation-for="RefreshTokenLifetime"></span>
                         </div>
                     </div>
