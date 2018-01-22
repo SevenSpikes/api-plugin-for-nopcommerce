@@ -23,6 +23,7 @@
                     jwt.Audience = "nop_api";
                     jwt.TokenValidationParameters = new TokenValidationParameters
                     {
+						RequireExpirationTime = false,
                         ValidateActor = false,
                         ValidateIssuer = false,
                         NameClaimType = JwtClaimTypes.Name,
