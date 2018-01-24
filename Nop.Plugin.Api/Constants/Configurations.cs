@@ -2,11 +2,9 @@
 {
     public class Configurations
     {
-        // time is in minutes (30 days = 43200 minutes)
-        // It is recommended to keep your access token expiration time to 1 hour and to use the refresh token to obtain a new one after expiration.
-        // Refresh token lifespan should be max one month. 
-        // Please, edit the configuration bellow!!!
-        public const int DefaultAccessTokenExpiration = int.MaxValue;
+        // time is in seconds (10 years = 315360000 seconds) and should not exceed 2038 year
+        // https://stackoverflow.com/questions/43593074/jwt-validation-fails/43605820
+        public const int DefaultAccessTokenExpiration = 315360000;
         public const int DefaultRefreshTokenExpiration = int.MaxValue;
         public const int DefaultLimit = 50;
         public const int DefaultPageValue = 1;
