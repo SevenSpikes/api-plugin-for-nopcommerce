@@ -77,8 +77,8 @@
             SeedData(app);
 
             var rewriteOptions = new RewriteOptions()
-                .AddRedirect("oauth/(.*)", "connect/$1", 307)
-                .AddRedirect("api/token", "connect/token", 307);
+                .AddRewrite("oauth/(.*)", "connect/$1",true)
+                .AddRewrite("api/token", "connect/token",true);
 
             app.UseRewriter(rewriteOptions);
 
