@@ -37,7 +37,7 @@
             }
         }
 
-        public string ClientSecretDescription
+        public string ClientSecret
         {
             get
             {

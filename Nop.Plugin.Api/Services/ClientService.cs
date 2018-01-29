@@ -54,7 +54,7 @@ namespace Nop.Plugin.Api.Services
                 AbsoluteRefreshTokenLifetime = model.RefreshTokenLifetime
             };
 
-            AddOrUpdateClientSecret(client, model.ClientSecretDescription);
+            AddOrUpdateClientSecret(client, model.ClientSecret);
             AddOrUpdateClientRedirectUrl(client, model.RedirectUrl);
             
             client.AllowedGrantTypes = new List<ClientGrantType>()
@@ -125,7 +125,7 @@ namespace Nop.Plugin.Api.Services
                 throw new ArgumentNullException(nameof(currentClient));
             }
 
-            AddOrUpdateClientSecret(currentClient, model.ClientSecretDescription);
+            AddOrUpdateClientSecret(currentClient, model.ClientSecret);
             AddOrUpdateClientRedirectUrl(currentClient, model.RedirectUrl);
 
             currentClient.ClientId = model.ClientId;
