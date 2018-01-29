@@ -21,21 +21,37 @@
             if (context.Request.Path.Value.Equals("/connect/authorize", StringComparison.InvariantCultureIgnoreCase) ||
                 context.Request.Path.Value.Equals("/oauth/authorize", StringComparison.InvariantCultureIgnoreCase))
             {
-                if (!context.Request.Query.ContainsKey("scope"))
-                {
-                    var queryValues = new Dictionary<string, StringValues>();
+                // Make sure we have "nop_api" and "offline_access" scope
 
-                    foreach (var item in context.Request.Query)
+                var queryValues = new Dictionary<string, StringValues>();
+
+                foreach (var item in context.Request.Query)
+                {
+                    if (item.Key == "scope")
                     {
-                        queryValues.Add(item.Key, item.Value);
+                        string scopeValue = item.Value;
+
+                        if (!scopeValue.Contains("nop_api offline_access"))
+                        {
+                            // add our scope instead since we don't support other scopes
+                            queryValues.Add(item.Key, "nop_api offline_access");
+                            continue;
+                        }
                     }
 
-                    queryValues.Add("scope", "nop_api offline_access");
-
-                    var newQueryCollection = new QueryCollection(queryValues);
-
-                    context.Request.Query = newQueryCollection;
+                    queryValues.Add(item.Key, item.Value);
                 }
+
+                if (!queryValues.ContainsKey("scope"))
+                {
+                    // if no scope is specified we add it
+                    queryValues.Add("scope", "nop_api offline_access");
+                }
+
+                var newQueryCollection = new QueryCollection(queryValues);
+
+                context.Request.Query = newQueryCollection;
+
             }
 
             await _next(context);
