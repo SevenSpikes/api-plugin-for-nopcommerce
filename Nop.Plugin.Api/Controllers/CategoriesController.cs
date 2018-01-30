@@ -174,7 +174,7 @@ namespace Nop.Plugin.Api.Controllers
         }
         
         [HttpPost]
-        [Route("/api/categories/categories")]
+        [Route("/api/categories")]
         [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
