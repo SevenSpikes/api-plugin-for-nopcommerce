@@ -31,6 +31,9 @@ namespace Nop.Plugin.Api.Services
         {
             string attributesXml = "";
 
+            if (attributeDtos == null)
+                return attributesXml;
+
             var productAttributes = _productAttributeService.GetProductAttributeMappingsByProductId(productId);
             foreach (var attribute in productAttributes)
             {
