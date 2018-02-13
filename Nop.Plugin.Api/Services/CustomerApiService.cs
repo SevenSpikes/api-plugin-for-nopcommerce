@@ -382,15 +382,15 @@ namespace Nop.Plugin.Api.Services
 
             query = query.Where(customer => !customer.CustomerRoles.Any(cr => (cr.Active) && (cr.SystemName == SystemCustomerRoleNames.Guests)));
 
-            if (_storeContext.CurrentStore.Id == BLBSettings.BLBStoreId)
+            if (_storeContext.CurrentStore.Id == BlbSettings.BLBStoreId)
             {
                 query = query.Where(customer =>
-                    !customer.CustomerRoles.Any(cr => cr.SystemName.Equals(BLBSettings.TradeCustomerRoleSystemName)));
+                    !customer.CustomerRoles.Any(cr => cr.SystemName.Equals(BlbSettings.BigMamaRoleSystemName)));
             }
             else
             {
                 query = query.Where(customer =>
-                    customer.CustomerRoles.Any(cr => cr.SystemName.Equals(BLBSettings.TradeCustomerRoleSystemName)));
+                    customer.CustomerRoles.Any(cr => cr.SystemName.Equals(BlbSettings.BigMamaRoleSystemName)));
             }
 
             if (createdAtMin != null)

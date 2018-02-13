@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Nop.Core.Caching;
 using Nop.Core.Domain.Customers;
@@ -52,12 +51,12 @@ namespace Nop.Plugin.Api.Helpers
 
         public int getCustomerStore(Customer customer)
         {
-            if (customer.IsInCustomerRole(BLBSettings.TradeCustomerRoleSystemName))
+            if (customer.IsInCustomerRole(BlbSettings.BigMamaRoleSystemName))
             {
-                return BLBSettings.BigMamaStoreid;
+                return BlbSettings.BigMamaStoreId;
             }
 
-            return BLBSettings.BLBStoreId;
+            return BlbSettings.BLBStoreId;
         }
 
         public int getCustomerStoreByRoleIds(List<int> roleIds)
@@ -68,7 +67,7 @@ namespace Nop.Plugin.Api.Helpers
             {
                 CustomerRole customerRole = _customerService.GetCustomerRoleById(roleId);
 
-                if (customerRole.SystemName.Equals(BLBSettings.TradeCustomerRoleSystemName))
+                if (customerRole.SystemName.Equals(BlbSettings.BigMamaRoleSystemName))
                 {
                     isInTraceRole = true;
 
@@ -78,10 +77,10 @@ namespace Nop.Plugin.Api.Helpers
 
             if (isInTraceRole)
             {
-                return BLBSettings.BigMamaStoreid;
+                return BlbSettings.BigMamaStoreId;
             }
 
-            return BLBSettings.BLBStoreId;
+            return BlbSettings.BLBStoreId;
         }
     }
 }
