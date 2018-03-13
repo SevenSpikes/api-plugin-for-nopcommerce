@@ -12,16 +12,22 @@ namespace Nop.Plugin.Api.Infrastructure
     using Nop.Core.Domain.Customers;
     using Nop.Core.Domain.Orders;
     using Nop.Plugin.Api.Converters;
+    using Nop.Plugin.Api.Data;
     using Nop.Plugin.Api.Factories;
     using Nop.Plugin.Api.Helpers;
     using Nop.Plugin.Api.JSON.Serializers;
     using Nop.Plugin.Api.ModelBinders;
     using Nop.Plugin.Api.Validators;
+    using Nop.Web.Framework.Infrastructure;
 
     public class DependencyRegister : IDependencyRegistrar
     {
+        private const string ObjectContextName = "nop_object_context_web_api";
+
         public void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
         {
+            this.RegisterPluginDataContext<ApiObjectContext>(builder, ObjectContextName);
+
             RegisterPluginServices(builder);
 
             RegisterModelBinders(builder);

@@ -6,6 +6,7 @@
     using Nop.Core;
     using Nop.Core.Infrastructure;
     using Nop.Core.Plugins;
+    using Nop.Plugin.Api.Data;
     using Nop.Plugin.Api.Domain;
     using Nop.Plugin.Api.Helpers;
     using Nop.Services.Configuration;
@@ -15,15 +16,17 @@
     public class ApiPlugin : BasePlugin, IAdminMenuPlugin
     {
         //private readonly IWebConfigMangerHelper _webConfigMangerHelper;
+        private readonly ApiObjectContext _objectContext;
         private readonly ISettingService _settingService;
         private readonly IWorkContext _workContext;
         private readonly IWebHelper _webHelper;
         private readonly ILocalizationService _localizationService;
 
-        public ApiPlugin(/*IWebConfigMangerHelper webConfigMangerHelper,*/ ISettingService settingService, IWorkContext workContext,
+        public ApiPlugin(ApiObjectContext objectContext,/*IWebConfigMangerHelper webConfigMangerHelper,*/ ISettingService settingService, IWorkContext workContext,
             ILocalizationService localizationService, IWebHelper webHelper
 /*, IConfiguration configuration*/)
         {
+            _objectContext = objectContext;
             //_webConfigMangerHelper = webConfigMangerHelper;
             _settingService = settingService;
             _workContext = workContext;
@@ -38,7 +41,9 @@
         {
             // Add the nopCommerce connection string to the web.config file. This is required by the WebHooks.
             //IWebConfigMangerHelper webConfigManagerHelper = EngineContext.Current.Resolve<IWebConfigMangerHelper>();
-            //webConfigManagerHelper.AddConnectionString();            
+            //webConfigManagerHelper.AddConnectionString();           
+
+            _objectContext.Install();
 
             //locales
             this.AddOrUpdatePluginLocaleResource("Plugins.Api", "Api plugin");
@@ -118,6 +123,8 @@
 
         public override void Uninstall()
         {
+            _objectContext.Uninstall();
+
             var persistedGrantMigrator = EngineContext.Current.Resolve<PersistedGrantDbContext>().GetService<IMigrator>();
             persistedGrantMigrator.Migrate("0");
             
