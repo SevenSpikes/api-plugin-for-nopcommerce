@@ -32,8 +32,8 @@ namespace Nop.Plugin.Api.Services
 
         public IWebHookManager GetWebHookManager()
         {
-            if (_webHookManager == null)
-            {       
+            if (_webHookManager == null || _webHookStore.GetType() != typeof(SqlWebHookStore))
+            {
                 _webHookManager = new WebHookManager(GetWebHookStore(), GetWebHookSender(), _logger);
             }
 
@@ -52,12 +52,12 @@ namespace Nop.Plugin.Api.Services
 
         public IWebHookStore GetWebHookStore()
         {
-            if (_webHookStore == null)
+            if (_webHookStore == null || _webHookStore.GetType() != typeof(SqlWebHookStore))
             {
                 _webHookStore = CustomServices.GetStore();
             }
 
             return _webHookStore;
         }
-    }    
+    }
 }

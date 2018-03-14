@@ -106,6 +106,9 @@
             this.AddOrUpdatePluginLocaleResource("Api.WebHooks.CouldNotDeleteWebhooks", "Could not delete WebHooks due to error: {0}");
             this.AddOrUpdatePluginLocaleResource("Api.WebHooks.InvalidFilters", "The following filters are not valid: '{0}'. A list of valid filters can be obtained from the path '{1}'.");
 
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.EnableLogging", "Enable Logging");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.EnableLogging.Hint", "By enable logging you will see messages in the Log. These messages are needed ONLY for diagnostic purposes");
+
             ApiSettings settings = new ApiSettings
             {
                 EnableApi = true,

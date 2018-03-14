@@ -54,6 +54,8 @@
                 _settingService.SaveSetting(apiSettings, x => x.EnableApi, storeScope, false);
             if (model.AllowRequestsFromSwagger_OverrideForStore || storeScope == 0)
                 _settingService.SaveSetting(apiSettings, x => x.AllowRequestsFromSwagger, storeScope, false);
+            if (model.EnableLogging_OverrideForStore || storeScope == 0)
+                _settingService.SaveSetting(apiSettings, x => x.EnableLogging, storeScope, false);
 
             //now clear settings cache
             _settingService.ClearCache();
@@ -77,6 +79,8 @@
                 _settingService.SaveSetting(settings, x => x.EnableApi, storeScope, false);
             if (configurationModel.AllowRequestsFromSwagger_OverrideForStore || storeScope == 0)
                 _settingService.SaveSetting(settings, x => x.AllowRequestsFromSwagger, storeScope, false);
+            if (configurationModel.EnableLogging_OverrideForStore || storeScope == 0)
+                _settingService.SaveSetting(settings, x => x.EnableLogging, storeScope, false);
 
             //now clear settings cache
             _settingService.ClearCache();
