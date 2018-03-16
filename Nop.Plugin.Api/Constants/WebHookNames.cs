@@ -33,5 +33,9 @@
         public const string LanguagesCreate = "languages/create";
         public const string LanguagesUpdate = "languages/update";
         public const string LanguagesDelete = "languages/delete";
+
+        public const string NewsLetterSubscriptionCreate = "news_letter_subscription/create";
+        public const string NewsLetterSubscriptionUpdate = "news_letter_subscription/update";
+        public const string NewsLetterSubscriptionDelete = "news_letter_subscription/delete";
     }
 }

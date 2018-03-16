@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNet.WebHooks;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Common;
@@ -28,6 +27,10 @@ using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.WebHooks
 {
+    using Microsoft.AspNet.WebHooks;
+    using Nop.Core.Caching;
+    using Nop.Core.Domain.Messages;
+
     public class WebHookEventConsumer : IConsumer<EntityInserted<Customer>>,
         IConsumer<EntityUpdated<Customer>>,
         IConsumer<EntityInserted<Product>>,
@@ -50,9 +53,12 @@ namespace Nop.Plugin.Api.WebHooks
         IConsumer<EntityInserted<ProductPicture>>,
         IConsumer<EntityUpdated<ProductPicture>>,
         IConsumer<EntityDeleted<ProductPicture>>,
-        IConsumer<EntityUpdated<Picture>>
+        IConsumer<EntityUpdated<Picture>>,
+        IConsumer<EntityInserted<NewsLetterSubscription>>,
+        IConsumer<EntityUpdated<NewsLetterSubscription>>,
+        IConsumer<EntityDeleted<NewsLetterSubscription>>
     {
-        private readonly IWebHookManager _webHookManager;
+        private IWebHookManager _webHookManager;
         private readonly ICustomerApiService _customerApiService;
         private readonly ICategoryApiService _categoryApiService;
         private readonly IProductApiService _productApiService;
@@ -62,25 +68,37 @@ namespace Nop.Plugin.Api.WebHooks
         private readonly IProductPictureService _productPictureService;
         private IStoreService _storeService;
         private IStoreContext _storeContext;
+        private readonly IStaticCacheManager _cacheManager;
 
         private IDTOHelper _dtoHelper;
 
         public WebHookEventConsumer(IStoreService storeService)
         {
-            IWebHookService webHookService = EngineContext.Current.ContainerManager.Resolve<IWebHookService>();
-            _customerApiService = EngineContext.Current.ContainerManager.Resolve<ICustomerApiService>();
-            _categoryApiService = EngineContext.Current.ContainerManager.Resolve<ICategoryApiService>();
-            _productApiService = EngineContext.Current.ContainerManager.Resolve<IProductApiService>();
-            _dtoHelper = EngineContext.Current.ContainerManager.Resolve<IDTOHelper>();
-            _storeService = EngineContext.Current.ContainerManager.Resolve<IStoreService>();
-            _productPictureService = EngineContext.Current.ContainerManager.Resolve<IProductPictureService>();
+            _customerApiService = EngineContext.Current.Resolve<ICustomerApiService>();
+            _categoryApiService = EngineContext.Current.Resolve<ICategoryApiService>();
+            _productApiService = EngineContext.Current.Resolve<IProductApiService>();
+            _dtoHelper = EngineContext.Current.Resolve<IDTOHelper>();
+            _storeService = EngineContext.Current.Resolve<IStoreService>();
+            _productPictureService = EngineContext.Current.Resolve<IProductPictureService>();
+            _productService = EngineContext.Current.Resolve<IProductService>();
+            _categoryService = EngineContext.Current.Resolve<ICategoryService>();
+            _storeMappingService = EngineContext.Current.Resolve<IStoreMappingService>();
+            _storeContext = EngineContext.Current.Resolve<IStoreContext>();
+            _cacheManager = EngineContext.Current.Resolve<IStaticCacheManager>();
+        }
 
-            _productService = EngineContext.Current.ContainerManager.Resolve<IProductService>();
-            _categoryService = EngineContext.Current.ContainerManager.Resolve<ICategoryService>();
-            _storeMappingService = EngineContext.Current.ContainerManager.Resolve<IStoreMappingService>();
-            _storeContext = EngineContext.Current.ContainerManager.Resolve<IStoreContext>();
+        private IWebHookManager WebHookManager
+        {
+            get
+            {
+                if (_webHookManager == null)
+                {
+                    IWebHookService webHookService = EngineContext.Current.Resolve<IWebHookService>();
+                    _webHookManager = webHookService.GetWebHookManager();
+                }
 
-            _webHookManager = webHookService.GetHookManager();
+                return _webHookManager;
+            }
         }
 
         public void HandleEvent(EntityInserted<Customer> eventMessage)
@@ -361,6 +379,48 @@ namespace Nop.Plugin.Api.WebHooks
             }
         }
 
+        public void HandleEvent(EntityDeleted<NewsLetterSubscription> eventMessage)
+        {
+            _cacheManager.RemoveByPattern(Configurations.NEWSLETTER_SUBSCRIBERS_KEY);
+
+            NewsLetterSubscriptionDto newsLetterSubscriptionDto = eventMessage.Entity.ToDto();
+
+            var storeIds = new List<int>
+            {
+                newsLetterSubscriptionDto.StoreId
+            };
+
+            NotifyRegisteredWebHooks(newsLetterSubscriptionDto, WebHookNames.NewsLetterSubscriptionDelete, storeIds);
+        }
+
+        public void HandleEvent(EntityInserted<NewsLetterSubscription> eventMessage)
+        {
+            _cacheManager.RemoveByPattern(Configurations.NEWSLETTER_SUBSCRIBERS_KEY);
+
+            NewsLetterSubscriptionDto newsLetterSubscriptionDto = eventMessage.Entity.ToDto();
+
+            var storeIds = new List<int>
+            {
+                newsLetterSubscriptionDto.StoreId
+            };
+
+            NotifyRegisteredWebHooks(newsLetterSubscriptionDto, WebHookNames.NewsLetterSubscriptionCreate, storeIds);
+        }
+
+        public void HandleEvent(EntityUpdated<NewsLetterSubscription> eventMessage)
+        {
+            _cacheManager.RemoveByPattern(Configurations.NEWSLETTER_SUBSCRIBERS_KEY);
+
+            NewsLetterSubscriptionDto newsLetterSubscriptionDto = eventMessage.Entity.ToDto();
+
+            var storeIds = new List<int>
+            {
+                newsLetterSubscriptionDto.StoreId
+            };
+
+            NotifyRegisteredWebHooks(newsLetterSubscriptionDto, WebHookNames.NewsLetterSubscriptionUpdate, storeIds);
+        }
+
         private void NotifyProductCategoryMappingWebhook(ProductCategory productCategory, string eventName)
         {
             var storeIds = GetStoreIdsForProductCategoryMap(productCategory);
@@ -453,7 +513,7 @@ namespace Nop.Plugin.Api.WebHooks
             if (storeIds.Count > 0)
             {
                 // Notify all webhooks that the entity is mapped to their store.
-                _webHookManager.NotifyAllAsync(webhookEvent, new { Item = entityDto }, (hook, hookUser) => IsEntityMatchingTheWebHookStoreId(hookUser, storeIds));
+                WebHookManager.NotifyAllAsync(webhookEvent, new { Item = entityDto }, (hook, hookUser) => IsEntityMatchingTheWebHookStoreId(hookUser, storeIds));
 
                 if (typeof(T) == typeof(ProductDto) || typeof(T) == typeof(CategoryDto))
                 {
@@ -462,7 +522,7 @@ namespace Nop.Plugin.Api.WebHooks
             }
             else
             {
-                _webHookManager.NotifyAllAsync(webhookEvent, new { Item = entityDto });
+                WebHookManager.NotifyAllAsync(webhookEvent, new { Item = entityDto });
             }
         }
 
@@ -472,14 +532,14 @@ namespace Nop.Plugin.Api.WebHooks
             {
                 // The product is not mapped to the store.
                 // Notify all webhooks that the entity is not mapped to their store.
-                _webHookManager.NotifyAllAsync(WebHookNames.ProductsUnmap, new { Item = entityDto },
+                WebHookManager.NotifyAllAsync(WebHookNames.ProductsUnmap, new { Item = entityDto },
                     (hook, hookUser) => !IsEntityMatchingTheWebHookStoreId(hookUser, storeIds));
             }
             else if (typeof(T) == typeof(CategoryDto))
             {
                 // The category is not mapped to the store.
                 // Notify all webhooks that the entity is not mapped to their store.
-                _webHookManager.NotifyAllAsync(WebHookNames.CategoriesUnmap, new { Item = entityDto },
+                WebHookManager.NotifyAllAsync(WebHookNames.CategoriesUnmap, new { Item = entityDto },
                     (hook, hookUser) => !IsEntityMatchingTheWebHookStoreId(hookUser, storeIds));
             }
         }

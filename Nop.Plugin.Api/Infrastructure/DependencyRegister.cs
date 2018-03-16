@@ -89,6 +89,7 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<ProductPictureService>().As<IProductPictureService>().InstancePerLifetimeScope();
 
             builder.RegisterType<ProductAttributeConverter>().As<IProductAttributeConverter>().InstancePerLifetimeScope();
+            builder.RegisterType<NewsLetterSubscriptionApiService>().As<INewsLetterSubscriptionApiService>().InstancePerLifetimeScope();
 
             builder.RegisterType<MappingHelper>().As<IMappingHelper>().InstancePerLifetimeScope();
             builder.RegisterType<AuthorizationHelper>().As<IAuthorizationHelper>().InstancePerLifetimeScope();

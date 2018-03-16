@@ -14,6 +14,8 @@ using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Services.Localization;
 using Nop.Services.Stores;
+using Nop.Core.Domain.Messages;
+using Nop.Core.Caching;
 
 namespace Nop.Plugin.Api.Services
 {
@@ -29,18 +31,24 @@ namespace Nop.Plugin.Api.Services
         private readonly IStoreMappingService _storeMappingService;
         private readonly IRepository<Customer> _customerRepository;
         private readonly IRepository<GenericAttribute> _genericAttributeRepository;
+        private readonly IRepository<NewsLetterSubscription> _subscriptionRepository;
+        private readonly IStaticCacheManager _cacheManager;
 
         public CustomerApiService(IRepository<Customer> customerRepository,
             IRepository<GenericAttribute> genericAttributeRepository,
+            IRepository<NewsLetterSubscription> subscriptionRepository,
             IStoreContext storeContext,
             ILanguageService languageService,
-            IStoreMappingService storeMappingService)
+            IStoreMappingService storeMappingService,
+            IStaticCacheManager staticCacheManager)
         {
             _customerRepository = customerRepository;
             _genericAttributeRepository = genericAttributeRepository;
+            _subscriptionRepository = subscriptionRepository;
             _storeContext = storeContext;
             _languageService = languageService;
             _storeMappingService = storeMappingService;
+            _cacheManager = staticCacheManager;
         }
 
         public IList<CustomerDto> GetCustomersDtos(DateTime? createdAtMin = null, DateTime? createdAtMax = null, int limit = Configurations.DefaultLimit,
@@ -49,6 +57,8 @@ namespace Nop.Plugin.Api.Services
             var query = GetCustomersQuery(createdAtMin, createdAtMax, sinceId);
 
             IList<CustomerDto> result = HandleCustomerGenericAttributes(null, query, limit, page);
+
+            SetNewsletterSubscribtionStatus(result);
 
             return result;
         }
@@ -192,6 +202,8 @@ namespace Nop.Plugin.Api.Services
                     }
                 }
             }
+
+            SetNewsletterSubscribtionStatus(customerDto);
 
             return customerDto;
         }
@@ -429,6 +441,52 @@ namespace Nop.Plugin.Api.Services
             }
 
             return defaultLanguageId;
+        }
+
+        private void SetNewsletterSubscribtionStatus(IList<CustomerDto> customerDtos)
+        {
+            if(customerDtos == null)
+            {
+                return;
+            }
+
+            var allNewsletterCustomerEmail = getAllNewsletterCustomersEmails();
+
+            foreach(var customerDto in customerDtos)
+            {
+                SetNewsletterSubscribtionStatus(customerDto, allNewsletterCustomerEmail);
+            }
+        }
+
+        private void SetNewsletterSubscribtionStatus(CustomerDto customerDto, IEnumerable<String> allNewsletterCustomerEmail = null)
+        {
+            if(customerDto == null)
+            {
+                return;
+            }
+
+            if(allNewsletterCustomerEmail == null)
+            { 
+                allNewsletterCustomerEmail = getAllNewsletterCustomersEmails();
+            }
+
+            if (allNewsletterCustomerEmail.Contains(customerDto.Email.ToLowerInvariant()))
+            {
+                customerDto.SubscribedToNewsletter = true;
+            }
+        }
+
+        private IEnumerable<String> getAllNewsletterCustomersEmails()
+        {
+            return _cacheManager.Get(Configurations.NEWSLETTER_SUBSCRIBERS_KEY, () =>
+            {
+                var subscriberEmails = (from nls in _subscriptionRepository.TableNoTracking
+                            where nls.StoreId == _storeContext.CurrentStore.Id
+                            && nls.Active
+                            select nls.Email).ToList();
+
+                return subscriberEmails.Select(e => e.ToLowerInvariant());
+            });
         }
     }
 }
