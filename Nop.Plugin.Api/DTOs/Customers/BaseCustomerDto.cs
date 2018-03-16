@@ -105,6 +105,12 @@ namespace Nop.Plugin.Api.DTOs.Customers
         [JsonProperty("registered_in_store_id")]
         public int? RegisteredInStoreId { get; set; }
 
+        /// <summary>
+        ///  Gets or sets the subscribed to newsletter property
+        /// </summary>
+        [JsonProperty("subscribed_to_newsletter")]
+        public bool SubscribedToNewsletter { get; set; }
+
         [JsonProperty("role_ids")]
         public List<int> RoleIds
         {

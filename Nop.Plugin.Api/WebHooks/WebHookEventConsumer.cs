@@ -28,6 +28,8 @@ using Nop.Services.Stores;
 namespace Nop.Plugin.Api.WebHooks
 {
     using Microsoft.AspNet.WebHooks;
+    using Nop.Core.Caching;
+    using Nop.Core.Domain.Messages;
 
     public class WebHookEventConsumer : IConsumer<EntityInserted<Customer>>,
         IConsumer<EntityUpdated<Customer>>,
@@ -51,7 +53,10 @@ namespace Nop.Plugin.Api.WebHooks
         IConsumer<EntityInserted<ProductPicture>>,
         IConsumer<EntityUpdated<ProductPicture>>,
         IConsumer<EntityDeleted<ProductPicture>>,
-        IConsumer<EntityUpdated<Picture>>
+        IConsumer<EntityUpdated<Picture>>,
+        IConsumer<EntityInserted<NewsLetterSubscription>>,
+        IConsumer<EntityUpdated<NewsLetterSubscription>>,
+        IConsumer<EntityDeleted<NewsLetterSubscription>>
     {
         private IWebHookManager _webHookManager;
         private readonly ICustomerApiService _customerApiService;
@@ -63,6 +68,7 @@ namespace Nop.Plugin.Api.WebHooks
         private readonly IProductPictureService _productPictureService;
         private IStoreService _storeService;
         private IStoreContext _storeContext;
+        private readonly IStaticCacheManager _cacheManager;
 
         private IDTOHelper _dtoHelper;
 
@@ -78,6 +84,7 @@ namespace Nop.Plugin.Api.WebHooks
             _categoryService = EngineContext.Current.Resolve<ICategoryService>();
             _storeMappingService = EngineContext.Current.Resolve<IStoreMappingService>();
             _storeContext = EngineContext.Current.Resolve<IStoreContext>();
+            _cacheManager = EngineContext.Current.Resolve<IStaticCacheManager>();
         }
 
         private IWebHookManager WebHookManager
@@ -370,6 +377,48 @@ namespace Nop.Plugin.Api.WebHooks
                     ProductUpdated(productDto);
                 }
             }
+        }
+
+        public void HandleEvent(EntityDeleted<NewsLetterSubscription> eventMessage)
+        {
+            _cacheManager.RemoveByPattern(Configurations.NEWSLETTER_SUBSCRIBERS_KEY);
+
+            NewsLetterSubscriptionDto newsLetterSubscriptionDto = eventMessage.Entity.ToDto();
+
+            var storeIds = new List<int>
+            {
+                newsLetterSubscriptionDto.StoreId
+            };
+
+            NotifyRegisteredWebHooks(newsLetterSubscriptionDto, WebHookNames.NewsLetterSubscriptionDelete, storeIds);
+        }
+
+        public void HandleEvent(EntityInserted<NewsLetterSubscription> eventMessage)
+        {
+            _cacheManager.RemoveByPattern(Configurations.NEWSLETTER_SUBSCRIBERS_KEY);
+
+            NewsLetterSubscriptionDto newsLetterSubscriptionDto = eventMessage.Entity.ToDto();
+
+            var storeIds = new List<int>
+            {
+                newsLetterSubscriptionDto.StoreId
+            };
+
+            NotifyRegisteredWebHooks(newsLetterSubscriptionDto, WebHookNames.NewsLetterSubscriptionCreate, storeIds);
+        }
+
+        public void HandleEvent(EntityUpdated<NewsLetterSubscription> eventMessage)
+        {
+            _cacheManager.RemoveByPattern(Configurations.NEWSLETTER_SUBSCRIBERS_KEY);
+
+            NewsLetterSubscriptionDto newsLetterSubscriptionDto = eventMessage.Entity.ToDto();
+
+            var storeIds = new List<int>
+            {
+                newsLetterSubscriptionDto.StoreId
+            };
+
+            NotifyRegisteredWebHooks(newsLetterSubscriptionDto, WebHookNames.NewsLetterSubscriptionUpdate, storeIds);
         }
 
         private void NotifyProductCategoryMappingWebhook(ProductCategory productCategory, string eventName)

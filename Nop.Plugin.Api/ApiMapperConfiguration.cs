@@ -10,6 +10,7 @@
     using Nop.Core.Domain.Customers;
     using Nop.Core.Domain.Directory;
     using Nop.Core.Domain.Localization;
+    using Nop.Core.Domain.Messages;
     using Nop.Core.Domain.Orders;
     using Nop.Core.Domain.Stores;
     using Nop.Core.Infrastructure.Mapper;
@@ -67,6 +68,9 @@
             CreateMap<ProductAttributeValue, ProductAttributeValueDto>();
 
             CreateMap<ProductAttribute, ProductAttributeDto>();
+
+            CreateMap<NewsLetterSubscriptionDto, NewsLetterSubscription>();
+            CreateMap<NewsLetterSubscription, NewsLetterSubscriptionDto>();
         }
 
         private IMappingExpression<TSource, TDestination> CreateMap<TSource, TDestination>()
