@@ -5,7 +5,6 @@ using Nop.Plugin.Api.Validators;
 
 namespace Nop.Plugin.Api.DTOs.Categories
 {
-    [Validator(typeof(CategoryDtoValidator))]
     [JsonObject(Title = "news_letter_subscription")]
     public class NewsLetterSubscriptionDto
     {
