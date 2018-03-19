@@ -247,6 +247,7 @@
     <Compile Include="Controllers\BaseApiController.cs" />
     <Compile Include="Controllers\CustomerRolesController.cs" />
     <Compile Include="Controllers\LanguagesController.cs" />
+    <Compile Include="Controllers\NewsLetterSubscriptionController.cs" />
     <Compile Include="Controllers\OrderItemsController.cs" />
     <Compile Include="Controllers\ProductAttributesController.cs" />
     <Compile Include="DTOs\CustomerRoles\CustomerRoleDto.cs" />
@@ -260,6 +261,8 @@
     <Compile Include="DTOs\Languages\LanguageDto.cs" />
     <Compile Include="DTOs\Languages\LanguagesRootObject.cs" />
     <Compile Include="DTOs\Languages\LocalizedNameDto.cs" />
+    <Compile Include="DTOs\NewsLetterSubscriptions\NewsLetterSubscriptionDto.cs" />
+    <Compile Include="DTOs\NewsLetterSubscriptions\NewsLetterSubscriptionsRootObject.cs" />
     <Compile Include="DTOs\OrderItems\OrderItemsCountRootObject.cs" />
     <Compile Include="DTOs\OrderItems\OrderItemsRootObject.cs" />
     <Compile Include="DTOs\ProductItemAttributeDto.cs" />
@@ -289,11 +292,13 @@
     <Compile Include="JSON\ActionResults\RawJsonActionResult.cs" />
     <Compile Include="MappingExtensions\CustomerRoleDtoMappings.cs" />
     <Compile Include="MappingExtensions\LanguageDtoMappings.cs" />
+    <Compile Include="MappingExtensions\NewsLetterSubscriptoonDtoMappings.cs" />
     <Compile Include="MappingExtensions\ProductAttributeDtoMappings.cs" />
     <Compile Include="MappingExtensions\StoreDtoMappings.cs" />
     <Compile Include="Maps\IJsonPropertyMap.cs" />
     <Compile Include="Maps\JsonPropertyMap.cs" />
     <Compile Include="ModelBinders\JsonModelBinder.cs" />
+    <Compile Include="Models\NewsLetterSubscriptionsParameters\NewsLetterSubscriptionsParametersModel.cs" />
     <Compile Include="Models\ProductAttributesParameters\ProductAttributesParametersModel.cs" />
     <Compile Include="Models\DefaultWeApiErrorsModel.cs" />
     <Compile Include="Models\OrderItemsParameters\OrderItemsParametersModel.cs" />
@@ -399,6 +404,7 @@
     <Compile Include="Services\ClientService.cs" />
     <Compile Include="Services\CustomerApiService.cs" />
     <Compile Include="Services\ICategoryApiService.cs" />
+    <Compile Include="Services\INewsLetterSubscriptionApiService.cs" />
     <Compile Include="Services\IOrderItemApiService.cs" />
     <Compile Include="Services\IProductAttributeConverter.cs" />
     <Compile Include="Services\IProductAttributesApiService.cs" />
@@ -410,6 +416,7 @@
     <Compile Include="Services\IProductPictureService.cs" />
     <Compile Include="Services\IShoppingCartItemApiService.cs" />
     <Compile Include="Services\IWebHookService.cs" />
+    <Compile Include="Services\NewsLetterSubscriptionApiService.cs" />
     <Compile Include="Services\OrderApiService.cs" />
     <Compile Include="Services\OrderItemApiService.cs" />
     <Compile Include="Services\ProductApiService.cs" />

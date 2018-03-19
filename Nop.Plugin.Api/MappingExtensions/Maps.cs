@@ -1,93 +1,41 @@
-﻿namespace Nop.Plugin.Api
+﻿using System.Collections.Generic;
+using AutoMapper;
+using Nop.Core.Domain.Common;
+using Nop.Core.Domain.Customers;
+using Nop.Core.Domain.Orders;
+using Nop.Plugin.Api.DTOs.Customers;
+using System.Linq;
+using System.Web;
+using Nop.Core.Domain.Catalog;
+using Nop.Core.Domain.Directory;
+using Nop.Core.Domain.Localization;
+using Nop.Core.Domain.Stores;
+using Nop.Plugin.Api.AutoMapper;
+using Nop.Plugin.Api.Domain;
+using Nop.Plugin.Api.DTOs;
+using Nop.Plugin.Api.DTOs.Categories;
+using Nop.Plugin.Api.DTOs.CustomerRoles;
+using Nop.Plugin.Api.DTOs.Languages;
+using Nop.Plugin.Api.DTOs.OrderItems;
+using Nop.Plugin.Api.DTOs.Orders;
+using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
+using Nop.Plugin.Api.DTOs.Products;
+using Nop.Plugin.Api.DTOs.ShoppingCarts;
+using Nop.Plugin.Api.DTOs.Stores;
+using Nop.Plugin.Api.Models;
+using Nop.Plugin.Api.DTOs.ProductAttributes;
+using Nop.Core.Domain.Messages;
+
+namespace Nop.Plugin.Api.MappingExtensions
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net;
-    using global::AutoMapper;
-    using IdentityServer4.EntityFramework.Entities;
-    using Nop.Core.Domain.Catalog;
-    using Nop.Core.Domain.Common;
-    using Nop.Core.Domain.Customers;
-    using Nop.Core.Domain.Directory;
-    using Nop.Core.Domain.Localization;
-    using Nop.Core.Domain.Messages;
-    using Nop.Core.Domain.Orders;
-    using Nop.Core.Domain.Stores;
-    using Nop.Core.Infrastructure.Mapper;
-    using Nop.Plugin.Api.AutoMapper;
-    using Nop.Plugin.Api.Domain;
-    using Nop.Plugin.Api.DTOs;
-    using Nop.Plugin.Api.DTOs.Categories;
-    using Nop.Plugin.Api.DTOs.CustomerRoles;
-    using Nop.Plugin.Api.DTOs.Customers;
-    using Nop.Plugin.Api.DTOs.Languages;
-    using Nop.Plugin.Api.DTOs.OrderItems;
-    using Nop.Plugin.Api.DTOs.Orders;
-    using Nop.Plugin.Api.DTOs.ProductAttributes;
-    using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
-    using Nop.Plugin.Api.DTOs.Products;
-    using Nop.Plugin.Api.DTOs.ShoppingCarts;
-    using Nop.Plugin.Api.DTOs.Stores;
-    using Nop.Plugin.Api.MappingExtensions;
-    using Nop.Plugin.Api.Models;
-
-    public class ApiMapperConfiguration : Profile, IMapperProfile
+    public static class Maps
     {
-        public ApiMapperConfiguration()
-        {
-            CreateMap<ApiSettings, ConfigurationModel>();
-            CreateMap<ConfigurationModel, ApiSettings>();
-            
-            CreateMap<Category, CategoryDto>();
-            CreateMap<CategoryDto, Category>();
-
-            CreateMap<Store, StoreDto>();
-
-            CreateMap<ProductCategory, ProductCategoryMappingDto>();
-
-            CreateMap<Language, LanguageDto>();
-
-            CreateMap<CustomerRole, CustomerRoleDto>();
-
-            CreateClientToClientApiModelMap();
-
-            CreateAddressMap();
-            CreateAddressDtoToEntityMap();
-            CreateShoppingCartItemMap();
-
-            CreateCustomerToDTOMap();
-            CreateCustomerToOrderCustomerDTOMap();
-            CreateCustomerDTOToOrderCustomerDTOMap();
-            CreateCustomerForShoppingCartItemMapFromCustomer();
-
-            CreateMap<OrderItem, OrderItemDto>();
-            CreateOrderEntityToOrderDtoMap();
-
-            CreateProductMap();
-
-            CreateMap<ProductAttributeValue, ProductAttributeValueDto>();
-
-            CreateMap<ProductAttribute, ProductAttributeDto>();
-
-            CreateMap<NewsLetterSubscriptionDto, NewsLetterSubscription>();
-            CreateMap<NewsLetterSubscription, NewsLetterSubscriptionDto>();
-        }
-
-        private IMappingExpression<TSource, TDestination> CreateMap<TSource, TDestination>()
+        public static IMappingExpression<TSource, TDestination> CreateMap<TSource, TDestination>()
         {
             return AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<TSource, TDestination>().IgnoreAllNonExisting();
         }
 
-        private void CreateClientToClientApiModelMap()
-        {
-            AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Client, ClientApiModel>()
-                .ForMember(x => x.ClientSecret, y => y.MapFrom(src => src.ClientSecrets.FirstOrDefault().Description))
-                .ForMember(x => x.RedirectUrl, y => y.MapFrom(src => src.RedirectUris.FirstOrDefault().RedirectUri))
-                .ForMember(x => x.AccessTokenLifetime, y => y.MapFrom(src => src.AccessTokenLifetime))
-                .ForMember(x => x.RefreshTokenLifetime, y => y.MapFrom(src => src.AbsoluteRefreshTokenLifetime));
-        }
-
-        private void CreateOrderEntityToOrderDtoMap()
+        public static void CreateOrderEntityToOrderDtoMap()
         {
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Order, OrderDto>()
                 .IgnoreAllNonExisting()
@@ -95,7 +43,7 @@
                 .ForMember(x => x.OrderItemDtos, y => y.MapFrom(src => src.OrderItems.Select(x => x.ToDto())));
         }
 
-        private void CreateAddressMap()
+        public static void CreateAddressMap()
         {
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Address, AddressDto>()
                .IgnoreAllNonExisting()
@@ -104,14 +52,14 @@
                .ForMember(x => x.StateProvinceName, y => y.MapFrom(src => src.StateProvince.GetWithDefault(x => x, new StateProvince()).Name));
         }
 
-        private void CreateAddressDtoToEntityMap()
+        public static void CreateAddressDtoToEntityMap()
         {
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<AddressDto, Address>()
                 .IgnoreAllNonExisting()
                 .ForMember(x => x.Id, y => y.MapFrom(src => src.Id));
         }
 
-        private void CreateCustomerForShoppingCartItemMapFromCustomer()
+        public static void CreateCustomerForShoppingCartItemMapFromCustomer()
         {
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Customer, CustomerForShoppingCartItemDto>()
                 .IgnoreAllNonExisting()
@@ -121,7 +69,7 @@
                 .ForMember(x => x.Addresses, y => y.MapFrom(src => src.Addresses.GetWithDefault(x => x, new List<Address>()).Select(address => address.ToDto())));
         }
 
-        private void CreateCustomerToDTOMap()
+        public static void CreateCustomerToDTOMap()
         {
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Customer, CustomerDto>()
                 .IgnoreAllNonExisting()
@@ -145,19 +93,19 @@
                  .ForMember(x => x.RoleIds, y => y.MapFrom(src => src.CustomerRoles.Select(z => z.Id)));
         }
 
-        private void CreateCustomerToOrderCustomerDTOMap()
+        public static void CreateCustomerToOrderCustomerDTOMap()
         {
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Customer, OrderCustomerDto>()
                 .IgnoreAllNonExisting();
         }
 
-        private void CreateCustomerDTOToOrderCustomerDTOMap()
+        public static void CreateCustomerDTOToOrderCustomerDTOMap()
         {
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<CustomerDto, OrderCustomerDto>()
                 .IgnoreAllNonExisting();
         }
 
-        private void CreateShoppingCartItemMap()
+        public static void CreateShoppingCartItemMap()
         {
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<ShoppingCartItem, ShoppingCartItemDto>()
                 .IgnoreAllNonExisting()
@@ -165,15 +113,54 @@
                 .ForMember(x => x.ProductDto, y => y.MapFrom(src => src.Product.GetWithDefault(x => x, new Product()).ToDto()));
         }
 
-        private void CreateProductMap()
+        public static void CreateProductMap()
         {
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Product, ProductDto>()
                .IgnoreAllNonExisting()
                .ForMember(x => x.ProductAttributeMappings, y => y.Ignore())
-               .ForMember(x => x.FullDescription, y => y.MapFrom(src => WebUtility.HtmlEncode(src.FullDescription)))
+               .ForMember(x => x.FullDescription, y => y.MapFrom(src => HttpUtility.HtmlEncode(src.FullDescription)))
                .ForMember(x => x.Tags, y => y.MapFrom(src => src.ProductTags.Select(x => x.Name)));
         }
 
-        public int Order { get; }
+        public static void CreateAllMappings()
+        {
+            CreateMap<ApiSettings, ConfigurationModel>();
+            CreateMap<ConfigurationModel, ApiSettings>();
+
+            CreateMap<Client, ClientModel>();
+            CreateMap<ClientModel, Client>();
+
+            CreateMap<Category, CategoryDto>();
+            CreateMap<CategoryDto, Category>();
+
+            CreateMap<Store, StoreDto>();
+
+            CreateMap<ProductCategory, ProductCategoryMappingDto>();
+
+            CreateMap<Language, LanguageDto>();
+
+            CreateMap<CustomerRole, CustomerRoleDto>();
+
+            CreateAddressMap();
+            CreateAddressDtoToEntityMap();
+            CreateShoppingCartItemMap();
+
+            CreateCustomerToDTOMap();
+            CreateCustomerToOrderCustomerDTOMap();
+            CreateCustomerDTOToOrderCustomerDTOMap();
+            CreateCustomerForShoppingCartItemMapFromCustomer();
+
+            CreateMap<OrderItem, OrderItemDto>();
+            CreateOrderEntityToOrderDtoMap();
+
+            CreateProductMap();
+
+            CreateMap<ProductAttributeValue, ProductAttributeValueDto>();
+
+            CreateMap<ProductAttribute, ProductAttributeDto>();
+
+            CreateMap<NewsLetterSubscription, NewsLetterSubscriptionDto>();
+            CreateMap<NewsLetterSubscriptionDto, NewsLetterSubscription>();
+        }
     }
 }

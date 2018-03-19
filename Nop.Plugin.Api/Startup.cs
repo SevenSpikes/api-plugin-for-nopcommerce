@@ -402,6 +402,12 @@ namespace Nop.Plugin.Api
                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
 
             config.Routes.MapHttpRoute(
+               name: "getNewsLetterSubscriptions",
+               routeTemplate: "api/news_letter_subscriptions",
+               defaults: new { controller = "NewsLetterSubscription", action = "GetNewsLetterSubscriptions" },
+               constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+
+            config.Routes.MapHttpRoute(
                name: "getAllWebHooks",
                routeTemplate: "api/webhooks/registrations",
                defaults: new { controller = "WebHookRegistrations", action = "GetAllWebHooks" },
