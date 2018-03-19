@@ -460,7 +460,7 @@ namespace Nop.Plugin.Api.Services
 
         private void SetNewsletterSubscribtionStatus(CustomerDto customerDto, IEnumerable<String> allNewsletterCustomerEmail = null)
         {
-            if(customerDto == null)
+            if(customerDto == null || String.IsNullOrEmpty(customerDto.Email))
             {
                 return;
             }
@@ -470,7 +470,7 @@ namespace Nop.Plugin.Api.Services
                 allNewsletterCustomerEmail = getAllNewsletterCustomersEmails();
             }
 
-            if (allNewsletterCustomerEmail.Contains(customerDto.Email.ToLowerInvariant()))
+            if (allNewsletterCustomerEmail != null && allNewsletterCustomerEmail.Contains(customerDto.Email.ToLowerInvariant()))
             {
                 customerDto.SubscribedToNewsletter = true;
             }
@@ -480,12 +480,17 @@ namespace Nop.Plugin.Api.Services
         {
             return _cacheManager.Get(Configurations.NEWSLETTER_SUBSCRIBERS_KEY, () =>
             {
-                var subscriberEmails = (from nls in _subscriptionRepository.TableNoTracking
-                            where nls.StoreId == _storeContext.CurrentStore.Id
-                            && nls.Active
-                            select nls.Email).ToList();
+                IEnumerable<String> subscriberEmails = (from nls in _subscriptionRepository.TableNoTracking
+                                                        where nls.StoreId == _storeContext.CurrentStore.Id
+                                                        && nls.Active
+                                                        select nls.Email).ToList();
 
-                return subscriberEmails.Select(e => e.ToLowerInvariant());
+                if (subscriberEmails != null)
+                {
+                    subscriberEmails = subscriberEmails.Where(e => !String.IsNullOrEmpty(e)).Select(e => e.ToLowerInvariant());
+                }
+
+                return subscriberEmails.Where(e => !String.IsNullOrEmpty(e)).Select(e => e.ToLowerInvariant());
             });
         }
     }
