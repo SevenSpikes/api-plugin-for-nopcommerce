@@ -18,6 +18,7 @@ namespace Nop.Plugin.Api.Infrastructure
     using Nop.Plugin.Api.JSON.Serializers;
     using Nop.Plugin.Api.ModelBinders;
     using Nop.Plugin.Api.Validators;
+    using Nop.Plugin.Api.WebHooks;
     using Nop.Web.Framework.Infrastructure;
 
     public class DependencyRegister : IDependencyRegistrar
@@ -58,6 +59,8 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<JsonHelper>().As<IJsonHelper>().InstancePerLifetimeScope();
             builder.RegisterType<DTOHelper>().As<IDTOHelper>().InstancePerLifetimeScope();
             builder.RegisterType<NopConfigManagerHelper>().As<IConfigManagerHelper>().InstancePerLifetimeScope();
+
+            builder.RegisterType<NopWebHooksLogger>().As<Microsoft.AspNet.WebHooks.Diagnostics.ILogger>().InstancePerLifetimeScope();
 
             builder.RegisterType<JsonFieldsSerializer>().As<IJsonFieldsSerializer>().InstancePerLifetimeScope();
 
