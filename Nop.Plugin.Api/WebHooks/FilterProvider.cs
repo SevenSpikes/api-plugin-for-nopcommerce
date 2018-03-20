@@ -30,7 +30,10 @@ namespace Nop.Plugin.Api.WebHooks
         new WebHookFilter { Name = WebHookNames.StoresUpdate, Description = "A store has been updated."},
         new WebHookFilter { Name = WebHookNames.LanguagesCreate, Description = "A language has been created."},
         new WebHookFilter { Name = WebHookNames.LanguagesUpdate, Description = "A language has been updated."},
-        new WebHookFilter { Name = WebHookNames.LanguagesDelete, Description = "A language has been deleted."}
+        new WebHookFilter { Name = WebHookNames.LanguagesDelete, Description = "A language has been deleted."},
+        new WebHookFilter { Name = WebHookNames.NewsLetterSubscriptionCreate, Description = "A news letter subscription has been created."},
+        new WebHookFilter { Name = WebHookNames.NewsLetterSubscriptionUpdate, Description = "A news letter subscription has been updated."},
+        new WebHookFilter { Name = WebHookNames.NewsLetterSubscriptionDelete, Description = "A news letter subscription has been deleted."}
     };
 
         public Task<Collection<WebHookFilter>> GetFiltersAsync()
