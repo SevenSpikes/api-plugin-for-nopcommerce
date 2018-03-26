@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using Nop.Core.Data;
 using Nop.Web.Framework.Kendoui;
 using Nop.Core.Domain.Customers;
@@ -15,6 +14,9 @@ using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Services.Localization;
 using Nop.Services.Stores;
+using Nop.Core.Caching;
+using Nop.Core.Infrastructure;
+using Nop.Core.Domain.Messages;
 
 namespace Nop.Plugin.Api.Services
 {
@@ -31,18 +33,24 @@ namespace Nop.Plugin.Api.Services
         private readonly IStoreMappingService _storeMappingService;
         private readonly IRepository<Customer> _customerRepository;
         private readonly IRepository<GenericAttribute> _genericAttributeRepository;
+        private readonly IRepository<NewsLetterSubscription> _subscriptionRepository;
+        private readonly ICacheManager _cacheManager;
 
         public CustomerApiService(IRepository<Customer> customerRepository,
             IRepository<GenericAttribute> genericAttributeRepository,
+            IRepository<NewsLetterSubscription> subscriptionRepository,
             IStoreContext storeContext,
             ILanguageService languageService,
             IStoreMappingService storeMappingService)
         {
             _customerRepository = customerRepository;
             _genericAttributeRepository = genericAttributeRepository;
+            _subscriptionRepository = subscriptionRepository;
             _storeContext = storeContext;
             _languageService = languageService;
             _storeMappingService = storeMappingService;
+
+            _cacheManager = EngineContext.Current.ContainerManager.Resolve<ICacheManager>("nop_cache_static");
         }
 
         public IList<CustomerDto> GetCustomersDtos(DateTime? createdAtMin = null, DateTime? createdAtMax = null, int limit = Configurations.DefaultLimit,
@@ -51,6 +59,8 @@ namespace Nop.Plugin.Api.Services
             var query = GetCustomersQuery(createdAtMin, createdAtMax, sinceId);
 
             IList<CustomerDto> result = HandleCustomerGenericAttributes(null, query, limit, page);
+
+            SetNewsletterSubscribtionStatus(result);
 
             return result;
         }
@@ -239,6 +249,8 @@ namespace Nop.Plugin.Api.Services
                     }
                 }
             }
+
+            SetNewsletterSubscribtionStatus(customerDto);
 
             return customerDto;
         }
@@ -532,6 +544,57 @@ namespace Nop.Plugin.Api.Services
             }
 
             return defaultLanguageId;
+        }
+
+        private void SetNewsletterSubscribtionStatus(IList<CustomerDto> customerDtos)
+        {
+            if (customerDtos == null)
+            {
+                return;
+            }
+
+            var allNewsletterCustomerEmail = getAllNewsletterCustomersEmails();
+
+            foreach (var customerDto in customerDtos)
+            {
+                SetNewsletterSubscribtionStatus(customerDto, allNewsletterCustomerEmail);
+            }
+        }
+
+        private void SetNewsletterSubscribtionStatus(CustomerDto customerDto, IEnumerable<String> allNewsletterCustomerEmail = null)
+        {
+            if (customerDto == null || String.IsNullOrEmpty(customerDto.Email))
+            {
+                return;
+            }
+
+            if (allNewsletterCustomerEmail == null)
+            {
+                allNewsletterCustomerEmail = getAllNewsletterCustomersEmails();
+            }
+
+            if (allNewsletterCustomerEmail != null && allNewsletterCustomerEmail.Contains(customerDto.Email.ToLowerInvariant()))
+            {
+                customerDto.SubscribedToNewsletter = true;
+            }
+        }
+
+        private IEnumerable<String> getAllNewsletterCustomersEmails()
+        {
+            return _cacheManager.Get(Configurations.NEWSLETTER_SUBSCRIBERS_KEY, () =>
+            {
+                IEnumerable<String> subscriberEmails = (from nls in _subscriptionRepository.TableNoTracking
+                                                        where nls.StoreId == _storeContext.CurrentStore.Id
+                                                        && nls.Active
+                                                        select nls.Email).ToList();
+
+                if (subscriberEmails != null)
+                {
+                    subscriberEmails = subscriberEmails.Where(e => !String.IsNullOrEmpty(e)).Select(e => e.ToLowerInvariant());
+                }
+
+                return subscriberEmails.Where(e => !String.IsNullOrEmpty(e)).Select(e => e.ToLowerInvariant());
+            });
         }
     }
 }
