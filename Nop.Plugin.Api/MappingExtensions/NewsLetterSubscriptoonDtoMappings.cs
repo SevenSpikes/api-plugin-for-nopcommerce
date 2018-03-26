@@ -1,5 +1,5 @@
-﻿using Nop.Core.Domain.Messages;
-using Nop.Plugin.Api.AutoMapper;
+﻿using Nop.Admin.Extensions;
+using Nop.Core.Domain.Messages;
 using Nop.Plugin.Api.DTOs.Categories;
 
 namespace Nop.Plugin.Api.MappingExtensions
