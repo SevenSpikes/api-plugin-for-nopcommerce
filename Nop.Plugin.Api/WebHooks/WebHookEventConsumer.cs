@@ -25,6 +25,8 @@ using Nop.Plugin.Api.DTOs.Stores;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Services.Catalog;
 using Nop.Services.Stores;
+using Nop.Core.Caching;
+using Nop.Core.Domain.Messages;
 
 namespace Nop.Plugin.Api.WebHooks
 {
@@ -50,7 +52,10 @@ namespace Nop.Plugin.Api.WebHooks
         IConsumer<EntityInserted<ProductPicture>>,
         IConsumer<EntityUpdated<ProductPicture>>,
         IConsumer<EntityDeleted<ProductPicture>>,
-        IConsumer<EntityUpdated<Picture>>
+        IConsumer<EntityUpdated<Picture>>,
+        IConsumer<EntityInserted<NewsLetterSubscription>>,
+        IConsumer<EntityUpdated<NewsLetterSubscription>>,
+        IConsumer<EntityDeleted<NewsLetterSubscription>>
     {
         private readonly IWebHookManager _webHookManager;
         private readonly ICustomerApiService _customerApiService;
@@ -62,6 +67,7 @@ namespace Nop.Plugin.Api.WebHooks
         private readonly IProductPictureService _productPictureService;
         private IStoreService _storeService;
         private IStoreContext _storeContext;
+        private readonly ICacheManager _cacheManager;
 
         private IDTOHelper _dtoHelper;
 
@@ -79,6 +85,8 @@ namespace Nop.Plugin.Api.WebHooks
             _categoryService = EngineContext.Current.ContainerManager.Resolve<ICategoryService>();
             _storeMappingService = EngineContext.Current.ContainerManager.Resolve<IStoreMappingService>();
             _storeContext = EngineContext.Current.ContainerManager.Resolve<IStoreContext>();
+
+            _cacheManager = EngineContext.Current.ContainerManager.Resolve<ICacheManager>("nop_cache_static");
 
             _webHookManager = webHookService.GetHookManager();
         }
@@ -338,6 +346,48 @@ namespace Nop.Plugin.Api.WebHooks
 
                 ProductUpdated(productDto);
             }
+        }
+
+        public void HandleEvent(EntityDeleted<NewsLetterSubscription> eventMessage)
+        {
+            _cacheManager.RemoveByPattern(Configurations.NEWSLETTER_SUBSCRIBERS_KEY);
+
+            NewsLetterSubscriptionDto newsLetterSubscriptionDto = eventMessage.Entity.ToDto();
+
+            var storeIds = new List<int>
+            {
+                newsLetterSubscriptionDto.StoreId
+            };
+
+            NotifyRegisteredWebHooks(newsLetterSubscriptionDto, WebHookNames.NewsLetterSubscriptionDelete, storeIds);
+        }
+
+        public void HandleEvent(EntityInserted<NewsLetterSubscription> eventMessage)
+        {
+            _cacheManager.RemoveByPattern(Configurations.NEWSLETTER_SUBSCRIBERS_KEY);
+
+            NewsLetterSubscriptionDto newsLetterSubscriptionDto = eventMessage.Entity.ToDto();
+
+            var storeIds = new List<int>
+            {
+                newsLetterSubscriptionDto.StoreId
+            };
+
+            NotifyRegisteredWebHooks(newsLetterSubscriptionDto, WebHookNames.NewsLetterSubscriptionCreate, storeIds);
+        }
+
+        public void HandleEvent(EntityUpdated<NewsLetterSubscription> eventMessage)
+        {
+            _cacheManager.RemoveByPattern(Configurations.NEWSLETTER_SUBSCRIBERS_KEY);
+
+            NewsLetterSubscriptionDto newsLetterSubscriptionDto = eventMessage.Entity.ToDto();
+
+            var storeIds = new List<int>
+            {
+                newsLetterSubscriptionDto.StoreId
+            };
+
+            NotifyRegisteredWebHooks(newsLetterSubscriptionDto, WebHookNames.NewsLetterSubscriptionUpdate, storeIds);
         }
 
         // We trigger a product updated WebHook when a picture used in a product is updated.

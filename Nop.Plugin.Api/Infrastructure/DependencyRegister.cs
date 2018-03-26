@@ -57,7 +57,6 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<CustomersController>().InstancePerLifetimeScope();
             builder.RegisterType<CategoriesController>().InstancePerLifetimeScope();
             builder.RegisterType<ProductsController>().InstancePerLifetimeScope();
-            builder.RegisterType<ProductAttributesController>().InstancePerLifetimeScope();
             builder.RegisterType<ProductCategoryMappingsController>().InstancePerLifetimeScope();
             builder.RegisterType<OrdersController>().InstancePerLifetimeScope();
             builder.RegisterType<ShoppingCartItemsController>().InstancePerLifetimeScope();
@@ -67,6 +66,7 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<CustomerRolesController>().InstancePerLifetimeScope();
             builder.RegisterType<WebHookRegistrationsController>().InstancePerLifetimeScope();
             builder.RegisterType<WebHookFiltersController>().InstancePerLifetimeScope();
+            builder.RegisterType<NewsLetterSubscriptionController>().InstancePerLifetimeScope();
         }
 
         private void RegisterModelBinders(ContainerBuilder builder)
@@ -85,8 +85,9 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<OrderApiService>().As<IOrderApiService>().InstancePerLifetimeScope();
             builder.RegisterType<ShoppingCartItemApiService>().As<IShoppingCartItemApiService>().InstancePerLifetimeScope();
             builder.RegisterType<OrderItemApiService>().As<IOrderItemApiService>().InstancePerLifetimeScope();
-            builder.RegisterType<ProductAttributesApiService>().As<IProductAttributesApiService>().InstancePerLifetimeScope();
             builder.RegisterType<ProductPictureService>().As<IProductPictureService>().InstancePerLifetimeScope();
+
+            builder.RegisterType<NewsLetterSubscriptionApiService>().As<INewsLetterSubscriptionApiService>().InstancePerLifetimeScope();
 
             builder.RegisterType<ProductAttributeConverter>().As<IProductAttributeConverter>().InstancePerLifetimeScope();
 

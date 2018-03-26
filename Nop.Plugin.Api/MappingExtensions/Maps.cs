@@ -23,6 +23,7 @@ using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
 using Nop.Plugin.Api.DTOs.Stores;
 using Nop.Plugin.Api.Models;
+using Nop.Core.Domain.Messages;
 
 namespace Nop.Plugin.Api.MappingExtensions
 {
@@ -138,6 +139,9 @@ namespace Nop.Plugin.Api.MappingExtensions
             CreateMap<Language, LanguageDto>();
 
             CreateMap<CustomerRole, CustomerRoleDto>();
+
+            CreateMap<NewsLetterSubscriptionDto, NewsLetterSubscription>();
+            CreateMap<NewsLetterSubscription, NewsLetterSubscriptionDto>();
 
             CreateAddressMap();
             CreateAddressDtoToEntityMap();
