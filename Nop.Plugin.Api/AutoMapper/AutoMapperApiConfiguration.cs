@@ -8,6 +8,9 @@ namespace Nop.Plugin.Api.AutoMapper
         private static MapperConfigurationExpression _mapperConfigurationExpression;
         private static IMapper _mapper;
 
+        private static readonly object mapperConfigurationExpressionLockObject = new object();
+        private static readonly object mapperLockObject = new object();
+
         public static MapperConfigurationExpression MapperConfigurationExpression
         {
             get
@@ -19,7 +22,7 @@ namespace Nop.Plugin.Api.AutoMapper
 
                 return _mapperConfigurationExpression;
             }
-        }
+        }        
 
         public static IMapper Mapper
         {
@@ -27,9 +30,15 @@ namespace Nop.Plugin.Api.AutoMapper
             {
                 if (_mapper == null)
                 {
-                    var mapperConfiguration = new MapperConfiguration(MapperConfigurationExpression);
+                    lock (mapperLockObject)
+                    {
+                        if (_mapper == null)
+                        {
+                            var mapperConfiguration = new MapperConfiguration(MapperConfigurationExpression);
 
-                    _mapper = mapperConfiguration.CreateMapper();
+                            _mapper = mapperConfiguration.CreateMapper();
+                        }
+                    }
                 }
 
                 return _mapper;

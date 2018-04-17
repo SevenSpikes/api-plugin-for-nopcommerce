@@ -112,18 +112,8 @@
             configManagerHelper.AddBindingRedirects();
 
             // required by the WebHooks support
-            configManagerHelper.AddConnectionString();
-
-            var dataSettings = configManagerHelper.DataSettings;
-            Microsoft.AspNet.WebHooks.Config.SettingsDictionary settings = new Microsoft.AspNet.WebHooks.Config.SettingsDictionary();
-            settings.Add("MS_SqlStoreConnectionString", dataSettings.DataConnectionString);
-            settings.Connections.Add("MS_SqlStoreConnectionString", new Microsoft.AspNet.WebHooks.Config.ConnectionSettings("MS_SqlStoreConnectionString", dataSettings.DataConnectionString));
-
-            ILogger logger = new NopWebHooksLogger();
-            Microsoft.AspNet.WebHooks.IWebHookStore store = new Microsoft.AspNet.WebHooks.SqlWebHookStore(settings, logger);
-
-            Microsoft.AspNet.WebHooks.Services.CustomServices.SetStore(store);
-
+            configManagerHelper.AddConnectionString();           
+            
             // This is required only in development.
             // It it is required only when you want to send a web hook to an https address with an invalid SSL certificate. (self-signed)
             // The code marks all certificates as valid.

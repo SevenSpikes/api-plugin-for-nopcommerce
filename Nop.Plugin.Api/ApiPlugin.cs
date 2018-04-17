@@ -39,9 +39,14 @@
 
         public override void Install()
         {
-            // Add the nopCommerce connection string to the web.config file. This is required by the WebHooks.
-            //IWebConfigMangerHelper webConfigManagerHelper = EngineContext.Current.Resolve<IWebConfigMangerHelper>();
-            //webConfigManagerHelper.AddConnectionString();           
+            var configManagerHelper = new NopConfigManagerHelper();
+
+            // some of third party libaries that we use for WebHooks and Swagger use older versions
+            // of certain assemblies so we need to redirect them to the those that nopCommerce uses
+            configManagerHelper.AddBindingRedirects();
+
+            // required by the WebHooks support
+            configManagerHelper.AddConnectionString();
 
             _objectContext.Install();
 
@@ -107,7 +112,7 @@
             this.AddOrUpdatePluginLocaleResource("Api.WebHooks.InvalidFilters", "The following filters are not valid: '{0}'. A list of valid filters can be obtained from the path '{1}'.");
 
             this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.EnableLogging", "Enable Logging");
-            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.EnableLogging.Hint", "By enable logging you will see messages in the Log. These messages are needed ONLY for diagnostic purposes");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.EnableLogging.Hint", "By enable logging you will see webhook messages in the Log. These messages are needed ONLY for diagnostic purposes. NOTE: A restart is required when changing this setting in order to take effect");
 
             ApiSettings settings = new ApiSettings
             {
@@ -115,7 +120,7 @@
                 AllowRequestsFromSwagger = false
             };
 
-            _settingService.SaveSetting(settings);
+            _settingService.SaveSetting(settings);           
 
             base.Install();
 
