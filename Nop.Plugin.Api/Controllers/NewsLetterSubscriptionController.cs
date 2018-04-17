@@ -3,13 +3,18 @@ using System.Linq;
 using System.Net;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Nop.Core;
+using Nop.Core.Domain.Messages;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.Constants;
+using Nop.Plugin.Api.Delta;
 using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Plugin.Api.DTOs.Errors;
+using Nop.Plugin.Api.Factories;
 using Nop.Plugin.Api.JSON.ActionResults;
 using Nop.Plugin.Api.JSON.Serializers;
 using Nop.Plugin.Api.MappingExtensions;
+using Nop.Plugin.Api.ModelBinders;
 using Nop.Plugin.Api.Models.CustomersParameters;
 using Nop.Plugin.Api.Services;
 using Nop.Services.Customers;
@@ -17,6 +22,7 @@ using Nop.Services.Discounts;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
 using Nop.Services.Media;
+using Nop.Services.Messages;
 using Nop.Services.Security;
 using Nop.Services.Stores;
 
@@ -26,6 +32,8 @@ namespace Nop.Plugin.Api.Controllers
     public class NewsLetterSubscriptionController : BaseApiController
     {
         private readonly INewsLetterSubscriptionApiService _newsLetterSubscriptionApiService;
+        private readonly IStoreContext _storeContext;
+        private readonly INewsLetterSubscriptionService _newsLetterSubscriptionService;
 
         public NewsLetterSubscriptionController(IJsonFieldsSerializer jsonFieldsSerializer,
             IAclService aclService,
@@ -36,13 +44,17 @@ namespace Nop.Plugin.Api.Controllers
             ICustomerActivityService customerActivityService,
             ILocalizationService localizationService,
             IPictureService pictureService,
-            INewsLetterSubscriptionApiService newsLetterSubscriptionApiService) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService, pictureService)
+            INewsLetterSubscriptionApiService newsLetterSubscriptionApiService,
+            IStoreContext storeContext,
+            INewsLetterSubscriptionService newsLetterSubscriptionService) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService, pictureService)
         {
             _newsLetterSubscriptionApiService = newsLetterSubscriptionApiService;
+            _storeContext = storeContext;
+            _newsLetterSubscriptionService = newsLetterSubscriptionService;
         }
 
         /// <summary>
-        /// Receive a list of all Categories
+        /// Receive a list of all NewsLetters
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="400">Bad Request</response>
@@ -78,6 +90,38 @@ namespace Nop.Plugin.Api.Controllers
             var json = _jsonFieldsSerializer.Serialize(newsLetterSubscriptionsRootObject, parameters.Fields);
 
             return new RawJsonActionResult(json);
+        }
+
+        /// <summary>
+        /// Deactivate a NewsLetter subscriber by email
+        /// </summary>
+        /// <response code="200">OK</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized</response>
+        [HttpPost]
+        [Route("/api/news_letter_subscriptions/{email}/deactivate")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorsRootObject), 422)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        public IActionResult DeactivateNewsLetterSubscription(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return Error(HttpStatusCode.BadRequest, "The email parameter could not be empty.");
+            }
+
+            var existingSubscription = _newsLetterSubscriptionService.GetNewsLetterSubscriptionByEmailAndStoreId(email, _storeContext.CurrentStore.Id);
+
+            if (existingSubscription == null)
+            {
+                return Error(HttpStatusCode.BadRequest, "There is no news letter subscription with the specified email.");
+            }
+
+            existingSubscription.Active = false;
+
+            _newsLetterSubscriptionService.UpdateNewsLetterSubscription(existingSubscription);
+
+            return Ok();
         }
     }
 }
