@@ -93,7 +93,6 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="400">Bad Request</response>
         /// <response code="401">Unauthorized</response>
         [HttpPost]
-        [Route("/api/news_letter_subscriptions/{email}/deactivate")]
         [GetRequestsErrorInterceptorActionFilter]
         public IHttpActionResult DeactivateNewsLetterSubscription(string email)
         {
