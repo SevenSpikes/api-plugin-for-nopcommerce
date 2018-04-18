@@ -119,6 +119,18 @@ namespace Nop.Plugin.Api
                 constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Delete) });
 
             config.Routes.MapHttpRoute(
+                name: "getNewsLetterSubscriptions",
+                routeTemplate: "api/news_letter_subscriptions",
+                defaults: new { controller = "NewsLetterSubscription", action = "GetNewsLetterSubscriptions" },
+                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+
+            config.Routes.MapHttpRoute(
+              name: "deactivateNewsLetterSubscription",
+              routeTemplate: "api/news_letter_subscriptions/{email}/deactivate",
+              defaults: new { controller = "NewsLetterSubscription", action = "DeactivateNewsLetterSubscription" },
+              constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Post) });
+
+            config.Routes.MapHttpRoute(
                name: "categories",
                routeTemplate: "api/categories",
                defaults: new { controller = "Categories", action = "GetCategories" },
