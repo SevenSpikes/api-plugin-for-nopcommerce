@@ -250,6 +250,12 @@ namespace Nop.Plugin.Api.Controllers
 
             foreach (var address in customerDelta.Dto.CustomerAddresses)
             {
+                // we need to explicitly set the date as if it is not specified
+                // it will default to 01/01/0001 which is not supported by SQL Server and throws and exception
+                if (address.CreatedOnUtc == null)
+                {
+                    address.CreatedOnUtc = DateTime.UtcNow;
+                }
                 newCustomer.Addresses.Add(address.ToEntity());
             }
             
