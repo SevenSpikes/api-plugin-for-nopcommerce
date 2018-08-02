@@ -218,12 +218,12 @@ namespace Nop.Plugin.Api.Controllers
             //search engine name
             if (categoryDelta.Dto.SeName != null)
             {
-                var seName = category.ValidateSeName(categoryDelta.Dto.SeName, category.Name, true);
+                var seName = _urlRecordService.ValidateSeName(category, categoryDelta.Dto.SeName, category.Name, true);
                 _urlRecordService.SaveSlug(category, seName, 0);
             }
 
             _customerActivityService.InsertActivity("AddNewCategory",
-                _localizationService.GetResource("ActivityLog.AddNewCategory"), category.Name);
+                string.Format(_localizationService.GetResource("ActivityLog.AddNewCategory"), category.Name), category);
 
             // Preparing the result dto of the new category
             CategoryDto newCategoryDto = _dtoHelper.PrepareCategoryDTO(category);
@@ -280,14 +280,14 @@ namespace Nop.Plugin.Api.Controllers
             //search engine name
             if (categoryDelta.Dto.SeName != null)
             {
-                var seName = category.ValidateSeName(categoryDelta.Dto.SeName, category.Name, true);
+                var seName = _urlRecordService.ValidateSeName(category, categoryDelta.Dto.SeName, category.Name, true);
                 _urlRecordService.SaveSlug(category, seName, 0);
             }
 
             _categoryService.UpdateCategory(category);
 
             _customerActivityService.InsertActivity("UpdateCategory",
-                _localizationService.GetResource("ActivityLog.UpdateCategory"), category.Name);
+                string.Format(_localizationService.GetResource("ActivityLog.UpdateCategory"), category.Name), category);
 
             CategoryDto categoryDto = _dtoHelper.PrepareCategoryDTO(category);
 
@@ -324,7 +324,8 @@ namespace Nop.Plugin.Api.Controllers
             _categoryService.DeleteCategory(categoryToDelete);
 
             //activity log
-            _customerActivityService.InsertActivity("DeleteCategory", _localizationService.GetResource("ActivityLog.DeleteCategory"), categoryToDelete.Name);
+            _customerActivityService.InsertActivity("DeleteCategory",
+                string.Format(_localizationService.GetResource("ActivityLog.DeleteCategory"), categoryToDelete.Name), categoryToDelete);
 
             return new RawJsonActionResult("{}");
         }

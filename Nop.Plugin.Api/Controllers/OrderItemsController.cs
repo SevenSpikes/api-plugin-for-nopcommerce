@@ -239,7 +239,7 @@ namespace Nop.Plugin.Api.Controllers
             _orderService.UpdateOrder(order);
 
             _customerActivityService.InsertActivity("AddNewOrderItem",
-               _localizationService.GetResource("ActivityLog.AddNewOrderItem"), newOrderItem.Id);
+                string.Format(_localizationService.GetResource("ActivityLog.AddNewOrderItem"), newOrderItem.Id), newOrderItem);
 
             var orderItemsRootObject = new OrderItemsRootObject();
 
@@ -294,7 +294,7 @@ namespace Nop.Plugin.Api.Controllers
             _orderService.UpdateOrder(order);
 
             _customerActivityService.InsertActivity("UpdateOrderItem",
-               _localizationService.GetResource("ActivityLog.UpdateOrderItem"), orderItemToUpdate.Id);
+                string.Format(_localizationService.GetResource("ActivityLog.UpdateOrderItem"), orderItemToUpdate.Id), orderItemToUpdate);
 
             var orderItemsRootObject = new OrderItemsRootObject();
 

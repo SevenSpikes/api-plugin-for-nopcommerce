@@ -1,23 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity.ModelConfiguration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Nop.Plugin.Api.Domain;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Nop.Data.Mapping;
 
 namespace Nop.Plugin.Api.DataMappings
 {
-    public class WebHooksMap : EntityTypeConfiguration<Domain.WebHooks>
+    public class WebHooksMap : NopEntityTypeConfiguration<Domain.WebHooks>
     {
-        public WebHooksMap()
+        public override void Configure(EntityTypeBuilder<Domain.WebHooks> builder)
         {
-            ToTable("WebHooks", "WebHooks");
+            builder.ToTable("WebHooks", "WebHooks");
+            builder.HasKey(wh => new { wh.User, wh.Id });
 
-            HasKey(wh => new {wh.User, wh.Id});
-
-            Property(wh => wh.ProtectedData).IsRequired();
-            Property(wh => wh.RowVer).IsRowVersion();
+            builder.Property(wh => wh.ProtectedData).IsRequired();
+            builder.Property(wh => wh.RowVer).IsRowVersion();
         }
     }
 }

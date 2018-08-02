@@ -1,28 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Nop.Core;
 using Nop.Data;
+using Nop.Data.Extensions;
 using Nop.Plugin.Api.DataMappings;
-using Nop.Plugin.Api.Domain;
-using System.Linq;
 
 namespace Nop.Plugin.Api.Data
 {
     public class ApiObjectContext : DbContext, IDbContext
     {
-        public ApiObjectContext(string nameOrConnectionString)
-            : base(nameOrConnectionString)
+        public ApiObjectContext(DbContextOptions<ApiObjectContext> options) 
+            : base(options)
         {
-            //((IObjectContextAdapter) this).ObjectContext.ContextOptions.LazyLoadingEnabled = true;
         }
 
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            Database.SetInitializer<ApiObjectContext>(null);
-            
-            modelBuilder.Configurations.Add(new WebHooksMap());
+            modelBuilder.ApplyConfiguration(new WebHooksMap());
 
             //disable EdmMetadata generation
             //modelBuilder.Conventions.Remove<IncludeMetadataConvention>();
@@ -50,87 +46,78 @@ namespace Nop.Plugin.Api.Data
         /// </summary>
         public void Uninstall()
         {
-            var webHooksName = this.GetTableName<Domain.WebHooks>();
-            DropPluginTableWithSchema(this, webHooksName);
+            this.DropPluginTable(nameof(Domain.WebHooks));
         }
 
-        // The WebHook table has a different schema than the nopCommerce tables,
-        // so in order to drop the table we should use this method.
-        private void DropPluginTableWithSchema(DbContext context, string tableName)
-        {
-            if (context == null)
-                throw new ArgumentNullException("context");
-
-            if (String.IsNullOrEmpty(tableName))
-                throw new ArgumentNullException("tableName");
-
-            //drop the table
-            var tableSchema = context.Database.SqlQuery<string>("SELECT TABLE_SCHEMA FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}", tableName).FirstOrDefault();
- 
-            if (!String.IsNullOrEmpty(tableSchema))
-            {
-                var dbScript = String.Format("DROP TABLE [{0}].[{1}]", tableSchema, tableName);
-                context.Database.ExecuteSqlCommand(dbScript);
-            }
-            context.SaveChanges();
-        }
-
-        public IDbSet<TEntity> Set<TEntity>() where TEntity : BaseEntity
+        /// <summary>
+        /// Creates a DbSet that can be used to query and save instances of entity
+        /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        /// <returns>A set for the given entity type</returns>
+        public virtual new DbSet<TEntity> Set<TEntity>() where TEntity : BaseEntity
         {
             return base.Set<TEntity>();
         }
 
-        public IList<TEntity> ExecuteStoredProcedureList<TEntity>(string commandText, params object[] parameters) where TEntity : BaseEntity, new()
+        /// <summary>
+        /// Generate a script to create all tables for the current model
+        /// </summary>
+        /// <returns>A SQL script</returns>
+        public virtual string GenerateCreateScript()
         {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<TElement> SqlQuery<TElement>(string sql, params object[] parameters)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int ExecuteSqlCommand(string sql, bool doNotEnsureTransaction = false, int? timeout = null, params object[] parameters)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Detach(object entity)
-        {
-            if (entity == null)
-                throw new ArgumentNullException("entity");
-
-            ((IObjectContextAdapter)this).ObjectContext.Detach(entity);
+            return this.Database.GenerateCreateScript();
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether proxy creation setting is enabled (used in EF)
+        /// Creates a LINQ query for the query type based on a raw SQL query
         /// </summary>
-        public virtual bool ProxyCreationEnabled
+        /// <typeparam name="TQuery">Query type</typeparam>
+        /// <param name="sql">The raw SQL query</param>
+        /// <returns>An IQueryable representing the raw SQL query</returns>
+        public virtual IQueryable<TQuery> QueryFromSql<TQuery>(string sql) where TQuery : class
         {
-            get
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Creates a LINQ query for the entity based on a raw SQL query
+        /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        /// <param name="sql">The raw SQL query</param>
+        /// <param name="parameters">The values to be assigned to parameters</param>
+        /// <returns>An IQueryable representing the raw SQL query</returns>
+        public virtual IQueryable<TEntity> EntityFromSql<TEntity>(string sql, params object[] parameters) where TEntity : BaseEntity
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Executes the given SQL against the database
+        /// </summary>
+        /// <param name="sql">The SQL to execute</param>
+        /// <param name="doNotEnsureTransaction">true - the transaction creation is not ensured; false - the transaction creation is ensured.</param>
+        /// <param name="timeout">The timeout to use for command. Note that the command timeout is distinct from the connection timeout, which is commonly set on the database connection string</param>
+        /// <param name="parameters">Parameters to use with the SQL</param>
+        /// <returns>The number of rows affected</returns>
+        public virtual int ExecuteSqlCommand(RawSqlString sql, bool doNotEnsureTransaction = false, int? timeout = null, params object[] parameters)
+        {
+            using (var transaction = this.Database.BeginTransaction())
             {
-                return this.Configuration.ProxyCreationEnabled;
-            }
-            set
-            {
-                this.Configuration.ProxyCreationEnabled = value;
+                var result = this.Database.ExecuteSqlCommand(sql, parameters);
+                transaction.Commit();
+
+                return result;
             }
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether auto detect changes setting is enabled (used in EF)
+        /// Detach an entity from the context
         /// </summary>
-        public virtual bool AutoDetectChangesEnabled
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        /// <param name="entity">Entity</param>
+        public virtual void Detach<TEntity>(TEntity entity) where TEntity : BaseEntity
         {
-            get
-            {
-                return this.Configuration.AutoDetectChangesEnabled;
-            }
-            set
-            {
-                this.Configuration.AutoDetectChangesEnabled = value;
-            }
+            throw new NotImplementedException();
         }
     }
 }

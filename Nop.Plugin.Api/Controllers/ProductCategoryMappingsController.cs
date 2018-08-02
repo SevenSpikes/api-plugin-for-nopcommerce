@@ -218,7 +218,8 @@ namespace Nop.Plugin.Api.Controllers
             var json = _jsonFieldsSerializer.Serialize(productCategoryMappingsRootObject, string.Empty);
 
             //activity log 
-            _customerActivityService.InsertActivity("AddNewProductCategoryMapping", _localizationService.GetResource("ActivityLog.AddNewProductCategoryMapping"), newProductCategory.Id);
+            _customerActivityService.InsertActivity("AddNewProductCategoryMapping",
+                string.Format(_localizationService.GetResource("ActivityLog.AddNewProductCategoryMapping"), newProductCategory.Id), newProductCategory);
 
             return new RawJsonActionResult(json);
         }
@@ -272,7 +273,7 @@ namespace Nop.Plugin.Api.Controllers
 
             //activity log
             _customerActivityService.InsertActivity("UpdateProdutCategoryMapping",
-                _localizationService.GetResource("ActivityLog.UpdateProdutCategoryMapping"), productCategoryEntityToUpdate.Id);
+                string.Format(_localizationService.GetResource("ActivityLog.UpdateProdutCategoryMapping"), productCategoryEntityToUpdate.Id), productCategoryEntityToUpdate);
 
             ProductCategoryMappingDto updatedProductCategoryDto = productCategoryEntityToUpdate.ToDto();
 
@@ -309,7 +310,8 @@ namespace Nop.Plugin.Api.Controllers
             _categoryService.DeleteProductCategory(productCategory);
 
             //activity log 
-            _customerActivityService.InsertActivity("DeleteProductCategoryMapping", _localizationService.GetResource("ActivityLog.DeleteProductCategoryMapping"), productCategory.Id);
+            _customerActivityService.InsertActivity("DeleteProductCategoryMapping",
+                string.Format(_localizationService.GetResource("ActivityLog.DeleteProductCategoryMapping"), productCategory.Id), productCategory);
 
             return new RawJsonActionResult("{}");
         }

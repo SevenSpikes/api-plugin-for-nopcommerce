@@ -3,10 +3,10 @@ using Nop.Core.Configuration;
 using Nop.Core.Infrastructure;
 using Nop.Core.Infrastructure.DependencyManagement;
 using Nop.Plugin.Api.Services;
+using Nop.Web.Framework.Infrastructure.Extensions;
 
 namespace Nop.Plugin.Api.Infrastructure
 {
-    using System;
     using Nop.Core.Domain.Catalog;
     using Nop.Core.Domain.Common;
     using Nop.Core.Domain.Customers;
@@ -19,7 +19,7 @@ namespace Nop.Plugin.Api.Infrastructure
     using Nop.Plugin.Api.ModelBinders;
     using Nop.Plugin.Api.Validators;
     using Nop.Plugin.Api.WebHooks;
-    using Nop.Web.Framework.Infrastructure;
+    using System;
 
     public class DependencyRegister : IDependencyRegistrar
     {
@@ -27,7 +27,7 @@ namespace Nop.Plugin.Api.Infrastructure
 
         public void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
         {
-            this.RegisterPluginDataContext<ApiObjectContext>(builder, ObjectContextName);
+            builder.RegisterPluginDataContext<ApiObjectContext>(ObjectContextName);
 
             RegisterPluginServices(builder);
 

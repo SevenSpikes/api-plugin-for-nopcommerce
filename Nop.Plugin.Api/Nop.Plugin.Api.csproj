@@ -1,15 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework> 
-    <Copyright>Copyright © Seven Spikes, Ltd</Copyright> 
-    <Company>Seven Spikes, Ltd (Nop-Templates.com)</Company> 
-    <Authors>Seven Spikes, Ltd (Nop-Templates.com)</Authors> 
-    <Version>4.00</Version> 
-    <Description>This plugin allows you to access/create Nop resources outside of the system</Description> 
-    <PackageLicenseUrl></PackageLicenseUrl> 
+    <Description>This plugin allows you to access/create Nop resources outside of the system</Description>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>..\..\Presentation\Nop.Web\Plugins\Nop.Plugin.Api</OutputPath>
     <OutDir>$(OutputPath)</OutDir>
@@ -19,48 +12,9 @@
     <OutputPath>..\..\Presentation\Nop.Web\Plugins\Nop.Plugin.Api</OutputPath>
     <OutDir>$(OutputPath)</OutDir>
   </PropertyGroup>
-  
-  <!-- This target execute after "Build" target -->
-  <Target Name="NopTarget" AfterTargets="Build">
-     <!--Delete unnecessary libraries from plugins path--> 
-    <MSBuild Projects="$(MSBuildProjectDirectory)\..\..\Build\ClearPluginAssemblies.proj" Properties="PluginPath=$(MSBuildProjectDirectory)\$(OutDir)" Targets="NopClear" />
-  </Target>
-  <ItemGroup>
-    <None Remove="Views\Clients\ClientSettings.cshtml" />
-    <None Remove="Views\Clients\Create.cshtml" />
-    <None Remove="Views\Clients\CreateOrUpdate.cshtml" />
-    <None Remove="Views\Clients\Edit.cshtml" />
-    <None Remove="Views\Clients\List.cshtml" />
-    <None Remove="Views\Clients\_ViewStart.cshtml" />
-    <None Remove="Views\Settings.cshtml" />
-    <None Remove="Views\_ViewImports.cshtml" />
-  </ItemGroup> 
-  <ItemGroup>
-    <Content Include="Views\Clients\ClientSettings.cshtml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Clients\Create.cshtml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Clients\CreateOrUpdate.cshtml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Clients\Edit.cshtml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Clients\List.cshtml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Settings.cshtml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\_ViewImports.cshtml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper">
-      <Version>6.1.1</Version>
+      <Version>7.0.1</Version>
     </PackageReference>
     <PackageReference Include="IdentityServer4.AccessTokenValidation">
       <Version>2.0.2</Version>
@@ -71,17 +25,17 @@
     <PackageReference Include="Microsoft.AspNet.WebHooks.Common" Version="1.2.1" />
     <PackageReference Include="Microsoft.AspNet.WebHooks.Custom.SqlStorage" Version="1.2.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer">
-      <Version>2.0.0</Version>
+      <Version>2.1.1</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.Rewrite" Version="2.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Rewrite" Version="2.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore">
-      <Version>2.0.1</Version>
+      <Version>2.1.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer">
-      <Version>2.0.1</Version>
+      <Version>2.1.1</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
-      <Version>10.0.3</Version>
+      <Version>11.0.2</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -89,18 +43,11 @@
     <ProjectReference Include="..\..\Libraries\Nop.Services\Nop.Services.csproj" />
     <ProjectReference Include="..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Configuration" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="logo.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="plugin.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="upgrade_script.sql">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+  
+  <!-- This target execute after "Build" target -->
+  <Target Name="NopTarget" AfterTargets="Build">
+    <!-- Delete unnecessary libraries from plugins path -->
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\..\Build\ClearPluginAssemblies.proj" Properties="PluginPath=$(MSBuildProjectDirectory)\$(OutDir)" Targets="NopClear" />
+  </Target>
+  
 </Project>

@@ -1,21 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Nop.Core;
+using Nop.Core.Caching;
 using Nop.Core.Data;
-using Nop.Core.Domain.Customers;
-using Nop.Plugin.Api.DTOs.Customers;
-using System.Linq;
-using System.Linq.Dynamic;
-using System.Text.RegularExpressions;
-using Nop.Core;
 using Nop.Core.Domain.Common;
+using Nop.Core.Domain.Customers;
+using Nop.Core.Domain.Messages;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.DataStructures;
+using Nop.Plugin.Api.DTOs.Customers;
 using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Services.Localization;
 using Nop.Services.Stores;
-using Nop.Core.Domain.Messages;
-using Nop.Core.Caching;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Dynamic.Core;
+using System.Text.RegularExpressions;
 
 namespace Nop.Plugin.Api.Services
 {
@@ -425,7 +425,7 @@ namespace Nop.Plugin.Api.Services
         {
             var query = _customerRepository.TableNoTracking.Where(customer => !customer.Deleted && !customer.IsSystemAccount && customer.Active);
 
-            query = query.Where(customer => !customer.CustomerRoles.Any(cr => (cr.Active) && (cr.SystemName == SystemCustomerRoleNames.Guests))
+            query = query.Where(customer => !customer.CustomerRoles.Any(cr => (cr.Active) && (cr.SystemName == NopCustomerDefaults.GuestsRoleName))
             && (customer.RegisteredInStoreId == 0 || customer.RegisteredInStoreId == _storeContext.CurrentStore.Id));
 
             if (createdAtMin != null)

@@ -213,7 +213,7 @@ namespace Nop.Plugin.Api.Controllers
             UpdateAssociatedProducts(product, productDelta.Dto.AssociatedProductIds);
 
             //search engine name
-            var seName = product.ValidateSeName(productDelta.Dto.SeName, product.Name, true);
+            var seName = _urlRecordService.ValidateSeName(product, productDelta.Dto.SeName, product.Name, true);
             _urlRecordService.SaveSlug(product, seName, 0);
 
             UpdateAclRoles(product, productDelta.Dto.RoleIds);
@@ -225,7 +225,7 @@ namespace Nop.Plugin.Api.Controllers
             _productService.UpdateProduct(product);
 
             _customerActivityService.InsertActivity("AddNewProduct",
-                _localizationService.GetResource("ActivityLog.AddNewProduct"), product.Name);
+                string.Format(_localizationService.GetResource("ActivityLog.AddNewProduct"), product.Name), product);
 
             // Preparing the result dto of the new product
             ProductDto productDto = _dtoHelper.PrepareProductDTO(product);
@@ -282,7 +282,7 @@ namespace Nop.Plugin.Api.Controllers
             // Update the SeName if specified
             if (productDelta.Dto.SeName != null)
             {
-                var seName = product.ValidateSeName(productDelta.Dto.SeName, product.Name, true);
+                var seName = _urlRecordService.ValidateSeName(product, productDelta.Dto.SeName, product.Name, true);
                 _urlRecordService.SaveSlug(product, seName, 0);
             }
 
@@ -295,7 +295,7 @@ namespace Nop.Plugin.Api.Controllers
             _productService.UpdateProduct(product);
 
             _customerActivityService.InsertActivity("UpdateProduct",
-               _localizationService.GetResource("ActivityLog.UpdateProduct"), product.Name);
+                string.Format(_localizationService.GetResource("ActivityLog.UpdateProduct"), product.Name), product);
 
             // Preparing the result dto of the new product
             ProductDto productDto = _dtoHelper.PrepareProductDTO(product);
@@ -333,7 +333,8 @@ namespace Nop.Plugin.Api.Controllers
             _productService.DeleteProduct(product);
 
             //activity log
-            _customerActivityService.InsertActivity("DeleteProduct", _localizationService.GetResource("ActivityLog.DeleteProduct"), product.Name);
+            _customerActivityService.InsertActivity("DeleteProduct",
+                string.Format(_localizationService.GetResource("ActivityLog.DeleteProduct"), product.Name), product);
 
             return new RawJsonActionResult("{}");
         }
@@ -475,31 +476,37 @@ namespace Nop.Plugin.Api.Controllers
             if (product == null)
                 throw new ArgumentNullException("product");
 
+            //Copied from UpdateProductTags method of ProductTagService
             //product tags
-            var existingProductTags = product.ProductTags.ToList();
+            var existingProductTags = _productTagService.GetAllProductTagsByProductId(product.Id);
             var productTagsToRemove = new List<ProductTag>();
             foreach (var existingProductTag in existingProductTags)
             {
-                bool found = false;
-                foreach (string newProductTag in productTags)
+                var found = false;
+                foreach (var newProductTag in productTags)
                 {
-                    if (existingProductTag.Name.Equals(newProductTag, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        found = true;
-                        break;
-                    }
+                    if (!existingProductTag.Name.Equals(newProductTag, StringComparison.InvariantCultureIgnoreCase))
+                        continue;
+
+                    found = true;
+                    break;
                 }
+
                 if (!found)
                 {
                     productTagsToRemove.Add(existingProductTag);
                 }
             }
+
             foreach (var productTag in productTagsToRemove)
             {
-                product.ProductTags.Remove(productTag);
+                //product.ProductTags.Remove(productTag);
+                product.ProductProductTagMappings
+                    .Remove(product.ProductProductTagMappings.FirstOrDefault(mapping => mapping.ProductTagId == productTag.Id));
                 _productService.UpdateProduct(product);
             }
-            foreach (string productTagName in productTags)
+
+            foreach (var productTagName in productTags)
             {
                 ProductTag productTag;
                 var productTag2 = _productTagService.GetProductTagByName(productTagName);
@@ -516,11 +523,16 @@ namespace Nop.Plugin.Api.Controllers
                 {
                     productTag = productTag2;
                 }
-                if (!product.ProductTagExists(productTag.Id))
+
+                if (!_productService.ProductTagExists(product, productTag.Id))
                 {
-                    product.ProductTags.Add(productTag);
+                    //product.ProductTags.Add(productTag);
+                    product.ProductProductTagMappings.Add(new ProductProductTagMapping { ProductTag = productTag });
                     _productService.UpdateProduct(product);
                 }
+
+                var seName = _urlRecordService.ValidateSeName(productTag, string.Empty, productTag.Name, true);
+                _urlRecordService.SaveSlug(productTag, seName, 0);
             }
         }
 

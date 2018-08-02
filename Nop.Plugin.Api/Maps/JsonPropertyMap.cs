@@ -33,7 +33,7 @@ namespace Nop.Plugin.Api.Maps
                 StaticCacheManager.Set(Configurations.JsonTypeMapsPattern, new Dictionary<string, Dictionary<string, Tuple<string, Type>>>(), int.MaxValue);
             }
 
-            var typeMaps = StaticCacheManager.Get<Dictionary<string, Dictionary<string, Tuple<string, Type>>>>(Configurations.JsonTypeMapsPattern);
+            var typeMaps = StaticCacheManager.Get<Dictionary<string, Dictionary<string, Tuple<string, Type>>>>(Configurations.JsonTypeMapsPattern, () => null, 0);
 
             if (!typeMaps.ContainsKey(type.Name))
             {
@@ -46,7 +46,7 @@ namespace Nop.Plugin.Api.Maps
         private void Build(Type type)
         {
             Dictionary<string, Dictionary<string, Tuple<string, Type>>> typeMaps =
-                StaticCacheManager.Get<Dictionary<string, Dictionary<string, Tuple<string, Type>>>>(Configurations.JsonTypeMapsPattern);
+                StaticCacheManager.Get<Dictionary<string, Dictionary<string, Tuple<string, Type>>>>(Configurations.JsonTypeMapsPattern, () => null, 0);
 
             var mapForCurrentType = new Dictionary<string, Tuple<string, Type>>();
 

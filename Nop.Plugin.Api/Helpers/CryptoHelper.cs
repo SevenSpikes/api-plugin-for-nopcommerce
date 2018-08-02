@@ -1,4 +1,6 @@
-﻿namespace Nop.Plugin.Api.Helpers
+﻿using Nop.Core.Infrastructure;
+
+namespace Nop.Plugin.Api.Helpers
 {
     using Microsoft.IdentityModel.Tokens;
     using Newtonsoft.Json;
@@ -16,7 +18,8 @@
         {
             if (_key == null)
             {
-                string pathToKey = CommonHelper.MapPath($"~/App_Data/{TokenSigningKeyFileName}");
+                var fileProvider = EngineContext.Current.Resolve<INopFileProvider>();
+                string pathToKey = fileProvider.MapPath($"~/App_Data/{TokenSigningKeyFileName}");
 
                 if (!File.Exists(pathToKey))
                 {

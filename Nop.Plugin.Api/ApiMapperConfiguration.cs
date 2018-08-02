@@ -31,7 +31,7 @@
     using Nop.Plugin.Api.MappingExtensions;
     using Nop.Plugin.Api.Models;
 
-    public class ApiMapperConfiguration : Profile, IMapperProfile
+    public class ApiMapperConfiguration : Profile, IOrderedMapperProfile
     {
         public ApiMapperConfiguration()
         {
@@ -170,8 +170,9 @@
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Product, ProductDto>()
                .IgnoreAllNonExisting()
                .ForMember(x => x.ProductAttributeMappings, y => y.Ignore())
-               .ForMember(x => x.FullDescription, y => y.MapFrom(src => WebUtility.HtmlEncode(src.FullDescription)))
-               .ForMember(x => x.Tags, y => y.MapFrom(src => src.ProductTags.Select(x => x.Name)));
+               .ForMember(x => x.FullDescription, y => y.MapFrom(src => WebUtility.HtmlEncode(src.FullDescription)));
+               //TODO Upgrade 4.1 Check if this is needed!
+               //.ForMember(x => x.Tags, y => y.MapFrom(src => src.ProductTags.Select(x => x.Name)));
         }
 
         public int Order { get; }

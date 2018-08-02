@@ -20,8 +20,7 @@ namespace Nop.Plugin.Api.Helpers
 
         public NopConfigManagerHelper()
         {
-            var dataSettingsManager = new DataSettingsManager();
-            DataSettings = dataSettingsManager.LoadSettings();
+            DataSettings = DataSettingsManager.LoadSettings();
         }
 
         public void AddBindingRedirects()
@@ -65,7 +64,8 @@ namespace Nop.Plugin.Api.Helpers
                     {
                         appConfig.Save(nopWebAssemblyConfigLocation);
 
-                        System.Configuration.ConfigurationManager.RefreshSection("runtime");
+                        //TODO: Upgrade 4.1. Check this!
+                        //System.Configuration.ConfigurationManager.RefreshSection("runtime");
                     }
                     catch (Exception ex)
                     {
@@ -145,7 +145,8 @@ namespace Nop.Plugin.Api.Helpers
                     {
                         appConfig.Save(nopWebAssemblyConfigLocation);
 
-                        System.Configuration.ConfigurationManager.RefreshSection("connectionStrings");
+                        //TODO: Upgrade 4.1. Check this!
+                        //System.Configuration.ConfigurationManager.RefreshSection("connectionStrings");
                     }
                     catch
                     {

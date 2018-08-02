@@ -32,7 +32,6 @@ namespace Nop.Plugin.Api.Helpers
 {
     public class DTOHelper : IDTOHelper
     {
-        private IStoreContext _storeContext;
         private IProductService _productService;
         private IAclService _aclService;
         private IStoreMappingService _storeMappingService;
@@ -44,9 +43,11 @@ namespace Nop.Plugin.Api.Helpers
         private readonly IStoreService _storeService;
         private ICustomerApiService _customerApiService;
         private IProductAttributeConverter _productAttributeConverter;
+        private ILocalizationService _localizationService;
+        private IUrlRecordService _urlRecordService;
+        private IProductTagService _productTagService;
 
-        public DTOHelper(IStoreContext storeContext,
-            IProductService productService,
+        public DTOHelper(IProductService productService,
             IAclService aclService,
             IStoreMappingService storeMappingService,
             IPictureService pictureService,
@@ -56,7 +57,9 @@ namespace Nop.Plugin.Api.Helpers
             ILanguageService languageService,
             ICurrencyService currencyService,
             CurrencySettings currencySettings,
-            IStoreService storeService)
+            IStoreService storeService,
+            ILocalizationService localizationService, 
+            IUrlRecordService urlRecordService)
         {
             _productService = productService;
             _aclService = aclService;
@@ -69,7 +72,8 @@ namespace Nop.Plugin.Api.Helpers
             _currencyService = currencyService;
             _currencySettings = currencySettings;
             _storeService = storeService;
-            _storeContext = storeContext;
+            _localizationService = localizationService;
+            _urlRecordService = urlRecordService;
         }
 
         public ProductDto PrepareProductDTO(Product product)
@@ -79,12 +83,12 @@ namespace Nop.Plugin.Api.Helpers
             PrepareProductImages(product.ProductPictures, productDto);
             PrepareProductAttributes(product.ProductAttributeMappings, productDto);
 
-            productDto.SeName = product.GetSeName();
+            productDto.SeName = _urlRecordService.GetSeName(product);
             productDto.DiscountIds = product.AppliedDiscounts.Select(discount => discount.Id).ToList();
             productDto.ManufacturerIds = product.ProductManufacturers.Select(pm => pm.ManufacturerId).ToList();
             productDto.RoleIds = _aclService.GetAclRecords(product).Select(acl => acl.CustomerRoleId).ToList();
             productDto.StoreIds = _storeMappingService.GetStoreMappings(product).Select(mapping => mapping.StoreId).ToList();
-            productDto.Tags = product.ProductTags.Select(tag => tag.Name).ToList();
+            productDto.Tags = _productTagService.GetAllProductTagsByProductId(product.Id).Select(tag => tag.Name).ToList();
 
             productDto.AssociatedProductIds =
                 _productService.GetAssociatedProducts(product.Id, showHidden: true)
@@ -100,7 +104,7 @@ namespace Nop.Plugin.Api.Helpers
                 var localizedNameDto = new LocalizedNameDto
                 {
                     LanguageId = language.Id,
-                    LocalizedName = product.GetLocalized(x => x.Name, language.Id)
+                    LocalizedName = _localizationService.GetLocalized(product, x => x.Name, language.Id, false, false)
                 };
 
                 productDto.LocalizedNames.Add(localizedNameDto);
@@ -120,8 +124,8 @@ namespace Nop.Plugin.Api.Helpers
             {
                 categoryDto.Image = imageDto;
             }
-            
-            categoryDto.SeName = category.GetSeName();
+
+            categoryDto.SeName = _urlRecordService.GetSeName(category);
             categoryDto.DiscountIds = category.AppliedDiscounts.Select(discount => discount.Id).ToList();
             categoryDto.RoleIds = _aclService.GetAclRecords(category).Select(acl => acl.CustomerRoleId).ToList();
             categoryDto.StoreIds = _storeMappingService.GetStoreMappings(category).Select(mapping => mapping.StoreId).ToList();
@@ -135,7 +139,7 @@ namespace Nop.Plugin.Api.Helpers
                 var localizedNameDto = new LocalizedNameDto
                 {
                     LanguageId = language.Id,
-                    LocalizedName = category.GetLocalized(x => x.Name, language.Id)
+                    LocalizedName = _localizationService.GetLocalized(category, x => x.Name, language.Id, false, false)
                 };
 
                 categoryDto.LocalizedNames.Add(localizedNameDto);

@@ -174,10 +174,10 @@ namespace Nop.Plugin.Api.Controllers
             ProductAttribute productAttribute = new ProductAttribute();
             productAttributeDelta.Merge(productAttribute);
 
-            _productAttributeService.InsertProductAttribute(productAttribute);       
+            _productAttributeService.InsertProductAttribute(productAttribute);
 
             _customerActivityService.InsertActivity("AddNewProductAttribute",
-                _localizationService.GetResource("ActivityLog.AddNewProductAttribute"), productAttribute.Name);
+                string.Format(_localizationService.GetResource("ActivityLog.AddNewProductAttribute"), productAttribute.Name), productAttribute);
 
             // Preparing the result dto of the new product
             ProductAttributeDto productAttributeDto = _dtoHelper.PrepareProductAttributeDTO(productAttribute);
@@ -221,9 +221,9 @@ namespace Nop.Plugin.Api.Controllers
 
 
             _productAttributeService.UpdateProductAttribute(productAttribute);
-          
+
             _customerActivityService.InsertActivity("EditProductAttribute",
-               _localizationService.GetResource("ActivityLog.EditProductAttribute"), productAttribute.Name);
+                string.Format(_localizationService.GetResource("ActivityLog.EditProductAttribute"), productAttribute.Name), productAttribute);
 
             // Preparing the result dto of the new product attribute
             ProductAttributeDto productAttributeDto = _dtoHelper.PrepareProductAttributeDTO(productAttribute);
@@ -262,7 +262,8 @@ namespace Nop.Plugin.Api.Controllers
             _productAttributeService.DeleteProductAttribute(productAttribute);
 
             //activity log
-            _customerActivityService.InsertActivity("DeleteProductAttribute", _localizationService.GetResource("ActivityLog.DeleteProductAttribute"), productAttribute.Name);
+            _customerActivityService.InsertActivity("DeleteProductAttribute",
+                string.Format(_localizationService.GetResource("ActivityLog.DeleteProductAttribute"), productAttribute.Name), productAttribute);
 
             return new RawJsonActionResult("{}");
         }       

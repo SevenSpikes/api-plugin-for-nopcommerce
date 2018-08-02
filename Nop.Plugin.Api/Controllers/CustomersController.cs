@@ -268,7 +268,7 @@ namespace Nop.Plugin.Api.Controllers
             if (!string.IsNullOrEmpty(customerDelta.Dto.LanguageId) && int.TryParse(customerDelta.Dto.LanguageId, out languageId)
                 && _languageService.GetLanguageById(languageId) != null)
             {
-                _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.LanguageId, languageId);
+                _genericAttributeService.SaveAttribute(newCustomer, NopCustomerDefaults.LanguageIdAttribute, languageId);
             }
 
             //password
@@ -302,7 +302,8 @@ namespace Nop.Plugin.Api.Controllers
             newCustomerDto.LanguageId = customerDelta.Dto.LanguageId;
 
             //activity log
-            _customerActivityService.InsertActivity("AddNewCustomer", _localizationService.GetResource("ActivityLog.AddNewCustomer"), newCustomer.Id);
+            _customerActivityService.InsertActivity("AddNewCustomer",
+                string.Format(_localizationService.GetResource("ActivityLog.AddNewCustomer"), newCustomer.Id), newCustomer);
 
             var customersRootObject = new CustomersRootObject();
 
@@ -381,7 +382,7 @@ namespace Nop.Plugin.Api.Controllers
             if (!string.IsNullOrEmpty(customerDelta.Dto.LanguageId) && int.TryParse(customerDelta.Dto.LanguageId, out languageId)
                 && _languageService.GetLanguageById(languageId) != null)
             {
-                _genericAttributeService.SaveAttribute(currentCustomer, SystemCustomerAttributeNames.LanguageId, languageId);
+                _genericAttributeService.SaveAttribute(currentCustomer, NopCustomerDefaults.LanguageIdAttribute, languageId);
             }
 
             //password
@@ -427,7 +428,8 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             //activity log
-            _customerActivityService.InsertActivity("UpdateCustomer", _localizationService.GetResource("ActivityLog.UpdateCustomer"), currentCustomer.Id);
+            _customerActivityService.InsertActivity("UpdateCustomer",
+                string.Format(_localizationService.GetResource("ActivityLog.UpdateCustomer"), currentCustomer.Id), currentCustomer);
 
             var customersRootObject = new CustomersRootObject();
 
@@ -470,7 +472,8 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             //activity log
-            _customerActivityService.InsertActivity("DeleteCustomer", _localizationService.GetResource("ActivityLog.DeleteCustomer"), customer.Id);
+            _customerActivityService.InsertActivity("DeleteCustomer",
+                string.Format(_localizationService.GetResource("ActivityLog.DeleteCustomer"), customer.Id), customer);
             
             return new RawJsonActionResult("{}");
         }
@@ -480,12 +483,12 @@ namespace Nop.Plugin.Api.Controllers
             // we assume that if the first name is not sent then it will be null and in this case we don't want to update it
             if (firstName != null)
             {
-                _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.FirstName, firstName);
+                _genericAttributeService.SaveAttribute(newCustomer, NopCustomerDefaults.FirstNameAttribute, firstName);
             }
 
             if (lastName != null)
             {
-                _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.LastName, lastName);
+                _genericAttributeService.SaveAttribute(newCustomer, NopCustomerDefaults.LastNameAttribute, lastName);
             }
         }
 

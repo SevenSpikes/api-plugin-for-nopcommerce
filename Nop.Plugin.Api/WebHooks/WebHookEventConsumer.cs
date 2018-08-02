@@ -31,32 +31,32 @@ namespace Nop.Plugin.Api.WebHooks
     using Nop.Core.Caching;
     using Nop.Core.Domain.Messages;
 
-    public class WebHookEventConsumer : IConsumer<EntityInserted<Customer>>,
-        IConsumer<EntityUpdated<Customer>>,
-        IConsumer<EntityInserted<Product>>,
-        IConsumer<EntityUpdated<Product>>,
-        IConsumer<EntityInserted<Category>>,
-        IConsumer<EntityUpdated<Category>>,
-        IConsumer<EntityInserted<Order>>,
-        IConsumer<EntityUpdated<Order>>,
-        IConsumer<EntityInserted<StoreMapping>>,
-        IConsumer<EntityDeleted<StoreMapping>>,
-        IConsumer<EntityInserted<GenericAttribute>>,
-        IConsumer<EntityUpdated<GenericAttribute>>,
-        IConsumer<EntityUpdated<Store>>,
-        IConsumer<EntityInserted<ProductCategory>>,
-        IConsumer<EntityUpdated<ProductCategory>>,
-        IConsumer<EntityDeleted<ProductCategory>>,
-        IConsumer<EntityInserted<Language>>,
-        IConsumer<EntityUpdated<Language>>,
-        IConsumer<EntityDeleted<Language>>,
-        IConsumer<EntityInserted<ProductPicture>>,
-        IConsumer<EntityUpdated<ProductPicture>>,
-        IConsumer<EntityDeleted<ProductPicture>>,
-        IConsumer<EntityUpdated<Picture>>,
-        IConsumer<EntityInserted<NewsLetterSubscription>>,
-        IConsumer<EntityUpdated<NewsLetterSubscription>>,
-        IConsumer<EntityDeleted<NewsLetterSubscription>>
+    public class WebHookEventConsumer : IConsumer<EntityInsertedEvent<Customer>>,
+        IConsumer<EntityUpdatedEvent<Customer>>,
+        IConsumer<EntityInsertedEvent<Product>>,
+        IConsumer<EntityUpdatedEvent<Product>>,
+        IConsumer<EntityInsertedEvent<Category>>,
+        IConsumer<EntityUpdatedEvent<Category>>,
+        IConsumer<EntityInsertedEvent<Order>>,
+        IConsumer<EntityUpdatedEvent<Order>>,
+        IConsumer<EntityInsertedEvent<StoreMapping>>,
+        IConsumer<EntityDeletedEvent<StoreMapping>>,
+        IConsumer<EntityInsertedEvent<GenericAttribute>>,
+        IConsumer<EntityUpdatedEvent<GenericAttribute>>,
+        IConsumer<EntityUpdatedEvent<Store>>,
+        IConsumer<EntityInsertedEvent<ProductCategory>>,
+        IConsumer<EntityUpdatedEvent<ProductCategory>>,
+        IConsumer<EntityDeletedEvent<ProductCategory>>,
+        IConsumer<EntityInsertedEvent<Language>>,
+        IConsumer<EntityUpdatedEvent<Language>>,
+        IConsumer<EntityDeletedEvent<Language>>,
+        IConsumer<EntityInsertedEvent<ProductPicture>>,
+        IConsumer<EntityUpdatedEvent<ProductPicture>>,
+        IConsumer<EntityDeletedEvent<ProductPicture>>,
+        IConsumer<EntityUpdatedEvent<Picture>>,
+        IConsumer<EntityInsertedEvent<NewsLetterSubscription>>,
+        IConsumer<EntityUpdatedEvent<NewsLetterSubscription>>,
+        IConsumer<EntityDeletedEvent<NewsLetterSubscription>>
     {
         private IWebHookManager _webHookManager;
         private readonly ICustomerApiService _customerApiService;
@@ -66,8 +66,6 @@ namespace Nop.Plugin.Api.WebHooks
         private readonly ICategoryService _categoryService;
         private readonly IStoreMappingService _storeMappingService;
         private readonly IProductPictureService _productPictureService;
-        private IStoreService _storeService;
-        private IStoreContext _storeContext;
         private readonly IStaticCacheManager _cacheManager;
 
         private IDTOHelper _dtoHelper;
@@ -78,12 +76,10 @@ namespace Nop.Plugin.Api.WebHooks
             _categoryApiService = EngineContext.Current.Resolve<ICategoryApiService>();
             _productApiService = EngineContext.Current.Resolve<IProductApiService>();
             _dtoHelper = EngineContext.Current.Resolve<IDTOHelper>();
-            _storeService = EngineContext.Current.Resolve<IStoreService>();
             _productPictureService = EngineContext.Current.Resolve<IProductPictureService>();
             _productService = EngineContext.Current.Resolve<IProductService>();
             _categoryService = EngineContext.Current.Resolve<ICategoryService>();
             _storeMappingService = EngineContext.Current.Resolve<IStoreMappingService>();
-            _storeContext = EngineContext.Current.Resolve<IStoreContext>();
             _cacheManager = EngineContext.Current.Resolve<IStaticCacheManager>();
         }
 
@@ -101,7 +97,7 @@ namespace Nop.Plugin.Api.WebHooks
             }
         }
 
-        public void HandleEvent(EntityInserted<Customer> eventMessage)
+        public void HandleEvent(EntityInsertedEvent<Customer> eventMessage)
         {
             // There is no need to send webhooks for guest customers.
             if (eventMessage.Entity.IsGuest())
@@ -120,7 +116,7 @@ namespace Nop.Plugin.Api.WebHooks
             NotifyRegisteredWebHooks(customer, WebHookNames.CustomersCreate, storeIds);
         }
 
-        public void HandleEvent(EntityUpdated<Customer> eventMessage)
+        public void HandleEvent(EntityUpdatedEvent<Customer> eventMessage)
         {
             // There is no need to send webhooks for guest customers.
             if (eventMessage.Entity.IsGuest())
@@ -149,7 +145,7 @@ namespace Nop.Plugin.Api.WebHooks
             NotifyRegisteredWebHooks(customer, webhookEvent, storeIds);
         }
 
-        public void HandleEvent(EntityInserted<Product> eventMessage)
+        public void HandleEvent(EntityInsertedEvent<Product> eventMessage)
         {
             ProductDto productDto = _dtoHelper.PrepareProductDTO(eventMessage.Entity);
 
@@ -158,14 +154,14 @@ namespace Nop.Plugin.Api.WebHooks
             NotifyRegisteredWebHooks(productDto, WebHookNames.ProductsCreate, productDto.StoreIds);
         }
 
-        public void HandleEvent(EntityUpdated<Product> eventMessage)
+        public void HandleEvent(EntityUpdatedEvent<Product> eventMessage)
         {
             ProductDto productDto = _dtoHelper.PrepareProductDTO(eventMessage.Entity);
 
             ProductUpdated(productDto);
         }
 
-        public void HandleEvent(EntityInserted<Category> eventMessage)
+        public void HandleEvent(EntityInsertedEvent<Category> eventMessage)
         {
             CategoryDto categoryDto = _dtoHelper.PrepareCategoryDTO(eventMessage.Entity);
 
@@ -174,7 +170,7 @@ namespace Nop.Plugin.Api.WebHooks
             NotifyRegisteredWebHooks(categoryDto, WebHookNames.CategoriesCreate, categoryDto.StoreIds);
         }
 
-        public void HandleEvent(EntityUpdated<Category> eventMessage)
+        public void HandleEvent(EntityUpdatedEvent<Category> eventMessage)
         {
             CategoryDto categoryDto = _dtoHelper.PrepareCategoryDTO(eventMessage.Entity);
 
@@ -188,7 +184,7 @@ namespace Nop.Plugin.Api.WebHooks
             NotifyRegisteredWebHooks(categoryDto, webhookEvent, categoryDto.StoreIds);
         }
 
-        public void HandleEvent(EntityInserted<Order> eventMessage)
+        public void HandleEvent(EntityInsertedEvent<Order> eventMessage)
         {
             OrderDto orderDto = _dtoHelper.PrepareOrderDTO(eventMessage.Entity);
 
@@ -202,7 +198,7 @@ namespace Nop.Plugin.Api.WebHooks
             NotifyRegisteredWebHooks(orderDto, WebHookNames.OrdersCreate, storeIds);
         }
 
-        public void HandleEvent(EntityUpdated<Order> eventMessage)
+        public void HandleEvent(EntityUpdatedEvent<Order> eventMessage)
         {
             OrderDto orderDto = _dtoHelper.PrepareOrderDTO(eventMessage.Entity);
 
@@ -223,21 +219,21 @@ namespace Nop.Plugin.Api.WebHooks
             NotifyRegisteredWebHooks(orderDto, webhookEvent, storeIds);
         }
 
-        public void HandleEvent(EntityInserted<StoreMapping> eventMessage)
+        public void HandleEvent(EntityInsertedEvent<StoreMapping> eventMessage)
         {
             HandleStoreMappingEvent(eventMessage.Entity.EntityId, eventMessage.Entity.EntityName);
         }
 
-        public void HandleEvent(EntityDeleted<StoreMapping> eventMessage)
+        public void HandleEvent(EntityDeletedEvent<StoreMapping> eventMessage)
         {
             HandleStoreMappingEvent(eventMessage.Entity.EntityId, eventMessage.Entity.EntityName);
         }
 
-        public void HandleEvent(EntityInserted<GenericAttribute> eventMessage)
+        public void HandleEvent(EntityInsertedEvent<GenericAttribute> eventMessage)
         {
-            if (eventMessage.Entity.Key == SystemCustomerAttributeNames.FirstName ||
-                eventMessage.Entity.Key == SystemCustomerAttributeNames.LastName ||
-                eventMessage.Entity.Key == SystemCustomerAttributeNames.LanguageId)
+            if (eventMessage.Entity.Key == NopCustomerDefaults.FirstNameAttribute ||
+                eventMessage.Entity.Key == NopCustomerDefaults.LastNameAttribute ||
+                eventMessage.Entity.Key == NopCustomerDefaults.LanguageIdAttribute)
             {
                 var customerDto = _customerApiService.GetCustomerById(eventMessage.Entity.EntityId);
 
@@ -252,11 +248,11 @@ namespace Nop.Plugin.Api.WebHooks
             }
         }
 
-        public void HandleEvent(EntityUpdated<GenericAttribute> eventMessage)
+        public void HandleEvent(EntityUpdatedEvent<GenericAttribute> eventMessage)
         {
-            if (eventMessage.Entity.Key == SystemCustomerAttributeNames.FirstName ||
-                eventMessage.Entity.Key == SystemCustomerAttributeNames.LastName ||
-                eventMessage.Entity.Key == SystemCustomerAttributeNames.LanguageId)
+            if (eventMessage.Entity.Key == NopCustomerDefaults.FirstNameAttribute ||
+                eventMessage.Entity.Key == NopCustomerDefaults.LastNameAttribute ||
+                eventMessage.Entity.Key == NopCustomerDefaults.LanguageIdAttribute)
             {
                 var customerDto = _customerApiService.GetCustomerById(eventMessage.Entity.EntityId);
 
@@ -271,7 +267,7 @@ namespace Nop.Plugin.Api.WebHooks
             }
         }
 
-        public void HandleEvent(EntityUpdated<Store> eventMessage)
+        public void HandleEvent(EntityUpdatedEvent<Store> eventMessage)
         {
             StoreDto storeDto = _dtoHelper.PrepareStoreDTO(eventMessage.Entity);
 
@@ -286,43 +282,43 @@ namespace Nop.Plugin.Api.WebHooks
             }
         }
 
-        public void HandleEvent(EntityInserted<ProductCategory> eventMessage)
+        public void HandleEvent(EntityInsertedEvent<ProductCategory> eventMessage)
         {
             NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapsCreate);
         }
 
-        public void HandleEvent(EntityUpdated<ProductCategory> eventMessage)
+        public void HandleEvent(EntityUpdatedEvent<ProductCategory> eventMessage)
         {
             NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapsUpdate);
         }
 
-        public void HandleEvent(EntityDeleted<ProductCategory> eventMessage)
+        public void HandleEvent(EntityDeletedEvent<ProductCategory> eventMessage)
         {
             NotifyProductCategoryMappingWebhook(eventMessage.Entity, WebHookNames.ProductCategoryMapsDelete);
         }
 
-        public void HandleEvent(EntityInserted<Language> eventMessage)
+        public void HandleEvent(EntityInsertedEvent<Language> eventMessage)
         {
             LanguageDto langaDto = _dtoHelper.PrepateLanguageDto(eventMessage.Entity);
 
             NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesCreate, langaDto.StoreIds);
         }
 
-        public void HandleEvent(EntityUpdated<Language> eventMessage)
+        public void HandleEvent(EntityUpdatedEvent<Language> eventMessage)
         {
             LanguageDto langaDto = _dtoHelper.PrepateLanguageDto(eventMessage.Entity);
 
             NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesUpdate, langaDto.StoreIds);
         }
 
-        public void HandleEvent(EntityDeleted<Language> eventMessage)
+        public void HandleEvent(EntityDeletedEvent<Language> eventMessage)
         {
             LanguageDto langaDto = _dtoHelper.PrepateLanguageDto(eventMessage.Entity);
 
             NotifyRegisteredWebHooks(langaDto, WebHookNames.LanguagesDelete, langaDto.StoreIds);
         }
 
-        public void HandleEvent(EntityInserted<ProductPicture> eventMessage)
+        public void HandleEvent(EntityInsertedEvent<ProductPicture> eventMessage)
         {
             var product = _productApiService.GetProductById(eventMessage.Entity.ProductId);
 
@@ -334,7 +330,7 @@ namespace Nop.Plugin.Api.WebHooks
             }
         }
 
-        public void HandleEvent(EntityUpdated<ProductPicture> eventMessage)
+        public void HandleEvent(EntityUpdatedEvent<ProductPicture> eventMessage)
         {
             var product = _productApiService.GetProductById(eventMessage.Entity.ProductId);
 
@@ -346,7 +342,7 @@ namespace Nop.Plugin.Api.WebHooks
             }
         }
 
-        public void HandleEvent(EntityDeleted<ProductPicture> eventMessage)
+        public void HandleEvent(EntityDeletedEvent<ProductPicture> eventMessage)
         {
             var product = _productApiService.GetProductById(eventMessage.Entity.ProductId);
 
@@ -362,7 +358,7 @@ namespace Nop.Plugin.Api.WebHooks
         // This is required, because when the product title is changed, the product is updated first
         // and then the picture urls are chaged. In order for the WebHook consumer to have the latest
         // product picture urls the following code is used.
-        public void HandleEvent(EntityUpdated<Picture> eventMessage)
+        public void HandleEvent(EntityUpdatedEvent<Picture> eventMessage)
         {
             var productPicture = _productPictureService.GetProductPictureByPictureId(eventMessage.Entity.Id);
 
@@ -379,7 +375,7 @@ namespace Nop.Plugin.Api.WebHooks
             }
         }
 
-        public void HandleEvent(EntityDeleted<NewsLetterSubscription> eventMessage)
+        public void HandleEvent(EntityDeletedEvent<NewsLetterSubscription> eventMessage)
         {
             _cacheManager.RemoveByPattern(Configurations.NEWSLETTER_SUBSCRIBERS_KEY);
 
@@ -393,7 +389,7 @@ namespace Nop.Plugin.Api.WebHooks
             NotifyRegisteredWebHooks(newsLetterSubscriptionDto, WebHookNames.NewsLetterSubscriptionDelete, storeIds);
         }
 
-        public void HandleEvent(EntityInserted<NewsLetterSubscription> eventMessage)
+        public void HandleEvent(EntityInsertedEvent<NewsLetterSubscription> eventMessage)
         {
             _cacheManager.RemoveByPattern(Configurations.NEWSLETTER_SUBSCRIBERS_KEY);
 
@@ -407,7 +403,7 @@ namespace Nop.Plugin.Api.WebHooks
             NotifyRegisteredWebHooks(newsLetterSubscriptionDto, WebHookNames.NewsLetterSubscriptionCreate, storeIds);
         }
 
-        public void HandleEvent(EntityUpdated<NewsLetterSubscription> eventMessage)
+        public void HandleEvent(EntityUpdatedEvent<NewsLetterSubscription> eventMessage)
         {
             _cacheManager.RemoveByPattern(Configurations.NEWSLETTER_SUBSCRIBERS_KEY);
 

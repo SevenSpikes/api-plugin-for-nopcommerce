@@ -40,12 +40,12 @@ namespace Nop.Plugin.Api.Helpers
 
         public bool IsInGuestsRole(IList<CustomerRole> customerRoles)
         {
-            return customerRoles.FirstOrDefault(cr => cr.SystemName == SystemCustomerRoleNames.Guests) != null;
+            return customerRoles.FirstOrDefault(cr => cr.SystemName == NopCustomerDefaults.GuestsRoleName) != null;
         }
 
         public bool IsInRegisteredRole(IList<CustomerRole> customerRoles)
         {
-            return customerRoles.FirstOrDefault(cr => cr.SystemName == SystemCustomerRoleNames.Registered) != null;
+            return customerRoles.FirstOrDefault(cr => cr.SystemName == NopCustomerDefaults.RegisteredRoleName) != null;
         }
     }
 }

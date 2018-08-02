@@ -352,7 +352,8 @@ namespace Nop.Plugin.Api.Controllers
             _shoppingCartService.DeleteShoppingCartItem(shoppingCartItemForDelete);
 
             //activity log
-            _customerActivityService.InsertActivity("DeleteShoppingCartItem", _localizationService.GetResource("ActivityLog.DeleteShoppingCartItem"), shoppingCartItemForDelete.Id);
+            _customerActivityService.InsertActivity("DeleteShoppingCartItem",
+                string.Format(_localizationService.GetResource("ActivityLog.DeleteShoppingCartItem"), shoppingCartItemForDelete.Id), shoppingCartItemForDelete);
 
             return new RawJsonActionResult("{}");
         }

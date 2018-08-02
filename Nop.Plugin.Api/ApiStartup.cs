@@ -1,21 +1,9 @@
 ﻿namespace Nop.Plugin.Api
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IdentityModel.Tokens.Jwt;
-    using System.IO;
-    using System.Linq;
-    using System.Linq.Dynamic;
-    using System.Reflection;
-    using System.Security.Cryptography.X509Certificates;
-    using System.Xml.Linq;
-    using System.Xml.XPath;
     using IdentityServer4.EntityFramework.DbContexts;
     using IdentityServer4.EntityFramework.Entities;
     using IdentityServer4.Hosting;
     using IdentityServer4.Models;
-    using Microsoft.AspNet.WebHooks.Diagnostics;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
@@ -24,7 +12,6 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.IdentityModel.Tokens;
-    using Nop.Core;
     using Nop.Core.Data;
     using Nop.Core.Infrastructure;
     using Nop.Plugin.Api.Authorization.Policies;
@@ -34,13 +21,27 @@
     using Nop.Plugin.Api.IdentityServer.Endpoints;
     using Nop.Plugin.Api.IdentityServer.Generators;
     using Nop.Plugin.Api.IdentityServer.Middlewares;
-    using Nop.Plugin.Api.WebHooks;
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IdentityModel.Tokens.Jwt;
+    using System.IO;
+    using System.Linq;
+    using System.Linq.Dynamic.Core;
+    using System.Reflection;
     using ApiResource = IdentityServer4.EntityFramework.Entities.ApiResource;
 
     public class ApiStartup : INopStartup
     {
+        private readonly INopFileProvider _fileProvider;
+
+        public ApiStartup(INopFileProvider fileProvider)
+        {
+            _fileProvider = fileProvider;
+        }
+
         // TODO: extract all methods into extensions.
-        public void ConfigureServices(IServiceCollection services, IConfigurationRoot configuration)
+        public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             AddRequiredConfiguration();
 
@@ -148,9 +149,7 @@
         {       
             RsaSecurityKey signingKey = CryptoHelper.CreateRsaSecurityKey();
 
-            DataSettingsManager dataSettingsManager = new DataSettingsManager();
-
-            DataSettings dataSettings = dataSettingsManager.LoadSettings();
+            DataSettings dataSettings = DataSettingsManager.LoadSettings();
             string connectionStringFromNop = dataSettings.DataConnectionString;
 
             var migrationsAssembly = typeof(ApiStartup).GetTypeInfo().Assembly.GetName().Name;
@@ -194,7 +193,7 @@
             {
                 var configurationContext = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
 
-                if (!DynamicQueryable.Any(configurationContext.ApiResources))
+                if (configurationContext.ApiResources.Any())
                 {
                     // In the simple case an API has exactly one scope. But there are cases where you might want to sub-divide the functionality of an API, and give different clients access to different parts. 
                     configurationContext.ApiResources.Add(new ApiResource()
@@ -220,7 +219,7 @@
 
         private string LoadUpgradeScript()
         {
-            string path = CommonHelper.MapPath("~/Plugins/Nop.Plugin.Api/upgrade_script.sql");
+            string path = _fileProvider.MapPath("~/Plugins/Nop.Plugin.Api/upgrade_script.sql");
             string script = File.ReadAllText(path);
 
             return script;

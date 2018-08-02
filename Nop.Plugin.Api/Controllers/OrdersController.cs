@@ -343,7 +343,7 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             _customerActivityService.InsertActivity("AddNewOrder",
-                 _localizationService.GetResource("ActivityLog.AddNewOrder"), newOrder.Id);
+                string.Format(_localizationService.GetResource("ActivityLog.AddNewOrder"), newOrder.Id), newOrder);
 
             var ordersRootObject = new OrdersRootObject();
 
@@ -381,8 +381,9 @@ namespace Nop.Plugin.Api.Controllers
             _orderProcessingService.DeleteOrder(orderToDelete);
 
             //activity log
-            _customerActivityService.InsertActivity("DeleteOrder", _localizationService.GetResource("ActivityLog.DeleteOrder"), orderToDelete.Id);
-
+            _customerActivityService.InsertActivity("DeleteOrder",
+                string.Format(_localizationService.GetResource("ActivityLog.DeleteOrder"), orderToDelete.Id), orderToDelete);
+            
             return new RawJsonActionResult("{}");
         }
 
@@ -460,7 +461,7 @@ namespace Nop.Plugin.Api.Controllers
             _orderService.UpdateOrder(currentOrder);
 
             _customerActivityService.InsertActivity("UpdateOrder",
-                 _localizationService.GetResource("ActivityLog.UpdateOrder"), currentOrder.Id);
+                string.Format(_localizationService.GetResource("ActivityLog.UpdateOrder"), currentOrder.Id), currentOrder);
 
             var ordersRootObject = new OrdersRootObject();
 
@@ -506,7 +507,7 @@ namespace Nop.Plugin.Api.Controllers
                         .Find(so => !string.IsNullOrEmpty(so.Name) && so.Name.Equals(shippingOptionName, StringComparison.InvariantCultureIgnoreCase));
                     
                     _genericAttributeService.SaveAttribute(customer,
-                        SystemCustomerAttributeNames.SelectedShippingOption,
+                        NopCustomerDefaults.SelectedShippingOptionAttribute,
                         shippingOption, storeId);
                 }
                 else

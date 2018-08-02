@@ -20,6 +20,7 @@
     {
         private readonly IStoreService _storeService;
         private readonly IWorkContext _workContext;
+        private readonly IStoreContext _storeContext;
         private readonly ISettingService _settingService;
         private readonly ICustomerActivityService _customerActivityService;
         private readonly ILocalizationService _localizationService;
@@ -27,12 +28,14 @@
         public ApiAdminController(
             IStoreService storeService,
             IWorkContext workContext,
+            IStoreContext storeContext,
             ISettingService settingService,
-            ICustomerActivityService customerActivityService,
+            ICustomerActivityService customerActivityService, 
             ILocalizationService localizationService)
         {
             _storeService = storeService;
             _workContext = workContext;
+            _storeContext = storeContext;
             _settingService = settingService;
             _customerActivityService = customerActivityService;
             _localizationService = localizationService;
@@ -41,7 +44,7 @@
         [HttpGet]
         public ActionResult Settings()
         {
-            var storeScope = this.GetActiveStoreScopeConfiguration(_storeService, _workContext);
+            var storeScope = _storeContext.ActiveStoreScopeConfiguration;
 
             ApiSettings apiSettings = _settingService.LoadSetting<ApiSettings>(storeScope);
 
@@ -67,7 +70,7 @@
         public ActionResult Settings(ConfigurationModel configurationModel)
         {
             //load settings for a chosen store scope
-            var storeScope = this.GetActiveStoreScopeConfiguration(_storeService, _workContext);
+            var storeScope = _storeContext.ActiveStoreScopeConfiguration;
 
             ApiSettings settings = configurationModel.ToEntity();
 
