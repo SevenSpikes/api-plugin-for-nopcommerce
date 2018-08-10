@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Data.Entity.Infrastructure;
+//using System.Data.Entity.Infrastructure;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Nop.Core;
@@ -24,20 +24,22 @@ namespace Nop.Plugin.Api.Data
             //modelBuilder.Conventions.Remove<IncludeMetadataConvention>();
             base.OnModelCreating(modelBuilder);
         }
-
-        public string CreateDatabaseScript()
-        {
-            return ((IObjectContextAdapter)this).ObjectContext.CreateDatabaseScript();
-        }
+        
+        //TODO: Upgrade 4.10 Check this!
+        //public string CreateDatabaseScript()
+        //{
+        //    return ((IObjectContextAdapter)this).ObjectContext.CreateDatabaseScript();
+        //}
 
         /// <summary>
         /// Install
         /// </summary>
         public void Install()
         {
+            //TODO: Upgrade 4.10 Check this!
             //create the table
-            var dbScript = CreateDatabaseScript();
-            Database.ExecuteSqlCommand(dbScript);
+            //var dbScript = CreateDatabaseScript();
+            //Database.ExecuteSqlCommand(dbScript);
             SaveChanges();
         }
 

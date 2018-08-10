@@ -43,10 +43,12 @@
 
             // some of third party libaries that we use for WebHooks and Swagger use older versions
             // of certain assemblies so we need to redirect them to the those that nopCommerce uses
-            configManagerHelper.AddBindingRedirects();
+            // TODO: Upgrade 4.1. check this!
+            //configManagerHelper.AddBindingRedirects();
 
             // required by the WebHooks support
-            configManagerHelper.AddConnectionString();
+            // TODO: Upgrade 4.1. check this!
+            //configManagerHelper.AddConnectionString();
 
             _objectContext.Install();
 

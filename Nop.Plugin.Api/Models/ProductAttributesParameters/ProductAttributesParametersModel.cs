@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Web.Http.ModelBinding;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.ModelBinders;

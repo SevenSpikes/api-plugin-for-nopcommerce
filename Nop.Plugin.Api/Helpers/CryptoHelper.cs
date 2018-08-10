@@ -7,6 +7,8 @@ namespace Nop.Plugin.Api.Helpers
     using System.IO;
     using System.Security.Cryptography;
     using Nop.Core;
+    using Microsoft.Extensions.DependencyInjection;
+
 
     public static class CryptoHelper
     {
@@ -18,8 +20,7 @@ namespace Nop.Plugin.Api.Helpers
         {
             if (_key == null)
             {
-                var fileProvider = EngineContext.Current.Resolve<INopFileProvider>();
-                string pathToKey = fileProvider.MapPath($"~/App_Data/{TokenSigningKeyFileName}");
+                string pathToKey = CommonHelper.DefaultFileProvider.MapPath($"~/App_Data/{TokenSigningKeyFileName}");
 
                 if (!File.Exists(pathToKey))
                 {

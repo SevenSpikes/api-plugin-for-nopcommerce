@@ -104,7 +104,7 @@ namespace Nop.Plugin.Api.Helpers
                 var localizedNameDto = new LocalizedNameDto
                 {
                     LanguageId = language.Id,
-                    LocalizedName = _localizationService.GetLocalized(product, x => x.Name, language.Id, false, false)
+                    LocalizedName = _localizationService.GetLocalized(product, x => x.Name, language.Id)
                 };
 
                 productDto.LocalizedNames.Add(localizedNameDto);
@@ -139,7 +139,7 @@ namespace Nop.Plugin.Api.Helpers
                 var localizedNameDto = new LocalizedNameDto
                 {
                     LanguageId = language.Id,
-                    LocalizedName = _localizationService.GetLocalized(category, x => x.Name, language.Id, false, false)
+                    LocalizedName = _localizationService.GetLocalized(category, x => x.Name, language.Id)
                 };
 
                 categoryDto.LocalizedNames.Add(localizedNameDto);

@@ -1,12 +1,9 @@
 ﻿using System.Xml.Linq;
-using Nop.Core;
 using Nop.Core.Data;
 
 namespace Nop.Plugin.Api.Helpers
 {
     using System;
-    using System.Collections.Generic;
-    using System.Globalization;
     using System.Reflection;
     using System.Xml;
     using System.Xml.XPath;
@@ -64,7 +61,7 @@ namespace Nop.Plugin.Api.Helpers
                     {
                         appConfig.Save(nopWebAssemblyConfigLocation);
 
-                        //TODO: Upgrade 4.1. Check this!
+                        //TODO: Upgrade 4.10 Check this!
                         //System.Configuration.ConfigurationManager.RefreshSection("runtime");
                     }
                     catch (Exception ex)

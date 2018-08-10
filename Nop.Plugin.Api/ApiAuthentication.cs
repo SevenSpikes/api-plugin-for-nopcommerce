@@ -16,8 +16,8 @@
     {
         public void Configure(AuthenticationBuilder builder)
         {
-           RsaSecurityKey signingKey = CryptoHelper.CreateRsaSecurityKey();                        
-           
+            RsaSecurityKey signingKey = CryptoHelper.CreateRsaSecurityKey();
+
             builder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwt =>
                 {
                     jwt.Audience = "nop_api";

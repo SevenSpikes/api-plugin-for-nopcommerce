@@ -18,17 +18,13 @@ namespace Nop.Plugin.Api.Infrastructure
     using Nop.Plugin.Api.JSON.Serializers;
     using Nop.Plugin.Api.ModelBinders;
     using Nop.Plugin.Api.Validators;
-    using Nop.Plugin.Api.WebHooks;
+    //using Nop.Plugin.Api.WebHooks;
     using System;
 
     public class DependencyRegister : IDependencyRegistrar
     {
-        private const string ObjectContextName = "nop_object_context_web_api";
-
         public void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
         {
-            builder.RegisterPluginDataContext<ApiObjectContext>(ObjectContextName);
-
             RegisterPluginServices(builder);
 
             RegisterModelBinders(builder);
@@ -61,13 +57,15 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<DTOHelper>().As<IDTOHelper>().InstancePerLifetimeScope();
             builder.RegisterType<NopConfigManagerHelper>().As<IConfigManagerHelper>().InstancePerLifetimeScope();
 
-            builder.RegisterType<NopWebHooksLogger>().As<Microsoft.AspNet.WebHooks.Diagnostics.ILogger>().InstancePerLifetimeScope();
+            //TODO: Upgrade 4.1. Check this!
+            //builder.RegisterType<NopWebHooksLogger>().As<Microsoft.AspNet.WebHooks.Diagnostics.ILogger>().InstancePerLifetimeScope();
 
             builder.RegisterType<JsonFieldsSerializer>().As<IJsonFieldsSerializer>().InstancePerLifetimeScope();
 
             builder.RegisterType<FieldsValidator>().As<IFieldsValidator>().InstancePerLifetimeScope();
 
-            builder.RegisterType<WebHookService>().As<IWebHookService>().SingleInstance();
+            //TODO: Upgrade 4.1. Check this!
+            //builder.RegisterType<WebHookService>().As<IWebHookService>().SingleInstance();
 
             builder.RegisterType<ObjectConverter>().As<IObjectConverter>().InstancePerLifetimeScope();
             builder.RegisterType<ApiTypeConverter>().As<IApiTypeConverter>().InstancePerLifetimeScope();

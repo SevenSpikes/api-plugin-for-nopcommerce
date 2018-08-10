@@ -1,4 +1,7 @@
-﻿namespace Nop.Plugin.Api
+﻿using Nop.Plugin.Api.Data;
+using Nop.Web.Framework.Infrastructure.Extensions;
+
+namespace Nop.Plugin.Api
 {
     using IdentityServer4.EntityFramework.DbContexts;
     using IdentityServer4.EntityFramework.Entities;
@@ -33,16 +36,16 @@
 
     public class ApiStartup : INopStartup
     {
-        private readonly INopFileProvider _fileProvider;
-
-        public ApiStartup(INopFileProvider fileProvider)
-        {
-            _fileProvider = fileProvider;
-        }
+        private const string ObjectContextName = "nop_object_context_web_api";
 
         // TODO: extract all methods into extensions.
         public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
+            services.AddDbContext<ApiObjectContext>(optionsBuilder =>
+            {
+                optionsBuilder.UseSqlServerWithLazyLoading(services);
+            });
+
             AddRequiredConfiguration();
 
             AddBindingRedirectsFallbacks();
@@ -110,11 +113,13 @@
 
             // some of third party libaries that we use for WebHooks and Swagger use older versions
             // of certain assemblies so we need to redirect them to the once that nopCommerce uses
-            configManagerHelper.AddBindingRedirects();
+            //TODO: Upgrade 4.10 check this!
+            //configManagerHelper.AddBindingRedirects();
 
             // required by the WebHooks support
-            configManagerHelper.AddConnectionString();           
-            
+            //TODO: Upgrade 4.10 check this!
+            //configManagerHelper.AddConnectionString();           
+
             // This is required only in development.
             // It it is required only when you want to send a web hook to an https address with an invalid SSL certificate. (self-signed)
             // The code marks all certificates as valid.
@@ -219,7 +224,8 @@
 
         private string LoadUpgradeScript()
         {
-            string path = _fileProvider.MapPath("~/Plugins/Nop.Plugin.Api/upgrade_script.sql");
+            var fileProvider = EngineContext.Current.Resolve<INopFileProvider>();
+            string path = fileProvider.MapPath("~/Plugins/Nop.Plugin.Api/upgrade_script.sql");
             string script = File.ReadAllText(path);
 
             return script;
