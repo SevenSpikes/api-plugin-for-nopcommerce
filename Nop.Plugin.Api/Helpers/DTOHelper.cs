@@ -1,32 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Localization;
-using Nop.Plugin.Api.DTOs.Products;
-using Nop.Services.Catalog;
-using Nop.Services.Seo;
-using Nop.Services.Security;
-using Nop.Services.Stores;
-using Nop.Plugin.Api.DTOs.Images;
 using Nop.Core.Domain.Media;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Stores;
-using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Plugin.Api.DTOs.Customers;
+using Nop.Plugin.Api.DTOs.Images;
 using Nop.Plugin.Api.DTOs.Languages;
+using Nop.Plugin.Api.DTOs.OrderItems;
 using Nop.Plugin.Api.DTOs.Orders;
-using Nop.Plugin.Api.Services;
-using Nop.Services.Media;
+using Nop.Plugin.Api.DTOs.ProductAttributes;
+using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
+using Nop.Plugin.Api.DTOs.SpecificationAttributes;
 using Nop.Plugin.Api.DTOs.Stores;
+using Nop.Plugin.Api.MappingExtensions;
+using Nop.Plugin.Api.Services;
+using Nop.Services.Catalog;
 using Nop.Services.Directory;
 using Nop.Services.Localization;
-using Nop.Plugin.Api.DTOs.ProductAttributes;
-using Nop.Plugin.Api.DTOs.OrderItems;
+using Nop.Services.Media;
+using Nop.Services.Security;
+using Nop.Services.Seo;
+using Nop.Services.Stores;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Nop.Plugin.Api.Helpers
 {
@@ -78,6 +79,7 @@ namespace Nop.Plugin.Api.Helpers
 
             PrepareProductImages(product.ProductPictures, productDto);
             PrepareProductAttributes(product.ProductAttributeMappings, productDto);
+            PrepareProductSpecificationAttributes(product.ProductSpecificationAttributes, productDto);
 
             productDto.SeName = product.GetSeName();
             productDto.DiscountIds = product.AppliedDiscounts.Select(discount => discount.Id).ToList();
@@ -320,6 +322,32 @@ namespace Nop.Plugin.Api.Helpers
         public ProductAttributeDto PrepareProductAttributeDTO(ProductAttribute productAttribute)
         {
             return productAttribute.ToDto();
-        }        
+        }
+        
+        public void PrepareProductSpecificationAttributes(IEnumerable<ProductSpecificationAttribute> productSpecificationAttributes, ProductDto productDto)
+        {
+            if (productDto.ProductSpecificationAttributes == null)
+                productDto.ProductSpecificationAttributes = new List<ProductSpecificationAttributeDto>();
+
+            foreach (var productSpecificationAttribute in productSpecificationAttributes)
+            {
+                ProductSpecificationAttributeDto productSpecificationAttributeDto = PrepareProductSpecificationAttributeDto(productSpecificationAttribute);
+
+                if (productSpecificationAttributeDto != null)
+                {
+                    productDto.ProductSpecificationAttributes.Add(productSpecificationAttributeDto);
+                }
+            }
+        }
+
+        public ProductSpecificationAttributeDto PrepareProductSpecificationAttributeDto(ProductSpecificationAttribute productSpecificationAttribute)
+        {
+            return productSpecificationAttribute.ToDto();
+        }
+
+        public SpecificationAttributeDto PrepareSpecificationAttributeDto(SpecificationAttribute specificationAttribute)
+        {
+            return specificationAttribute.ToDto();
+        }
     }
 }

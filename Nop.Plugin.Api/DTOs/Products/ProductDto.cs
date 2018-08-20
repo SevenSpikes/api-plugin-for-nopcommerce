@@ -6,6 +6,7 @@ using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.DTOs.Images;
 using Nop.Plugin.Api.DTOs.Languages;
+using Nop.Plugin.Api.DTOs.SpecificationAttributes;
 using Nop.Plugin.Api.Validators;
 
 namespace Nop.Plugin.Api.DTOs.Products
@@ -22,6 +23,7 @@ namespace Nop.Plugin.Api.DTOs.Products
         private List<LocalizedNameDto> _localizedNames;
         private List<ImageMappingDto> _images;
         private List<ProductAttributeMappingDto> _productAttributeMappings;
+        private List<ProductSpecificationAttributeDto> _productSpecificationAttributes;
         private List<int> _associatedProductIds;
         private List<string> _tags;
 
@@ -590,6 +592,19 @@ namespace Nop.Plugin.Api.DTOs.Products
             set
             {
                 _productAttributeMappings = value;
+            }
+        }
+
+        [JsonProperty("product_specification_attributes")]
+        public List<ProductSpecificationAttributeDto> ProductSpecificationAttributes
+        {
+            get
+            {
+                return _productSpecificationAttributes;
+            }
+            set
+            {
+                _productSpecificationAttributes = value;
             }
         }
 
