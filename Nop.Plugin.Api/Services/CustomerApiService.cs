@@ -518,10 +518,10 @@ namespace Nop.Plugin.Api.Services
         {
             return _cacheManager.Get(Configurations.NEWSLETTER_SUBSCRIBERS_KEY, () =>
             {
-                IEnumerable<String> subscriberEmails = from nls in _subscriptionRepository.Table
+                IEnumerable<String> subscriberEmails = (from nls in _subscriptionRepository.TableNoTracking
                     where nls.StoreId == _storeContext.CurrentStore.Id
                           && nls.Active
-                    select nls.Email;
+                    select nls.Email).ToList();
 
                 
                 subscriberEmails = subscriberEmails.Where(e => !String.IsNullOrEmpty(e)).Select(e => e.ToLowerInvariant());
