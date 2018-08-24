@@ -46,7 +46,7 @@ namespace Nop.Plugin.Api.Services
             if (id <= 0)
                 return null;
 
-            Category category = _categoryRepository.Table.FirstOrDefault(cat => cat.Id == id && !cat.Deleted);
+            var category = _categoryRepository.Table.FirstOrDefault(cat => cat.Id == id && !cat.Deleted);
 
             return category;
         }
@@ -58,14 +58,14 @@ namespace Nop.Plugin.Api.Services
             var query = GetCategoriesQuery(createdAtMin, createdAtMax, updatedAtMin, updatedAtMax,
                                            publishedStatus, productId);
 
-            return query.ToList().Count(c => _storeMappingService.Authorize(c));
+            return query.Count(c => _storeMappingService.Authorize(c));
         }
 
         private IQueryable<Category> GetCategoriesQuery(
             DateTime? createdAtMin = null, DateTime? createdAtMax = null, DateTime? updatedAtMin = null, DateTime? updatedAtMax = null,
             bool? publishedStatus = null, int? productId = null, IList<int> ids = null)
         {
-            var query = _categoryRepository.TableNoTracking;
+            var query = _categoryRepository.Table;
 
             if (ids != null && ids.Count > 0)
             {
@@ -109,7 +109,7 @@ namespace Nop.Plugin.Api.Services
 
             if (productId != null)
             {
-                var categoryMappingsForProduct = from productCategoryMapping in _productCategoryMappingRepository.TableNoTracking
+                var categoryMappingsForProduct = from productCategoryMapping in _productCategoryMappingRepository.Table
                                                  where productCategoryMapping.ProductId == productId
                                                  select productCategoryMapping;
 

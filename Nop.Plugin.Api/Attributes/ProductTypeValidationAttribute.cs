@@ -6,7 +6,7 @@ namespace Nop.Plugin.Api.Attributes
 {
     public class ProductTypeValidationAttribute : BaseValidationAttribute
     {
-        private Dictionary<string, string> _errors = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _errors = new Dictionary<string, string>();
 
         public override void Validate(object instance)
         {
@@ -14,8 +14,6 @@ namespace Nop.Plugin.Api.Attributes
             // and there is nothing to validate in this case
             if (instance == null)
                 return;
-
-            ProductType productType;
 
             var isDefined = Enum.IsDefined(typeof(ProductType), instance);
 

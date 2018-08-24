@@ -1,5 +1,4 @@
 ﻿using Nop.Core;
-using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.DTOs.Stores;
 using Nop.Plugin.Api.JSON.ActionResults;
@@ -18,8 +17,8 @@ namespace Nop.Plugin.Api.Controllers
 {
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Mvc;
-    using Nop.Plugin.Api.DTOs.Errors;
-    using Nop.Plugin.Api.JSON.Serializers;
+    using DTOs.Errors;
+    using JSON.Serializers;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class StoreController : BaseApiController
@@ -68,20 +67,20 @@ namespace Nop.Plugin.Api.Controllers
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetCurrentStore(string fields = "")
         {
-            Store store = _storeContext.CurrentStore;
+            var store = _storeContext.CurrentStore;
 
             if (store == null)
             {
                 return Error(HttpStatusCode.NotFound, "store", "store not found");
             }
 
-            StoreDto storeDto = _dtoHelper.PrepareStoreDTO(store);
+            var storeDto = _dtoHelper.PrepareStoreDTO(store);
 
             var storesRootObject = new StoresRootObject();
 
             storesRootObject.Stores.Add(storeDto);
 
-            var json = _jsonFieldsSerializer.Serialize(storesRootObject, fields);
+            var json = JsonFieldsSerializer.Serialize(storesRootObject, fields);
 
             return new RawJsonActionResult(json);
         }
@@ -100,7 +99,7 @@ namespace Nop.Plugin.Api.Controllers
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetAllStores(string fields = "")
         {
-            IList<Store> allStores = _storeService.GetAllStores();
+            var allStores = StoreService.GetAllStores();
         
             IList<StoreDto> storesAsDto = new List<StoreDto>();
 
@@ -116,7 +115,7 @@ namespace Nop.Plugin.Api.Controllers
                 Stores = storesAsDto
             };
 
-            var json = _jsonFieldsSerializer.Serialize(storesRootObject, fields);
+            var json = JsonFieldsSerializer.Serialize(storesRootObject, fields);
 
             return new RawJsonActionResult(json);
         }

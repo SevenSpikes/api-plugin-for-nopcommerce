@@ -24,8 +24,8 @@ namespace Nop.Plugin.Api.Controllers
 {
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Mvc;
-    using Nop.Plugin.Api.DTOs.Errors;
-    using Nop.Plugin.Api.JSON.Serializers;
+    using DTOs.Errors;
+    using JSON.Serializers;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ProductCategoryMappingsController : BaseApiController
@@ -92,7 +92,7 @@ namespace Nop.Plugin.Api.Controllers
                 ProductCategoryMappingDtos = mappingsAsDtos
             };
 
-            var json = _jsonFieldsSerializer.Serialize(productCategoryMappingRootObject, parameters.Fields);
+            var json = JsonFieldsSerializer.Serialize(productCategoryMappingRootObject, parameters.Fields);
 
             return new RawJsonActionResult(json);
         }
@@ -153,7 +153,7 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "id", "invalid id");
             }
 
-            ProductCategory mapping = _productCategoryMappingsService.GetById(id);
+            var mapping = _productCategoryMappingsService.GetById(id);
 
             if (mapping == null)
             {
@@ -163,7 +163,7 @@ namespace Nop.Plugin.Api.Controllers
             var productCategoryMappingsRootObject = new ProductCategoryMappingsRootObject();
             productCategoryMappingsRootObject.ProductCategoryMappingDtos.Add(mapping.ToDto());
 
-            var json = _jsonFieldsSerializer.Serialize(productCategoryMappingsRootObject, fields);
+            var json = JsonFieldsSerializer.Serialize(productCategoryMappingsRootObject, fields);
 
             return new RawJsonActionResult(json);
         }
@@ -183,43 +183,42 @@ namespace Nop.Plugin.Api.Controllers
                 return Error();
             }
 
-            Category category = _categoryApiService.GetCategoryById(productCategoryDelta.Dto.CategoryId.Value);
+            var category = _categoryApiService.GetCategoryById(productCategoryDelta.Dto.CategoryId.Value);
             if (category == null)
             {
                 return Error(HttpStatusCode.NotFound, "category_id", "not found");
             }
 
-            Product product = _productApiService.GetProductById(productCategoryDelta.Dto.ProductId.Value);
+            var product = _productApiService.GetProductById(productCategoryDelta.Dto.ProductId.Value);
             if (product == null)
             {
                 return Error(HttpStatusCode.NotFound, "product_id", "not found");
             }
 
-            int mappingsCount = _productCategoryMappingsService.GetMappingsCount(product.Id, category.Id);
+            var mappingsCount = _productCategoryMappingsService.GetMappingsCount(product.Id, category.Id);
 
             if (mappingsCount > 0)
             {
                 return Error(HttpStatusCode.BadRequest, "product_category_mapping", "already exist");
             }
 
-            ProductCategory newProductCategory = new ProductCategory();
+            var newProductCategory = new ProductCategory();
             productCategoryDelta.Merge(newProductCategory);
 
             //inserting new category
             _categoryService.InsertProductCategory(newProductCategory);
 
             // Preparing the result dto of the new product category mapping
-            ProductCategoryMappingDto newProductCategoryMappingDto = newProductCategory.ToDto();
+            var newProductCategoryMappingDto = newProductCategory.ToDto();
 
             var productCategoryMappingsRootObject = new ProductCategoryMappingsRootObject();
 
             productCategoryMappingsRootObject.ProductCategoryMappingDtos.Add(newProductCategoryMappingDto);
 
-            var json = _jsonFieldsSerializer.Serialize(productCategoryMappingsRootObject, string.Empty);
+            var json = JsonFieldsSerializer.Serialize(productCategoryMappingsRootObject, string.Empty);
 
             //activity log 
-            _customerActivityService.InsertActivity("AddNewProductCategoryMapping",
-                string.Format(_localizationService.GetResource("ActivityLog.AddNewProductCategoryMapping"), newProductCategory.Id), newProductCategory);
+            CustomerActivityService.InsertActivity("AddNewProductCategoryMapping", LocalizationService.GetResource("ActivityLog.AddNewProductCategoryMapping"), newProductCategory);
 
             return new RawJsonActionResult(json);
         }
@@ -241,7 +240,7 @@ namespace Nop.Plugin.Api.Controllers
 
             if (productCategoryDelta.Dto.CategoryId.HasValue)
             {
-                Category category = _categoryApiService.GetCategoryById(productCategoryDelta.Dto.CategoryId.Value);
+                var category = _categoryApiService.GetCategoryById(productCategoryDelta.Dto.CategoryId.Value);
                 if (category == null)
                 {
                     return Error(HttpStatusCode.NotFound, "category_id", "not found");
@@ -250,7 +249,7 @@ namespace Nop.Plugin.Api.Controllers
 
             if (productCategoryDelta.Dto.ProductId.HasValue)
             {
-                Product product = _productApiService.GetProductById(productCategoryDelta.Dto.ProductId.Value);
+                var product = _productApiService.GetProductById(productCategoryDelta.Dto.ProductId.Value);
                 if (product == null)
                 {
                     return Error(HttpStatusCode.NotFound, "product_id", "not found");
@@ -258,9 +257,9 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             // We do not need to validate the category id, because this will happen in the model binder using the dto validator.
-            int updateProductCategoryId = productCategoryDelta.Dto.Id;
+            var updateProductCategoryId = productCategoryDelta.Dto.Id;
 
-            ProductCategory productCategoryEntityToUpdate = _categoryService.GetProductCategoryById(updateProductCategoryId);
+            var productCategoryEntityToUpdate = _categoryService.GetProductCategoryById(updateProductCategoryId);
 
             if (productCategoryEntityToUpdate == null)
             {
@@ -272,16 +271,16 @@ namespace Nop.Plugin.Api.Controllers
             _categoryService.UpdateProductCategory(productCategoryEntityToUpdate);
 
             //activity log
-            _customerActivityService.InsertActivity("UpdateProdutCategoryMapping",
-                string.Format(_localizationService.GetResource("ActivityLog.UpdateProdutCategoryMapping"), productCategoryEntityToUpdate.Id), productCategoryEntityToUpdate);
+            CustomerActivityService.InsertActivity("UpdateProdutCategoryMapping",
+                LocalizationService.GetResource("ActivityLog.UpdateProdutCategoryMapping"), productCategoryEntityToUpdate);
 
-            ProductCategoryMappingDto updatedProductCategoryDto = productCategoryEntityToUpdate.ToDto();
+            var updatedProductCategoryDto = productCategoryEntityToUpdate.ToDto();
 
             var productCategoriesRootObject = new ProductCategoryMappingsRootObject();
 
             productCategoriesRootObject.ProductCategoryMappingDtos.Add(updatedProductCategoryDto);
 
-            var json = _jsonFieldsSerializer.Serialize(productCategoriesRootObject, string.Empty);
+            var json = JsonFieldsSerializer.Serialize(productCategoriesRootObject, string.Empty);
 
             return new RawJsonActionResult(json);
         }
@@ -300,7 +299,7 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "id", "invalid id");
             }
 
-            ProductCategory productCategory = _categoryService.GetProductCategoryById(id);
+            var productCategory = _categoryService.GetProductCategoryById(id);
 
             if (productCategory == null)
             {
@@ -310,8 +309,7 @@ namespace Nop.Plugin.Api.Controllers
             _categoryService.DeleteProductCategory(productCategory);
 
             //activity log 
-            _customerActivityService.InsertActivity("DeleteProductCategoryMapping",
-                string.Format(_localizationService.GetResource("ActivityLog.DeleteProductCategoryMapping"), productCategory.Id), productCategory);
+            CustomerActivityService.InsertActivity("DeleteProductCategoryMapping", LocalizationService.GetResource("ActivityLog.DeleteProductCategoryMapping"), productCategory);
 
             return new RawJsonActionResult("{}");
         }

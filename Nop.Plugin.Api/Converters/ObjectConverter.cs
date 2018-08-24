@@ -16,12 +16,12 @@ namespace Nop.Plugin.Api.Converters
         public T ToObject<T>(ICollection<KeyValuePair<string, string>> source)
             where T : class, new()
         {
-            T someObject = new T();
-            Type someObjectType = someObject.GetType();
+            var someObject = new T();
+            var someObjectType = someObject.GetType();
 
             if (source != null)
             {
-                foreach (KeyValuePair<string, string> item in source)
+                foreach (var item in source)
                 {
                     var itemKey = item.Key.Replace("_", string.Empty);
                     var currentProperty = someObjectType.GetProperty(itemKey,
@@ -71,7 +71,7 @@ namespace Nop.Plugin.Api.Converters
 
         private bool IsNullableEnum(Type t)
         {
-            Type u = Nullable.GetUnderlyingType(t);
+            var u = Nullable.GetUnderlyingType(t);
             return (u != null) && u.IsEnum;
         }
     }

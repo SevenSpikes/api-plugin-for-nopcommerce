@@ -7,7 +7,7 @@ namespace Nop.Plugin.Api.Validators
 {
     public class OrderItemDtoValidator : AbstractValidator<OrderItemDto>
     {
-        public OrderItemDtoValidator(string httpMethod, Dictionary<string, object> passedPropertyValuePaires)
+        public OrderItemDtoValidator(string httpMethod, IReadOnlyDictionary<string, object> passedPropertyValuePaires)
         {
             if (string.IsNullOrEmpty(httpMethod) ||
                 httpMethod.Equals("post", StringComparison.InvariantCultureIgnoreCase))

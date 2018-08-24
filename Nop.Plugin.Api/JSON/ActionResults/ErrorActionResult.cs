@@ -7,7 +7,6 @@ namespace Nop.Plugin.Api.JSON.ActionResults
     using System;
     using System.IO;
     using System.Text;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.WebUtilities;
 
     public class ErrorActionResult : IActionResult 
@@ -26,7 +25,7 @@ namespace Nop.Plugin.Api.JSON.ActionResults
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            HttpResponse response = context.HttpContext.Response;
+            var response = context.HttpContext.Response;
 
             response.StatusCode = (int)_statusCode;
             response.ContentType = "application/json";

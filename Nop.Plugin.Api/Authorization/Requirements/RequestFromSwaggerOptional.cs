@@ -22,7 +22,7 @@
 
         public bool AllowRequestsFromSwagger()
         {
-            ApiSettings settings = EngineContext.Current.Resolve<ApiSettings>();
+            var settings = EngineContext.Current.Resolve<ApiSettings>();
 
             return settings.AllowRequestsFromSwagger;
         }

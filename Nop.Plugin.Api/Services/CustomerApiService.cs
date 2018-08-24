@@ -1,21 +1,22 @@
-﻿using Nop.Core;
-using Nop.Core.Caching;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Nop.Core.Data;
-using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
-using Nop.Core.Domain.Messages;
+using Nop.Plugin.Api.DTOs.Customers;
+using System.Linq;
+using System.Linq.Dynamic.Core;
+using System.Text.RegularExpressions;
+using Nop.Core;
+using Nop.Core.Domain.Common;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.DataStructures;
-using Nop.Plugin.Api.DTOs.Customers;
 using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Services.Localization;
 using Nop.Services.Stores;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Dynamic.Core;
-using System.Text.RegularExpressions;
+using Nop.Core.Domain.Messages;
+using Nop.Core.Caching;
 
 namespace Nop.Plugin.Api.Services
 {
@@ -58,7 +59,7 @@ namespace Nop.Plugin.Api.Services
         {
             var query = GetCustomersQuery(createdAtMin, createdAtMax, sinceId);
 
-            IList<CustomerDto> result = HandleCustomerGenericAttributes(null, query, limit, page);
+            var result = HandleCustomerGenericAttributes(null, query, limit, page);
 
             SetNewsletterSubscribtionStatus(result);
 
@@ -77,17 +78,18 @@ namespace Nop.Plugin.Api.Services
         {
             IList<CustomerDto> result = new List<CustomerDto>();
 
-            Dictionary<string, string> searchParams = EnsureSearchQueryIsValid(queryParams, ParseSearchQuery);
+            var searchParams = EnsureSearchQueryIsValid(queryParams, ParseSearchQuery);
 
             if (searchParams != null)
             {
-                IQueryable<Customer> query = _customerRepository.TableNoTracking.Where(customer => !customer.Deleted);
+                var query = _customerRepository.Table.Where(customer => !customer.Deleted);
 
                 foreach (var searchParam in searchParams)
                 {
                     // Skip non existing properties.
                     if (ReflectionHelper.HasProperty(searchParam.Key, typeof(Customer)))
                     {
+                        
                         // @0 is a placeholder used by dynamic linq and it is used to prevent possible sql injections.
                         query = query.Where(string.Format("{0} = @0 || {0}.Contains(@0)", searchParam.Key), searchParam.Value);
                     }
@@ -106,7 +108,7 @@ namespace Nop.Plugin.Api.Services
 
         public Dictionary<string, string> GetFirstAndLastNameByCustomerId(int customerId)
         {
-            return _genericAttributeRepository.TableNoTracking.Where(
+            return _genericAttributeRepository.Table.Where(
                 x =>
                     x.KeyGroup == KeyGroup && x.EntityId == customerId &&
                     (x.Key == FirstName || x.Key == LastName)).ToDictionary(x => x.Key.ToLowerInvariant(), y => y.Value);
@@ -114,7 +116,7 @@ namespace Nop.Plugin.Api.Services
 
         public Customer GetCustomerEntityById(int id)
         {
-            Customer customer = _customerRepository.Table.FirstOrDefault(c => c.Id == id && !c.Deleted);
+            var customer = _customerRepository.Table.FirstOrDefault(c => c.Id == id && !c.Deleted);
 
             return customer;
         }
@@ -125,8 +127,9 @@ namespace Nop.Plugin.Api.Services
                 return null;
 
             // Here we expect to get two records, one for the first name and one for the last name.
-            List<CustomerAttributeMappingDto> customerAttributeMappings = (from customer in _customerRepository.TableNoTracking
-                                                                           join attribute in _genericAttributeRepository.TableNoTracking on customer.Id equals attribute.EntityId
+            var customerAttributeMappings = (from customer in _customerRepository.Table //NoTracking
+                                                                           join attribute in _genericAttributeRepository.Table//NoTracking
+                                                                                                                              on customer.Id equals attribute.EntityId
                                                                            where customer.Id == id &&
                                                                                  attribute.KeyGroup.Equals(KeyGroup, StringComparison.InvariantCultureIgnoreCase) &&
                                                                                  (attribute.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase) ||
@@ -134,7 +137,7 @@ namespace Nop.Plugin.Api.Services
                                                                                   attribute.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase) || 
                                                                                   attribute.Key.Equals(DateOfBirth, StringComparison.InvariantCultureIgnoreCase) ||
                                                                                   attribute.Key.Equals(Gender, StringComparison.InvariantCultureIgnoreCase))
-                                                                           select new CustomerAttributeMappingDto()
+                                                                           select new CustomerAttributeMappingDto
                                                                            {
                                                                                Attribute = attribute,
                                                                                Customer = customer
@@ -145,22 +148,22 @@ namespace Nop.Plugin.Api.Services
             // This is in case we have first and last names set for the customer.
             if (customerAttributeMappings.Count > 0)
             {
-                Customer customer = customerAttributeMappings.First().Customer;
+                var customer = customerAttributeMappings.First().Customer;
                 // The customer object is the same in all mappings.
                 customerDto = customer.ToDto();
 
                 var defaultStoreLanguageId = GetDefaultStoreLangaugeId();
 
                 // If there is no Language Id generic attribute create one with the default language id.
-                if (!customerAttributeMappings.Any(cam => cam != null && cam.Attribute != null && cam.Attribute.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase)))
+                if (!customerAttributeMappings.Any(cam => cam?.Attribute != null && cam.Attribute.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    GenericAttribute languageId = new GenericAttribute
+                    var languageId = new GenericAttribute
                     {
                         Key = LanguageId,
                         Value = defaultStoreLanguageId.ToString()
                     };
 
-                    CustomerAttributeMappingDto customerAttributeMappingDto = new CustomerAttributeMappingDto
+                    var customerAttributeMappingDto = new CustomerAttributeMappingDto
                     {
                         Customer = customer,
                         Attribute = languageId
@@ -204,7 +207,7 @@ namespace Nop.Plugin.Api.Services
             else
             {
                 // This is when we do not have first and last name set.
-                Customer currentCustomer = _customerRepository.TableNoTracking.FirstOrDefault(customer => customer.Id == id);
+                var currentCustomer = _customerRepository.Table.FirstOrDefault(customer => customer.Id == id);
 
                 if (currentCustomer != null)
                 {
@@ -234,7 +237,7 @@ namespace Nop.Plugin.Api.Services
         {
             var parsedQuery = new Dictionary<string, string>();
 
-            string splitPattern = @"(\w+):";
+            var splitPattern = @"(\w+):";
 
             var fieldValueList = Regex.Split(query, splitPattern).Where(s => s != String.Empty).ToList();
 
@@ -243,7 +246,7 @@ namespace Nop.Plugin.Api.Services
                 return parsedQuery;
             }
 
-            for (int i = 0; i < fieldValueList.Count; i += 2)
+            for (var i = 0; i < fieldValueList.Count; i += 2)
             {
                 var field = fieldValueList[i];
                 var value = fieldValueList[i + 1];
@@ -264,8 +267,11 @@ namespace Nop.Plugin.Api.Services
         /// <param name="searchParams">Search parameters is used to shrinc the range of results from the GenericAttibutes table 
         /// to be only those with specific search parameter (i.e. currently we focus only on first and last name).</param>
         /// <param name="query">Query parameter represents the current customer records which we will join with GenericAttributes table.</param>
+        /// <param name="limit"></param>
+        /// <param name="page"></param>
+        /// <param name="order"></param>
         /// <returns></returns>
-        private IList<CustomerDto> HandleCustomerGenericAttributes(Dictionary<string, string> searchParams, IQueryable<Customer> query,
+        private IList<CustomerDto> HandleCustomerGenericAttributes(IReadOnlyDictionary<string, string> searchParams, IQueryable<Customer> query,
             int limit = Configurations.DefaultLimit, int page = Configurations.DefaultPageValue, string order = Configurations.DefaultOrder)
         {
             // Here we join the GenericAttribute records with the customers and making sure that we are working only with the attributes
@@ -280,9 +286,9 @@ namespace Nop.Plugin.Api.Services
             //      attribute that contains the last name of customer 2
             // etc.
 
-            IQueryable<IGrouping<int, CustomerAttributeMappingDto>> allRecordsGroupedByCustomerId =
+            var allRecordsGroupedByCustomerId =
                 (from customer in query
-                 from attribute in _genericAttributeRepository.TableNoTracking
+                 from attribute in _genericAttributeRepository.Table
                      .Where(attr => attr.EntityId == customer.Id &&
                                     attr.KeyGroup.Equals(KeyGroup, StringComparison.InvariantCultureIgnoreCase) &&
                                     (attr.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase) ||
@@ -290,7 +296,7 @@ namespace Nop.Plugin.Api.Services
                                     attr.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase) ||
                                     attr.Key.Equals(DateOfBirth, StringComparison.InvariantCultureIgnoreCase) ||
                                     attr.Key.Equals(Gender, StringComparison.InvariantCultureIgnoreCase))).DefaultIfEmpty()
-                 select new CustomerAttributeMappingDto()
+                 select new CustomerAttributeMappingDto
                  {
                      Attribute = attribute,
                      Customer = customer
@@ -324,7 +330,7 @@ namespace Nop.Plugin.Api.Services
                 }
             }
 
-            IList<CustomerDto> result = GetFullCustomerDtos(allRecordsGroupedByCustomerId, page, limit, order);
+            var result = GetFullCustomerDtos(allRecordsGroupedByCustomerId, page, limit, order);
 
             return result;
         }
@@ -348,7 +354,7 @@ namespace Nop.Plugin.Api.Services
             {
                 IList<CustomerAttributeMappingDto> mappingsForMerge = group.Select(x => x).ToList();
 
-                CustomerDto customerDto = Merge(mappingsForMerge, defaultLanguageId);
+                var customerDto = Merge(mappingsForMerge, defaultLanguageId);
 
                 customerDtos.Add(customerDto);
             }
@@ -357,19 +363,17 @@ namespace Nop.Plugin.Api.Services
             return customerDtos.AsQueryable().OrderBy(order).ToList();
         }
 
-        private CustomerDto Merge(IList<CustomerAttributeMappingDto> mappingsForMerge, int defaultLanguageId)
+        private static CustomerDto Merge(IList<CustomerAttributeMappingDto> mappingsForMerge, int defaultLanguageId)
         {
-            var customerDto = new CustomerDto();
-
             // We expect the customer to be always set.
-            customerDto = mappingsForMerge.First().Customer.ToDto();
+            var customerDto = mappingsForMerge.First().Customer.ToDto();
 
-            List<GenericAttribute> attributes = mappingsForMerge.Select(x => x.Attribute).ToList();
+            var attributes = mappingsForMerge.Select(x => x.Attribute).ToList();
 
             // If there is no Language Id generic attribute create one with the default language id.
             if (!attributes.Any(atr => atr != null && atr.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase)))
             {
-                GenericAttribute languageId = new GenericAttribute
+                var languageId = new GenericAttribute
                 {
                     Key = LanguageId,
                     Value = defaultLanguageId.ToString()
@@ -423,11 +427,12 @@ namespace Nop.Plugin.Api.Services
 
         private IQueryable<Customer> GetCustomersQuery(DateTime? createdAtMin = null, DateTime? createdAtMax = null, int sinceId = 0)
         {
-            var query = _customerRepository.TableNoTracking.Where(customer => !customer.Deleted && !customer.IsSystemAccount && customer.Active);
-
+            var query = _customerRepository.Table //NoTracking
+                                                  .Where(customer => !customer.Deleted && !customer.IsSystemAccount && customer.Active);
+            
             query = query.Where(customer => !customer.CustomerRoles.Any(cr => (cr.Active) && (cr.SystemName == NopCustomerDefaults.GuestsRoleName))
             && (customer.RegisteredInStoreId == 0 || customer.RegisteredInStoreId == _storeContext.CurrentStore.Id));
-
+            
             if (createdAtMin != null)
             {
                 query = query.Where(c => c.CreatedOnUtc > createdAtMin.Value);
@@ -475,6 +480,7 @@ namespace Nop.Plugin.Api.Services
             return defaultLanguageId;
         }
 
+        [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
         private void SetNewsletterSubscribtionStatus(IList<CustomerDto> customerDtos)
         {
             if(customerDtos == null)
@@ -482,7 +488,7 @@ namespace Nop.Plugin.Api.Services
                 return;
             }
 
-            var allNewsletterCustomerEmail = getAllNewsletterCustomersEmails();
+            var allNewsletterCustomerEmail = GetAllNewsletterCustomersEmails();
 
             foreach(var customerDto in customerDtos)
             {
@@ -490,7 +496,7 @@ namespace Nop.Plugin.Api.Services
             }
         }
 
-        private void SetNewsletterSubscribtionStatus(CustomerDto customerDto, IEnumerable<String> allNewsletterCustomerEmail = null)
+        private void SetNewsletterSubscribtionStatus(BaseCustomerDto customerDto, IEnumerable<String> allNewsletterCustomerEmail = null)
         {
             if(customerDto == null || String.IsNullOrEmpty(customerDto.Email))
             {
@@ -499,7 +505,7 @@ namespace Nop.Plugin.Api.Services
 
             if(allNewsletterCustomerEmail == null)
             { 
-                allNewsletterCustomerEmail = getAllNewsletterCustomersEmails();
+                allNewsletterCustomerEmail = GetAllNewsletterCustomersEmails();
             }
 
             if (allNewsletterCustomerEmail != null && allNewsletterCustomerEmail.Contains(customerDto.Email.ToLowerInvariant()))
@@ -508,20 +514,18 @@ namespace Nop.Plugin.Api.Services
             }
         }
 
-        private IEnumerable<String> getAllNewsletterCustomersEmails()
+        private IEnumerable<String> GetAllNewsletterCustomersEmails()
         {
             return _cacheManager.Get(Configurations.NEWSLETTER_SUBSCRIBERS_KEY, () =>
             {
-                IEnumerable<String> subscriberEmails = (from nls in _subscriptionRepository.TableNoTracking
-                                                        where nls.StoreId == _storeContext.CurrentStore.Id
-                                                        && nls.Active
-                                                        select nls.Email).ToList();
+                IEnumerable<String> subscriberEmails = from nls in _subscriptionRepository.Table
+                    where nls.StoreId == _storeContext.CurrentStore.Id
+                          && nls.Active
+                    select nls.Email;
 
-                if (subscriberEmails != null)
-                {
-                    subscriberEmails = subscriberEmails.Where(e => !String.IsNullOrEmpty(e)).Select(e => e.ToLowerInvariant());
-                }
-
+                
+                subscriberEmails = subscriberEmails.Where(e => !String.IsNullOrEmpty(e)).Select(e => e.ToLowerInvariant());
+             
                 return subscriberEmails.Where(e => !String.IsNullOrEmpty(e)).Select(e => e.ToLowerInvariant());
             });
         }

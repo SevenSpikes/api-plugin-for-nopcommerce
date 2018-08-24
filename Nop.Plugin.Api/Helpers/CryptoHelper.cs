@@ -1,4 +1,4 @@
-﻿using Nop.Core.Infrastructure;
+﻿using Nop.Core;
 
 namespace Nop.Plugin.Api.Helpers
 {
@@ -6,7 +6,6 @@ namespace Nop.Plugin.Api.Helpers
     using Newtonsoft.Json;
     using System.IO;
     using System.Security.Cryptography;
-    using Nop.Core;
 
     public static class CryptoHelper
     {
@@ -18,8 +17,8 @@ namespace Nop.Plugin.Api.Helpers
         {
             if (_key == null)
             {
-                var fileProvider = EngineContext.Current.Resolve<INopFileProvider>();
-                string pathToKey = fileProvider.MapPath($"~/App_Data/{TokenSigningKeyFileName}");
+                
+                var pathToKey = CommonHelper.DefaultFileProvider.MapPath($"~/App_Data/{TokenSigningKeyFileName}");
 
                 if (!File.Exists(pathToKey))
                 {
@@ -28,7 +27,7 @@ namespace Nop.Plugin.Api.Helpers
 
                     var rsaParams = new RSAParametersWithPrivate();
                     rsaParams.SetParameters(randomParameters);
-                    string serializedParameters = JsonConvert.SerializeObject(rsaParams);
+                    var serializedParameters = JsonConvert.SerializeObject(rsaParams);
 
                     // create file and save the key
                     File.WriteAllText(pathToKey, serializedParameters);

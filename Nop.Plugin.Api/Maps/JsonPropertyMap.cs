@@ -45,7 +45,7 @@ namespace Nop.Plugin.Api.Maps
 
         private void Build(Type type)
         {
-            Dictionary<string, Dictionary<string, Tuple<string, Type>>> typeMaps =
+            var typeMaps =
                 StaticCacheManager.Get<Dictionary<string, Dictionary<string, Tuple<string, Type>>>>(Configurations.JsonTypeMapsPattern, () => null, 0);
 
             var mapForCurrentType = new Dictionary<string, Tuple<string, Type>>();
@@ -54,8 +54,8 @@ namespace Nop.Plugin.Api.Maps
             
             foreach (var property in typeProps)
             {
-                JsonPropertyAttribute jsonAttribute = property.GetCustomAttribute(typeof(JsonPropertyAttribute)) as JsonPropertyAttribute;
-                DoNotMapAttribute doNotMapAttribute = property.GetCustomAttribute(typeof(DoNotMapAttribute)) as DoNotMapAttribute;
+                var jsonAttribute = property.GetCustomAttribute(typeof(JsonPropertyAttribute)) as JsonPropertyAttribute;
+                var doNotMapAttribute = property.GetCustomAttribute(typeof(DoNotMapAttribute)) as DoNotMapAttribute;
 
                 // If it has json attribute set and is not marked as doNotMap
                 if (jsonAttribute != null && doNotMapAttribute == null)

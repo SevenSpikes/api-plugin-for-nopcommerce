@@ -3,32 +3,26 @@ using Nop.Core.Configuration;
 using Nop.Core.Infrastructure;
 using Nop.Core.Infrastructure.DependencyManagement;
 using Nop.Plugin.Api.Services;
-using Nop.Web.Framework.Infrastructure.Extensions;
 
 namespace Nop.Plugin.Api.Infrastructure
 {
+    using System;
     using Nop.Core.Domain.Catalog;
     using Nop.Core.Domain.Common;
     using Nop.Core.Domain.Customers;
     using Nop.Core.Domain.Orders;
-    using Nop.Plugin.Api.Converters;
-    using Nop.Plugin.Api.Data;
-    using Nop.Plugin.Api.Factories;
-    using Nop.Plugin.Api.Helpers;
-    using Nop.Plugin.Api.JSON.Serializers;
-    using Nop.Plugin.Api.ModelBinders;
-    using Nop.Plugin.Api.Validators;
-    using Nop.Plugin.Api.WebHooks;
-    using System;
+    using Converters;
+    using Factories;
+    using Helpers;
+    using JSON.Serializers;
+    using ModelBinders;
+    using Validators;
+ 
 
     public class DependencyRegister : IDependencyRegistrar
     {
-        private const string ObjectContextName = "nop_object_context_web_api";
-
         public void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
         {
-            builder.RegisterPluginDataContext<ApiObjectContext>(ObjectContextName);
-
             RegisterPluginServices(builder);
 
             RegisterModelBinders(builder);
@@ -61,14 +55,11 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<DTOHelper>().As<IDTOHelper>().InstancePerLifetimeScope();
             builder.RegisterType<NopConfigManagerHelper>().As<IConfigManagerHelper>().InstancePerLifetimeScope();
 
-            builder.RegisterType<NopWebHooksLogger>().As<Microsoft.AspNet.WebHooks.Diagnostics.ILogger>().InstancePerLifetimeScope();
-
             builder.RegisterType<JsonFieldsSerializer>().As<IJsonFieldsSerializer>().InstancePerLifetimeScope();
 
             builder.RegisterType<FieldsValidator>().As<IFieldsValidator>().InstancePerLifetimeScope();
 
-            builder.RegisterType<WebHookService>().As<IWebHookService>().SingleInstance();
-
+            
             builder.RegisterType<ObjectConverter>().As<IObjectConverter>().InstancePerLifetimeScope();
             builder.RegisterType<ApiTypeConverter>().As<IApiTypeConverter>().InstancePerLifetimeScope();
 

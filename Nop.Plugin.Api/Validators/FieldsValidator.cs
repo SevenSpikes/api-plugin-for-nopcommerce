@@ -7,10 +7,10 @@ namespace Nop.Plugin.Api.Validators
 {
     public class FieldsValidator : IFieldsValidator
     {
-        private List<string> GetPropertiesIntoList(string fields)
+        private static IEnumerable<string> GetPropertiesIntoList(string fields)
         {
             var properties = fields.ToLowerInvariant()
-                .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
                 .Distinct()
                 .ToList();
@@ -27,11 +27,11 @@ namespace Nop.Plugin.Api.Validators
             fields = fields.Replace("_", string.Empty);
 
             var validFields = new Dictionary<string, bool>();
-            List<string> fieldsAsList = GetPropertiesIntoList(fields); 
+            var fieldsAsList = GetPropertiesIntoList(fields); 
             
             foreach (var field in fieldsAsList)
             {
-                bool propertyExists = type.GetProperty(field, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance) != null;
+                var propertyExists = type.GetProperty(field, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance) != null;
 
                 if (propertyExists)
                 {

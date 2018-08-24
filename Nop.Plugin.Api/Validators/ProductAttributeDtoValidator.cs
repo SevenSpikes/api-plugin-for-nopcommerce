@@ -7,7 +7,7 @@ namespace Nop.Plugin.Api.Validators
 {
     public class ProductAttributeDtoValidator : AbstractValidator<ProductAttributeDto>
     {
-        public ProductAttributeDtoValidator(string httpMethod, Dictionary<string, object> passedPropertyValuePaires)
+        public ProductAttributeDtoValidator(string httpMethod, IReadOnlyDictionary<string, object> passedPropertyValuePaires)
         {
             if (string.IsNullOrEmpty(httpMethod) || httpMethod.Equals("post", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -15,12 +15,10 @@ namespace Nop.Plugin.Api.Validators
             }
             else if (httpMethod.Equals("put", StringComparison.InvariantCultureIgnoreCase))
             {
-                int parsedId = 0;
-
                 RuleFor(x => x.Id)
                         .NotNull()
                         .NotEmpty()
-                        .Must(id => int.TryParse(id, out parsedId) && parsedId > 0)
+                        .Must(id => int.TryParse(id, out var parsedId) && parsedId > 0)
                         .WithMessage("invalid id");
 
                 if (passedPropertyValuePaires.ContainsKey("name"))

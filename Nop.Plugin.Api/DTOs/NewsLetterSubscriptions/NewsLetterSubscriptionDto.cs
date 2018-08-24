@@ -1,7 +1,5 @@
 ﻿using System;
-using FluentValidation.Attributes;
 using Newtonsoft.Json;
-using Nop.Plugin.Api.Validators;
 
 namespace Nop.Plugin.Api.DTOs.Categories
 {

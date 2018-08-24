@@ -10,7 +10,7 @@ namespace Nop.Plugin.Api.Validators
 {
     public class CustomerDtoValidator : AbstractValidator<CustomerDto>
     {
-        private ICustomerRolesHelper _customerRolesHelper = EngineContext.Current.Resolve<ICustomerRolesHelper>();
+        private readonly ICustomerRolesHelper _customerRolesHelper = EngineContext.Current.Resolve<ICustomerRolesHelper>();
 
         public CustomerDtoValidator(string httpMethod, Dictionary<string, object> passedPropertyValuePaires)
         {
@@ -22,7 +22,7 @@ namespace Nop.Plugin.Api.Validators
             }
             else if (httpMethod.Equals("put", StringComparison.InvariantCultureIgnoreCase))
             {
-                int parsedId = 0;
+                int parsedId;
 
                 RuleFor(x => x.Id)
                     .NotNull()
@@ -82,11 +82,11 @@ namespace Nop.Plugin.Api.Validators
         {
             IList<CustomerRole> customerRoles = null;
 
-            RuleFor<List<int>>(x => x.RoleIds)
+            RuleFor(x => x.RoleIds)
                    .NotNull()
                    .Must(roles => roles.Count > 0)
                    .WithMessage("role_ids required")
-                   .DependentRules(dependentRules => dependentRules.RuleFor(dto => dto.RoleIds)
+                   .DependentRules(() => RuleFor(dto => dto.RoleIds)
                        .Must(roleIds =>
                        {
                            if (customerRoles == null)
@@ -94,14 +94,14 @@ namespace Nop.Plugin.Api.Validators
                                customerRoles = _customerRolesHelper.GetValidCustomerRoles(roleIds);
                            }
 
-                           bool isInGuestAndRegisterRoles = _customerRolesHelper.IsInGuestsRole(customerRoles) &&
+                           var isInGuestAndRegisterRoles = _customerRolesHelper.IsInGuestsRole(customerRoles) &&
                                                             _customerRolesHelper.IsInRegisteredRole(customerRoles);
 
                            // Customer can not be in guest and register roles simultaneously
                            return !isInGuestAndRegisterRoles;
                        })
                        .WithMessage("must not be in guest and register roles simultaneously")
-                       .DependentRules(dependentRule => dependentRules.RuleFor(dto => dto.RoleIds)
+                       .DependentRules(() => RuleFor(dto => dto.RoleIds)
                             .Must(roleIds =>
                             {
                                 if (customerRoles == null)
@@ -109,7 +109,7 @@ namespace Nop.Plugin.Api.Validators
                                     customerRoles = _customerRolesHelper.GetValidCustomerRoles(roleIds);
                                 }
 
-                                bool isInGuestOrRegisterRoles = _customerRolesHelper.IsInGuestsRole(customerRoles) ||
+                                var isInGuestOrRegisterRoles = _customerRolesHelper.IsInGuestsRole(customerRoles) ||
                                                                 _customerRolesHelper.IsInRegisteredRole(customerRoles);
 
                                 // Customer must be in either guest or register role.

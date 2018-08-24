@@ -76,18 +76,18 @@ namespace Nop.Plugin.Api.Delta
             if (changedJsonPropertyNames == null)
                 return propertyValuePairs;
 
-            Dictionary<string, Tuple<string, Type>> typeMap = _jsonPropertyMapper.GetMap(type);
+            var typeMap = _jsonPropertyMapper.GetMap(type);
 
             foreach (var changedProperty in changedJsonPropertyNames)
             {
-                string jsonName = changedProperty.Key;
+                var jsonName = changedProperty.Key;
 
                 if (typeMap.ContainsKey(jsonName))
                 {
-                    Tuple<string, Type> propertyNameAndType = typeMap[jsonName];
+                    var propertyNameAndType = typeMap[jsonName];
 
-                    string propertyName = propertyNameAndType.Item1;
-                    Type propertyType = propertyNameAndType.Item2;
+                    var propertyName = propertyNameAndType.Item1;
+                    var propertyType = propertyNameAndType.Item2;
 
                     // Handle system types
                     // This is also the recursion base
@@ -105,7 +105,7 @@ namespace Nop.Plugin.Api.Delta
                             continue;
 
                             var collection = changedProperty.Value as IEnumerable<object>;
-                        Type collectionElementsType = propertyType.GetGenericArguments()[0];
+                        var collectionElementsType = propertyType.GetGenericArguments()[0];
                         var resultCollection = new List<object>();
 
                         foreach (var item in collection)
@@ -119,7 +119,7 @@ namespace Nop.Plugin.Api.Delta
                             else
                             {
                                 // the complex type could be null so we try a defensive cast
-                                Dictionary<string, object> itemDictionary =
+                                var itemDictionary =
                                     item as Dictionary<string, object>;
 
                                 resultCollection.Add(GetPropertyValuePairs(collectionElementsType,itemDictionary));
@@ -132,7 +132,7 @@ namespace Nop.Plugin.Api.Delta
                     else
                     {
                         // the complex type could be null so we try a defensive cast
-                        Dictionary<string, object> changedPropertyValueDictionary =
+                        var changedPropertyValueDictionary =
                             changedProperty.Value as Dictionary<string, object>;
 
                         var resultedNestedObject = GetPropertyValuePairs(propertyType, changedPropertyValueDictionary);

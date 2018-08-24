@@ -8,7 +8,7 @@ namespace Nop.Plugin.Api.Validators
 {
     public class ShoppingCartItemDtoValidator : AbstractValidator<ShoppingCartItemDto>
     {
-        public ShoppingCartItemDtoValidator(string httpMethod, Dictionary<string, object> passedPropertyValuePaires)
+        public ShoppingCartItemDtoValidator(string httpMethod, IReadOnlyDictionary<string, object> passedPropertyValuePaires)
         {
             if (string.IsNullOrEmpty(httpMethod) || httpMethod.Equals("post", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -22,12 +22,10 @@ namespace Nop.Plugin.Api.Validators
             }
             else if (httpMethod.Equals("put", StringComparison.InvariantCultureIgnoreCase))
             {
-                int parsedId = 0;
-
                 RuleFor(x => x.Id)
                         .NotNull()
                         .NotEmpty()
-                        .Must(id => int.TryParse(id, out parsedId) && parsedId > 0)
+                        .Must(id => int.TryParse(id, out var parsedId) && parsedId > 0)
                         .WithMessage("Invalid Id");
 
                 if (passedPropertyValuePaires.ContainsKey("customer_id"))
@@ -98,13 +96,11 @@ namespace Nop.Plugin.Api.Validators
 
         private void ValidateShoppingCartType()
         {
-            ShoppingCartType shoppingCartType;
-
             RuleFor(x => x.ShoppingCartType)
                 .NotNull()
                 .Must(x =>
                 {
-                    var parsed = Enum.TryParse(x, true, out shoppingCartType);
+                    var parsed = Enum.TryParse(x, true, out ShoppingCartType _);
                     return parsed;
                 })
                 .WithMessage("Please provide a valid shopping cart type");
