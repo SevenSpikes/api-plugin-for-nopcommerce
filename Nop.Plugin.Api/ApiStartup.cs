@@ -198,7 +198,7 @@ namespace Nop.Plugin.Api
             {
                 var configurationContext = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
 
-                if (configurationContext.ApiResources.Any())
+                if (!configurationContext.ApiResources.Any())
                 {
                     // In the simple case an API has exactly one scope. But there are cases where you might want to sub-divide the functionality of an API, and give different clients access to different parts. 
                     configurationContext.ApiResources.Add(new ApiResource()
