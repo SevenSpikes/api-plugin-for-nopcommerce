@@ -126,7 +126,7 @@ namespace Nop.Plugin.Api.Services
         {
             if (id == 0)
                 return null;
-
+            
             // Here we expect to get two records, one for the first name and one for the last name.
             var customerAttributeMappings = (from customer in GetQuery() 
                                                                            join attribute in _genericAttributeRepository.Table//NoTracking
@@ -232,12 +232,10 @@ namespace Nop.Plugin.Api.Services
             query = query.Include(c => c.BillingAddress).ThenInclude(m => m.StateProvince);
             query = query.Include(c => c.ShippingAddress).ThenInclude(m => m.Country);
             query = query.Include(c => c.ShippingAddress).ThenInclude(m => m.StateProvince);
-            
-            query = query.Include(c => c.CustomerRoles).ThenInclude(m => m.PermissionRecordCustomerRoleMappings).ThenInclude(m => m.PermissionRecord);
             query = query.Include(c => c.CustomerCustomerRoleMappings).ThenInclude(m => m.CustomerRole);
-
             query = query.Include(c => c.ShoppingCartItems).ThenInclude(m => m.Product);
             query = query.Include(c => c.ReturnRequests);
+            query = query.Include(c => c.CustomerAddressMappings);
             
             return query;
         }
