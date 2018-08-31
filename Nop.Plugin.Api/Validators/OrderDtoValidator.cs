@@ -7,7 +7,7 @@ namespace Nop.Plugin.Api.Validators
 {
     public class OrderDtoValidator : AbstractValidator<OrderDto>
     {
-        public OrderDtoValidator(string httpMethod, Dictionary<string, object> passedPropertyValuePaires)
+        public OrderDtoValidator(string httpMethod, IReadOnlyDictionary<string, object> passedPropertyValuePaires)
         {
             if (string.IsNullOrEmpty(httpMethod) ||
                 httpMethod.Equals("post", StringComparison.InvariantCultureIgnoreCase))
@@ -16,12 +16,10 @@ namespace Nop.Plugin.Api.Validators
             }
             else if(httpMethod.Equals("put", StringComparison.InvariantCultureIgnoreCase))
             {
-                int parsedId = 0;
-
                 RuleFor(x => x.Id)
                         .NotNull()
                         .NotEmpty()
-                        .Must(id => int.TryParse(id, out parsedId) && parsedId > 0)
+                        .Must(id => int.TryParse(id, out var parsedId) && parsedId > 0)
                         .WithMessage("Invalid id");
 
                 if (passedPropertyValuePaires.ContainsKey("customer_id"))

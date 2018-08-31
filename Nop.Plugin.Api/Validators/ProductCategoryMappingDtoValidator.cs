@@ -7,16 +7,16 @@ namespace Nop.Plugin.Api.Validators
 {
     public class ProductCategoryMappingDtoValidator : AbstractValidator<ProductCategoryMappingDto>
     {
-        public ProductCategoryMappingDtoValidator(string httpMethod, Dictionary<string, object> passedPropertyValuePaires)
+        public ProductCategoryMappingDtoValidator(string httpMethod, IReadOnlyDictionary<string, object> passedPropertyValuePaires)
         {
             if (string.IsNullOrEmpty(httpMethod) || httpMethod.Equals("post", StringComparison.InvariantCultureIgnoreCase))
             {
                 RuleFor(mapping => mapping.CategoryId)
                     .Must(categoryId => categoryId > 0)
                     .WithMessage("invalid category_id")
-                    .DependentRules(mapping =>
+                    .DependentRules(() =>
                     {
-                        mapping.RuleFor(a => a.ProductId)
+                        RuleFor(a => a.ProductId)
                             .Must(productId => productId > 0)
                             .WithMessage("invalid product_id");
                     });

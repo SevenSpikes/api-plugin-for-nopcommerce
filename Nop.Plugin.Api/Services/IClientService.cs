@@ -2,7 +2,7 @@
 
 namespace Nop.Plugin.Api.Services
 {
-    using Nop.Plugin.Api.Models;
+    using Models;
 
     public interface IClientService
     {

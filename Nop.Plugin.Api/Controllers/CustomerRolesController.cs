@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Nop.Core.Domain.Customers;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.DTOs.CustomerRoles;
 using Nop.Plugin.Api.JSON.ActionResults;
@@ -18,8 +17,8 @@ namespace Nop.Plugin.Api.Controllers
     using System.Net;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Mvc;
-    using Nop.Plugin.Api.DTOs.Errors;
-    using Nop.Plugin.Api.JSON.Serializers;
+    using DTOs.Errors;
+    using JSON.Serializers;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CustomerRolesController : BaseApiController
@@ -60,7 +59,7 @@ namespace Nop.Plugin.Api.Controllers
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetAllCustomerRoles(string fields = "")
         {
-            IList<CustomerRole> allCustomerRoles = _customerService.GetAllCustomerRoles();
+            var allCustomerRoles = CustomerService.GetAllCustomerRoles();
 
             IList<CustomerRoleDto> customerRolesAsDto = allCustomerRoles.Select(role => role.ToDto()).ToList();
 
@@ -69,7 +68,7 @@ namespace Nop.Plugin.Api.Controllers
                 CustomerRoles = customerRolesAsDto
             };
 
-            var json = _jsonFieldsSerializer.Serialize(customerRolesRootObject, fields);
+            var json = JsonFieldsSerializer.Serialize(customerRolesRootObject, fields);
 
             return new RawJsonActionResult(json);
         }

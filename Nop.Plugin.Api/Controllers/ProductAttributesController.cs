@@ -77,18 +77,14 @@ namespace Nop.Plugin.Api.Controllers
 
             var allProductAttributes = _productAttributesApiService.GetProductAttributes(parameters.Limit, parameters.Page, parameters.SinceId);
 
-            IList<ProductAttributeDto> productAttributesAsDtos = allProductAttributes.Select(productAttribute =>
-            {
-                return _dtoHelper.PrepareProductAttributeDTO(productAttribute);
-
-            }).ToList();
+            IList<ProductAttributeDto> productAttributesAsDtos = allProductAttributes.Select(productAttribute => _dtoHelper.PrepareProductAttributeDTO(productAttribute)).ToList();
 
             var productAttributesRootObject = new ProductAttributesRootObjectDto()
             {
                 ProductAttributes = productAttributesAsDtos
             };
 
-            var json = _jsonFieldsSerializer.Serialize(productAttributesRootObject, parameters.Fields);
+            var json = JsonFieldsSerializer.Serialize(productAttributesRootObject, parameters.Fields);
 
             return new RawJsonActionResult(json);
         }
@@ -105,7 +101,7 @@ namespace Nop.Plugin.Api.Controllers
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetProductAttributesCount()
         {
-            int allProductAttributesCount = _productAttributesApiService.GetProductAttributesCount();
+            var allProductAttributesCount = _productAttributesApiService.GetProductAttributesCount();
 
             var productAttributesCountRootObject = new ProductAttributesCountRootObject()
             {
@@ -136,20 +132,20 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "id", "invalid id");
             }
 
-            ProductAttribute productAttribute = _productAttributesApiService.GetById(id);
+            var productAttribute = _productAttributesApiService.GetById(id);
 
             if (productAttribute == null)
             {
                 return Error(HttpStatusCode.NotFound, "product attribute", "not found");
             }
 
-            ProductAttributeDto productAttributeDto = _dtoHelper.PrepareProductAttributeDTO(productAttribute);
+            var productAttributeDto = _dtoHelper.PrepareProductAttributeDTO(productAttribute);
 
             var productAttributesRootObject = new ProductAttributesRootObjectDto();
 
             productAttributesRootObject.ProductAttributes.Add(productAttributeDto);
 
-            var json = _jsonFieldsSerializer.Serialize(productAttributesRootObject, fields);
+            var json = JsonFieldsSerializer.Serialize(productAttributesRootObject, fields);
 
             return new RawJsonActionResult(json);
         }
@@ -171,22 +167,22 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             // Inserting the new product
-            ProductAttribute productAttribute = new ProductAttribute();
+            var productAttribute = new ProductAttribute();
             productAttributeDelta.Merge(productAttribute);
 
-            _productAttributeService.InsertProductAttribute(productAttribute);
+            _productAttributeService.InsertProductAttribute(productAttribute);       
 
-            _customerActivityService.InsertActivity("AddNewProductAttribute",
-                string.Format(_localizationService.GetResource("ActivityLog.AddNewProductAttribute"), productAttribute.Name), productAttribute);
+            CustomerActivityService.InsertActivity("AddNewProductAttribute",
+                LocalizationService.GetResource("ActivityLog.AddNewProductAttribute"), productAttribute);
 
             // Preparing the result dto of the new product
-            ProductAttributeDto productAttributeDto = _dtoHelper.PrepareProductAttributeDTO(productAttribute);
+            var productAttributeDto = _dtoHelper.PrepareProductAttributeDTO(productAttribute);
 
             var productAttributesRootObjectDto = new ProductAttributesRootObjectDto();
 
             productAttributesRootObjectDto.ProductAttributes.Add(productAttributeDto);
 
-            var json = _jsonFieldsSerializer.Serialize(productAttributesRootObjectDto, string.Empty);
+            var json = JsonFieldsSerializer.Serialize(productAttributesRootObjectDto, string.Empty);
 
             return new RawJsonActionResult(json);
         }
@@ -208,9 +204,9 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             // We do not need to validate the product attribute id, because this will happen in the model binder using the dto validator.
-            int productAttributeId = int.Parse(productAttributeDelta.Dto.Id);
+            var productAttributeId = int.Parse(productAttributeDelta.Dto.Id);
 
-            ProductAttribute productAttribute = _productAttributesApiService.GetById(productAttributeId);
+            var productAttribute = _productAttributesApiService.GetById(productAttributeId);
 
             if (productAttribute == null)
             {
@@ -221,18 +217,18 @@ namespace Nop.Plugin.Api.Controllers
 
 
             _productAttributeService.UpdateProductAttribute(productAttribute);
-
-            _customerActivityService.InsertActivity("EditProductAttribute",
-                string.Format(_localizationService.GetResource("ActivityLog.EditProductAttribute"), productAttribute.Name), productAttribute);
+          
+            CustomerActivityService.InsertActivity("EditProductAttribute",
+               LocalizationService.GetResource("ActivityLog.EditProductAttribute"), productAttribute);
 
             // Preparing the result dto of the new product attribute
-            ProductAttributeDto productAttributeDto = _dtoHelper.PrepareProductAttributeDTO(productAttribute);
+            var productAttributeDto = _dtoHelper.PrepareProductAttributeDTO(productAttribute);
 
             var productAttributesRootObjectDto = new ProductAttributesRootObjectDto();
 
             productAttributesRootObjectDto.ProductAttributes.Add(productAttributeDto);
 
-            var json = _jsonFieldsSerializer.Serialize(productAttributesRootObjectDto, string.Empty);
+            var json = JsonFieldsSerializer.Serialize(productAttributesRootObjectDto, string.Empty);
 
             return new RawJsonActionResult(json);
         }
@@ -252,7 +248,7 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "id", "invalid id");
             }
 
-            ProductAttribute productAttribute = _productAttributesApiService.GetById(id);
+            var productAttribute = _productAttributesApiService.GetById(id);
 
             if (productAttribute == null)
             {
@@ -262,8 +258,7 @@ namespace Nop.Plugin.Api.Controllers
             _productAttributeService.DeleteProductAttribute(productAttribute);
 
             //activity log
-            _customerActivityService.InsertActivity("DeleteProductAttribute",
-                string.Format(_localizationService.GetResource("ActivityLog.DeleteProductAttribute"), productAttribute.Name), productAttribute);
+            CustomerActivityService.InsertActivity("DeleteProductAttribute", LocalizationService.GetResource("ActivityLog.DeleteProductAttribute"), productAttribute);
 
             return new RawJsonActionResult("{}");
         }       

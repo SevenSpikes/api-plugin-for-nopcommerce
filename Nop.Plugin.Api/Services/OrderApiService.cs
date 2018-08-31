@@ -21,7 +21,7 @@ namespace Nop.Plugin.Api.Services
 
         public IList<Order> GetOrdersByCustomerId(int customerId)
         {
-            var query = from order in _orderRepository.TableNoTracking
+            var query = from order in _orderRepository.Table
                         where order.CustomerId == customerId && !order.Deleted
                         orderby order.Id
                         select order;
@@ -65,8 +65,8 @@ namespace Nop.Plugin.Api.Services
             PaymentStatus? paymentStatus = null, ShippingStatus? shippingStatus = null, IList<int> ids = null, 
             int? customerId = null, int? storeId = null)
         {
-            var query = _orderRepository.TableNoTracking;
-
+            var query = _orderRepository.Table;
+            
             if (customerId != null)
             {
                 query = query.Where(order => order.CustomerId == customerId);
@@ -110,6 +110,17 @@ namespace Nop.Plugin.Api.Services
             }
 
             query = query.OrderBy(order => order.Id);
+
+            //query = query.Include(c => c.Customer);
+            //query = query.Include(c => c.BillingAddress);
+            //query = query.Include(c => c.ShippingAddress);
+            //query = query.Include(c => c.PickupAddress);
+            //query = query.Include(c => c.RedeemedRewardPointsEntry);
+            //query = query.Include(c => c.DiscountUsageHistory);
+            //query = query.Include(c => c.GiftCardUsageHistory);
+            //query = query.Include(c => c.OrderNotes);
+            //query = query.Include(c => c.OrderItems);
+            //query = query.Include(c => c.Shipments);
 
             return query;
         }

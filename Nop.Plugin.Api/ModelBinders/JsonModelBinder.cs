@@ -5,8 +5,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using FluentValidation.Attributes;
 using FluentValidation.Results;
-using Newtonsoft.Json;
-using Nop.Core.Domain.Localization;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.Delta;
@@ -31,7 +29,7 @@ namespace Nop.Plugin.Api.ModelBinders
             _localizationService = localizationService;
 
             // Languages are ordered by display order so the first language will be with the smallest display order.
-            Language firstLanguage = languageService.GetAllLanguages().FirstOrDefault();
+            var firstLanguage = languageService.GetAllLanguages().FirstOrDefault();
 
             if (firstLanguage != null)
             {
@@ -45,7 +43,7 @@ namespace Nop.Plugin.Api.ModelBinders
 
         public Task BindModelAsync(ModelBindingContext bindingContext)
         {
-            Dictionary<string, object> result = GetResult(bindingContext);
+            var result = GetResult(bindingContext);
 
             if (result == null)
             {
@@ -53,7 +51,7 @@ namespace Nop.Plugin.Api.ModelBinders
                 return Task.CompletedTask;
             }
             
-            string rootProperty = GetRootProperty(bindingContext);
+            var rootProperty = GetRootProperty(bindingContext);
 
             // Now we need to validate the root property.
             ValidateRootProperty(bindingContext, result, rootProperty);
@@ -61,13 +59,13 @@ namespace Nop.Plugin.Api.ModelBinders
             if (bindingContext.ModelState.IsValid)
             {
                 // The validation for the key is in the Validate method.
-                Dictionary<string, object> propertyValuePaires =
+                var propertyValuePaires =
                     (Dictionary<string, object>) result[rootProperty];
 
                 // You will have id parameter passed in the model binder only when you have put request.
                 // because get and delete do not use the model binder.
                 // Here we insert the id in the property value pairs to be validated by the dto validator in a later point.
-                object routeDataId = GetRouteDataId(bindingContext.ActionContext);
+                var routeDataId = GetRouteDataId(bindingContext.ActionContext);
 
                 if (routeDataId != null)
                 {
@@ -110,9 +108,9 @@ namespace Nop.Plugin.Api.ModelBinders
         {
             Dictionary<string, object> result = null;
 
-            Stream requestPayloadStream = bindingContext.ActionContext.HttpContext.Request.Body;
+            var requestPayloadStream = bindingContext.ActionContext.HttpContext.Request.Body;
 
-            string requestPayload = string.Empty;
+            var requestPayload = string.Empty;
 
             using (requestPayloadStream)
             {
@@ -181,7 +179,7 @@ namespace Nop.Plugin.Api.ModelBinders
         {
             if (bindingContext.ModelState.IsValid)
             {
-                bool isRootPropertyValid = !string.IsNullOrEmpty(rootProperty) && result.ContainsKey(rootProperty);
+                var isRootPropertyValid = !string.IsNullOrEmpty(rootProperty) && result.ContainsKey(rootProperty);
 
                 if (!isRootPropertyValid)
                 {
@@ -196,7 +194,7 @@ namespace Nop.Plugin.Api.ModelBinders
 
             if (bindingContext.ModelState.IsValid)
             {
-                JsonObjectAttribute jsonObjectAttribute = ReflectionHelper.GetJsonObjectAttribute(typeof(T));
+                var jsonObjectAttribute = ReflectionHelper.GetJsonObjectAttribute(typeof(T));
 
                 if (jsonObjectAttribute != null)
                 {
@@ -209,7 +207,7 @@ namespace Nop.Plugin.Api.ModelBinders
 
         private void ValidateJsonFormat(ModelBindingContext bindingContext, Dictionary<string, object> result)
         {
-            bool isJsonFormatValid = result != null && result.Count > 0;
+            var isJsonFormatValid = result != null && result.Count > 0;
 
             if (!isJsonFormatValid)
             {
@@ -242,7 +240,7 @@ namespace Nop.Plugin.Api.ModelBinders
         
         private void ValidateModel(ModelBindingContext bindingContext, Dictionary<string, object> propertyValuePaires, T dto)
         {
-            ValidationResult validationResult = GetValidationResult(bindingContext.ActionContext, propertyValuePaires, dto);
+            var validationResult = GetValidationResult(bindingContext.ActionContext, propertyValuePaires, dto);
 
             if (!validationResult.IsValid)
             {
@@ -263,12 +261,12 @@ namespace Nop.Plugin.Api.ModelBinders
             var validationResult = new ValidationResult();
 
             // Needed so we can call the get the validator.
-            ValidatorAttribute validatorAttribute =
+            var validatorAttribute =
                 typeof (T).GetCustomAttribute(typeof (ValidatorAttribute)) as ValidatorAttribute;
 
             if (validatorAttribute != null)
             {
-                Type validatorType = validatorAttribute.ValidatorType;
+                var validatorType = validatorAttribute.ValidatorType;
 
                 // We need to pass the http method because there are some differences between the validation rules for post and put
                 // We need to pass the propertyValuePaires from the passed json because there are cases in which one field is required
@@ -296,7 +294,7 @@ namespace Nop.Plugin.Api.ModelBinders
             foreach (var property in dtoProperties)
             {
                 // Check property type
-                BaseValidationAttribute validationAttribute = property.PropertyType.GetCustomAttribute(typeof (BaseValidationAttribute)) as BaseValidationAttribute;
+                var validationAttribute = property.PropertyType.GetCustomAttribute(typeof (BaseValidationAttribute)) as BaseValidationAttribute;
 
                 // If not on property type, check the property itself.
                 if (validationAttribute == null)
@@ -307,7 +305,7 @@ namespace Nop.Plugin.Api.ModelBinders
                 if (validationAttribute != null)
                 {
                     validationAttribute.Validate(property.GetValue(dto));
-                    Dictionary<string, string> errors = validationAttribute.GetErrors();
+                    var errors = validationAttribute.GetErrors();
 
                     if (errors.Count > 0)
                     {

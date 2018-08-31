@@ -24,6 +24,7 @@ namespace Nop.Plugin.Api
     using Nop.Plugin.Api.IdentityServer.Endpoints;
     using Nop.Plugin.Api.IdentityServer.Generators;
     using Nop.Plugin.Api.IdentityServer.Middlewares;
+    using Nop.Web.Framework.Infrastructure;
     using System;
     using System.Collections.Generic;
     using System.Globalization;
@@ -290,6 +291,6 @@ namespace Nop.Plugin.Api
             AppDomain.CurrentDomain.AssemblyResolve += handler;
         }
 
-        public int Order { get; }
+        public int Order => new AuthenticationStartup().Order + 1;
     }
 }

@@ -3,7 +3,6 @@
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
     using Nop.Core.Infrastructure;
-    using Nop.Plugin.Api.Models;
     using Nop.Plugin.Api.Services;
 
     public class ActiveClientRequirement : IAuthorizationRequirement

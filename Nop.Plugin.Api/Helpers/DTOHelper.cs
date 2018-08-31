@@ -1,51 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Localization;
-using Nop.Plugin.Api.DTOs.Products;
-using Nop.Services.Catalog;
-using Nop.Services.Seo;
-using Nop.Services.Security;
-using Nop.Services.Stores;
-using Nop.Plugin.Api.DTOs.Images;
 using Nop.Core.Domain.Media;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Stores;
-using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.DTOs.Categories;
-using Nop.Plugin.Api.DTOs.Customers;
+using Nop.Plugin.Api.DTOs.Images;
 using Nop.Plugin.Api.DTOs.Languages;
+using Nop.Plugin.Api.DTOs.OrderItems;
 using Nop.Plugin.Api.DTOs.Orders;
-using Nop.Plugin.Api.Services;
-using Nop.Services.Media;
+using Nop.Plugin.Api.DTOs.ProductAttributes;
+using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
 using Nop.Plugin.Api.DTOs.Stores;
+using Nop.Plugin.Api.MappingExtensions;
+using Nop.Plugin.Api.Services;
+using Nop.Services.Catalog;
 using Nop.Services.Directory;
 using Nop.Services.Localization;
-using Nop.Plugin.Api.DTOs.ProductAttributes;
-using Nop.Plugin.Api.DTOs.OrderItems;
+using Nop.Services.Media;
+using Nop.Services.Security;
+using Nop.Services.Seo;
+using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.Helpers
 {
     public class DTOHelper : IDTOHelper
     {
-        private IProductService _productService;
-        private IAclService _aclService;
-        private IStoreMappingService _storeMappingService;
-        private IPictureService _pictureService;
-        private IProductAttributeService _productAttributeService;
-        private ILanguageService _languageService;
-        private ICurrencyService _currencyService;
-        private CurrencySettings _currencySettings;
+        private readonly IAclService _aclService;
+        private readonly ICurrencyService _currencyService;
+        private readonly CurrencySettings _currencySettings;
+        private readonly ICustomerApiService _customerApiService;
+        private readonly ILanguageService _languageService;
+        private readonly ILocalizationService _localizationService;
+        private readonly IPictureService _pictureService;
+        private readonly IProductAttributeConverter _productAttributeConverter;
+        private readonly IProductAttributeService _productAttributeService;
+        private readonly IProductService _productService;
+        private readonly IProductTagService _productTagService;
+        private readonly IStoreMappingService _storeMappingService;
         private readonly IStoreService _storeService;
-        private ICustomerApiService _customerApiService;
-        private IProductAttributeConverter _productAttributeConverter;
-        private ILocalizationService _localizationService;
-        private IUrlRecordService _urlRecordService;
-        private IProductTagService _productTagService;
+        private readonly IUrlRecordService _urlRecordService;
 
         public DTOHelper(IProductService productService,
             IAclService aclService,
@@ -58,8 +55,9 @@ namespace Nop.Plugin.Api.Helpers
             ICurrencyService currencyService,
             CurrencySettings currencySettings,
             IStoreService storeService,
-            ILocalizationService localizationService, 
-            IUrlRecordService urlRecordService)
+            ILocalizationService localizationService,
+            IUrlRecordService urlRecordService,
+            IProductTagService productTagService)
         {
             _productService = productService;
             _aclService = aclService;
@@ -74,11 +72,12 @@ namespace Nop.Plugin.Api.Helpers
             _storeService = storeService;
             _localizationService = localizationService;
             _urlRecordService = urlRecordService;
+            _productTagService = productTagService;
         }
 
         public ProductDto PrepareProductDTO(Product product)
         {
-            ProductDto productDto = product.ToDto();
+            var productDto = product.ToDto();
 
             PrepareProductImages(product.ProductPictures, productDto);
             PrepareProductAttributes(product.ProductAttributeMappings, productDto);
@@ -87,15 +86,17 @@ namespace Nop.Plugin.Api.Helpers
             productDto.DiscountIds = product.AppliedDiscounts.Select(discount => discount.Id).ToList();
             productDto.ManufacturerIds = product.ProductManufacturers.Select(pm => pm.ManufacturerId).ToList();
             productDto.RoleIds = _aclService.GetAclRecords(product).Select(acl => acl.CustomerRoleId).ToList();
-            productDto.StoreIds = _storeMappingService.GetStoreMappings(product).Select(mapping => mapping.StoreId).ToList();
-            productDto.Tags = _productTagService.GetAllProductTagsByProductId(product.Id).Select(tag => tag.Name).ToList();
+            productDto.StoreIds = _storeMappingService.GetStoreMappings(product).Select(mapping => mapping.StoreId)
+                .ToList();
+            productDto.Tags = _productTagService.GetAllProductTagsByProductId(product.Id).Select(tag => tag.Name)
+                .ToList();
 
             productDto.AssociatedProductIds =
                 _productService.GetAssociatedProducts(product.Id, showHidden: true)
                     .Select(associatedProduct => associatedProduct.Id)
                     .ToList();
 
-            IList<Language> allLanguages = _languageService.GetAllLanguages();
+            var allLanguages = _languageService.GetAllLanguages();
 
             productDto.LocalizedNames = new List<LocalizedNameDto>();
 
@@ -115,10 +116,10 @@ namespace Nop.Plugin.Api.Helpers
 
         public CategoryDto PrepareCategoryDTO(Category category)
         {
-            CategoryDto categoryDto = category.ToDto();
+            var categoryDto = category.ToDto();
 
-            Picture picture = _pictureService.GetPictureById(category.PictureId);
-            ImageDto imageDto = PrepareImageDto(picture);
+            var picture = _pictureService.GetPictureById(category.PictureId);
+            var imageDto = PrepareImageDto(picture);
 
             if (imageDto != null)
             {
@@ -128,9 +129,10 @@ namespace Nop.Plugin.Api.Helpers
             categoryDto.SeName = _urlRecordService.GetSeName(category);
             categoryDto.DiscountIds = category.AppliedDiscounts.Select(discount => discount.Id).ToList();
             categoryDto.RoleIds = _aclService.GetAclRecords(category).Select(acl => acl.CustomerRoleId).ToList();
-            categoryDto.StoreIds = _storeMappingService.GetStoreMappings(category).Select(mapping => mapping.StoreId).ToList();
+            categoryDto.StoreIds = _storeMappingService.GetStoreMappings(category).Select(mapping => mapping.StoreId)
+                .ToList();
 
-            IList<Language> allLanguages = _languageService.GetAllLanguages();
+            var allLanguages = _languageService.GetAllLanguages();
 
             categoryDto.LocalizedNames = new List<LocalizedNameDto>();
 
@@ -150,11 +152,11 @@ namespace Nop.Plugin.Api.Helpers
 
         public OrderDto PrepareOrderDTO(Order order)
         {
-            OrderDto orderDto = order.ToDto();
+            var orderDto = order.ToDto();
 
-            orderDto.OrderItemDtos = order.OrderItems.Select(orderItem => PrepareOrderItemDTO(orderItem)).ToList();
+            orderDto.OrderItemDtos = order.OrderItems.Select(PrepareOrderItemDTO).ToList();
 
-            CustomerDto customerDto = _customerApiService.GetCustomerById(order.Customer.Id);
+            var customerDto = _customerApiService.GetCustomerById(order.Customer.Id);
 
             if (customerDto != null)
             {
@@ -176,18 +178,18 @@ namespace Nop.Plugin.Api.Helpers
         public OrderItemDto PrepareOrderItemDTO(OrderItem orderItem)
         {
             var dto = orderItem.ToDto();
-            dto.Product = PrepareProductDTO(orderItem.Product);            
+            dto.Product = PrepareProductDTO(orderItem.Product);
             dto.Attributes = _productAttributeConverter.Parse(orderItem.AttributesXml);
             return dto;
         }
 
         public StoreDto PrepareStoreDTO(Store store)
         {
-            StoreDto storeDto = store.ToDto();
+            var storeDto = store.ToDto();
 
-            Currency primaryCurrency = _currencyService.GetCurrencyById(_currencySettings.PrimaryStoreCurrencyId);
+            var primaryCurrency = _currencyService.GetCurrencyById(_currencySettings.PrimaryStoreCurrencyId);
 
-            if (!String.IsNullOrEmpty(primaryCurrency.DisplayLocale))
+            if (!string.IsNullOrEmpty(primaryCurrency.DisplayLocale))
             {
                 storeDto.PrimaryCurrencyDisplayLocale = primaryCurrency.DisplayLocale;
             }
@@ -199,9 +201,10 @@ namespace Nop.Plugin.Api.Helpers
 
         public LanguageDto PrepateLanguageDto(Language language)
         {
-            LanguageDto languageDto = language.ToDto();
+            var languageDto = language.ToDto();
 
-            languageDto.StoreIds = _storeMappingService.GetStoreMappings(language).Select(mapping => mapping.StoreId).ToList();
+            languageDto.StoreIds = _storeMappingService.GetStoreMappings(language).Select(mapping => mapping.StoreId)
+                .ToList();
 
             if (languageDto.StoreIds.Count == 0)
             {
@@ -211,23 +214,32 @@ namespace Nop.Plugin.Api.Helpers
             return languageDto;
         }
 
+        public ProductAttributeDto PrepareProductAttributeDTO(ProductAttribute productAttribute)
+        {
+            return productAttribute.ToDto();
+        }
+
         private void PrepareProductImages(IEnumerable<ProductPicture> productPictures, ProductDto productDto)
         {
             if (productDto.Images == null)
+            {
                 productDto.Images = new List<ImageMappingDto>();
+            }
 
             // Here we prepare the resulted dto image.
             foreach (var productPicture in productPictures)
             {
-                ImageDto imageDto = PrepareImageDto(productPicture.Picture);
+                var imageDto = PrepareImageDto(productPicture.Picture);
 
                 if (imageDto != null)
                 {
-                    ImageMappingDto productImageDto = new ImageMappingDto();
-                    productImageDto.Id = productPicture.Id;
-                    productImageDto.Position = productPicture.DisplayOrder;
-                    productImageDto.Src = imageDto.Src;
-                    productImageDto.Attachment = imageDto.Attachment;
+                    var productImageDto = new ImageMappingDto
+                    {
+                        Id = productPicture.Id,
+                        Position = productPicture.DisplayOrder,
+                        Src = imageDto.Src,
+                        Attachment = imageDto.Attachment
+                    };
 
                     productDto.Images.Add(productImageDto);
                 }
@@ -242,7 +254,7 @@ namespace Nop.Plugin.Api.Helpers
             {
                 // We don't use the image from the passed dto directly 
                 // because the picture may be passed with src and the result should only include the base64 format.
-                image = new ImageDto()
+                image = new ImageDto
                 {
                     //Attachment = Convert.ToBase64String(picture.PictureBinary),
                     Src = _pictureService.GetPictureUrl(picture)
@@ -252,14 +264,18 @@ namespace Nop.Plugin.Api.Helpers
             return image;
         }
 
-        private void PrepareProductAttributes(IEnumerable<ProductAttributeMapping> productAttributeMappings, ProductDto productDto)
+        private void PrepareProductAttributes(IEnumerable<ProductAttributeMapping> productAttributeMappings,
+            ProductDto productDto)
         {
             if (productDto.ProductAttributeMappings == null)
+            {
                 productDto.ProductAttributeMappings = new List<ProductAttributeMappingDto>();
+            }
 
             foreach (var productAttributeMapping in productAttributeMappings)
             {
-                ProductAttributeMappingDto productAttributeMappingDto = PrepareProductAttributeMappingDto(productAttributeMapping);
+                var productAttributeMappingDto =
+                    PrepareProductAttributeMappingDto(productAttributeMapping);
 
                 if (productAttributeMappingDto != null)
                 {
@@ -268,30 +284,34 @@ namespace Nop.Plugin.Api.Helpers
             }
         }
 
-        private ProductAttributeMappingDto PrepareProductAttributeMappingDto(ProductAttributeMapping productAttributeMapping)
+        private ProductAttributeMappingDto PrepareProductAttributeMappingDto(
+            ProductAttributeMapping productAttributeMapping)
         {
             ProductAttributeMappingDto productAttributeMappingDto = null;
 
             if (productAttributeMapping != null)
             {
-                productAttributeMappingDto = new ProductAttributeMappingDto()
+                productAttributeMappingDto = new ProductAttributeMappingDto
                 {
                     Id = productAttributeMapping.Id,
                     ProductAttributeId = productAttributeMapping.ProductAttributeId,
-                    ProductAttributeName = _productAttributeService.GetProductAttributeById(productAttributeMapping.ProductAttributeId).Name,
+                    ProductAttributeName = _productAttributeService
+                        .GetProductAttributeById(productAttributeMapping.ProductAttributeId).Name,
                     TextPrompt = productAttributeMapping.TextPrompt,
                     DefaultValue = productAttributeMapping.DefaultValue,
                     AttributeControlTypeId = productAttributeMapping.AttributeControlTypeId,
                     DisplayOrder = productAttributeMapping.DisplayOrder,
                     IsRequired = productAttributeMapping.IsRequired,
-                    ProductAttributeValues = productAttributeMapping.ProductAttributeValues.Select(x => PrepareProductAttributeValueDto(x, productAttributeMapping.Product)).ToList()
+                    ProductAttributeValues = productAttributeMapping.ProductAttributeValues
+                        .Select(x => PrepareProductAttributeValueDto(x, productAttributeMapping.Product)).ToList()
                 };
             }
 
             return productAttributeMappingDto;
         }
 
-        private ProductAttributeValueDto PrepareProductAttributeValueDto(ProductAttributeValue productAttributeValue, Product product)
+        private ProductAttributeValueDto PrepareProductAttributeValueDto(ProductAttributeValue productAttributeValue,
+            Product product)
         {
             ProductAttributeValueDto productAttributeValueDto = null;
 
@@ -300,8 +320,9 @@ namespace Nop.Plugin.Api.Helpers
                 productAttributeValueDto = productAttributeValue.ToDto();
                 if (productAttributeValue.ImageSquaresPictureId > 0)
                 {
-                    Picture imageSquaresPicture = _pictureService.GetPictureById(productAttributeValue.ImageSquaresPictureId);
-                    ImageDto imageDto = PrepareImageDto(imageSquaresPicture);
+                    var imageSquaresPicture =
+                        _pictureService.GetPictureById(productAttributeValue.ImageSquaresPictureId);
+                    var imageDto = PrepareImageDto(imageSquaresPicture);
                     productAttributeValueDto.ImageSquaresImage = imageDto;
                 }
 
@@ -310,7 +331,8 @@ namespace Nop.Plugin.Api.Helpers
                     // make sure that the picture is mapped to the product
                     // This is needed since if you delete the product picture mapping from the nopCommerce administrationthe
                     // then the attribute value is not updated and it will point to a picture that has been deleted
-                    var productPicture = product.ProductPictures.FirstOrDefault(pp => pp.PictureId == productAttributeValue.PictureId);
+                    var productPicture =
+                        product.ProductPictures.FirstOrDefault(pp => pp.PictureId == productAttributeValue.PictureId);
                     if (productPicture != null)
                     {
                         productAttributeValueDto.ProductPictureId = productPicture.Id;
@@ -320,10 +342,5 @@ namespace Nop.Plugin.Api.Helpers
 
             return productAttributeValueDto;
         }
-
-        public ProductAttributeDto PrepareProductAttributeDTO(ProductAttribute productAttribute)
-        {
-            return productAttribute.ToDto();
-        }        
     }
 }

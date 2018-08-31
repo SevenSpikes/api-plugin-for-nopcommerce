@@ -22,12 +22,12 @@ namespace Nop.Plugin.Api.Helpers
 
         public void AddBindingRedirects()
         {
-            bool hasChanged = false;
+            var hasChanged = false;
 
             // load Nop.Web.exe.config
             XDocument appConfig = null;
 
-            string nopWebAssemblyConfigLocation = $"{Assembly.GetEntryAssembly().Location}.config";
+            var nopWebAssemblyConfigLocation = $"{Assembly.GetEntryAssembly().Location}.config";
 
             using (var fs = System.IO.File.OpenRead(nopWebAssemblyConfigLocation))
             {
@@ -64,7 +64,7 @@ namespace Nop.Plugin.Api.Helpers
                         //TODO: Upgrade 4.10 Check this!
                         //System.Configuration.ConfigurationManager.RefreshSection("runtime");
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         // we should do nothing here as throwing an exception breaks nopCommerce.
                         // The right thing to do is to write a message in the Log that the user needs to provide Write access to Web.config
@@ -85,12 +85,12 @@ namespace Nop.Plugin.Api.Helpers
 
         public void AddConnectionString()
         {
-            bool hasChanged = false;
+            var hasChanged = false;
 
             // load web.config
             XDocument appConfig = null;
 
-            string nopWebAssemblyConfigLocation = $"{Assembly.GetEntryAssembly().Location}.config";
+            var nopWebAssemblyConfigLocation = $"{Assembly.GetEntryAssembly().Location}.config";
 
             using (var fs = System.IO.File.OpenRead(nopWebAssemblyConfigLocation))
             {
@@ -110,7 +110,7 @@ namespace Nop.Plugin.Api.Helpers
                     configuration.Add(connectionStrings);
                 }
 
-                string connectionStringFromNop = DataSettings.DataConnectionString;
+                var connectionStringFromNop = DataSettings.DataConnectionString;
 
                 var element = appConfig.XPathSelectElement("configuration//connectionStrings//add[@name='MS_SqlStoreConnectionString']");
 
@@ -127,7 +127,7 @@ namespace Nop.Plugin.Api.Helpers
                 {
                     // Check if the connection string is changed.
                     // If so update the connection string in the config.
-                    string connectionStringInConfig = element.Attribute("connectionString").Value;
+                    var connectionStringInConfig = element.Attribute("connectionString").Value;
 
                     if (!String.Equals(connectionStringFromNop, connectionStringInConfig, StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -164,10 +164,10 @@ namespace Nop.Plugin.Api.Helpers
 
         private void AddAssemblyBinding(XElement runtime, string name, string publicToken, string oldVersion, string newVersion)
         {
-            XmlNamespaceManager xmlNamespaceManager = new XmlNamespaceManager(new NameTable());
+            var xmlNamespaceManager = new XmlNamespaceManager(new NameTable());
             xmlNamespaceManager.AddNamespace("bind", "urn:schemas-microsoft-com:asm.v1");
 
-            XElement assemblyBindingElement = runtime.XPathSelectElement(
+            var assemblyBindingElement = runtime.XPathSelectElement(
                     $"bind:assemblyBinding//bind:dependentAssembly//bind:assemblyIdentity[@name='{name}']", xmlNamespaceManager);
 
             // create the binding redirect if it does not exist

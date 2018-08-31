@@ -39,7 +39,7 @@ namespace Nop.Plugin.Api.Services
 
         private IQueryable<ProductAttribute> GetProductAttributesQuery(int sinceId = Configurations.DefaultSinceId)
         {
-            var query = _productAttributesRepository.TableNoTracking;
+            var query = _productAttributesRepository.Table;
 
             if (sinceId > 0)
             {

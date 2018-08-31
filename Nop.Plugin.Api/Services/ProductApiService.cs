@@ -66,7 +66,7 @@ namespace Nop.Plugin.Api.Services
             if (productId == 0)
                 return null;
 
-            return _productRepository.TableNoTracking.FirstOrDefault(product => product.Id == productId && !product.Deleted);
+            return _productRepository.Table.FirstOrDefault(product => product.Id == productId && !product.Deleted);
         }
 
         private IQueryable<Product> GetProductsQuery(DateTime? createdAtMin = null, DateTime? createdAtMax = null, 
@@ -74,7 +74,7 @@ namespace Nop.Plugin.Api.Services
             bool? publishedStatus = null, IList<int> ids = null, int? categoryId = null)
             
         {
-            var query = _productRepository.TableNoTracking;
+            var query = _productRepository.Table;
 
             if (ids != null && ids.Count > 0)
             {
@@ -111,8 +111,8 @@ namespace Nop.Plugin.Api.Services
 
             if (!string.IsNullOrEmpty(vendorName))
             {
-                query = from vendor in _vendorRepository.TableNoTracking
-                        join product in _productRepository.TableNoTracking on vendor.Id equals product.VendorId
+                query = from vendor in _vendorRepository.Table
+                        join product in _productRepository.Table on vendor.Id equals product.VendorId
                         where vendor.Name == vendorName && !vendor.Deleted && vendor.Active
                         select product;
             }
@@ -126,7 +126,7 @@ namespace Nop.Plugin.Api.Services
 
             if (categoryId != null)
             {
-                var categoryMappingsForProduct = from productCategoryMapping in _productCategoryMappingRepository.TableNoTracking
+                var categoryMappingsForProduct = from productCategoryMapping in _productCategoryMappingRepository.Table
                                                  where productCategoryMapping.CategoryId == categoryId
                                                  select productCategoryMapping;
 

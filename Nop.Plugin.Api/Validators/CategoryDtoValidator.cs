@@ -15,12 +15,10 @@ namespace Nop.Plugin.Api.Validators
             }
             else if (httpMethod.Equals("put", StringComparison.InvariantCultureIgnoreCase))
             {
-                int parsedId = 0;
-
                 RuleFor(x => x.Id)
                         .NotNull()
                         .NotEmpty()
-                        .Must(id => int.TryParse(id, out parsedId) && parsedId > 0)
+                        .Must(id => int.TryParse(id, out var parsedId) && parsedId > 0)
                         .WithMessage("Invalid id");
 
                 if (passedPropertyValuePaires.ContainsKey("name"))

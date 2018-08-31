@@ -1,7 +1,6 @@
 ﻿namespace Nop.Plugin.Api.IdentityServer.Services
 {
     using System.Linq;
-    using System.Security.Claims;
     using System.Threading.Tasks;
     using IdentityServer4.Models;
     using IdentityServer4.Services;
@@ -21,7 +20,7 @@
         {
             var sub = context.Subject.Claims.FirstOrDefault(x => x.Type == "sub");
 
-            int userId = 0;
+            var userId = 0;
 
             if (int.TryParse(sub?.Value, out userId))
             {

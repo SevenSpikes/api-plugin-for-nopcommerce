@@ -30,8 +30,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace Nop.Plugin.Api.Controllers
 {
     using Microsoft.AspNetCore.Authentication.JwtBearer;
-    using Nop.Plugin.Api.DTOs.Errors;
-    using Nop.Plugin.Api.JSON.Serializers;
+    using DTOs.Errors;
+    using JSON.Serializers;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CategoriesController : BaseApiController
@@ -91,7 +91,7 @@ namespace Nop.Plugin.Api.Controllers
                                                                              parameters.UpdatedAtMin, parameters.UpdatedAtMax,
                                                                              parameters.Limit, parameters.Page, parameters.SinceId,
                                                                              parameters.ProductId, parameters.PublishedStatus)
-                                                   .Where(c => _storeMappingService.Authorize(c));
+                                                   .Where(c => StoreMappingService.Authorize(c));
 
             IList<CategoryDto> categoriesAsDtos = allCategories.Select(category =>
             {
@@ -104,7 +104,7 @@ namespace Nop.Plugin.Api.Controllers
                 Categories = categoriesAsDtos
             };
 
-            var json = _jsonFieldsSerializer.Serialize(categoriesRootObject, parameters.Fields);
+            var json = JsonFieldsSerializer.Serialize(categoriesRootObject, parameters.Fields);
 
             return new RawJsonActionResult(json);
         }
@@ -155,20 +155,20 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "id", "invalid id");
             }
 
-            Category category = _categoryApiService.GetCategoryById(id);
+            var category = _categoryApiService.GetCategoryById(id);
 
             if (category == null)
             {
                 return Error(HttpStatusCode.NotFound, "category", "category not found");
             }
 
-            CategoryDto categoryDto = _dtoHelper.PrepareCategoryDTO(category);
+            var categoryDto = _dtoHelper.PrepareCategoryDTO(category);
 
             var categoriesRootObject = new CategoriesRootObject();
 
             categoriesRootObject.Categories.Add(categoryDto);
 
-            var json = _jsonFieldsSerializer.Serialize(categoriesRootObject, fields);
+            var json = JsonFieldsSerializer.Serialize(categoriesRootObject, fields);
 
             return new RawJsonActionResult(json);
         }
@@ -194,11 +194,11 @@ namespace Nop.Plugin.Api.Controllers
             // We need to insert the picture before the category so we can obtain the picture id and map it to the category.
             if (categoryDelta.Dto.Image != null && categoryDelta.Dto.Image.Binary != null)
             {
-                insertedPicture = _pictureService.InsertPicture(categoryDelta.Dto.Image.Binary, categoryDelta.Dto.Image.MimeType, string.Empty);
+                insertedPicture = PictureService.InsertPicture(categoryDelta.Dto.Image.Binary, categoryDelta.Dto.Image.MimeType, string.Empty);
             }
 
             // Inserting the new category
-            Category category = _factory.Initialize();
+            var category = _factory.Initialize();
             categoryDelta.Merge(category);
 
             if (insertedPicture != null)
@@ -222,17 +222,17 @@ namespace Nop.Plugin.Api.Controllers
                 _urlRecordService.SaveSlug(category, seName, 0);
             }
 
-            _customerActivityService.InsertActivity("AddNewCategory",
-                string.Format(_localizationService.GetResource("ActivityLog.AddNewCategory"), category.Name), category);
+            CustomerActivityService.InsertActivity("AddNewCategory",
+                LocalizationService.GetResource("ActivityLog.AddNewCategory"), category);
 
             // Preparing the result dto of the new category
-            CategoryDto newCategoryDto = _dtoHelper.PrepareCategoryDTO(category);
+            var newCategoryDto = _dtoHelper.PrepareCategoryDTO(category);
 
             var categoriesRootObject = new CategoriesRootObject();
 
             categoriesRootObject.Categories.Add(newCategoryDto);
 
-            var json = _jsonFieldsSerializer.Serialize(categoriesRootObject, string.Empty);
+            var json = JsonFieldsSerializer.Serialize(categoriesRootObject, string.Empty);
 
             return new RawJsonActionResult(json);
         }
@@ -254,9 +254,9 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             // We do not need to validate the category id, because this will happen in the model binder using the dto validator.
-            int updateCategoryId = int.Parse(categoryDelta.Dto.Id);
+            var updateCategoryId = int.Parse(categoryDelta.Dto.Id);
 
-            Category category = _categoryApiService.GetCategoryById(updateCategoryId);
+            var category = _categoryApiService.GetCategoryById(updateCategoryId);
 
             if (category == null)
             {
@@ -280,22 +280,23 @@ namespace Nop.Plugin.Api.Controllers
             //search engine name
             if (categoryDelta.Dto.SeName != null)
             {
+                
                 var seName = _urlRecordService.ValidateSeName(category, categoryDelta.Dto.SeName, category.Name, true);
                 _urlRecordService.SaveSlug(category, seName, 0);
             }
 
             _categoryService.UpdateCategory(category);
 
-            _customerActivityService.InsertActivity("UpdateCategory",
-                string.Format(_localizationService.GetResource("ActivityLog.UpdateCategory"), category.Name), category);
+            CustomerActivityService.InsertActivity("UpdateCategory",
+                LocalizationService.GetResource("ActivityLog.UpdateCategory"), category);
 
-            CategoryDto categoryDto = _dtoHelper.PrepareCategoryDTO(category);
+            var categoryDto = _dtoHelper.PrepareCategoryDTO(category);
 
             var categoriesRootObject = new CategoriesRootObject();
 
             categoriesRootObject.Categories.Add(categoryDto);
 
-            var json = _jsonFieldsSerializer.Serialize(categoriesRootObject, string.Empty);
+            var json = JsonFieldsSerializer.Serialize(categoriesRootObject, string.Empty);
 
             return new RawJsonActionResult(json);
         }
@@ -314,7 +315,7 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "id", "invalid id");
             }
 
-            Category categoryToDelete = _categoryApiService.GetCategoryById(id);
+            var categoryToDelete = _categoryApiService.GetCategoryById(id);
 
             if (categoryToDelete == null)
             {
@@ -324,8 +325,7 @@ namespace Nop.Plugin.Api.Controllers
             _categoryService.DeleteCategory(categoryToDelete);
 
             //activity log
-            _customerActivityService.InsertActivity("DeleteCategory",
-                string.Format(_localizationService.GetResource("ActivityLog.DeleteCategory"), categoryToDelete.Name), categoryToDelete);
+            CustomerActivityService.InsertActivity("DeleteCategory", LocalizationService.GetResource("ActivityLog.DeleteCategory"), categoryToDelete);
 
             return new RawJsonActionResult("{}");
         }
@@ -336,13 +336,13 @@ namespace Nop.Plugin.Api.Controllers
             if (imageDto == null)
                 return;
 
-            Picture updatedPicture = null;
-            Picture currentCategoryPicture = _pictureService.GetPictureById(categoryEntityToUpdate.PictureId);
+            Picture updatedPicture;
+            var currentCategoryPicture = PictureService.GetPictureById(categoryEntityToUpdate.PictureId);
 
             // when there is a picture set for the category
             if (currentCategoryPicture != null)
             {
-                _pictureService.DeletePicture(currentCategoryPicture);
+                PictureService.DeletePicture(currentCategoryPicture);
 
                 // When the image attachment is null or empty.
                 if (imageDto.Binary == null)
@@ -351,7 +351,7 @@ namespace Nop.Plugin.Api.Controllers
                 }
                 else
                 {
-                    updatedPicture = _pictureService.InsertPicture(imageDto.Binary, imageDto.MimeType, string.Empty);
+                    updatedPicture = PictureService.InsertPicture(imageDto.Binary, imageDto.MimeType, string.Empty);
                     categoryEntityToUpdate.PictureId = updatedPicture.Id;
                 }
             }
@@ -360,7 +360,7 @@ namespace Nop.Plugin.Api.Controllers
             {
                 if (imageDto.Binary != null)
                 {
-                    updatedPicture = _pictureService.InsertPicture(imageDto.Binary, imageDto.MimeType, string.Empty);
+                    updatedPicture = PictureService.InsertPicture(imageDto.Binary, imageDto.MimeType, string.Empty);
                     categoryEntityToUpdate.PictureId = updatedPicture.Id;
                 }
             }
@@ -371,7 +371,7 @@ namespace Nop.Plugin.Api.Controllers
             if(passedDiscountIds == null)
                 return;
 
-            var allDiscounts = _discountService.GetAllDiscounts(DiscountType.AssignedToCategories, showHidden: true);
+            var allDiscounts = DiscountService.GetAllDiscounts(DiscountType.AssignedToCategories, showHidden: true);
             foreach (var discount in allDiscounts)
             {
                 if (passedDiscountIds.Contains(discount.Id))

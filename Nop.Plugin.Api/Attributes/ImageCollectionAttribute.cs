@@ -22,7 +22,7 @@ namespace Nop.Plugin.Api.Attributes
 
                 imageValidationAttribute.Validate(image);
 
-                Dictionary<string, string> errorsForImage = imageValidationAttribute.GetErrors();
+                var errorsForImage = imageValidationAttribute.GetErrors();
 
                 if (errorsForImage.Count > 0)
                 {
