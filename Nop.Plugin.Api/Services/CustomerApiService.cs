@@ -7,6 +7,7 @@ using Nop.Plugin.Api.DTOs.Customers;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 using Nop.Core;
 using Nop.Core.Domain.Common;
 using Nop.Plugin.Api.Constants;
@@ -82,7 +83,7 @@ namespace Nop.Plugin.Api.Services
 
             if (searchParams != null)
             {
-                var query = _customerRepository.Table.Where(customer => !customer.Deleted);
+                var query = GetQuery().Where(customer => !customer.Deleted);
 
                 foreach (var searchParam in searchParams)
                 {
@@ -116,7 +117,7 @@ namespace Nop.Plugin.Api.Services
 
         public Customer GetCustomerEntityById(int id)
         {
-            var customer = _customerRepository.Table.FirstOrDefault(c => c.Id == id && !c.Deleted);
+            var customer = GetQuery().FirstOrDefault(c => c.Id == id && !c.Deleted);
 
             return customer;
         }
@@ -127,7 +128,7 @@ namespace Nop.Plugin.Api.Services
                 return null;
 
             // Here we expect to get two records, one for the first name and one for the last name.
-            var customerAttributeMappings = (from customer in _customerRepository.Table //NoTracking
+            var customerAttributeMappings = (from customer in GetQuery() 
                                                                            join attribute in _genericAttributeRepository.Table//NoTracking
                                                                                                                               on customer.Id equals attribute.EntityId
                                                                            where customer.Id == id &&
@@ -207,7 +208,7 @@ namespace Nop.Plugin.Api.Services
             else
             {
                 // This is when we do not have first and last name set.
-                var currentCustomer = _customerRepository.Table.FirstOrDefault(customer => customer.Id == id);
+                var currentCustomer = GetQuery().FirstOrDefault(customer => customer.Id == id);
 
                 if (currentCustomer != null)
                 {
@@ -222,7 +223,24 @@ namespace Nop.Plugin.Api.Services
 
             return customerDto;
         }
+        
+        private IQueryable<Customer> GetQuery()
+        {
+            var query = _customerRepository.TableNoTracking;
 
+            query = query.Include(c => c.BillingAddress).ThenInclude(m => m.Country);
+            query = query.Include(c => c.BillingAddress).ThenInclude(m => m.StateProvince);
+            query = query.Include(c => c.ShippingAddress).ThenInclude(m => m.Country);
+            query = query.Include(c => c.ShippingAddress).ThenInclude(m => m.StateProvince);
+            
+            query = query.Include(c => c.CustomerRoles).ThenInclude(m => m.PermissionRecordCustomerRoleMappings).ThenInclude(m => m.PermissionRecord);
+            query = query.Include(c => c.CustomerCustomerRoleMappings).ThenInclude(m => m.CustomerRole);
+
+            query = query.Include(c => c.ShoppingCartItems).ThenInclude(m => m.Product);
+            query = query.Include(c => c.ReturnRequests);
+            
+            return query;
+        }
         private Dictionary<string, string> EnsureSearchQueryIsValid(string query, Func<string, Dictionary<string, string>> parseSearchQuery)
         {
             if (!string.IsNullOrEmpty(query))
@@ -427,8 +445,7 @@ namespace Nop.Plugin.Api.Services
 
         private IQueryable<Customer> GetCustomersQuery(DateTime? createdAtMin = null, DateTime? createdAtMax = null, int sinceId = 0)
         {
-            var query = _customerRepository.Table //NoTracking
-                                                  .Where(customer => !customer.Deleted && !customer.IsSystemAccount && customer.Active);
+            var query = GetQuery().Where(customer => !customer.Deleted && !customer.IsSystemAccount && customer.Active);
             
             query = query.Where(customer => !customer.CustomerRoles.Any(cr => (cr.Active) && (cr.SystemName == NopCustomerDefaults.GuestsRoleName))
             && (customer.RegisteredInStoreId == 0 || customer.RegisteredInStoreId == _storeContext.CurrentStore.Id));
@@ -518,7 +535,7 @@ namespace Nop.Plugin.Api.Services
         {
             return _cacheManager.Get(Configurations.NEWSLETTER_SUBSCRIBERS_KEY, () =>
             {
-                IEnumerable<String> subscriberEmails = (from nls in _subscriptionRepository.TableNoTracking
+                IEnumerable<String> subscriberEmails = (from nls in _subscriptionRepository.Table
                     where nls.StoreId == _storeContext.CurrentStore.Id
                           && nls.Active
                     select nls.Email).ToList();

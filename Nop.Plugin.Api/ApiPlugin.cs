@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Nop.Core;
 using Nop.Core.Infrastructure;
 using Nop.Core.Plugins;
+using Nop.Plugin.Api.Data;
 using Nop.Plugin.Api.Domain;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
@@ -20,14 +21,16 @@ namespace Nop.Plugin.Api
 {
     public class ApiPlugin : BasePlugin, IAdminMenuPlugin
     {
+        private readonly ApiObjectContext _objectContext;
         private readonly ILocalizationService _localizationService;
         private readonly ISettingService _settingService;
         private readonly IWebHelper _webHelper;
         private readonly IWorkContext _workContext;
 
-        public ApiPlugin(ISettingService settingService, IWorkContext workContext,
+        public ApiPlugin(ApiObjectContext objectContext, ISettingService settingService, IWorkContext workContext,
             ILocalizationService localizationService, IWebHelper webHelper)
         {
+            _objectContext = objectContext;
             _settingService = settingService;
             _workContext = workContext;
             _localizationService = localizationService;
@@ -36,6 +39,7 @@ namespace Nop.Plugin.Api
 
         public override void Install()
         {
+           
             //locales
             _localizationService.AddOrUpdatePluginLocaleResource("Plugins.Api", "Api plugin");
             _localizationService.AddOrUpdatePluginLocaleResource("Plugins.Api.Admin.Menu.ManageClients",
@@ -129,6 +133,7 @@ namespace Nop.Plugin.Api
 
         public override void Uninstall()
         {
+            
             var persistedGrantMigrator =
                 EngineContext.Current.Resolve<PersistedGrantDbContext>().GetService<IMigrator>();
             persistedGrantMigrator.Migrate("0");

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Nop.Core.Data;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Payments;
@@ -21,7 +22,7 @@ namespace Nop.Plugin.Api.Services
 
         public IList<Order> GetOrdersByCustomerId(int customerId)
         {
-            var query = from order in _orderRepository.Table
+            var query = from order in GetQuery()
                         where order.CustomerId == customerId && !order.Deleted
                         orderby order.Id
                         select order;
@@ -49,7 +50,7 @@ namespace Nop.Plugin.Api.Services
             if (orderId <= 0)
                 return null;
 
-            return _orderRepository.Table.FirstOrDefault(order => order.Id == orderId && !order.Deleted);
+            return GetQuery().FirstOrDefault(order => order.Id == orderId && !order.Deleted);
         }
 
         public int GetOrdersCount(DateTime? createdAtMin = null, DateTime? createdAtMax = null, OrderStatus? status = null,
@@ -61,11 +62,51 @@ namespace Nop.Plugin.Api.Services
             return query.Count();
         }
 
+        private IQueryable<Order> GetQuery()
+        {
+            var query = _orderRepository.TableNoTracking;
+            
+            query = query.Include(c => c.Customer).ThenInclude(c => c.BillingAddress).ThenInclude(m => m.Country);
+            query = query.Include(c => c.Customer).ThenInclude(c => c.BillingAddress).ThenInclude(m => m.StateProvince);
+            query = query.Include(c => c.Customer).ThenInclude(c => c.ShippingAddress).ThenInclude(m => m.Country);
+            query = query.Include(c => c.Customer).ThenInclude(c => c.ShippingAddress)
+                .ThenInclude(m => m.StateProvince);
+
+
+            query = query.Include(c => c.BillingAddress).ThenInclude(m => m.Country);
+            query = query.Include(c => c.BillingAddress).ThenInclude(m => m.StateProvince);
+
+            query = query.Include(c => c.ShippingAddress).ThenInclude(m => m.Country);
+            query = query.Include(c => c.ShippingAddress).ThenInclude(m => m.StateProvince);
+
+            query = query.Include(c => c.PickupAddress).ThenInclude(m => m.Country);
+            query = query.Include(c => c.PickupAddress).ThenInclude(m => m.StateProvince);
+
+
+            query = query.Include(c => c.OrderItems).ThenInclude(m => m.Product);
+            query = query.Include(c => c.OrderItems).ThenInclude(m => m.Product)
+                .ThenInclude(m => m.ProductProductTagMappings);
+            query = query.Include(c => c.OrderItems)
+                .ThenInclude(m => m.Product)
+                .ThenInclude(m => m.ProductProductTagMappings)
+                .ThenInclude(m => m.ProductTag);
+            query = query.Include(c => c.OrderItems).ThenInclude(m => m.Product).ThenInclude(m => m.ProductCategories);
+            query = query.Include(c => c.OrderItems).ThenInclude(m => m.Product).ThenInclude(m => m.ProductManufacturers);
+            query = query.Include(c => c.OrderItems).ThenInclude(m => m.Product).ThenInclude(m => m.ProductPictures).ThenInclude(m => m.Picture);
+            query = query.Include(c => c.OrderItems).ThenInclude(m => m.Product).ThenInclude(m => m.ProductSpecificationAttributes);
+            query = query.Include(c => c.OrderItems).ThenInclude(m => m.Product).ThenInclude(m => m.ProductAttributeMappings);
+
+
+            query = query.Include(c => c.Shipments).ThenInclude(m => m.ShipmentItems).ThenInclude(m => m.Shipment);
+
+            return query;
+        }
+
         private IQueryable<Order> GetOrdersQuery(DateTime? createdAtMin = null, DateTime? createdAtMax = null, OrderStatus? status = null,
             PaymentStatus? paymentStatus = null, ShippingStatus? shippingStatus = null, IList<int> ids = null, 
             int? customerId = null, int? storeId = null)
         {
-            var query = _orderRepository.Table;
+            var query = GetQuery();
             
             if (customerId != null)
             {
@@ -110,17 +151,7 @@ namespace Nop.Plugin.Api.Services
             }
 
             query = query.OrderBy(order => order.Id);
-
-            //query = query.Include(c => c.Customer);
-            //query = query.Include(c => c.BillingAddress);
-            //query = query.Include(c => c.ShippingAddress);
-            //query = query.Include(c => c.PickupAddress);
-            //query = query.Include(c => c.RedeemedRewardPointsEntry);
-            //query = query.Include(c => c.DiscountUsageHistory);
-            //query = query.Include(c => c.GiftCardUsageHistory);
-            //query = query.Include(c => c.OrderNotes);
-            //query = query.Include(c => c.OrderItems);
-            //query = query.Include(c => c.Shipments);
+            
 
             return query;
         }

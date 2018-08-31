@@ -12,7 +12,7 @@ namespace Nop.Plugin.Api.AutoMapper
         public static MapperConfigurationExpression MapperConfigurationExpression => s_mapperConfigurationExpression ??
                                                                                      (s_mapperConfigurationExpression = new MapperConfigurationExpression());
 
-        public static IMapper Mapper
+        private static IMapper Mapper
         {
             get
             {

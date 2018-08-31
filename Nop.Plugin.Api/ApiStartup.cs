@@ -17,16 +17,19 @@ using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Nop.Core.Configuration;
 using Nop.Core.Data;
 using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.Authorization.Policies;
 using Nop.Plugin.Api.Authorization.Requirements;
 using Nop.Plugin.Api.Constants;
+using Nop.Plugin.Api.Data;
 using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.IdentityServer.Endpoints;
 using Nop.Plugin.Api.IdentityServer.Generators;
 using Nop.Plugin.Api.IdentityServer.Middlewares;
 using Nop.Web.Framework.Infrastructure;
+using Nop.Web.Framework.Infrastructure.Extensions;
 using ApiResource = IdentityServer4.EntityFramework.Entities.ApiResource;
 
 namespace Nop.Plugin.Api
@@ -46,6 +49,30 @@ namespace Nop.Plugin.Api
             AddTokenGenerationPipeline(services);
 
             AddAuthorizationPipeline(services);
+
+            //add object context
+            services.AddDbContext<ApiObjectContext>(optionsBuilder =>
+            {
+                var nopConfig = services.BuildServiceProvider().GetRequiredService<NopConfig>();
+                var dataSettings = DataSettingsManager.LoadSettings();
+                if (!dataSettings?.IsValid ?? true)
+                {
+                    return;
+                }
+
+                optionsBuilder.UseSqlServerWithLazyLoading(services);
+                
+                //optionsBuilder.UseSqlServer(dataSettings.DataConnectionString,
+               //     providerOptions => providerOptions.CommandTimeout(60));
+
+                //optionsBuilder.UseLazyLoadingProxies(false);
+                //optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+
+                if (nopConfig.UseRowNumberForPaging)
+                    optionsBuilder.UseSqlServer(dataSettings.DataConnectionString, option => option.UseRowNumberForPaging());
+                else
+                    optionsBuilder.UseSqlServer(dataSettings.DataConnectionString);
+            });
         }
 
         public void Configure(IApplicationBuilder app)
