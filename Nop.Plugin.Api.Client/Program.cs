@@ -9,10 +9,12 @@ namespace Nop.Plugin.Api.Client
         static void Main(string[] args)
         {
 
+            // TODO: Change to match your environment
             var url = "http://localhost:15536";
             var clientId = "ea0204cd-5bbd-49ae-9810-d24735581f43";
             var clientSecret = "80a14949-8549-4d60-9d3a-864473b7a93a";
 
+            
 
             var client = new NopApiClient(url, clientId, clientSecret);
 
@@ -41,6 +43,7 @@ namespace Nop.Plugin.Api.Client
                 start = int.Parse(order.Id);
             }
 
+            // now at this point we should store the 'start' variable
 
 
             Console.WriteLine("Hit any key to continue...");
