@@ -117,13 +117,6 @@ namespace Nop.Plugin.Api.Services
                         select product;
             }
 
-            //only distinct products (group by ID)
-            query = from p in query
-                    group p by p.Id
-                        into pGroup
-                    orderby pGroup.Key
-                    select pGroup.FirstOrDefault();
-
             if (categoryId != null)
             {
                 var categoryMappingsForProduct = from productCategoryMapping in _productCategoryMappingRepository.Table
