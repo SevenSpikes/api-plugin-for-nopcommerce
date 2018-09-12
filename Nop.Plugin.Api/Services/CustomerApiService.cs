@@ -429,10 +429,10 @@ namespace Nop.Plugin.Api.Services
         {
             var query = _customerRepository.Table //NoTracking
                                                   .Where(customer => !customer.Deleted && !customer.IsSystemAccount && customer.Active);
-            
-            query = query.Where(customer => !customer.CustomerRoles.Any(cr => (cr.Active) && (cr.SystemName == NopCustomerDefaults.GuestsRoleName))
+
+            query = query.Where(customer => !customer.CustomerCustomerRoleMappings.Any(ccrm => ccrm.CustomerRole.Active && ccrm.CustomerRole.SystemName == NopCustomerDefaults.GuestsRoleName)
             && (customer.RegisteredInStoreId == 0 || customer.RegisteredInStoreId == _storeContext.CurrentStore.Id));
-            
+
             if (createdAtMin != null)
             {
                 query = query.Where(c => c.CreatedOnUtc > createdAtMin.Value);
