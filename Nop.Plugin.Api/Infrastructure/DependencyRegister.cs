@@ -7,6 +7,7 @@ using Nop.Web.Framework.Infrastructure.Extensions;
 
 namespace Nop.Plugin.Api.Infrastructure
 {
+    using Microsoft.AspNetCore.Http;
     using Nop.Core.Domain.Catalog;
     using Nop.Core.Domain.Common;
     using Nop.Core.Domain.Customers;
@@ -78,6 +79,9 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<ShoppingCartItemFactory>().As<IFactory<ShoppingCartItem>>().InstancePerLifetimeScope();
 
             builder.RegisterType<Maps.JsonPropertyMapper>().As<Maps.IJsonPropertyMapper>().InstancePerLifetimeScope();
+
+            builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
+            builder.RegisterType<ProductDtoValidator>().InstancePerLifetimeScope();
         }
 
         public virtual int Order

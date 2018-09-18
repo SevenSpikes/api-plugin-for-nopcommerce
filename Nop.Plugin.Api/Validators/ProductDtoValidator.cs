@@ -1,39 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using FluentValidation;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Nop.Plugin.Api.DTOs.Products;
+using Nop.Plugin.Api.Helpers;
 
 namespace Nop.Plugin.Api.Validators
 {
-    public class ProductDtoValidator : AbstractValidator<ProductDto>
+    public class ProductDtoValidator : BaseDtoValidator<ProductDto>
     {
-        public ProductDtoValidator(string httpMethod, IReadOnlyDictionary<string, object> passedPropertyValuePaires)
+        public ProductDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper) : base(httpContextAccessor, jsonHelper)
         {
-            if (string.IsNullOrEmpty(httpMethod) || httpMethod.Equals("post", StringComparison.InvariantCultureIgnoreCase))
+            if (HttpMethods.IsPost(httpContextAccessor.HttpContext.Request.Method))
             {
-                SetNameRule();
+                SetNameRule(false);
             }
-            else if (httpMethod.Equals("put", StringComparison.InvariantCultureIgnoreCase))
+            else if (HttpMethods.IsPut(httpContextAccessor.HttpContext.Request.Method))
             {
-                RuleFor(x => x.Id)
-                        .NotNull()
-                        .NotEmpty()
-                        .Must(id => int.TryParse(id, out var parsedId) && parsedId > 0)
-                        .WithMessage("invalid id");
-
-                if (passedPropertyValuePaires.ContainsKey("name"))
-                {
-                    SetNameRule();
-                }
+                SetRequiredIdRule();
+                SetNameRule(true);
             }
         }
 
-        private void SetNameRule()
+        private void SetNameRule(bool isJsonValueRequiredForValidation)
         {
-            RuleFor(x => x.Name)
-                       .NotNull()
-                       .NotEmpty()
-                       .WithMessage("name is required");
+            if (!isJsonValueRequiredForValidation || JsonDictionary.ContainsKey("name"))
+            {
+                RuleFor(x => x.Name)
+                           .NotNull()
+                           .NotEmpty()
+                           .WithMessage("name is required");
+            }
         }
     }
 }
