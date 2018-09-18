@@ -1,17 +1,12 @@
 ﻿using System;
 using Newtonsoft.Json;
+using Nop.Plugin.Api.DTOs.Base;
 
 namespace Nop.Plugin.Api.DTOs.Categories
 {
     [JsonObject(Title = "news_letter_subscription")]
-    public class NewsLetterSubscriptionDto
+    public class NewsLetterSubscriptionDto : BaseDto
     {
-        /// <summary>
-        /// Gets or sets the id
-        /// </summary>
-        [JsonProperty("id")]
-        public string Id { get; set; }
-
         /// <summary>
         /// Gets or sets the email
         /// </summary>

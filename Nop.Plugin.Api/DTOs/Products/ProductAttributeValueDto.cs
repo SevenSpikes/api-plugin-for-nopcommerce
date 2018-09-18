@@ -1,20 +1,15 @@
 ﻿using System;
 using Newtonsoft.Json;
 using Nop.Core.Domain.Catalog;
+using Nop.Plugin.Api.DTOs.Base;
 using Nop.Plugin.Api.DTOs.Images;
 
 namespace Nop.Plugin.Api.DTOs.Products
 {
     [JsonObject(Title = "attribute_value")]
     //[Validator(typeof(ProductDtoValidator))]
-    public class ProductAttributeValueDto
+    public class ProductAttributeValueDto : BaseDto
     {
-        /// <summary>
-        /// Gets or sets the product attribute value id
-        /// </summary>
-        [JsonProperty("id")]
-        public int Id { get; set; }
-
         /// <summary>
         /// Gets or sets the attribute value type identifier
         /// </summary>

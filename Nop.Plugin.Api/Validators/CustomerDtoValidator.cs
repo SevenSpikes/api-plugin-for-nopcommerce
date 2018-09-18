@@ -1,123 +1,94 @@
-﻿using System;
-using System.Collections.Generic;
-using FluentValidation;
+﻿using FluentValidation;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Http;
 using Nop.Core.Domain.Customers;
-using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.DTOs.Customers;
 using Nop.Plugin.Api.Helpers;
+using System.Collections.Generic;
+using System.Net.Http;
 
 namespace Nop.Plugin.Api.Validators
 {
-    public class CustomerDtoValidator : AbstractValidator<CustomerDto>
+    public class CustomerDtoValidator : BaseDtoValidator<CustomerDto>
     {
-        private readonly ICustomerRolesHelper _customerRolesHelper = EngineContext.Current.Resolve<ICustomerRolesHelper>();
 
-        public CustomerDtoValidator(string httpMethod, Dictionary<string, object> passedPropertyValuePaires)
+        #region Private Fields
+
+        private readonly ICustomerRolesHelper _customerRolesHelper;
+
+        #endregion
+        
+        #region Constructors
+
+        public CustomerDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, ICustomerRolesHelper customerRolesHelper) : base(httpContextAccessor, jsonHelper)
         {
-            if (string.IsNullOrEmpty(httpMethod) ||
-                httpMethod.Equals("post", StringComparison.InvariantCultureIgnoreCase))
-            {
-                SetRuleForRoles();
-                SetRuleForEmail();
-            }
-            else if (httpMethod.Equals("put", StringComparison.InvariantCultureIgnoreCase))
-            {
-                int parsedId;
+            _customerRolesHelper = customerRolesHelper;
 
-                RuleFor(x => x.Id)
-                    .NotNull()
-                    .NotEmpty()
-                    .Must(id => int.TryParse(id, out parsedId) && parsedId > 0)
-                    .WithMessage("invalid id");
-
-                if (passedPropertyValuePaires.ContainsKey("email"))
-                {
-                    SetRuleForEmail();
-                }
-
-                // TODO: think of a way to not hardcode the json property name.
-                if (passedPropertyValuePaires.ContainsKey("role_ids"))
-                {
-                    SetRuleForRoles();
-                }
-            }
-
-            if (passedPropertyValuePaires.ContainsKey("password"))
-            {
-                RuleForEach(customer => customer.Password)
-                    .NotNull()
-                    .NotEmpty()
-                    .WithMessage("invalid password");
-            }
-
-            // The fields below are not required, but if they are passed they should be validated.
-            if (passedPropertyValuePaires.ContainsKey("billing_address"))
-            {
-                RuleFor(x => x.BillingAddress)
-                    .SetValidator(new AddressDtoValidator());
-            }
-
-            if (passedPropertyValuePaires.ContainsKey("shipping_address"))
-            {
-                RuleFor(x => x.ShippingAddress)
-                    .SetValidator(new AddressDtoValidator());
-            }
-
-            if (passedPropertyValuePaires.ContainsKey("addresses"))
-            {
-                RuleForEach(x => x.CustomerAddresses)
-                    .SetValidator(new AddressDtoValidator());
-            }
+            SetEmailRule();
+            SetRolesRule();
+            SetPasswordRule();
         }
 
-        private void SetRuleForEmail()
+        #endregion
+
+        #region Private Methods
+
+        private void SetEmailRule()
         {
-            RuleFor(customer => customer.Email)
-                .NotNull()
-                .NotEmpty()
-                .WithMessage("email can not be empty");
+            SetNotNullOrEmptyCreateOrUpdateRule(c => c.Email, "invalid email", "email");
         }
 
-        private void SetRuleForRoles()
+        private void SetPasswordRule()
         {
-            IList<CustomerRole> customerRoles = null;
+            SetNotNullOrEmptyCreateOrUpdateRule(c => c.Password, "invalid password", "password");
+        }
 
-            RuleFor(x => x.RoleIds)
-                   .NotNull()
-                   .Must(roles => roles.Count > 0)
-                   .WithMessage("role_ids required")
-                   .DependentRules(() => RuleFor(dto => dto.RoleIds)
-                       .Must(roleIds =>
-                       {
-                           if (customerRoles == null)
-                           {
-                               customerRoles = _customerRolesHelper.GetValidCustomerRoles(roleIds);
-                           }
+        private void SetRolesRule()
+        {
+            if (HttpMethod == HttpMethod.Post || JsonDictionary.ContainsKey("role_ids"))
+            {
+                IList<CustomerRole> customerRoles = null;
 
-                           var isInGuestAndRegisterRoles = _customerRolesHelper.IsInGuestsRole(customerRoles) &&
+                RuleFor(x => x.RoleIds)
+                    .NotNull()
+                    .Must(roles => roles.Count > 0)
+                    .WithMessage("role_ids required")
+                    .DependentRules(() => RuleFor(dto => dto.RoleIds)
+                    .Must(roleIds =>
+                    {
+                        if (customerRoles == null)
+                        {
+                            customerRoles = _customerRolesHelper.GetValidCustomerRoles(roleIds);
+                        }
+
+                        var isInGuestAndRegisterRoles = _customerRolesHelper.IsInGuestsRole(customerRoles) &&
+                                                        _customerRolesHelper.IsInRegisteredRole(customerRoles);
+
+                    // Customer can not be in guest and register roles simultaneously
+                    return !isInGuestAndRegisterRoles;
+                    })
+                    .WithMessage("must not be in guest and register roles simultaneously")
+                    .DependentRules(() => RuleFor(dto => dto.RoleIds)
+                        .Must(roleIds =>
+                        {
+                            if (customerRoles == null)
+                            {
+                                customerRoles = _customerRolesHelper.GetValidCustomerRoles(roleIds);
+                            }
+
+                            var isInGuestOrRegisterRoles = _customerRolesHelper.IsInGuestsRole(customerRoles) ||
                                                             _customerRolesHelper.IsInRegisteredRole(customerRoles);
 
-                           // Customer can not be in guest and register roles simultaneously
-                           return !isInGuestAndRegisterRoles;
-                       })
-                       .WithMessage("must not be in guest and register roles simultaneously")
-                       .DependentRules(() => RuleFor(dto => dto.RoleIds)
-                            .Must(roleIds =>
-                            {
-                                if (customerRoles == null)
-                                {
-                                    customerRoles = _customerRolesHelper.GetValidCustomerRoles(roleIds);
-                                }
-
-                                var isInGuestOrRegisterRoles = _customerRolesHelper.IsInGuestsRole(customerRoles) ||
-                                                                _customerRolesHelper.IsInRegisteredRole(customerRoles);
-
-                                // Customer must be in either guest or register role.
-                                return isInGuestOrRegisterRoles;
-                            })
-                            .WithMessage("must be in guest or register role")
-                       )
-                   );
+                        // Customer must be in either guest or register role.
+                        return isInGuestOrRegisterRoles;
+                        })
+                        .WithMessage("must be in guest or register role")
+                    )
+                );
+            }
         }
+
+        #endregion
+
     }
 }

@@ -81,7 +81,6 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<Maps.JsonPropertyMapper>().As<Maps.IJsonPropertyMapper>().InstancePerLifetimeScope();
 
             builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
-            builder.RegisterType<ProductDtoValidator>().InstancePerLifetimeScope();
         }
 
         public virtual int Order

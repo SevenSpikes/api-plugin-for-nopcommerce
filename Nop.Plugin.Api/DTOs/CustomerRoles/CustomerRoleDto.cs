@@ -1,16 +1,11 @@
 ﻿using Newtonsoft.Json;
+using Nop.Plugin.Api.DTOs.Base;
 
 namespace Nop.Plugin.Api.DTOs.CustomerRoles
 {
     [JsonObject(Title = "customer_role")]
-    public class CustomerRoleDto
+    public class CustomerRoleDto : BaseDto
     {
-        /// <summary>
-        /// Gets or sets the store ID
-        /// </summary>
-        [JsonProperty("id")]
-        public string Id { get; set; }
-
         /// <summary>
         /// Gets or sets the customer role name
         /// </summary>

@@ -392,7 +392,7 @@ namespace Nop.Plugin.Api.Controllers
                 return Error();
             }
 
-            var currentOrder = _orderApiService.GetOrderById(int.Parse(orderDelta.Dto.Id));
+            var currentOrder = _orderApiService.GetOrderById(orderDelta.Dto.Id);
 
             if (currentOrder == null)
             {
@@ -578,34 +578,36 @@ namespace Nop.Plugin.Api.Controllers
         {
             var shouldReturnError = false;
 
-            foreach (var orderItem in orderItems)
-            {
-                var orderItemDtoValidator = new OrderItemDtoValidator("post", null);
-                var validation = orderItemDtoValidator.Validate(orderItem);
+            //TODO:  4.10 Validation Refactor
 
-                if (validation.IsValid)
-                {
-                    if (orderItem.ProductId != null)
-                    {
-                        var product = _productService.GetProductById(orderItem.ProductId.Value);
+            //foreach (var orderItem in orderItems)
+            //{
+            //    var orderItemDtoValidator = new OrderItemDtoValidator("post", null);
+            //    var validation = orderItemDtoValidator.Validate(orderItem);
 
-                        if (product == null)
-                        {
-                            ModelState.AddModelError("order_item.product", string.Format("Product not found for order_item.product_id = {0}", orderItem.ProductId));
-                            shouldReturnError = true;
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (var error in validation.Errors)
-                    {
-                        ModelState.AddModelError("order_item", error.ErrorMessage);
-                    }
+            //    if (validation.IsValid)
+            //    {
+            //        if (orderItem.ProductId != null)
+            //        {
+            //            var product = _productService.GetProductById(orderItem.ProductId.Value);
 
-                    shouldReturnError = true;
-                }
-            }
+            //            if (product == null)
+            //            {
+            //                ModelState.AddModelError("order_item.product", string.Format("Product not found for order_item.product_id = {0}", orderItem.ProductId));
+            //                shouldReturnError = true;
+            //            }
+            //        }
+            //    }
+            //    else
+            //    {
+            //        foreach (var error in validation.Errors)
+            //        {
+            //            ModelState.AddModelError("order_item", error.ErrorMessage);
+            //        }
+
+            //        shouldReturnError = true;
+            //    }
+            //}
 
             return shouldReturnError;
         }
@@ -667,7 +669,7 @@ namespace Nop.Plugin.Api.Controllers
         
         private bool ValidateAddress(AddressDto address, string addressKind)
         {
-            bool addressValid;
+            bool addressValid = true;
 
             if (address == null)
             {
@@ -676,15 +678,17 @@ namespace Nop.Plugin.Api.Controllers
             }
             else
             {
-                var addressValidator = new AddressDtoValidator();
-                var validationResult = addressValidator.Validate(address);
+                //TODO:  4.10 Validation Refactor
 
-                foreach (var validationFailure in validationResult.Errors)
-                {
-                    ModelState.AddModelError(addressKind, validationFailure.ErrorMessage);
-                }
+                //var addressValidator = new AddressDtoValidator();
+                //var validationResult = addressValidator.Validate(address);
 
-                addressValid = validationResult.IsValid;
+                //foreach (var validationFailure in validationResult.Errors)
+                //{
+                //    ModelState.AddModelError(addressKind, validationFailure.ErrorMessage);
+                //}
+
+                //addressValid = validationResult.IsValid;
             }
 
             return addressValid;

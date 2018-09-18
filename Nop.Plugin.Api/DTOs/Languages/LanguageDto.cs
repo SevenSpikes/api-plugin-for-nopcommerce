@@ -1,18 +1,13 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
+using Nop.Plugin.Api.DTOs.Base;
 
 namespace Nop.Plugin.Api.DTOs.Languages
 {
     [JsonObject(Title = "language")]
-    public class LanguageDto
+    public class LanguageDto : BaseDto
     {
         private List<int> _storeIds;
-
-        /// <summary>
-        /// Gets or sets the store ID
-        /// </summary>
-        [JsonProperty("id")]
-        public string Id { get; set; }
 
         /// <summary>
         /// Gets or sets the name

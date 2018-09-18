@@ -253,10 +253,7 @@ namespace Nop.Plugin.Api.Controllers
                 return Error();
             }
 
-            // We do not need to validate the category id, because this will happen in the model binder using the dto validator.
-            var updateCategoryId = int.Parse(categoryDelta.Dto.Id);
-
-            var category = _categoryApiService.GetCategoryById(updateCategoryId);
+            var category = _categoryApiService.GetCategoryById(categoryDelta.Dto.Id);
 
             if (category == null)
             {

@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.Helpers;
 
@@ -7,28 +6,24 @@ namespace Nop.Plugin.Api.Validators
 {
     public class ProductDtoValidator : BaseDtoValidator<ProductDto>
     {
+
+        #region Constructors
+
         public ProductDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper) : base(httpContextAccessor, jsonHelper)
         {
-            if (HttpMethods.IsPost(httpContextAccessor.HttpContext.Request.Method))
-            {
-                SetNameRule(false);
-            }
-            else if (HttpMethods.IsPut(httpContextAccessor.HttpContext.Request.Method))
-            {
-                SetRequiredIdRule();
-                SetNameRule(true);
-            }
+            SetNameRule();
         }
 
-        private void SetNameRule(bool isJsonValueRequiredForValidation)
+        #endregion
+
+        #region Private Methods
+
+        private void SetNameRule()
         {
-            if (!isJsonValueRequiredForValidation || JsonDictionary.ContainsKey("name"))
-            {
-                RuleFor(x => x.Name)
-                           .NotNull()
-                           .NotEmpty()
-                           .WithMessage("name is required");
-            }
+            SetNotNullOrEmptyCreateOrUpdateRule(p => p.Name, "invalid name", "name");
         }
+
+        #endregion
+
     }
 }

@@ -6,21 +6,16 @@ using Nop.Plugin.Api.DTOs.Customers;
 using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.Validators;
 using System.Collections.Generic;
+using Nop.Plugin.Api.DTOs.Base;
 
 namespace Nop.Plugin.Api.DTOs.ShoppingCarts
 {
     [Validator(typeof(ShoppingCartItemDtoValidator))]
     [JsonObject(Title = "shopping_cart_item")]
-    public class ShoppingCartItemDto
+    public class ShoppingCartItemDto : BaseDto
     {
         private int? _shoppingCartTypeId;
         private List<ProductItemAttributeDto> _attributes;
-
-        /// <summary>
-        /// Gets or sets the id
-        /// </summary>
-        [JsonProperty("id")]
-        public string Id { get; set; }
 
         /// <summary>
         /// Gets or sets the selected attributes

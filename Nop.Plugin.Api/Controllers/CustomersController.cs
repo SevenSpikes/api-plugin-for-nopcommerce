@@ -326,7 +326,7 @@ namespace Nop.Plugin.Api.Controllers
             //If the validation has passed the customerDelta object won't be null for sure so we don't need to check for this.
             
             // Updateting the customer
-            var currentCustomer = _customerApiService.GetCustomerEntityById(int.Parse(customerDelta.Dto.Id));
+            var currentCustomer = _customerApiService.GetCustomerEntityById(customerDelta.Dto.Id);
 
             if (currentCustomer == null)
             {
@@ -352,12 +352,11 @@ namespace Nop.Plugin.Api.Controllers
 
                 foreach (var passedAddress in customerDelta.Dto.CustomerAddresses)
                 {
-                    var passedAddressId = int.Parse(passedAddress.Id);
                     var addressEntity = passedAddress.ToEntity();
 
-                    if (currentCustomerAddresses.ContainsKey(passedAddressId))
+                    if (currentCustomerAddresses.ContainsKey(passedAddress.Id))
                     {
-                        _mappingHelper.Merge(passedAddress, currentCustomerAddresses[passedAddressId]);
+                        _mappingHelper.Merge(passedAddress, currentCustomerAddresses[passedAddress.Id]);
                     }
                     else
                     {
