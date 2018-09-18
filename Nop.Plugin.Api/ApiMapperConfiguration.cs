@@ -26,6 +26,7 @@
     using Nop.Plugin.Api.DTOs.ProductAttributes;
     using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
     using Nop.Plugin.Api.DTOs.Products;
+    using Nop.Plugin.Api.DTOs.SpecificationAttributes;
     using Nop.Plugin.Api.DTOs.ShoppingCarts;
     using Nop.Plugin.Api.DTOs.Stores;
     using Nop.Plugin.Api.MappingExtensions;
@@ -68,6 +69,11 @@
             CreateMap<ProductAttributeValue, ProductAttributeValueDto>();
 
             CreateMap<ProductAttribute, ProductAttributeDto>();
+
+            CreateMap<ProductSpecificationAttribute, ProductSpecificationAttributeDto>();
+
+            CreateMap<SpecificationAttribute, SpecificationAttributeDto>();
+            CreateMap<SpecificationAttributeOption, SpecificationAttributeOptionDto>();
 
             CreateMap<NewsLetterSubscriptionDto, NewsLetterSubscription>();
             CreateMap<NewsLetterSubscription, NewsLetterSubscriptionDto>();
@@ -170,6 +176,7 @@
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Product, ProductDto>()
                .IgnoreAllNonExisting()
                .ForMember(x => x.ProductAttributeMappings, y => y.Ignore())
+               .ForMember(x => x.ProductSpecificationAttributes, y => y.Ignore())
                .ForMember(x => x.FullDescription, y => y.MapFrom(src => WebUtility.HtmlEncode(src.FullDescription)))
                .ForMember(x => x.Tags, y => y.MapFrom(src => src.ProductTags.Select(x => x.Name)));
         }
