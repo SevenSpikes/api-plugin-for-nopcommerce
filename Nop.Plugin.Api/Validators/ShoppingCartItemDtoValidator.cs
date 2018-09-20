@@ -4,6 +4,7 @@ using Nop.Core.Domain.Orders;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
 using Nop.Plugin.Api.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 
 namespace Nop.Plugin.Api.Validators
@@ -13,7 +14,7 @@ namespace Nop.Plugin.Api.Validators
 
         #region Constructors
 
-        public ShoppingCartItemDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper) : base(httpContextAccessor, jsonHelper)
+        public ShoppingCartItemDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary) : base(httpContextAccessor, jsonHelper, requestJsonDictionary)
         {
             SetCustomerIdRule();
             SetProductIdRule();
@@ -44,7 +45,7 @@ namespace Nop.Plugin.Api.Validators
 
         private void SetRentalDateRules()
         {
-            if (JsonDictionary.ContainsKey("rental_start_date_utc") || JsonDictionary.ContainsKey("rental_end_date_utc"))
+            if (RequestJsonDictionary.ContainsKey("rental_start_date_utc") || RequestJsonDictionary.ContainsKey("rental_end_date_utc"))
             {
                 RuleFor(x => x.RentalStartDateUtc)
                     .NotNull()
@@ -70,7 +71,7 @@ namespace Nop.Plugin.Api.Validators
 
         private void SetShoppingCartTypeRule()
         {
-            if (HttpMethod == HttpMethod.Post || JsonDictionary.ContainsKey("shopping_cart_type"))
+            if (HttpMethod == HttpMethod.Post || RequestJsonDictionary.ContainsKey("shopping_cart_type"))
             {
                 RuleFor(x => x.ShoppingCartType)
                     .NotNull()

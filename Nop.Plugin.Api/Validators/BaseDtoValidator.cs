@@ -1,10 +1,13 @@
 ﻿using FluentValidation;
+using FluentValidation.Results;
+using FluentValidation.Validators;
 using Microsoft.AspNetCore.Http;
 using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.DTOs.Base;
 using Nop.Plugin.Api.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
 
@@ -15,21 +18,20 @@ namespace Nop.Plugin.Api.Validators
 
         #region Private Fields
 
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IJsonHelper _jsonHelper;
-
-        private Dictionary<string, object> _jsonDictionary;
+        private Dictionary<string, object> _requestValuesDictionary;
 
         #endregion
 
         #region Constructors
 
-        public BaseDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper)
+        public BaseDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestValuesDictionary)
         {
-            _httpContextAccessor = httpContextAccessor;
-            _jsonHelper = jsonHelper;
+            HttpContextAccessor = httpContextAccessor;
+            JsonHelper = jsonHelper;
 
-            HttpMethod = new HttpMethod(_httpContextAccessor.HttpContext.Request.Method);
+            _requestValuesDictionary = requestValuesDictionary.Count > 0 ? requestValuesDictionary : null; //this is a hack because we can't make requestValuesDictionary an optinoal parameter, because Nop will try to resolve it)
+
+            HttpMethod = new HttpMethod(HttpContextAccessor.HttpContext.Request.Method);
 
             SetRequiredIdRule();
         }
@@ -38,28 +40,51 @@ namespace Nop.Plugin.Api.Validators
 
         #region Protected Properties
 
+        protected IHttpContextAccessor HttpContextAccessor { get; private set; }
+
         protected HttpMethod HttpMethod { get; private set; }
 
-        protected Dictionary<string, object> JsonDictionary
+        protected Dictionary<string, object> RequestJsonDictionary
         {
             get
             {
-                if (_jsonDictionary == null)
+                if (_requestValuesDictionary == null)
                 {
-                    _jsonDictionary = GetJsonDictionary();
+                    _requestValuesDictionary = GetRequestValuesDictionary();
                 }
 
-                return _jsonDictionary;
+                return _requestValuesDictionary;
             }
         }
+
+        protected IJsonHelper JsonHelper { get; private set; }
 
         #endregion
 
         #region Protected Methods
 
-        protected void SetGreaterThanZeroCreateOrUpdateRule(Expression<Func<T, int?>> expression, string errorMessage, string jsonKey)
+        protected void MergeValidationResult(CustomContext validationContext, ValidationResult validationResult)
         {
-            if (HttpMethod == HttpMethod.Post || JsonDictionary.ContainsKey(jsonKey))
+            if (!validationResult.IsValid)
+            {
+                foreach (var validationFailure in validationResult.Errors)
+                {
+                    validationContext.AddFailure(validationFailure);
+                }
+            }
+        }
+
+        protected Dictionary<string, object> GetRequestJsonDictionaryCollectionItemDictionary<TDto>(string collectionKey, TDto dto) where TDto : BaseDto
+        {
+            var collectionItems = (List<object>)RequestJsonDictionary[collectionKey];
+            var collectionItemDictionary = (Dictionary<string, object>)collectionItems.FirstOrDefault(x => ((int)(long)((Dictionary<string, object>)x)["id"]) == dto.Id);
+
+            return collectionItemDictionary;
+        }
+
+        protected void SetGreaterThanZeroCreateOrUpdateRule(Expression<Func<T, int?>> expression, string errorMessage, string requestValueKey)
+        {
+            if (HttpMethod == HttpMethod.Post || RequestJsonDictionary.ContainsKey(requestValueKey))
             {
                 SetGreaterThanZeroRule(expression, errorMessage);
             }
@@ -73,9 +98,9 @@ namespace Nop.Plugin.Api.Validators
                 .Must(id => id > 0);
         }
 
-        protected void SetNotNullOrEmptyCreateOrUpdateRule(Expression<Func<T, string>> expression, string errorMessage, string jsonKey)
+        protected void SetNotNullOrEmptyCreateOrUpdateRule(Expression<Func<T, string>> expression, string errorMessage, string requestValueKey)
         {
-            if (HttpMethod == HttpMethod.Post || JsonDictionary.ContainsKey(jsonKey))
+            if (HttpMethod == HttpMethod.Post || RequestJsonDictionary.ContainsKey(requestValueKey))
             {
                 SetNotNullOrEmptyRule(expression, errorMessage);
             }
@@ -93,17 +118,17 @@ namespace Nop.Plugin.Api.Validators
 
         #region Private Methods
 
-        private Dictionary<string, object> GetJsonDictionary()
+        private Dictionary<string, object> GetRequestValuesDictionary()
         {
-            var jsonDictionary = _jsonHelper.GetJsonDictionaryFromStream(_httpContextAccessor.HttpContext.Request.Body, true);
-            var rootPropertyName = _jsonHelper.GetRootPropertyName<T>();
+            var requestJsonDictionary = JsonHelper.GetRequestJsonDictionaryFromStream(HttpContextAccessor.HttpContext.Request.Body, true);
+            var rootPropertyName = JsonHelper.GetRootPropertyName<T>();
 
-            if (jsonDictionary.ContainsKey(rootPropertyName))
+            if (requestJsonDictionary.ContainsKey(rootPropertyName))
             {
-                jsonDictionary = (Dictionary<string, object>)jsonDictionary[rootPropertyName];
+                requestJsonDictionary = (Dictionary<string, object>)requestJsonDictionary[rootPropertyName];
             }
 
-            return jsonDictionary;
+            return requestJsonDictionary;
         }
 
         private void SetRequiredIdRule()

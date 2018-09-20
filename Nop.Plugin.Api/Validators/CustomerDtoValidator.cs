@@ -1,10 +1,13 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
+using FluentValidation.Validators;
 using Microsoft.AspNetCore.Http;
 using Nop.Core.Domain.Customers;
+using Nop.Plugin.Api.DTOs;
 using Nop.Plugin.Api.DTOs.Customers;
 using Nop.Plugin.Api.Helpers;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 
 namespace Nop.Plugin.Api.Validators
@@ -20,18 +23,60 @@ namespace Nop.Plugin.Api.Validators
         
         #region Constructors
 
-        public CustomerDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, ICustomerRolesHelper customerRolesHelper) : base(httpContextAccessor, jsonHelper)
+        public CustomerDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary, ICustomerRolesHelper customerRolesHelper) : base(httpContextAccessor, jsonHelper, requestJsonDictionary)
         {
             _customerRolesHelper = customerRolesHelper;
 
             SetEmailRule();
             SetRolesRule();
             SetPasswordRule();
+
+            SetBillingAddressRule();
+            SetShippingAddressRule();
+
+            SetCustomerAddressesRule();
+            SetShoppingCartItemsRule();
         }
 
         #endregion
 
         #region Private Methods
+
+        private void SetCustomerAddressesRule()
+        {
+            var key = "addresses";
+            if (RequestJsonDictionary.ContainsKey(key))
+            {
+                RuleForEach(c => c.CustomerAddresses)
+                    .Custom((addressDto, validationContext) =>
+                    {
+                        var addressJsonDictionary = GetRequestJsonDictionaryCollectionItemDictionary(key, addressDto);
+
+                        var validator = new AddressDtoValidator(HttpContextAccessor, JsonHelper, addressJsonDictionary);
+                        var validationResult = validator.Validate(addressDto);
+
+                        MergeValidationResult(validationContext, validationResult);
+                    });
+            }
+        }
+
+        private void SetBillingAddressRule()
+        {
+            var key = "billing_address";
+            if (RequestJsonDictionary.ContainsKey(key))
+            {
+                RuleFor(c => c.BillingAddress).SetValidator(new AddressDtoValidator(HttpContextAccessor, JsonHelper, (Dictionary<string, object>)RequestJsonDictionary[key]));
+            }
+        }
+
+        private void SetShippingAddressRule()
+        {
+            var key = "shipping_address";
+            if (RequestJsonDictionary.ContainsKey(key))
+            {
+                RuleFor(c => c.ShippingAddress).SetValidator(new AddressDtoValidator(HttpContextAccessor, JsonHelper, (Dictionary<string, object>)RequestJsonDictionary[key]));
+            }
+        }
 
         private void SetEmailRule()
         {
@@ -45,7 +90,7 @@ namespace Nop.Plugin.Api.Validators
 
         private void SetRolesRule()
         {
-            if (HttpMethod == HttpMethod.Post || JsonDictionary.ContainsKey("role_ids"))
+            if (HttpMethod == HttpMethod.Post || RequestJsonDictionary.ContainsKey("role_ids"))
             {
                 IList<CustomerRole> customerRoles = null;
 
@@ -85,6 +130,24 @@ namespace Nop.Plugin.Api.Validators
                         .WithMessage("must be in guest or register role")
                     )
                 );
+            }
+        }
+
+        private void SetShoppingCartItemsRule()
+        {
+            var key = "shopping_cart_items";
+            if (RequestJsonDictionary.ContainsKey(key))
+            {
+                RuleForEach(c => c.ShoppingCartItems)
+                    .Custom((shoppingCartItemDto, validationContext) =>
+                    {
+                        var shoppingCartItemJsonDictionary = GetRequestJsonDictionaryCollectionItemDictionary(key, shoppingCartItemDto);
+
+                        var validator = new ShoppingCartItemDtoValidator(HttpContextAccessor, JsonHelper, shoppingCartItemJsonDictionary);
+                        var validationResult = validator.Validate(shoppingCartItemDto);
+
+                        MergeValidationResult(validationContext, validationResult);
+                    });
             }
         }
 

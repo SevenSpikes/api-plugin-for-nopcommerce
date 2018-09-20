@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Nop.Plugin.Api.DTOs;
 using Nop.Plugin.Api.Helpers;
+using System.Collections.Generic;
 
 namespace Nop.Plugin.Api.Validators
 {
@@ -9,7 +10,7 @@ namespace Nop.Plugin.Api.Validators
 
         #region Constructors
 
-        public AddressDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper) : base(httpContextAccessor, jsonHelper)
+        public AddressDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary) : base(httpContextAccessor, jsonHelper, requestJsonDictionary)
         {
             SetFirstNameRule();
             SetLastNameRule();

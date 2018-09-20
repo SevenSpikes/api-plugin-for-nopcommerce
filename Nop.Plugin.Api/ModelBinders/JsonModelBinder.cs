@@ -100,7 +100,7 @@ namespace Nop.Plugin.Api.ModelBinders
                 try
                 {
                     //get the root dictionary and root property (these will throw exceptions if they fail)
-                    result = _jsonHelper.GetJsonDictionaryFromStream(bindingContext.HttpContext.Request.Body, true);
+                    result = _jsonHelper.GetRequestJsonDictionaryFromStream(bindingContext.HttpContext.Request.Body, true);
                     var rootPropertyName = _jsonHelper.GetRootPropertyName<T>();
 
                     result = (Dictionary<string, object>)result[rootPropertyName];

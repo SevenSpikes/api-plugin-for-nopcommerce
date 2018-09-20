@@ -7,6 +7,7 @@ using Nop.Web.Framework.Infrastructure.Extensions;
 
 namespace Nop.Plugin.Api.Infrastructure
 {
+    using Autofac.Core;
     using Microsoft.AspNetCore.Http;
     using Nop.Core.Domain.Catalog;
     using Nop.Core.Domain.Common;
@@ -21,6 +22,7 @@ namespace Nop.Plugin.Api.Infrastructure
     using Nop.Plugin.Api.Validators;
     //using Nop.Plugin.Api.WebHooks;
     using System;
+    using System.Collections.Generic;
 
     public class DependencyRegister : IDependencyRegistrar
     {
@@ -81,6 +83,8 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<Maps.JsonPropertyMapper>().As<Maps.IJsonPropertyMapper>().InstancePerLifetimeScope();
 
             builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
+
+            builder.RegisterType<Dictionary<string, object>>().SingleInstance();
         }
 
         public virtual int Order

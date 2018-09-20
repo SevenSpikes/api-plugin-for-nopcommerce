@@ -34,7 +34,7 @@ namespace Nop.Plugin.Api.Helpers
 
         #region Public Methods
 
-        public Dictionary<string, object> GetJsonDictionaryFromStream(Stream stream, bool rewindStream)
+        public Dictionary<string, object> GetRequestJsonDictionaryFromStream(Stream stream, bool rewindStream)
         {
             var json = GetRequestBodyString(stream, rewindStream);
             if (string.IsNullOrEmpty(json))

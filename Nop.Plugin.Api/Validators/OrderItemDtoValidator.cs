@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Nop.Plugin.Api.DTOs.OrderItems;
 using Nop.Plugin.Api.Helpers;
+using System.Collections.Generic;
 
 namespace Nop.Plugin.Api.Validators
 {
@@ -9,9 +10,9 @@ namespace Nop.Plugin.Api.Validators
 
         #region Constructors
 
-        public OrderItemDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper) : base(httpContextAccessor, jsonHelper)
+        public OrderItemDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary) : base(httpContextAccessor, jsonHelper, requestJsonDictionary)
         {
-            SetProductRule();
+            SetProductIdRule();
             SetQuantityRule();
         }
 
@@ -19,7 +20,7 @@ namespace Nop.Plugin.Api.Validators
 
         #region Private Methods
 
-        private void SetProductRule()
+        private void SetProductIdRule()
         {
             SetGreaterThanZeroCreateOrUpdateRule(o => o.ProductId, "invalid product_id", "product_id");
         }
