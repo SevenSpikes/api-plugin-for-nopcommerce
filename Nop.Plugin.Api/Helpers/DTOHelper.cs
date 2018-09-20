@@ -155,7 +155,7 @@ namespace Nop.Plugin.Api.Helpers
         {
             var orderDto = order.ToDto();
 
-            orderDto.OrderItemDtos = order.OrderItems.Select(PrepareOrderItemDTO).ToList();
+            orderDto.OrderItems = order.OrderItems.Select(PrepareOrderItemDTO).ToList();
 
             var customerDto = _customerApiService.GetCustomerById(order.Customer.Id);
 

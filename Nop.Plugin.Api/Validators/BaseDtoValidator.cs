@@ -42,8 +42,6 @@ namespace Nop.Plugin.Api.Validators
 
         protected IHttpContextAccessor HttpContextAccessor { get; private set; }
 
-        protected HttpMethod HttpMethod { get; private set; }
-
         protected Dictionary<string, object> RequestJsonDictionary
         {
             get
@@ -58,6 +56,12 @@ namespace Nop.Plugin.Api.Validators
         }
 
         protected IJsonHelper JsonHelper { get; private set; }
+
+        #endregion
+
+        #region Public Properties
+
+        public HttpMethod HttpMethod { get; set; }
 
         #endregion
 
@@ -77,7 +81,9 @@ namespace Nop.Plugin.Api.Validators
         protected Dictionary<string, object> GetRequestJsonDictionaryCollectionItemDictionary<TDto>(string collectionKey, TDto dto) where TDto : BaseDto
         {
             var collectionItems = (List<object>)RequestJsonDictionary[collectionKey];
-            var collectionItemDictionary = (Dictionary<string, object>)collectionItems.FirstOrDefault(x => ((int)(long)((Dictionary<string, object>)x)["id"]) == dto.Id);
+            var collectionItemDictionary = collectionItems.FirstOrDefault(x =>
+                ((Dictionary<string, object>)x).ContainsKey("id") && ((int)(long)((Dictionary<string, object>)x)["id"]) == dto.Id
+            ) as Dictionary<string, object>;
 
             return collectionItemDictionary;
         }

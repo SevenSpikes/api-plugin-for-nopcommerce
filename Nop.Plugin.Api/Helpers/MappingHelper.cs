@@ -104,6 +104,23 @@ namespace Nop.Plugin.Api.Helpers
                         propertyToUpdate.SetValue(objectToBeUpdated, collection);
                     }
 
+                    //this is a hack to fix a bug when "collection" cannot be cast to IList (ex:  it's a HashSet for Order.OrderItems)
+                    var collectionAsList = collection as IList;
+                    if (collectionAsList == null)
+                    {
+                        var listType = typeof(List<>);
+                        var constructedListType = listType.MakeGenericType(collectionElementsType);
+                        collectionAsList = (IList)Activator.CreateInstance(constructedListType);
+
+                        var collectionAsEnumerable = collection as IEnumerable;
+                        foreach (var collectionItem in collectionAsEnumerable)
+                        {
+                            collectionAsList.Add(collectionItem);
+                        }
+
+                        collection = collectionAsList;
+                    }
+
                     foreach (var item in propertyValueAsCollection)
                     {
                         if (collectionElementsType.Namespace != "System")

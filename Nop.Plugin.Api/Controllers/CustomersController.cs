@@ -323,8 +323,6 @@ namespace Nop.Plugin.Api.Controllers
                 return Error();
             }
 
-            //If the validation has passed the customerDelta object won't be null for sure so we don't need to check for this.
-            
             // Updateting the customer
             var currentCustomer = _customerApiService.GetCustomerEntityById(customerDelta.Dto.Id);
 

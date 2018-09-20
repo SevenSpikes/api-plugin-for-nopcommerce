@@ -258,23 +258,15 @@ namespace Nop.Plugin.Api.Controllers
 
             var shippingRequired = false;
 
-            if (orderDelta.Dto.OrderItemDtos != null)
+            if (orderDelta.Dto.OrderItems != null)
             {
-                var shouldReturnError = ValidateEachOrderItem(orderDelta.Dto.OrderItemDtos);
-
+                var shouldReturnError = AddOrderItemsToCart(orderDelta.Dto.OrderItems, customer, orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id);
                 if (shouldReturnError)
                 {
                     return Error(HttpStatusCode.BadRequest);
                 }
 
-                shouldReturnError = AddOrderItemsToCart(orderDelta.Dto.OrderItemDtos, customer, orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id);
-
-                if (shouldReturnError)
-                {
-                    return Error(HttpStatusCode.BadRequest);
-                }
-
-                shippingRequired = IsShippingAddressRequired(orderDelta.Dto.OrderItemDtos);
+                shippingRequired = IsShippingAddressRequired(orderDelta.Dto.OrderItems);
             }
 
             if (shippingRequired)
@@ -285,7 +277,7 @@ namespace Nop.Plugin.Api.Controllers
                                             orderDelta.Dto.ShippingMethod,
                                             orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id,
                                             customer, 
-                                            BuildShoppingCartItemsFromOrderItemDtos(orderDelta.Dto.OrderItemDtos.ToList(), 
+                                            BuildShoppingCartItemsFromOrderItemDtos(orderDelta.Dto.OrderItems.ToList(), 
                                                                                     customer.Id, 
                                                                                     orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id));
 
@@ -574,44 +566,6 @@ namespace Nop.Plugin.Api.Controllers
             return placeOrderResult;
         }
 
-        private bool ValidateEachOrderItem(ICollection<OrderItemDto> orderItems)
-        {
-            var shouldReturnError = false;
-
-            //TODO:  4.10 Validation Refactor
-
-            //foreach (var orderItem in orderItems)
-            //{
-            //    var orderItemDtoValidator = new OrderItemDtoValidator("post", null);
-            //    var validation = orderItemDtoValidator.Validate(orderItem);
-
-            //    if (validation.IsValid)
-            //    {
-            //        if (orderItem.ProductId != null)
-            //        {
-            //            var product = _productService.GetProductById(orderItem.ProductId.Value);
-
-            //            if (product == null)
-            //            {
-            //                ModelState.AddModelError("order_item.product", string.Format("Product not found for order_item.product_id = {0}", orderItem.ProductId));
-            //                shouldReturnError = true;
-            //            }
-            //        }
-            //    }
-            //    else
-            //    {
-            //        foreach (var error in validation.Errors)
-            //        {
-            //            ModelState.AddModelError("order_item", error.ErrorMessage);
-            //        }
-
-            //        shouldReturnError = true;
-            //    }
-            //}
-
-            return shouldReturnError;
-        }
-
         private bool IsShippingAddressRequired(ICollection<OrderItemDto> orderItems)
         {
             var shippingAddressRequired = false;
@@ -645,7 +599,7 @@ namespace Nop.Plugin.Api.Controllers
                         orderItem.RentalEndDateUtc = null;
                     }
 
-                    var attributesXml = _productAttributeConverter.ConvertToXml(orderItem.Attributes, product.Id);                
+                    var attributesXml = _productAttributeConverter.ConvertToXml(orderItem.Attributes.ToList(), product.Id);                
 
                     var errors = _shoppingCartService.AddToCart(customer, product,
                         ShoppingCartType.ShoppingCart, storeId,attributesXml,

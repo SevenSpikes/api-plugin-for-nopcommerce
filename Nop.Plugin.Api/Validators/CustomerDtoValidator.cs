@@ -53,6 +53,13 @@ namespace Nop.Plugin.Api.Validators
                         var addressJsonDictionary = GetRequestJsonDictionaryCollectionItemDictionary(key, addressDto);
 
                         var validator = new AddressDtoValidator(HttpContextAccessor, JsonHelper, addressJsonDictionary);
+
+                        //force create validation for new addresses
+                        if (addressDto.Id == 0)
+                        {
+                            validator.HttpMethod = HttpMethod.Post;
+                        }
+
                         var validationResult = validator.Validate(addressDto);
 
                         MergeValidationResult(validationContext, validationResult);
@@ -144,6 +151,13 @@ namespace Nop.Plugin.Api.Validators
                         var shoppingCartItemJsonDictionary = GetRequestJsonDictionaryCollectionItemDictionary(key, shoppingCartItemDto);
 
                         var validator = new ShoppingCartItemDtoValidator(HttpContextAccessor, JsonHelper, shoppingCartItemJsonDictionary);
+
+                        //force create validation for new addresses
+                        if (shoppingCartItemDto.Id == 0)
+                        {
+                            validator.HttpMethod = HttpMethod.Post;
+                        }
+
                         var validationResult = validator.Validate(shoppingCartItemDto);
 
                         MergeValidationResult(validationContext, validationResult);

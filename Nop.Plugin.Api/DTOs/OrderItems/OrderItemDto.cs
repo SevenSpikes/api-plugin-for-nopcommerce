@@ -13,13 +13,13 @@ namespace Nop.Plugin.Api.DTOs.OrderItems
     [JsonObject(Title = "order_item")]
     public class OrderItemDto : BaseDto
     {
-        private List<ProductItemAttributeDto> _attributes;
+        private ICollection<ProductItemAttributeDto> _attributes;
 
         /// <summary>
         /// Gets or sets the selected attributes
         /// </summary>
         [JsonProperty("product_attributes")]
-        public List<ProductItemAttributeDto> Attributes
+        public ICollection<ProductItemAttributeDto> Attributes
         {
             get
             {

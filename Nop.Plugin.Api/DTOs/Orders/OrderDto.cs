@@ -13,7 +13,7 @@ namespace Nop.Plugin.Api.DTOs.Orders
     [Validator(typeof(OrderDtoValidator))]
     public class OrderDto : BaseDto
     {
-        private ICollection<OrderItemDto> _orderItemDtos;
+        private ICollection<OrderItemDto> _orderItems;
 
         [JsonProperty("store_id")]
         public int? StoreId { get; set; }
@@ -259,10 +259,18 @@ namespace Nop.Plugin.Api.DTOs.Orders
         /// Gets or sets order items
         /// </summary>
         [JsonProperty("order_items")]
-        public ICollection<OrderItemDto> OrderItemDtos
+        public ICollection<OrderItemDto> OrderItems
         {
-            get { return _orderItemDtos; }
-            set { _orderItemDtos = value; }
+            get
+            {
+                if (_orderItems == null)
+                {
+                    _orderItems = new List<OrderItemDto>();
+                }
+
+                return _orderItems;
+            }
+            set { _orderItems = value; }
         }
 
         /// <summary>
