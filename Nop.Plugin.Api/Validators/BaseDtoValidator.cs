@@ -24,14 +24,28 @@ namespace Nop.Plugin.Api.Validators
 
         #region Constructors
 
-        public BaseDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestValuesDictionary)
+        public BaseDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary)
         {
             HttpContextAccessor = httpContextAccessor;
             JsonHelper = jsonHelper;
 
-            _requestValuesDictionary = requestValuesDictionary.Count > 0 ? requestValuesDictionary : null; //this is a hack because we can't make requestValuesDictionary an optinoal parameter, because Nop will try to resolve it)
+            // this is hacky - can't make requestJsonDictionary an optional parameter because Nop tries to resolve it
+            //
+            // when DI (or the Nop Engine) resolves this class, requestJsonDictionary will be empty (length 0)
+            //    in this case, HttpMethod should be whatever the current context is
+            // when we manually instantiate this class (from other validators to validate child objects), requestJsonDictionary will be null for "new" objects and populated for existing objects
+            //    in this scenario, we want to check if there's an id, and force "create" (POST) validation if there isn't an id
 
             HttpMethod = new HttpMethod(HttpContextAccessor.HttpContext.Request.Method);
+            if (requestJsonDictionary == null || requestJsonDictionary.Count > 0 && !requestJsonDictionary.ContainsKey("id"))
+            {
+                HttpMethod = HttpMethod.Post;
+            }
+
+            if (requestJsonDictionary != null && requestJsonDictionary.Count > 0)
+            {
+                _requestValuesDictionary = requestJsonDictionary;
+            }
 
             SetRequiredIdRule();
         }
@@ -48,7 +62,7 @@ namespace Nop.Plugin.Api.Validators
             {
                 if (_requestValuesDictionary == null)
                 {
-                    _requestValuesDictionary = GetRequestValuesDictionary();
+                    _requestValuesDictionary = GetRequestJsonDictionaryDictionaryFromHttpContext();
                 }
 
                 return _requestValuesDictionary;
@@ -124,7 +138,7 @@ namespace Nop.Plugin.Api.Validators
 
         #region Private Methods
 
-        private Dictionary<string, object> GetRequestValuesDictionary()
+        private Dictionary<string, object> GetRequestJsonDictionaryDictionaryFromHttpContext()
         {
             var requestJsonDictionary = JsonHelper.GetRequestJsonDictionaryFromStream(HttpContextAccessor.HttpContext.Request.Body, true);
             var rootPropertyName = JsonHelper.GetRootPropertyName<T>();
@@ -139,7 +153,10 @@ namespace Nop.Plugin.Api.Validators
 
         private void SetRequiredIdRule()
         {
-            SetGreaterThanZeroCreateOrUpdateRule(x => x.Id, "invalid id", "id");
+            if (HttpMethod == HttpMethod.Put)
+            {
+                SetGreaterThanZeroCreateOrUpdateRule(x => x.Id, "invalid id", "id");
+            }
         }
 
         #endregion
