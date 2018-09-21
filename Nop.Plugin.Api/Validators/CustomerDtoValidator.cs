@@ -47,7 +47,7 @@ namespace Nop.Plugin.Api.Validators
             var key = "addresses";
             if (RequestJsonDictionary.ContainsKey(key))
             {
-                RuleForEach(c => c.CustomerAddresses)
+                RuleForEach(c => c.Addresses)
                     .Custom((addressDto, validationContext) =>
                     {
                         var addressJsonDictionary = GetRequestJsonDictionaryCollectionItemDictionary(key, addressDto);

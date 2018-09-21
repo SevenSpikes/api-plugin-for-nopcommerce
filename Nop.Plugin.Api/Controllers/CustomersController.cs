@@ -245,7 +245,7 @@ namespace Nop.Plugin.Api.Controllers
             var newCustomer = _factory.Initialize();
             customerDelta.Merge(newCustomer);
 
-            foreach (var address in customerDelta.Dto.CustomerAddresses)
+            foreach (var address in customerDelta.Dto.Addresses)
             {
                 // we need to explicitly set the date as if it is not specified
                 // it will default to 01/01/0001 which is not supported by SQL Server and throws and exception
@@ -344,11 +344,11 @@ namespace Nop.Plugin.Api.Controllers
                 AddValidRoles(customerDelta, currentCustomer);
             }
 
-            if (customerDelta.Dto.CustomerAddresses.Count > 0)
+            if (customerDelta.Dto.Addresses.Count > 0)
             {
                 var currentCustomerAddresses = currentCustomer.Addresses.ToDictionary(address => address.Id, address => address);
 
-                foreach (var passedAddress in customerDelta.Dto.CustomerAddresses)
+                foreach (var passedAddress in customerDelta.Dto.Addresses)
                 {
                     var addressEntity = passedAddress.ToEntity();
 
@@ -493,7 +493,7 @@ namespace Nop.Plugin.Api.Controllers
 
         private void PopulateAddressCountryNames(CustomerDto newCustomerDto)
         {
-            foreach (var address in newCustomerDto.CustomerAddresses)
+            foreach (var address in newCustomerDto.Addresses)
             {
                 SetCountryName(address);
             }

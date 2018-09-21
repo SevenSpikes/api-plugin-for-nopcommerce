@@ -55,7 +55,7 @@ namespace Nop.Plugin.Api.DTOs.Customers
         /// Gets or sets customer addresses
         /// </summary>
         [JsonProperty("addresses")]
-        public ICollection<AddressDto> CustomerAddresses
+        public ICollection<AddressDto> Addresses
         {
             get
             {

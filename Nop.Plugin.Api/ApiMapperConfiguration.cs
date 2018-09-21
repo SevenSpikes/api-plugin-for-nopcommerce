@@ -140,7 +140,7 @@ namespace Nop.Plugin.Api
                     y => y.MapFrom(src => src.BillingAddress.GetWithDefault(x => x, new Address()).ToDto()))
                 .ForMember(x => x.ShippingAddress,
                     y => y.MapFrom(src => src.ShippingAddress.GetWithDefault(x => x, new Address()).ToDto()))
-                .ForMember(x => x.CustomerAddresses,
+                .ForMember(x => x.Addresses,
                     y =>
                         y.MapFrom(
                             src =>
