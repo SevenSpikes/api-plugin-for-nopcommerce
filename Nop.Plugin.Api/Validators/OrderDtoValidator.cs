@@ -16,11 +16,32 @@ namespace Nop.Plugin.Api.Validators
         {
             SetCustomerIdRule();
             SetOrderItemsRule();
+
+            SetBillingAddressRule();
+            SetShippingAddressRule();
         }
 
         #endregion
 
         #region Private Methods
+
+        private void SetBillingAddressRule()
+        {
+            var key = "billing_address";
+            if (RequestJsonDictionary.ContainsKey(key))
+            {
+                RuleFor(o => o.BillingAddress).SetValidator(new AddressDtoValidator(HttpContextAccessor, JsonHelper, (Dictionary<string, object>)RequestJsonDictionary[key]));
+            }
+        }
+
+        private void SetShippingAddressRule()
+        {
+            var key = "shipping_address";
+            if (RequestJsonDictionary.ContainsKey(key))
+            {
+                RuleFor(o => o.ShippingAddress).SetValidator(new AddressDtoValidator(HttpContextAccessor, JsonHelper, (Dictionary<string, object>)RequestJsonDictionary[key]));
+            }
+        }
 
         private void SetCustomerIdRule()
         {
