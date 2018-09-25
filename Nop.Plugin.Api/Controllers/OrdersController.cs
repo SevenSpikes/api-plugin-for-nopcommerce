@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Orders;
@@ -31,17 +32,14 @@ using Nop.Services.Payments;
 using Nop.Services.Security;
 using Nop.Services.Shipping;
 using Nop.Services.Stores;
-using Microsoft.AspNetCore.Mvc;
 
-namespace Nop.Plugin.Api.Controllers
-{
-    using Microsoft.AspNetCore.Authentication.JwtBearer;
+namespace Nop.Plugin.Api.Controllers {
     using DTOs.Errors;
     using JSON.Serializers;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
 
-    [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class OrdersController : BaseApiController
-    {
+    [ApiAuthorize (Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public class OrdersController : BaseApiController {
         private readonly IOrderApiService _orderApiService;
         private readonly IProductService _productService;
         private readonly IOrderProcessingService _orderProcessingService;
@@ -49,7 +47,7 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IGenericAttributeService _genericAttributeService;
         private readonly IShippingService _shippingService;
-        private readonly IDTOHelper _dtoHelper;        
+        private readonly IDTOHelper _dtoHelper;
         private readonly IProductAttributeConverter _productAttributeConverter;
         private readonly IStoreContext _storeContext;
         private readonly IFactory<Order> _factory;
@@ -58,9 +56,9 @@ namespace Nop.Plugin.Api.Controllers
         // The auto mocking does not support concreate types as dependencies. It supports only interfaces.
         private OrderSettings _orderSettings;
 
-        private OrderSettings OrderSettings => _orderSettings ?? (_orderSettings = EngineContext.Current.Resolve<OrderSettings>());
+        private OrderSettings OrderSettings => _orderSettings ?? (_orderSettings = EngineContext.Current.Resolve<OrderSettings> ());
 
-        public OrdersController(IOrderApiService orderApiService,
+        public OrdersController (IOrderApiService orderApiService,
             IJsonFieldsSerializer jsonFieldsSerializer,
             IAclService aclService,
             ICustomerService customerService,
@@ -79,10 +77,8 @@ namespace Nop.Plugin.Api.Controllers
             IShippingService shippingService,
             IPictureService pictureService,
             IDTOHelper dtoHelper,
-            IProductAttributeConverter productAttributeConverter)
-            : base(jsonFieldsSerializer, aclService, customerService, storeMappingService,
-                 storeService, discountService, customerActivityService, localizationService,pictureService)
-        {
+            IProductAttributeConverter productAttributeConverter) : base (jsonFieldsSerializer, aclService, customerService, storeMappingService,
+            storeService, discountService, customerActivityService, localizationService, pictureService) {
             _orderApiService = orderApiService;
             _factory = factory;
             _orderProcessingService = orderProcessingService;
@@ -103,41 +99,37 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="400">Bad Request</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [Route("/api/orders")]
-        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [Route ("/api/orders")]
+        [ProducesResponseType (typeof (OrdersRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType (typeof (ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType (typeof (string), (int) HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetOrders(OrdersParametersModel parameters)
-        {
-            if (parameters.Page < Configurations.DefaultPageValue)
-            {
-                return Error(HttpStatusCode.BadRequest, "page", "Invalid page parameter");
+        public IActionResult GetOrders (OrdersParametersModel parameters) {
+            if (parameters.Page < Configurations.DefaultPageValue) {
+                return Error (HttpStatusCode.BadRequest, "page", "Invalid page parameter");
             }
 
-            if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
-            {
-                return Error(HttpStatusCode.BadRequest, "page", "Invalid limit parameter");
+            if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit) {
+                return Error (HttpStatusCode.BadRequest, "page", "Invalid limit parameter");
             }
 
             var storeId = _storeContext.CurrentStore.Id;
 
-            var orders = _orderApiService.GetOrders(parameters.Ids, parameters.CreatedAtMin,
+            var orders = _orderApiService.GetOrders (parameters.Ids, parameters.CreatedAtMin,
                 parameters.CreatedAtMax,
                 parameters.Limit, parameters.Page, parameters.SinceId,
                 parameters.Status, parameters.PaymentStatus, parameters.ShippingStatus,
                 parameters.CustomerId, storeId);
 
-            IList<OrderDto> ordersAsDtos = orders.Select(x => _dtoHelper.PrepareOrderDTO(x)).ToList();
+            IList<OrderDto> ordersAsDtos = orders.Select (x => _dtoHelper.PrepareOrderDTO (x)).ToList ();
 
-            var ordersRootObject = new OrdersRootObject()
-            {
+            var ordersRootObject = new OrdersRootObject () {
                 Orders = ordersAsDtos
             };
 
-            var json = JsonFieldsSerializer.Serialize(ordersRootObject, parameters.Fields);
+            var json = JsonFieldsSerializer.Serialize (ordersRootObject, parameters.Fields);
 
-            return new RawJsonActionResult(json);
+            return new RawJsonActionResult (json);
         }
 
         /// <summary>
@@ -146,24 +138,22 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [Route("/api/orders/count")]
-        [ProducesResponseType(typeof(OrdersCountRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [Route ("/api/orders/count")]
+        [ProducesResponseType (typeof (OrdersCountRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType (typeof (string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType (typeof (ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetOrdersCount(OrdersCountParametersModel parameters)
-        {
+        public IActionResult GetOrdersCount (OrdersCountParametersModel parameters) {
             var storeId = _storeContext.CurrentStore.Id;
 
-            var ordersCount = _orderApiService.GetOrdersCount(parameters.CreatedAtMin, parameters.CreatedAtMax, parameters.Status,
-                                                              parameters.PaymentStatus, parameters.ShippingStatus, parameters.CustomerId, storeId);
+            var ordersCount = _orderApiService.GetOrdersCount (parameters.CreatedAtMin, parameters.CreatedAtMax, parameters.Status,
+                parameters.PaymentStatus, parameters.ShippingStatus, parameters.CustomerId, storeId);
 
-            var ordersCountRootObject = new OrdersCountRootObject()
-            {
+            var ordersCountRootObject = new OrdersCountRootObject () {
                 Count = ordersCount
             };
 
-            return Ok(ordersCountRootObject);
+            return Ok (ordersCountRootObject);
         }
 
         /// <summary>
@@ -175,34 +165,31 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [Route("/api/orders/{id}")]
-        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [Route ("/api/orders/{id}")]
+        [ProducesResponseType (typeof (OrdersRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType (typeof (string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType (typeof (ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType (typeof (string), (int) HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetOrderById(int id, string fields = "")
-        {
-            if (id <= 0)
-            {
-                return Error(HttpStatusCode.BadRequest, "id", "invalid id");
+        public IActionResult GetOrderById (int id, string fields = "") {
+            if (id <= 0) {
+                return Error (HttpStatusCode.BadRequest, "id", "invalid id");
             }
 
-            var order = _orderApiService.GetOrderById(id);
+            var order = _orderApiService.GetOrderById (id);
 
-            if (order == null)
-            {
-                return Error(HttpStatusCode.NotFound, "order", "not found");
+            if (order == null) {
+                return Error (HttpStatusCode.NotFound, "order", "not found");
             }
 
-            var ordersRootObject = new OrdersRootObject();
+            var ordersRootObject = new OrdersRootObject ();
 
-            var orderDto = _dtoHelper.PrepareOrderDTO(order);
-            ordersRootObject.Orders.Add(orderDto);
+            var orderDto = _dtoHelper.PrepareOrderDTO (order);
+            ordersRootObject.Orders.Add (orderDto);
 
-            var json = JsonFieldsSerializer.Serialize(ordersRootObject, fields);
+            var json = JsonFieldsSerializer.Serialize (ordersRootObject, fields);
 
-            return new RawJsonActionResult(json);
+            return new RawJsonActionResult (json);
         }
 
         /// <summary>
@@ -212,103 +199,90 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [Route("/api/orders/customer/{customer_id}")]
-        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [Route ("/api/orders/customer/{customer_id}")]
+        [ProducesResponseType (typeof (OrdersRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType (typeof (string), (int) HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetOrdersByCustomerId(int customerId)
-        {
-            IList<OrderDto> ordersForCustomer = _orderApiService.GetOrdersByCustomerId(customerId).Select(x => _dtoHelper.PrepareOrderDTO(x)).ToList();
+        public IActionResult GetOrdersByCustomerId (int customerId) {
+            IList<OrderDto> ordersForCustomer = _orderApiService.GetOrdersByCustomerId (customerId).Select (x => _dtoHelper.PrepareOrderDTO (x)).ToList ();
 
-            var ordersRootObject = new OrdersRootObject()
-            {
+            var ordersRootObject = new OrdersRootObject () {
                 Orders = ordersForCustomer
             };
 
-            return Ok(ordersRootObject);
+            return Ok (ordersRootObject);
         }
 
         [HttpPost]
-        [Route("/api/orders")]
-        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult CreateOrder([ModelBinder(typeof(JsonModelBinder<OrderDto>))] Delta<OrderDto> orderDelta)
-        {
+        [Route ("/api/orders")]
+        [ProducesResponseType (typeof (OrdersRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType (typeof (string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType (typeof (ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType (typeof (string), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType (typeof (ErrorsRootObject), 422)]
+        public IActionResult CreateOrder ([ModelBinder (typeof (JsonModelBinder<OrderDto>))] Delta<OrderDto> orderDelta) {
             // Here we display the errors if the validation has failed at some point.
-            if (!ModelState.IsValid)
-            {
-                return Error();
+            if (!ModelState.IsValid) {
+                return Error ();
             }
 
-            if (orderDelta.Dto.CustomerId == null)
-            {
-                return Error();
+            if (orderDelta.Dto.CustomerId == null) {
+                return Error ();
             }
 
             // We doesn't have to check for value because this is done by the order validator.
-            var customer = CustomerService.GetCustomerById(orderDelta.Dto.CustomerId.Value);
-            
-            if (customer == null)
-            {
-                return Error(HttpStatusCode.NotFound, "customer", "not found");
+            var customer = CustomerService.GetCustomerById (orderDelta.Dto.CustomerId.Value);
+
+            if (customer == null) {
+                return Error (HttpStatusCode.NotFound, "customer", "not found");
             }
 
             var shippingRequired = false;
 
-            if (orderDelta.Dto.OrderItemDtos != null)
-            {
-                var shouldReturnError = ValidateEachOrderItem(orderDelta.Dto.OrderItemDtos);
+            if (orderDelta.Dto.OrderItemDtos != null) {
+                var shouldReturnError = ValidateEachOrderItem (orderDelta.Dto.OrderItemDtos);
 
-                if (shouldReturnError)
-                {
-                    return Error(HttpStatusCode.BadRequest);
+                if (shouldReturnError) {
+                    return Error (HttpStatusCode.BadRequest);
                 }
 
-                shouldReturnError = AddOrderItemsToCart(orderDelta.Dto.OrderItemDtos, customer, orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id);
+                shouldReturnError = AddOrderItemsToCart (orderDelta.Dto.OrderItemDtos, customer, orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id);
 
-                if (shouldReturnError)
-                {
-                    return Error(HttpStatusCode.BadRequest);
+                if (shouldReturnError) {
+                    return Error (HttpStatusCode.BadRequest);
                 }
 
-                shippingRequired = IsShippingAddressRequired(orderDelta.Dto.OrderItemDtos);
+                shippingRequired = IsShippingAddressRequired (orderDelta.Dto.OrderItemDtos);
             }
 
-            if (shippingRequired)
-            {
+            if (shippingRequired) {
                 var isValid = true;
 
-                isValid &= SetShippingOption(orderDelta.Dto.ShippingRateComputationMethodSystemName,
-                                            orderDelta.Dto.ShippingMethod,
-                                            orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id,
-                                            customer, 
-                                            BuildShoppingCartItemsFromOrderItemDtos(orderDelta.Dto.OrderItemDtos.ToList(), 
-                                                                                    customer.Id, 
-                                                                                    orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id));
+                isValid &= SetShippingOption (orderDelta.Dto.ShippingRateComputationMethodSystemName,
+                    orderDelta.Dto.ShippingMethod,
+                    orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id,
+                    customer,
+                    BuildShoppingCartItemsFromOrderItemDtos (orderDelta.Dto.OrderItemDtos.ToList (),
+                        customer.Id,
+                        orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id));
 
-                isValid &= ValidateAddress(orderDelta.Dto.ShippingAddress, "shipping_address");
+                isValid &= ValidateAddress (orderDelta.Dto.ShippingAddress, "shipping_address");
 
-                if (!isValid)
-                {
-                    return Error(HttpStatusCode.BadRequest);
+                if (!isValid) {
+                    return Error (HttpStatusCode.BadRequest);
                 }
             }
 
-            if (!OrderSettings.DisableBillingAddressCheckoutStep)
-            {
-                var isValid = ValidateAddress(orderDelta.Dto.BillingAddress, "billing_address");
+            if (!OrderSettings.DisableBillingAddressCheckoutStep) {
+                var isValid = ValidateAddress (orderDelta.Dto.BillingAddress, "billing_address");
 
-                if (!isValid)
-                {
-                    return Error(HttpStatusCode.BadRequest);
+                if (!isValid) {
+                    return Error (HttpStatusCode.BadRequest);
                 }
             }
 
-            var newOrder = _factory.Initialize();
-            orderDelta.Merge(newOrder);
+            var newOrder = _factory.Initialize ();
+            orderDelta.Merge (newOrder);
 
             customer.BillingAddress = newOrder.BillingAddress;
             customer.ShippingAddress = newOrder.ShippingAddress;
@@ -316,195 +290,169 @@ namespace Nop.Plugin.Api.Controllers
             newOrder.Customer = customer;
 
             // The default value will be the currentStore.id, but if it isn't passed in the json we need to set it by hand.
-            if (!orderDelta.Dto.StoreId.HasValue)
-            {
+            if (!orderDelta.Dto.StoreId.HasValue) {
                 newOrder.StoreId = _storeContext.CurrentStore.Id;
             }
-            
-            var placeOrderResult = PlaceOrder(newOrder, customer);
 
-            if (!placeOrderResult.Success)
-            {
-                foreach (var error in placeOrderResult.Errors)
-                {
-                    ModelState.AddModelError("order placement", error);
+            var placeOrderResult = PlaceOrder (newOrder, customer);
+
+            if (!placeOrderResult.Success) {
+                foreach (var error in placeOrderResult.Errors) {
+                    ModelState.AddModelError ("order placement", error);
                 }
 
-                return Error(HttpStatusCode.BadRequest);
+                return Error (HttpStatusCode.BadRequest);
             }
 
-            CustomerActivityService.InsertActivity("AddNewOrder",
-                 LocalizationService.GetResource("ActivityLog.AddNewOrder"), newOrder);
+            CustomerActivityService.InsertActivity ("AddNewOrder",
+                LocalizationService.GetResource ("ActivityLog.AddNewOrder"), newOrder);
 
-            var ordersRootObject = new OrdersRootObject();
+            var ordersRootObject = new OrdersRootObject ();
 
-            var placedOrderDto = _dtoHelper.PrepareOrderDTO(placeOrderResult.PlacedOrder);
+            var placedOrderDto = _dtoHelper.PrepareOrderDTO (placeOrderResult.PlacedOrder);
 
-            ordersRootObject.Orders.Add(placedOrderDto);
+            ordersRootObject.Orders.Add (placedOrderDto);
 
-            var json = JsonFieldsSerializer.Serialize(ordersRootObject, string.Empty);
+            var json = JsonFieldsSerializer.Serialize (ordersRootObject, string.Empty);
 
-            return new RawJsonActionResult(json);
+            return new RawJsonActionResult (json);
         }
 
         [HttpDelete]
-        [Route("/api/orders/{id}")]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(ErrorsRootObject), 422)]
+        [Route ("/api/orders/{id}")]
+        [ProducesResponseType (typeof (void), (int) HttpStatusCode.OK)]
+        [ProducesResponseType (typeof (string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType (typeof (ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType (typeof (string), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType (typeof (ErrorsRootObject), 422)]
         [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult DeleteOrder(int id)
-        {
-            if (id <= 0)
-            {
-                return Error(HttpStatusCode.BadRequest, "id", "invalid id");
-            }
-            
-            var orderToDelete = _orderApiService.GetOrderById(id);
-
-            if (orderToDelete == null)
-            {
-                return Error(HttpStatusCode.NotFound, "order", "not found");
+        public IActionResult DeleteOrder (int id) {
+            if (id <= 0) {
+                return Error (HttpStatusCode.BadRequest, "id", "invalid id");
             }
 
-            _orderProcessingService.DeleteOrder(orderToDelete);
+            var orderToDelete = _orderApiService.GetOrderById (id);
+
+            if (orderToDelete == null) {
+                return Error (HttpStatusCode.NotFound, "order", "not found");
+            }
+
+            _orderProcessingService.DeleteOrder (orderToDelete);
 
             //activity log
-            CustomerActivityService.InsertActivity("DeleteOrder", LocalizationService.GetResource("ActivityLog.DeleteOrder"), orderToDelete);
+            CustomerActivityService.InsertActivity ("DeleteOrder", LocalizationService.GetResource ("ActivityLog.DeleteOrder"), orderToDelete);
 
-            return new RawJsonActionResult("{}");
+            return new RawJsonActionResult ("{}");
         }
 
         [HttpPut]
-        [Route("/api/orders/{id}")]
-        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult UpdateOrder([ModelBinder(typeof(JsonModelBinder<OrderDto>))] Delta<OrderDto> orderDelta)
-        {
+        [Route ("/api/orders/{id}")]
+        [ProducesResponseType (typeof (OrdersRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType (typeof (string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType (typeof (ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType (typeof (string), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType (typeof (ErrorsRootObject), 422)]
+        public IActionResult UpdateOrder ([ModelBinder (typeof (JsonModelBinder<OrderDto>))] Delta<OrderDto> orderDelta) {
             // Here we display the errors if the validation has failed at some point.
-            if (!ModelState.IsValid)
-            {
-                return Error();
+            if (!ModelState.IsValid) {
+                return Error ();
             }
 
-            var currentOrder = _orderApiService.GetOrderById(int.Parse(orderDelta.Dto.Id));
+            var currentOrder = _orderApiService.GetOrderById (int.Parse (orderDelta.Dto.Id));
 
-            if (currentOrder == null)
-            {
-                return Error(HttpStatusCode.NotFound, "order", "not found");
+            if (currentOrder == null) {
+                return Error (HttpStatusCode.NotFound, "order", "not found");
             }
 
             var customer = currentOrder.Customer;
 
-            var shippingRequired = currentOrder.OrderItems.Any(item => !item.Product.IsFreeShipping);
+            var shippingRequired = currentOrder.OrderItems.Any (item => !item.Product.IsFreeShipping);
 
-            if (shippingRequired)
-            {
+            if (shippingRequired) {
                 var isValid = true;
 
-                if (!string.IsNullOrEmpty(orderDelta.Dto.ShippingRateComputationMethodSystemName) ||
-                    !string.IsNullOrEmpty(orderDelta.Dto.ShippingMethod))
-                {
+                if (!string.IsNullOrEmpty (orderDelta.Dto.ShippingRateComputationMethodSystemName) ||
+                    !string.IsNullOrEmpty (orderDelta.Dto.ShippingMethod)) {
                     var storeId = orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id;
 
-                    isValid &= SetShippingOption(orderDelta.Dto.ShippingRateComputationMethodSystemName ?? currentOrder.ShippingRateComputationMethodSystemName,
-                        orderDelta.Dto.ShippingMethod, 
+                    isValid &= SetShippingOption (orderDelta.Dto.ShippingRateComputationMethodSystemName ?? currentOrder.ShippingRateComputationMethodSystemName,
+                        orderDelta.Dto.ShippingMethod,
                         storeId,
-                        customer, BuildShoppingCartItemsFromOrderItems(currentOrder.OrderItems.ToList(), customer.Id, storeId));
+                        customer, BuildShoppingCartItemsFromOrderItems (currentOrder.OrderItems.ToList (), customer.Id, storeId));
                 }
 
-                if (orderDelta.Dto.ShippingAddress != null)
-                {
-                    isValid &= ValidateAddress(orderDelta.Dto.ShippingAddress, "shipping_address");
+                if (orderDelta.Dto.ShippingAddress != null) {
+                    isValid &= ValidateAddress (orderDelta.Dto.ShippingAddress, "shipping_address");
                 }
 
-                if (isValid)
-                {
+                if (orderDelta.Dto.ShippingMethod != null) {
                     currentOrder.ShippingMethod = orderDelta.Dto.ShippingMethod;
                 }
-                else
-                {
-                    return Error(HttpStatusCode.BadRequest);
+                if (!isValid) {
+                    return Error (HttpStatusCode.BadRequest);
                 }
             }
 
-            if (!OrderSettings.DisableBillingAddressCheckoutStep && orderDelta.Dto.BillingAddress != null)
-            {
-                var isValid = ValidateAddress(orderDelta.Dto.BillingAddress, "billing_address");
+            if (!OrderSettings.DisableBillingAddressCheckoutStep && orderDelta.Dto.BillingAddress != null) {
+                var isValid = ValidateAddress (orderDelta.Dto.BillingAddress, "billing_address");
 
-                if (!isValid)
-                {
-                    return Error(HttpStatusCode.BadRequest);
+                if (!isValid) {
+                    return Error (HttpStatusCode.BadRequest);
                 }
             }
 
-            orderDelta.Merge(currentOrder);
-            
+            orderDelta.Merge (currentOrder);
+
             customer.BillingAddress = currentOrder.BillingAddress;
             customer.ShippingAddress = currentOrder.ShippingAddress;
 
-            _orderService.UpdateOrder(currentOrder);
+            _orderService.UpdateOrder (currentOrder);
 
-            CustomerActivityService.InsertActivity("UpdateOrder",
-                 LocalizationService.GetResource("ActivityLog.UpdateOrder"), currentOrder);
+            CustomerActivityService.InsertActivity ("UpdateOrder",
+                LocalizationService.GetResource ("ActivityLog.UpdateOrder"), currentOrder);
 
-            var ordersRootObject = new OrdersRootObject();
+            var ordersRootObject = new OrdersRootObject ();
 
-            var placedOrderDto = _dtoHelper.PrepareOrderDTO(currentOrder);
-            placedOrderDto.ShippingMethod = orderDelta.Dto.ShippingMethod;
+            var placedOrderDto = _dtoHelper.PrepareOrderDTO (currentOrder);
+           
 
-            ordersRootObject.Orders.Add(placedOrderDto);
+            ordersRootObject.Orders.Add (placedOrderDto);
 
-            var json = JsonFieldsSerializer.Serialize(ordersRootObject, string.Empty);
+            var json = JsonFieldsSerializer.Serialize (ordersRootObject, string.Empty);
 
-            return new RawJsonActionResult(json);
+            return new RawJsonActionResult (json);
         }
 
-        private bool SetShippingOption(string shippingRateComputationMethodSystemName, string shippingOptionName, int storeId, Customer customer, List<ShoppingCartItem> shoppingCartItems)
-        {
+        private bool SetShippingOption (string shippingRateComputationMethodSystemName, string shippingOptionName, int storeId, Customer customer, List<ShoppingCartItem> shoppingCartItems) {
             var isValid = true;
 
-            if (string.IsNullOrEmpty(shippingRateComputationMethodSystemName))
-            {
+            if (string.IsNullOrEmpty (shippingRateComputationMethodSystemName)) {
                 isValid = false;
 
-                ModelState.AddModelError("shipping_rate_computation_method_system_name",
+                ModelState.AddModelError ("shipping_rate_computation_method_system_name",
                     "Please provide shipping_rate_computation_method_system_name");
-            }
-            else if (string.IsNullOrEmpty(shippingOptionName))
-            {
+            } else if (string.IsNullOrEmpty (shippingOptionName)) {
                 isValid = false;
 
-                ModelState.AddModelError("shipping_option_name", "Please provide shipping_option_name");
-            }
-            else
-            {
-                var shippingOptionResponse = _shippingService.GetShippingOptions(shoppingCartItems, customer.ShippingAddress, customer,
-                        shippingRateComputationMethodSystemName, storeId);
+                ModelState.AddModelError ("shipping_option_name", "Please provide shipping_option_name");
+            } else {
+                var shippingOptionResponse = _shippingService.GetShippingOptions (shoppingCartItems, customer.ShippingAddress, customer,
+                    shippingRateComputationMethodSystemName, storeId);
 
-                if (shippingOptionResponse.Success)
-                {
-                    var shippingOptions = shippingOptionResponse.ShippingOptions.ToList();
+                if (shippingOptionResponse.Success) {
+                    var shippingOptions = shippingOptionResponse.ShippingOptions.ToList ();
 
                     var shippingOption = shippingOptions
-                        .Find(so => !string.IsNullOrEmpty(so.Name) && so.Name.Equals(shippingOptionName, StringComparison.InvariantCultureIgnoreCase));
-                    
-                    _genericAttributeService.SaveAttribute(customer,
+                        .Find (so => !string.IsNullOrEmpty (so.Name) && so.Name.Equals (shippingOptionName, StringComparison.InvariantCultureIgnoreCase));
+
+                    _genericAttributeService.SaveAttribute (customer,
                         NopCustomerDefaults.SelectedShippingOptionAttribute,
                         shippingOption, storeId);
-                }
-                else
-                {
+                } else {
                     isValid = false;
 
-                    foreach (var errorMessage in shippingOptionResponse.Errors)
-                    {
-                        ModelState.AddModelError("shipping_option", errorMessage);
+                    foreach (var errorMessage in shippingOptionResponse.Errors) {
+                        ModelState.AddModelError ("shipping_option", errorMessage);
                     }
                 }
             }
@@ -512,46 +460,39 @@ namespace Nop.Plugin.Api.Controllers
             return isValid;
         }
 
-        private List<ShoppingCartItem> BuildShoppingCartItemsFromOrderItems(List<OrderItem> orderItems, int customerId, int storeId)
-        {
-            var shoppingCartItems = new List<ShoppingCartItem>();
+        private List<ShoppingCartItem> BuildShoppingCartItemsFromOrderItems (List<OrderItem> orderItems, int customerId, int storeId) {
+            var shoppingCartItems = new List<ShoppingCartItem> ();
 
-            foreach (var orderItem in orderItems)
-            {
-                shoppingCartItems.Add(new ShoppingCartItem()
-                {
+            foreach (var orderItem in orderItems) {
+                shoppingCartItems.Add (new ShoppingCartItem () {
                     ProductId = orderItem.ProductId,
-                    CustomerId = customerId,
-                    Quantity = orderItem.Quantity,
-                    RentalStartDateUtc = orderItem.RentalStartDateUtc,
-                    RentalEndDateUtc = orderItem.RentalEndDateUtc,
-                    StoreId = storeId,
-                    Product = orderItem.Product,
-                    ShoppingCartType = ShoppingCartType.ShoppingCart
+                        CustomerId = customerId,
+                        Quantity = orderItem.Quantity,
+                        RentalStartDateUtc = orderItem.RentalStartDateUtc,
+                        RentalEndDateUtc = orderItem.RentalEndDateUtc,
+                        StoreId = storeId,
+                        Product = orderItem.Product,
+                        ShoppingCartType = ShoppingCartType.ShoppingCart
                 });
             }
 
             return shoppingCartItems;
         }
 
-        private List<ShoppingCartItem> BuildShoppingCartItemsFromOrderItemDtos(List<OrderItemDto> orderItemDtos, int customerId, int storeId)
-        {
-            var shoppingCartItems = new List<ShoppingCartItem>();
+        private List<ShoppingCartItem> BuildShoppingCartItemsFromOrderItemDtos (List<OrderItemDto> orderItemDtos, int customerId, int storeId) {
+            var shoppingCartItems = new List<ShoppingCartItem> ();
 
-            foreach (var orderItem in orderItemDtos)
-            {
-                if (orderItem.ProductId != null)
-                {
-                    shoppingCartItems.Add(new ShoppingCartItem()
-                    {
+            foreach (var orderItem in orderItemDtos) {
+                if (orderItem.ProductId != null) {
+                    shoppingCartItems.Add (new ShoppingCartItem () {
                         ProductId = orderItem.ProductId.Value, // required field
-                        CustomerId = customerId,
-                        Quantity = orderItem.Quantity ?? 1,
-                        RentalStartDateUtc = orderItem.RentalStartDateUtc,
-                        RentalEndDateUtc = orderItem.RentalEndDateUtc,
-                        StoreId = storeId,
-                        Product = _productService.GetProductById(orderItem.ProductId.Value),
-                        ShoppingCartType = ShoppingCartType.ShoppingCart
+                            CustomerId = customerId,
+                            Quantity = orderItem.Quantity ?? 1,
+                            RentalStartDateUtc = orderItem.RentalStartDateUtc,
+                            RentalEndDateUtc = orderItem.RentalEndDateUtc,
+                            StoreId = storeId,
+                            Product = _productService.GetProductById (orderItem.ProductId.Value),
+                            ShoppingCartType = ShoppingCartType.ShoppingCart
                     });
                 }
             }
@@ -559,48 +500,37 @@ namespace Nop.Plugin.Api.Controllers
             return shoppingCartItems;
         }
 
-        private PlaceOrderResult PlaceOrder(Order newOrder, Customer customer)
-        {
-            var processPaymentRequest = new ProcessPaymentRequest
-            {
+        private PlaceOrderResult PlaceOrder (Order newOrder, Customer customer) {
+            var processPaymentRequest = new ProcessPaymentRequest {
                 StoreId = newOrder.StoreId,
                 CustomerId = customer.Id,
                 PaymentMethodSystemName = newOrder.PaymentMethodSystemName
             };
 
-
-            var placeOrderResult = _orderProcessingService.PlaceOrder(processPaymentRequest);
+            var placeOrderResult = _orderProcessingService.PlaceOrder (processPaymentRequest);
 
             return placeOrderResult;
         }
 
-        private bool ValidateEachOrderItem(ICollection<OrderItemDto> orderItems)
-        {
+        private bool ValidateEachOrderItem (ICollection<OrderItemDto> orderItems) {
             var shouldReturnError = false;
 
-            foreach (var orderItem in orderItems)
-            {
-                var orderItemDtoValidator = new OrderItemDtoValidator("post", null);
-                var validation = orderItemDtoValidator.Validate(orderItem);
+            foreach (var orderItem in orderItems) {
+                var orderItemDtoValidator = new OrderItemDtoValidator ("post", null);
+                var validation = orderItemDtoValidator.Validate (orderItem);
 
-                if (validation.IsValid)
-                {
-                    if (orderItem.ProductId != null)
-                    {
-                        var product = _productService.GetProductById(orderItem.ProductId.Value);
+                if (validation.IsValid) {
+                    if (orderItem.ProductId != null) {
+                        var product = _productService.GetProductById (orderItem.ProductId.Value);
 
-                        if (product == null)
-                        {
-                            ModelState.AddModelError("order_item.product", string.Format("Product not found for order_item.product_id = {0}", orderItem.ProductId));
+                        if (product == null) {
+                            ModelState.AddModelError ("order_item.product", string.Format ("Product not found for order_item.product_id = {0}", orderItem.ProductId));
                             shouldReturnError = true;
                         }
                     }
-                }
-                else
-                {
-                    foreach (var error in validation.Errors)
-                    {
-                        ModelState.AddModelError("order_item", error.ErrorMessage);
+                } else {
+                    foreach (var error in validation.Errors) {
+                        ModelState.AddModelError ("order_item", error.ErrorMessage);
                     }
 
                     shouldReturnError = true;
@@ -610,15 +540,12 @@ namespace Nop.Plugin.Api.Controllers
             return shouldReturnError;
         }
 
-        private bool IsShippingAddressRequired(ICollection<OrderItemDto> orderItems)
-        {
+        private bool IsShippingAddressRequired (ICollection<OrderItemDto> orderItems) {
             var shippingAddressRequired = false;
 
-            foreach (var orderItem in orderItems)
-            {
-                if (orderItem.ProductId != null)
-                {
-                    var product = _productService.GetProductById(orderItem.ProductId.Value);
+            foreach (var orderItem in orderItems) {
+                if (orderItem.ProductId != null) {
+                    var product = _productService.GetProductById (orderItem.ProductId.Value);
 
                     shippingAddressRequired |= product.IsShipEnabled;
                 }
@@ -627,34 +554,28 @@ namespace Nop.Plugin.Api.Controllers
             return shippingAddressRequired;
         }
 
-        private bool AddOrderItemsToCart(ICollection<OrderItemDto> orderItems, Customer customer, int storeId)
-        {
+        private bool AddOrderItemsToCart (ICollection<OrderItemDto> orderItems, Customer customer, int storeId) {
             var shouldReturnError = false;
 
-            foreach (var orderItem in orderItems)
-            {
-                if (orderItem.ProductId != null)
-                {
-                    var product = _productService.GetProductById(orderItem.ProductId.Value);
+            foreach (var orderItem in orderItems) {
+                if (orderItem.ProductId != null) {
+                    var product = _productService.GetProductById (orderItem.ProductId.Value);
 
-                    if (!product.IsRental)
-                    {
+                    if (!product.IsRental) {
                         orderItem.RentalStartDateUtc = null;
                         orderItem.RentalEndDateUtc = null;
                     }
 
-                    var attributesXml = _productAttributeConverter.ConvertToXml(orderItem.Attributes, product.Id);                
+                    var attributesXml = _productAttributeConverter.ConvertToXml (orderItem.Attributes, product.Id);
 
-                    var errors = _shoppingCartService.AddToCart(customer, product,
-                        ShoppingCartType.ShoppingCart, storeId,attributesXml,
+                    var errors = _shoppingCartService.AddToCart (customer, product,
+                        ShoppingCartType.ShoppingCart, storeId, attributesXml,
                         0M, orderItem.RentalStartDateUtc, orderItem.RentalEndDateUtc,
                         orderItem.Quantity ?? 1);
 
-                    if (errors.Count > 0)
-                    {
-                        foreach (var error in errors)
-                        {
-                            ModelState.AddModelError("order", error);
+                    if (errors.Count > 0) {
+                        foreach (var error in errors) {
+                            ModelState.AddModelError ("order", error);
                         }
 
                         shouldReturnError = true;
@@ -664,24 +585,19 @@ namespace Nop.Plugin.Api.Controllers
 
             return shouldReturnError;
         }
-        
-        private bool ValidateAddress(AddressDto address, string addressKind)
-        {
+
+        private bool ValidateAddress (AddressDto address, string addressKind) {
             bool addressValid;
 
-            if (address == null)
-            {
-                ModelState.AddModelError(addressKind, string.Format("{0} address required", addressKind));
+            if (address == null) {
+                ModelState.AddModelError (addressKind, string.Format ("{0} address required", addressKind));
                 addressValid = false;
-            }
-            else
-            {
-                var addressValidator = new AddressDtoValidator();
-                var validationResult = addressValidator.Validate(address);
+            } else {
+                var addressValidator = new AddressDtoValidator ();
+                var validationResult = addressValidator.Validate (address);
 
-                foreach (var validationFailure in validationResult.Errors)
-                {
-                    ModelState.AddModelError(addressKind, validationFailure.ErrorMessage);
+                foreach (var validationFailure in validationResult.Errors) {
+                    ModelState.AddModelError (addressKind, validationFailure.ErrorMessage);
                 }
 
                 addressValid = validationResult.IsValid;
