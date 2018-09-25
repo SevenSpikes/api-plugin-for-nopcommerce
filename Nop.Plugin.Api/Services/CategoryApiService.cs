@@ -26,7 +26,7 @@ namespace Nop.Plugin.Api.Services
 
         public IList<Category> GetCategories(IList<int> ids = null,
             DateTime? createdAtMin = null, DateTime? createdAtMax = null, DateTime? updatedAtMin = null, DateTime? updatedAtMax = null,
-            int limit = Configurations.DefaultLimit, int page = Configurations.DefaultPageValue, int sinceId = Configurations.DefaultSinceId, 
+            int limit = Configurations.DefaultLimit, int page = Configurations.DefaultPageValue, int sinceId = Configurations.DefaultSinceId,
             int? productId = null,
             bool? publishedStatus = null)
         {
@@ -99,13 +99,6 @@ namespace Nop.Plugin.Api.Services
             {
                 query = query.Where(c => c.UpdatedOnUtc < updatedAtMax.Value);
             }
-
-            //only distinct categories (group by ID)
-            query = from c in query
-                    group c by c.Id
-                        into cGroup
-                    orderby cGroup.Key
-                    select cGroup.FirstOrDefault();
 
             if (productId != null)
             {
