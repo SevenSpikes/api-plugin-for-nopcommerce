@@ -2,20 +2,15 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Nop.Core.Domain.Catalog;
+using Nop.Plugin.Api.DTOs.Base;
 
 namespace Nop.Plugin.Api.DTOs.Products
 {
     [JsonObject(Title = "attribute")]
     //[Validator(typeof(ProductDtoValidator))]
-    public class ProductAttributeMappingDto
+    public class ProductAttributeMappingDto : BaseDto
     {
         private List<ProductAttributeValueDto> _productAttributeValues;
-
-        /// <summary>
-        /// Gets or sets the product attribute identifier
-        /// </summary>
-        [JsonProperty("id")]
-        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets the product attribute identifier

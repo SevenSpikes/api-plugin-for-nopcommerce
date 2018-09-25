@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Nop.Plugin.Api.DTOs.Base;
 
 namespace Nop.Plugin.Api.DTOs.Customers
 {
-    public class BaseCustomerDto
+    public class BaseCustomerDto : BaseDto
     {
         private List<int> _roleIds;
-
-        [JsonProperty("id")]
-        public string Id { get; set; }
 
         [JsonProperty("username")]
         public string Username { get; set; }

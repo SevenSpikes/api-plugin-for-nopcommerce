@@ -1,16 +1,14 @@
 ﻿using FluentValidation.Attributes;
 using Newtonsoft.Json;
+using Nop.Plugin.Api.DTOs.Base;
 using Nop.Plugin.Api.Validators;
 
 namespace Nop.Plugin.Api.DTOs.ProductCategoryMappings
 {
     [JsonObject(Title = "product_category_mapping")]
     [Validator(typeof(ProductCategoryMappingDtoValidator))]
-    public class ProductCategoryMappingDto
+    public class ProductCategoryMappingDto : BaseDto
     {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-
         /// <summary>
         /// Gets or sets the product identifier
         /// </summary>

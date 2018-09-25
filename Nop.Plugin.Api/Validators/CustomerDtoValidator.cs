@@ -1,123 +1,171 @@
-﻿using System;
-using System.Collections.Generic;
-using FluentValidation;
+﻿using FluentValidation;
+using FluentValidation.Results;
+using FluentValidation.Validators;
+using Microsoft.AspNetCore.Http;
 using Nop.Core.Domain.Customers;
-using Nop.Core.Infrastructure;
+using Nop.Plugin.Api.DTOs;
 using Nop.Plugin.Api.DTOs.Customers;
 using Nop.Plugin.Api.Helpers;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 
 namespace Nop.Plugin.Api.Validators
 {
-    public class CustomerDtoValidator : AbstractValidator<CustomerDto>
+    public class CustomerDtoValidator : BaseDtoValidator<CustomerDto>
     {
-        private readonly ICustomerRolesHelper _customerRolesHelper = EngineContext.Current.Resolve<ICustomerRolesHelper>();
 
-        public CustomerDtoValidator(string httpMethod, Dictionary<string, object> passedPropertyValuePaires)
+        #region Private Fields
+
+        private readonly ICustomerRolesHelper _customerRolesHelper;
+
+        #endregion
+        
+        #region Constructors
+
+        public CustomerDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary, ICustomerRolesHelper customerRolesHelper) : base(httpContextAccessor, jsonHelper, requestJsonDictionary)
         {
-            if (string.IsNullOrEmpty(httpMethod) ||
-                httpMethod.Equals("post", StringComparison.InvariantCultureIgnoreCase))
+            _customerRolesHelper = customerRolesHelper;
+
+            SetEmailRule();
+            SetRolesRule();
+            SetPasswordRule();
+
+            SetBillingAddressRule();
+            SetShippingAddressRule();
+
+            SetCustomerAddressesRule();
+            SetShoppingCartItemsRule();
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void SetCustomerAddressesRule()
+        {
+            var key = "addresses";
+            if (RequestJsonDictionary.ContainsKey(key))
             {
-                SetRuleForRoles();
-                SetRuleForEmail();
-            }
-            else if (httpMethod.Equals("put", StringComparison.InvariantCultureIgnoreCase))
-            {
-                int parsedId;
+                RuleForEach(c => c.Addresses)
+                    .Custom((addressDto, validationContext) =>
+                    {
+                        var addressJsonDictionary = GetRequestJsonDictionaryCollectionItemDictionary(key, addressDto);
 
-                RuleFor(x => x.Id)
-                    .NotNull()
-                    .NotEmpty()
-                    .Must(id => int.TryParse(id, out parsedId) && parsedId > 0)
-                    .WithMessage("invalid id");
+                        var validator = new AddressDtoValidator(HttpContextAccessor, JsonHelper, addressJsonDictionary);
 
-                if (passedPropertyValuePaires.ContainsKey("email"))
-                {
-                    SetRuleForEmail();
-                }
+                        //force create validation for new addresses
+                        if (addressDto.Id == 0)
+                        {
+                            validator.HttpMethod = HttpMethod.Post;
+                        }
 
-                // TODO: think of a way to not hardcode the json property name.
-                if (passedPropertyValuePaires.ContainsKey("role_ids"))
-                {
-                    SetRuleForRoles();
-                }
-            }
+                        var validationResult = validator.Validate(addressDto);
 
-            if (passedPropertyValuePaires.ContainsKey("password"))
-            {
-                RuleForEach(customer => customer.Password)
-                    .NotNull()
-                    .NotEmpty()
-                    .WithMessage("invalid password");
-            }
-
-            // The fields below are not required, but if they are passed they should be validated.
-            if (passedPropertyValuePaires.ContainsKey("billing_address"))
-            {
-                RuleFor(x => x.BillingAddress)
-                    .SetValidator(new AddressDtoValidator());
-            }
-
-            if (passedPropertyValuePaires.ContainsKey("shipping_address"))
-            {
-                RuleFor(x => x.ShippingAddress)
-                    .SetValidator(new AddressDtoValidator());
-            }
-
-            if (passedPropertyValuePaires.ContainsKey("addresses"))
-            {
-                RuleForEach(x => x.CustomerAddresses)
-                    .SetValidator(new AddressDtoValidator());
+                        MergeValidationResult(validationContext, validationResult);
+                    });
             }
         }
 
-        private void SetRuleForEmail()
+        private void SetBillingAddressRule()
         {
-            RuleFor(customer => customer.Email)
-                .NotNull()
-                .NotEmpty()
-                .WithMessage("email can not be empty");
+            var key = "billing_address";
+            if (RequestJsonDictionary.ContainsKey(key))
+            {
+                RuleFor(c => c.BillingAddress).SetValidator(new AddressDtoValidator(HttpContextAccessor, JsonHelper, (Dictionary<string, object>)RequestJsonDictionary[key]));
+            }
         }
 
-        private void SetRuleForRoles()
+        private void SetShippingAddressRule()
         {
-            IList<CustomerRole> customerRoles = null;
+            var key = "shipping_address";
+            if (RequestJsonDictionary.ContainsKey(key))
+            {
+                RuleFor(c => c.ShippingAddress).SetValidator(new AddressDtoValidator(HttpContextAccessor, JsonHelper, (Dictionary<string, object>)RequestJsonDictionary[key]));
+            }
+        }
 
-            RuleFor(x => x.RoleIds)
-                   .NotNull()
-                   .Must(roles => roles.Count > 0)
-                   .WithMessage("role_ids required")
-                   .DependentRules(() => RuleFor(dto => dto.RoleIds)
-                       .Must(roleIds =>
-                       {
-                           if (customerRoles == null)
-                           {
-                               customerRoles = _customerRolesHelper.GetValidCustomerRoles(roleIds);
-                           }
+        private void SetEmailRule()
+        {
+            SetNotNullOrEmptyCreateOrUpdateRule(c => c.Email, "invalid email", "email");
+        }
 
-                           var isInGuestAndRegisterRoles = _customerRolesHelper.IsInGuestsRole(customerRoles) &&
+        private void SetPasswordRule()
+        {
+            SetNotNullOrEmptyCreateOrUpdateRule(c => c.Password, "invalid password", "password");
+        }
+
+        private void SetRolesRule()
+        {
+            if (HttpMethod == HttpMethod.Post || RequestJsonDictionary.ContainsKey("role_ids"))
+            {
+                IList<CustomerRole> customerRoles = null;
+
+                RuleFor(x => x.RoleIds)
+                    .NotNull()
+                    .Must(roles => roles.Count > 0)
+                    .WithMessage("role_ids required")
+                    .DependentRules(() => RuleFor(dto => dto.RoleIds)
+                    .Must(roleIds =>
+                    {
+                        if (customerRoles == null)
+                        {
+                            customerRoles = _customerRolesHelper.GetValidCustomerRoles(roleIds);
+                        }
+
+                        var isInGuestAndRegisterRoles = _customerRolesHelper.IsInGuestsRole(customerRoles) &&
+                                                        _customerRolesHelper.IsInRegisteredRole(customerRoles);
+
+                    // Customer can not be in guest and register roles simultaneously
+                    return !isInGuestAndRegisterRoles;
+                    })
+                    .WithMessage("must not be in guest and register roles simultaneously")
+                    .DependentRules(() => RuleFor(dto => dto.RoleIds)
+                        .Must(roleIds =>
+                        {
+                            if (customerRoles == null)
+                            {
+                                customerRoles = _customerRolesHelper.GetValidCustomerRoles(roleIds);
+                            }
+
+                            var isInGuestOrRegisterRoles = _customerRolesHelper.IsInGuestsRole(customerRoles) ||
                                                             _customerRolesHelper.IsInRegisteredRole(customerRoles);
 
-                           // Customer can not be in guest and register roles simultaneously
-                           return !isInGuestAndRegisterRoles;
-                       })
-                       .WithMessage("must not be in guest and register roles simultaneously")
-                       .DependentRules(() => RuleFor(dto => dto.RoleIds)
-                            .Must(roleIds =>
-                            {
-                                if (customerRoles == null)
-                                {
-                                    customerRoles = _customerRolesHelper.GetValidCustomerRoles(roleIds);
-                                }
-
-                                var isInGuestOrRegisterRoles = _customerRolesHelper.IsInGuestsRole(customerRoles) ||
-                                                                _customerRolesHelper.IsInRegisteredRole(customerRoles);
-
-                                // Customer must be in either guest or register role.
-                                return isInGuestOrRegisterRoles;
-                            })
-                            .WithMessage("must be in guest or register role")
-                       )
-                   );
+                        // Customer must be in either guest or register role.
+                        return isInGuestOrRegisterRoles;
+                        })
+                        .WithMessage("must be in guest or register role")
+                    )
+                );
+            }
         }
+
+        private void SetShoppingCartItemsRule()
+        {
+            var key = "shopping_cart_items";
+            if (RequestJsonDictionary.ContainsKey(key))
+            {
+                RuleForEach(c => c.ShoppingCartItems)
+                    .Custom((shoppingCartItemDto, validationContext) =>
+                    {
+                        var shoppingCartItemJsonDictionary = GetRequestJsonDictionaryCollectionItemDictionary(key, shoppingCartItemDto);
+
+                        var validator = new ShoppingCartItemDtoValidator(HttpContextAccessor, JsonHelper, shoppingCartItemJsonDictionary);
+
+                        //force create validation for new addresses
+                        if (shoppingCartItemDto.Id == 0)
+                        {
+                            validator.HttpMethod = HttpMethod.Post;
+                        }
+
+                        var validationResult = validator.Validate(shoppingCartItemDto);
+
+                        MergeValidationResult(validationContext, validationResult);
+                    });
+            }
+        }
+
+        #endregion
+
     }
 }

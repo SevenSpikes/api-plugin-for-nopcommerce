@@ -1,55 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using FluentValidation;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Nop.Core.Domain.Orders;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
+using Nop.Plugin.Api.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
 
 namespace Nop.Plugin.Api.Validators
 {
-    public class ShoppingCartItemDtoValidator : AbstractValidator<ShoppingCartItemDto>
+    public class ShoppingCartItemDtoValidator : BaseDtoValidator<ShoppingCartItemDto>
     {
-        public ShoppingCartItemDtoValidator(string httpMethod, IReadOnlyDictionary<string, object> passedPropertyValuePaires)
+
+        #region Constructors
+
+        public ShoppingCartItemDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary) : base(httpContextAccessor, jsonHelper, requestJsonDictionary)
         {
-            if (string.IsNullOrEmpty(httpMethod) || httpMethod.Equals("post", StringComparison.InvariantCultureIgnoreCase))
-            {
-                SetCustomerIdRule();
+            SetCustomerIdRule();
+            SetProductIdRule();
+            SetQuantityRule();
+            SetShoppingCartTypeRule();
 
-                SetProductIdRule();
+            SetRentalDateRules();
+        }
 
-                SetQuantityRule();
-                
-                ValidateShoppingCartType();
-            }
-            else if (httpMethod.Equals("put", StringComparison.InvariantCultureIgnoreCase))
-            {
-                RuleFor(x => x.Id)
-                        .NotNull()
-                        .NotEmpty()
-                        .Must(id => int.TryParse(id, out var parsedId) && parsedId > 0)
-                        .WithMessage("Invalid Id");
+        #endregion
 
-                if (passedPropertyValuePaires.ContainsKey("customer_id"))
-                {
-                    SetCustomerIdRule();
-                }
+        #region Private Methods
 
-                if (passedPropertyValuePaires.ContainsKey("product_id"))
-                {
-                    SetProductIdRule();
-                }
+        private void SetCustomerIdRule()
+        {
+            SetGreaterThanZeroCreateOrUpdateRule(x => x.CustomerId, "invalid customer_id", "customer_id");
+        }
 
-                if (passedPropertyValuePaires.ContainsKey("quantity"))
-                {
-                    SetQuantityRule();
-                }
+        private void SetProductIdRule()
+        {
+            SetGreaterThanZeroCreateOrUpdateRule(x => x.ProductId, "invalid product_id", "product_id");
+        }
 
-                if (passedPropertyValuePaires.ContainsKey("shopping_cart_type"))
-                {
-                    ValidateShoppingCartType();
-                }
-            }
+        private void SetQuantityRule()
+        {
+            SetGreaterThanZeroCreateOrUpdateRule(x => x.Quantity, "invalid quantity", "quantity");
+        }
 
-            if (passedPropertyValuePaires.ContainsKey("rental_start_date_utc") || passedPropertyValuePaires.ContainsKey("rental_end_date_utc"))
+        private void SetRentalDateRules()
+        {
+            if (RequestJsonDictionary.ContainsKey("rental_start_date_utc") || RequestJsonDictionary.ContainsKey("rental_end_date_utc"))
             {
                 RuleFor(x => x.RentalStartDateUtc)
                     .NotNull()
@@ -73,37 +69,22 @@ namespace Nop.Plugin.Api.Validators
             }
         }
 
-        private void SetCustomerIdRule()
+        private void SetShoppingCartTypeRule()
         {
-            RuleFor(x => x.CustomerId)
-                   .NotNull()
-                   .WithMessage("Please, set customer id");
+            if (HttpMethod == HttpMethod.Post || RequestJsonDictionary.ContainsKey("shopping_cart_type"))
+            {
+                RuleFor(x => x.ShoppingCartType)
+                    .NotNull()
+                    .Must(x =>
+                    {
+                        var parsed = Enum.TryParse(x, true, out ShoppingCartType _);
+                        return parsed;
+                    })
+                    .WithMessage("Please provide a valid shopping cart type");
+            }
         }
 
-        private void SetProductIdRule()
-        {
-            RuleFor(x => x.ProductId)
-                   .NotNull()
-                   .WithMessage("Please, set product id");
-        }
+        #endregion
 
-        private void SetQuantityRule()
-        {
-            RuleFor(x => x.Quantity)
-                      .NotNull()
-                      .WithMessage("Please, set quantity");
-        }
-
-        private void ValidateShoppingCartType()
-        {
-            RuleFor(x => x.ShoppingCartType)
-                .NotNull()
-                .Must(x =>
-                {
-                    var parsed = Enum.TryParse(x, true, out ShoppingCartType _);
-                    return parsed;
-                })
-                .WithMessage("Please provide a valid shopping cart type");
-        }
     }
 }

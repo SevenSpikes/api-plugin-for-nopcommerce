@@ -95,7 +95,7 @@ namespace Nop.Plugin.Api
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Order, OrderDto>()
                 .IgnoreAllNonExisting()
                 .ForMember(x => x.Id, y => y.MapFrom(src => src.Id))
-                .ForMember(x => x.OrderItemDtos, y => y.MapFrom(src => src.OrderItems.Select(x => x.ToDto())));
+                .ForMember(x => x.OrderItems, y => y.MapFrom(src => src.OrderItems.Select(x => x.ToDto())));
         }
 
         private void CreateAddressMap()
@@ -140,7 +140,7 @@ namespace Nop.Plugin.Api
                     y => y.MapFrom(src => src.BillingAddress.GetWithDefault(x => x, new Address()).ToDto()))
                 .ForMember(x => x.ShippingAddress,
                     y => y.MapFrom(src => src.ShippingAddress.GetWithDefault(x => x, new Address()).ToDto()))
-                .ForMember(x => x.CustomerAddresses,
+                .ForMember(x => x.Addresses,
                     y =>
                         y.MapFrom(
                             src =>

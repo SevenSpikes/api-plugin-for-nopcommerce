@@ -1,39 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using FluentValidation;
+﻿using Microsoft.AspNetCore.Http;
 using Nop.Plugin.Api.DTOs.ProductAttributes;
+using Nop.Plugin.Api.Helpers;
+using System.Collections.Generic;
 
 namespace Nop.Plugin.Api.Validators
 {
-    public class ProductAttributeDtoValidator : AbstractValidator<ProductAttributeDto>
+    public class ProductAttributeDtoValidator : BaseDtoValidator<ProductAttributeDto>
     {
-        public ProductAttributeDtoValidator(string httpMethod, IReadOnlyDictionary<string, object> passedPropertyValuePaires)
-        {
-            if (string.IsNullOrEmpty(httpMethod) || httpMethod.Equals("post", StringComparison.InvariantCultureIgnoreCase))
-            {
-                SetNameRule();
-            }
-            else if (httpMethod.Equals("put", StringComparison.InvariantCultureIgnoreCase))
-            {
-                RuleFor(x => x.Id)
-                        .NotNull()
-                        .NotEmpty()
-                        .Must(id => int.TryParse(id, out var parsedId) && parsedId > 0)
-                        .WithMessage("invalid id");
 
-                if (passedPropertyValuePaires.ContainsKey("name"))
-                {
-                    SetNameRule();
-                }
-            }
+        #region Constructors
+
+        public ProductAttributeDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary) : base(httpContextAccessor, jsonHelper, requestJsonDictionary)
+        {
+            SetNameRule();
         }
+
+        #endregion
+
+        #region Private Methods
 
         private void SetNameRule()
         {
-            RuleFor(x => x.Name)
-                       .NotNull()
-                       .NotEmpty()
-                       .WithMessage("name is required");
+            SetNotNullOrEmptyCreateOrUpdateRule(p => p.Name, "invalid name", "name");
         }
+
+        #endregion
+
     }
 }

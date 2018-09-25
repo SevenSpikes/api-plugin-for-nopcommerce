@@ -203,10 +203,7 @@ namespace Nop.Plugin.Api.Controllers
                 return Error();
             }
 
-            // We do not need to validate the product attribute id, because this will happen in the model binder using the dto validator.
-            var productAttributeId = int.Parse(productAttributeDelta.Dto.Id);
-
-            var productAttribute = _productAttributesApiService.GetById(productAttributeId);
+            var productAttribute = _productAttributesApiService.GetById(productAttributeDelta.Dto.Id);
 
             if (productAttribute == null)
             {

@@ -1,40 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
-using FluentValidation;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Nop.Plugin.Api.DTOs.Orders;
+using Nop.Plugin.Api.Helpers;
+using System.Collections.Generic;
+using System.Net.Http;
 
 namespace Nop.Plugin.Api.Validators
 {
-    public class OrderDtoValidator : AbstractValidator<OrderDto>
+    public class OrderDtoValidator : BaseDtoValidator<OrderDto>
     {
-        public OrderDtoValidator(string httpMethod, IReadOnlyDictionary<string, object> passedPropertyValuePaires)
-        {
-            if (string.IsNullOrEmpty(httpMethod) ||
-                httpMethod.Equals("post", StringComparison.InvariantCultureIgnoreCase))
-            {
-                SetCustomerIdRule();
-            }
-            else if(httpMethod.Equals("put", StringComparison.InvariantCultureIgnoreCase))
-            {
-                RuleFor(x => x.Id)
-                        .NotNull()
-                        .NotEmpty()
-                        .Must(id => int.TryParse(id, out var parsedId) && parsedId > 0)
-                        .WithMessage("Invalid id");
 
-                if (passedPropertyValuePaires.ContainsKey("customer_id"))
-                {
-                    SetCustomerIdRule();
-                }
-            }
+        #region Constructors
+
+        public OrderDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary) : base(httpContextAccessor, jsonHelper, requestJsonDictionary)
+        {
+            SetCustomerIdRule();
+            SetOrderItemsRule();
         }
+
+        #endregion
+
+        #region Private Methods
 
         private void SetCustomerIdRule()
         {
-            RuleFor(x => x.CustomerId)
-                      .NotNull()
-                      .Must(id => id > 0)
-                      .WithMessage("Invalid customer_id");
+            SetGreaterThanZeroCreateOrUpdateRule(o => o.CustomerId, "invalid customer_id", "customer_id");
         }
+
+        private void SetOrderItemsRule()
+        {
+            var key = "order_items";
+            if (RequestJsonDictionary.ContainsKey(key))
+            {
+                RuleForEach(c => c.OrderItems)
+                    .Custom((orderItemDto, validationContext) =>
+                    {
+                        var orderItemJsonDictionary = GetRequestJsonDictionaryCollectionItemDictionary(key, orderItemDto);
+
+                        var validator = new OrderItemDtoValidator(HttpContextAccessor, JsonHelper, orderItemJsonDictionary);
+
+                        //force create validation for new addresses
+                        if (orderItemDto.Id == 0)
+                        {
+                            validator.HttpMethod = HttpMethod.Post;
+                        }
+
+                        var validationResult = validator.Validate(orderItemDto);
+                        MergeValidationResult(validationContext, validationResult);
+                    });
+            }
+        }
+
+        #endregion
+
     }
 }

@@ -98,9 +98,23 @@ namespace Nop.Plugin.Api.Helpers
 
                     if (collection == null)
                     {
-                        var listType = typeof(List<>);
-                        var constructedListType = listType.MakeGenericType(collectionElementsType);
-                        collection = Activator.CreateInstance(constructedListType);
+                        collection = CreateEmptyList(collectionElementsType);
+                        propertyToUpdate.SetValue(objectToBeUpdated, collection);
+                    }
+
+                    //this is a hack to fix a bug when "collection" cannot be cast to IList (ex:  it's a HashSet for Order.OrderItems)
+                    var collectionAsList = collection as IList;
+                    if (collectionAsList == null)
+                    {
+                        collectionAsList = CreateEmptyList(collectionElementsType);
+
+                        var collectionAsEnumerable = collection as IEnumerable;
+                        foreach (var collectionItem in collectionAsEnumerable)
+                        {
+                            collectionAsList.Add(collectionItem);
+                        }
+
+                        collection = collectionAsList;
                         propertyToUpdate.SetValue(objectToBeUpdated, collection);
                     }
 
@@ -205,6 +219,15 @@ namespace Nop.Plugin.Api.Helpers
             SetValues(newProperties, newInstance, collectionElementsType, objectPropertyNameValuePairs, handleComplexTypeCollections);
 
             collection.Add(newInstance);
+        }
+
+        private IList CreateEmptyList(Type listItemType)
+        {
+            var listType = typeof(List<>);
+            var constructedListType = listType.MakeGenericType(listItemType);
+            var list = Activator.CreateInstance(constructedListType);
+
+            return list as IList;
         }
 
         // We need this method, because the default value of DateTime is not in the sql server DateTime range and we will get an exception if we use it.

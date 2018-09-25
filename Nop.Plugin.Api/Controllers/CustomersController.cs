@@ -245,7 +245,7 @@ namespace Nop.Plugin.Api.Controllers
             var newCustomer = _factory.Initialize();
             customerDelta.Merge(newCustomer);
 
-            foreach (var address in customerDelta.Dto.CustomerAddresses)
+            foreach (var address in customerDelta.Dto.Addresses)
             {
                 // we need to explicitly set the date as if it is not specified
                 // it will default to 01/01/0001 which is not supported by SQL Server and throws and exception
@@ -323,10 +323,8 @@ namespace Nop.Plugin.Api.Controllers
                 return Error();
             }
 
-            //If the validation has passed the customerDelta object won't be null for sure so we don't need to check for this.
-            
             // Updateting the customer
-            var currentCustomer = _customerApiService.GetCustomerEntityById(int.Parse(customerDelta.Dto.Id));
+            var currentCustomer = _customerApiService.GetCustomerEntityById(customerDelta.Dto.Id);
 
             if (currentCustomer == null)
             {
@@ -346,18 +344,17 @@ namespace Nop.Plugin.Api.Controllers
                 AddValidRoles(customerDelta, currentCustomer);
             }
 
-            if (customerDelta.Dto.CustomerAddresses.Count > 0)
+            if (customerDelta.Dto.Addresses.Count > 0)
             {
                 var currentCustomerAddresses = currentCustomer.Addresses.ToDictionary(address => address.Id, address => address);
 
-                foreach (var passedAddress in customerDelta.Dto.CustomerAddresses)
+                foreach (var passedAddress in customerDelta.Dto.Addresses)
                 {
-                    var passedAddressId = int.Parse(passedAddress.Id);
                     var addressEntity = passedAddress.ToEntity();
 
-                    if (currentCustomerAddresses.ContainsKey(passedAddressId))
+                    if (currentCustomerAddresses.ContainsKey(passedAddress.Id))
                     {
-                        _mappingHelper.Merge(passedAddress, currentCustomerAddresses[passedAddressId]);
+                        _mappingHelper.Merge(passedAddress, currentCustomerAddresses[passedAddress.Id]);
                     }
                     else
                     {
@@ -496,7 +493,7 @@ namespace Nop.Plugin.Api.Controllers
 
         private void PopulateAddressCountryNames(CustomerDto newCustomerDto)
         {
-            foreach (var address in newCustomerDto.CustomerAddresses)
+            foreach (var address in newCustomerDto.Addresses)
             {
                 SetCountryName(address);
             }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FluentValidation.Attributes;
 using Newtonsoft.Json;
+using Nop.Plugin.Api.DTOs.Base;
 using Nop.Plugin.Api.DTOs.Images;
 using Nop.Plugin.Api.DTOs.Languages;
 using Nop.Plugin.Api.Validators;
@@ -10,16 +11,13 @@ namespace Nop.Plugin.Api.DTOs.Categories
 {
     [Validator(typeof(CategoryDtoValidator))]
     [JsonObject(Title = "category")]
-    public class CategoryDto
+    public class CategoryDto : BaseDto
     {
         private ImageDto _imageDto;
         private List<LocalizedNameDto> _localizedNames;
         private List<int> _storeIds;
         private List<int> _discountIds;
         private List<int> _roleIds;
-
-        [JsonProperty("id")]
-        public string Id { get; set; }
 
         [JsonProperty("name")]
         public string Name { get; set; }

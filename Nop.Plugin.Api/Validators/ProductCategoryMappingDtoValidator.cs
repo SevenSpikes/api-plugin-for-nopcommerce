@@ -1,48 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using FluentValidation;
+﻿using Microsoft.AspNetCore.Http;
 using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
+using Nop.Plugin.Api.Helpers;
+using System.Collections.Generic;
 
 namespace Nop.Plugin.Api.Validators
 {
-    public class ProductCategoryMappingDtoValidator : AbstractValidator<ProductCategoryMappingDto>
+    public class ProductCategoryMappingDtoValidator : BaseDtoValidator<ProductCategoryMappingDto>
     {
-        public ProductCategoryMappingDtoValidator(string httpMethod, IReadOnlyDictionary<string, object> passedPropertyValuePaires)
+
+        #region Constructors
+
+        public ProductCategoryMappingDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary) : base(httpContextAccessor, jsonHelper, requestJsonDictionary)
         {
-            if (string.IsNullOrEmpty(httpMethod) || httpMethod.Equals("post", StringComparison.InvariantCultureIgnoreCase))
-            {
-                RuleFor(mapping => mapping.CategoryId)
-                    .Must(categoryId => categoryId > 0)
-                    .WithMessage("invalid category_id")
-                    .DependentRules(() =>
-                    {
-                        RuleFor(a => a.ProductId)
-                            .Must(productId => productId > 0)
-                            .WithMessage("invalid product_id");
-                    });
-            }
-            else if (httpMethod.Equals("put", StringComparison.InvariantCultureIgnoreCase))
-            {
-                RuleFor(mapping => mapping.Id)
-                    .NotNull()
-                    .NotEmpty()
-                    .Must(id => id > 0)
-                    .WithMessage("invalid id");
-
-                if (passedPropertyValuePaires.ContainsKey("category_id"))
-                {
-                    RuleFor(mapping => mapping.CategoryId)
-                        .Must(categoryId => categoryId > 0)
-                        .WithMessage("category_id invalid");
-                }
-
-                if (passedPropertyValuePaires.ContainsKey("product_id"))
-                {
-                    RuleFor(mapping => mapping.ProductId)
-                        .Must(productId => productId > 0)
-                        .WithMessage("product_id invalid");
-                }
-            }
+            SetCategoryIdRule();
+            SetProductIdRule();
         }
+
+        #endregion
+
+        #region Private Methods
+
+        private void SetCategoryIdRule()
+        {
+            SetGreaterThanZeroCreateOrUpdateRule(p => p.CategoryId, "invalid category_id", "category_id");
+        }
+
+        private void SetProductIdRule()
+        {
+            SetGreaterThanZeroCreateOrUpdateRule(p => p.ProductId, "invalid product_id", "product_id");
+        }
+
+        #endregion
+
     }
 }

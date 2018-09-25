@@ -4,6 +4,7 @@ using FluentValidation.Attributes;
 using Newtonsoft.Json;
 using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.Attributes;
+using Nop.Plugin.Api.DTOs.Base;
 using Nop.Plugin.Api.DTOs.Images;
 using Nop.Plugin.Api.DTOs.Languages;
 using Nop.Plugin.Api.Validators;
@@ -12,7 +13,7 @@ namespace Nop.Plugin.Api.DTOs.Products
 {
     [JsonObject(Title = "product")]
     [Validator(typeof(ProductDtoValidator))]
-    public class ProductDto
+    public class ProductDto : BaseDto
     {
         private int? _productTypeId;
         private List<int> _storeIds;
@@ -24,12 +25,6 @@ namespace Nop.Plugin.Api.DTOs.Products
         private List<ProductAttributeMappingDto> _productAttributeMappings;
         private List<int> _associatedProductIds;
         private List<string> _tags;
-
-        /// <summary>
-        /// Gets or sets the product id
-        /// </summary>
-        [JsonProperty("id")]
-        public string Id { get; set; }
 
         /// <summary>
         /// Gets or sets the values indicating whether this product is visible in catalog or search results.
