@@ -61,6 +61,12 @@ namespace Nop.Plugin.Api
 
         public void Configure(IApplicationBuilder app)
         {
+            // During a clean install we should not register any middlewares i.e IdentityServer as it won't be able to create its  
+            // tables without a connection string and will throw an exception
+            var dataSettings = DataSettingsManager.LoadSettings();
+            if (!dataSettings?.IsValid ?? true)
+                return;
+
             // The default route templates for the Swagger docs and swagger - ui are "swagger/docs/{apiVersion}" and "swagger/ui/index#/{assetPath}" respectively.
             //app.UseSwagger();
             //app.UseSwaggerUI(options =>
@@ -82,9 +88,10 @@ namespace Nop.Plugin.Api
 
             SeedData(app);
 
+
             var rewriteOptions = new RewriteOptions()
-                .AddRewrite("oauth/(.*)", "connect/$1",true)
-                .AddRewrite("api/token", "connect/token",true);
+                .AddRewrite("oauth/(.*)", "connect/$1", true)
+                .AddRewrite("api/token", "connect/token", true);
 
             app.UseRewriter(rewriteOptions);
 
@@ -160,10 +167,13 @@ namespace Nop.Plugin.Api
         }
 
         private void AddTokenGenerationPipeline(IServiceCollection services)
-        {       
+        {
             RsaSecurityKey signingKey = CryptoHelper.CreateRsaSecurityKey();
 
             DataSettings dataSettings = DataSettingsManager.LoadSettings();
+            if (!dataSettings?.IsValid ?? true)
+                return;
+
             string connectionStringFromNop = dataSettings.DataConnectionString;
 
             var migrationsAssembly = typeof(ApiStartup).GetTypeInfo().Assembly.GetName().Name;
