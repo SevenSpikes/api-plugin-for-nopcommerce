@@ -10,6 +10,7 @@
     using Web.Framework.Mvc.Filters;
     using Models;
     using Services;
+    using System;
 
     [AuthorizeAdmin]
     [Area(AreaNames.Admin)]
@@ -53,7 +54,11 @@
         {
             var clientModel = new ClientApiModel
             {
-                Enabled = true
+                Enabled = true,
+                ClientSecret = Guid.NewGuid().ToString(),
+                ClientId = Guid.NewGuid().ToString(),
+                AccessTokenLifetime = Configurations.DefaultAccessTokenExpiration,
+                RefreshTokenLifetime = Configurations.DefaultRefreshTokenExpiration
             };
 
             return View(ViewNames.AdminApiClientsCreate, clientModel);
