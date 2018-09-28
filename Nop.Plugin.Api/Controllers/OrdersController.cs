@@ -281,18 +281,6 @@ namespace Nop.Plugin.Api.Controllers
                                                                                     customer.Id, 
                                                                                     orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id));
 
-                isValid &= ValidateAddress(orderDelta.Dto.ShippingAddress, "shipping_address");
-
-                if (!isValid)
-                {
-                    return Error(HttpStatusCode.BadRequest);
-                }
-            }
-
-            if (!OrderSettings.DisableBillingAddressCheckoutStep)
-            {
-                var isValid = ValidateAddress(orderDelta.Dto.BillingAddress, "billing_address");
-
                 if (!isValid)
                 {
                     return Error(HttpStatusCode.BadRequest);
@@ -304,6 +292,7 @@ namespace Nop.Plugin.Api.Controllers
 
             customer.BillingAddress = newOrder.BillingAddress;
             customer.ShippingAddress = newOrder.ShippingAddress;
+
             // If the customer has something in the cart it will be added too. Should we clear the cart first? 
             newOrder.Customer = customer;
 
@@ -410,26 +399,11 @@ namespace Nop.Plugin.Api.Controllers
                         customer, BuildShoppingCartItemsFromOrderItems(currentOrder.OrderItems.ToList(), customer.Id, storeId));
                 }
 
-                if (orderDelta.Dto.ShippingAddress != null)
-                {
-                    isValid &= ValidateAddress(orderDelta.Dto.ShippingAddress, "shipping_address");
-                }
-
                 if (isValid)
                 {
                     currentOrder.ShippingMethod = orderDelta.Dto.ShippingMethod;
                 }
                 else
-                {
-                    return Error(HttpStatusCode.BadRequest);
-                }
-            }
-
-            if (!OrderSettings.DisableBillingAddressCheckoutStep && orderDelta.Dto.BillingAddress != null)
-            {
-                var isValid = ValidateAddress(orderDelta.Dto.BillingAddress, "billing_address");
-
-                if (!isValid)
                 {
                     return Error(HttpStatusCode.BadRequest);
                 }
@@ -620,32 +594,5 @@ namespace Nop.Plugin.Api.Controllers
 
             return shouldReturnError;
         }
-        
-        private bool ValidateAddress(AddressDto address, string addressKind)
-        {
-            bool addressValid = true;
-
-            if (address == null)
-            {
-                ModelState.AddModelError(addressKind, string.Format("{0} address required", addressKind));
-                addressValid = false;
-            }
-            else
-            {
-                //TODO:  4.10 Validation Refactor
-
-                //var addressValidator = new AddressDtoValidator();
-                //var validationResult = addressValidator.Validate(address);
-
-                //foreach (var validationFailure in validationResult.Errors)
-                //{
-                //    ModelState.AddModelError(addressKind, validationFailure.ErrorMessage);
-                //}
-
-                //addressValid = validationResult.IsValid;
-            }
-
-            return addressValid;
-        }
-    }
+     }
 }
