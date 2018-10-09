@@ -85,6 +85,7 @@ namespace Nop.Plugin.Api.Helpers
 
             PrepareProductImages(product.ProductPictures, productDto);
             PrepareProductAttributes(product.ProductAttributeMappings, productDto);
+            PrepareProductAttributeCombinations(product.ProductAttributeCombinations, productDto);
             PrepareProductSpecificationAttributes(product.ProductSpecificationAttributes, productDto);
 
             productDto.SeName = _urlRecordService.GetSeName(product);
@@ -348,6 +349,26 @@ namespace Nop.Plugin.Api.Helpers
             return productAttributeValueDto;
         }
        
+        private void PrepareProductAttributeCombinations(IEnumerable<ProductAttributeCombination> productAttributeCombinations,
+            ProductDto productDto)
+        {
+            productDto.ProductAttributeCombinations = productDto.ProductAttributeCombinations ?? new List<ProductAttributeCombinationDto>();
+
+            foreach (var productAttributeCombination in productAttributeCombinations)
+            {
+                var productAttributeCombinationDto = PrepareProductAttributeCombinationDto(productAttributeCombination);
+                if (productAttributeCombinationDto != null)
+                {
+                    productDto.ProductAttributeCombinations.Add(productAttributeCombinationDto);
+                }
+            }
+        }
+
+        private ProductAttributeCombinationDto PrepareProductAttributeCombinationDto(ProductAttributeCombination productAttributeCombination)
+        {
+            return productAttributeCombination.ToDto();
+        }
+
         public void PrepareProductSpecificationAttributes(IEnumerable<ProductSpecificationAttribute> productSpecificationAttributes, ProductDto productDto)
         {
             if (productDto.ProductSpecificationAttributes == null)
