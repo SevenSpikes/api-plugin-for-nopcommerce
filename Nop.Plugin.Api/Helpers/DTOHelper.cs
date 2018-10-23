@@ -242,6 +242,7 @@ namespace Nop.Plugin.Api.Helpers
                     var productImageDto = new ImageMappingDto
                     {
                         Id = productPicture.Id,
+                        PictureId = productPicture.PictureId,
                         Position = productPicture.DisplayOrder,
                         Src = imageDto.Src,
                         Attachment = imageDto.Attachment
