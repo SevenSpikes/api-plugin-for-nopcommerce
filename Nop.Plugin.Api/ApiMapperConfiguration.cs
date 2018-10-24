@@ -188,7 +188,6 @@ namespace Nop.Plugin.Api
         {
             AutoMapperApiConfiguration.MapperConfigurationExpression.CreateMap<Product, ProductDto>()
                 .IgnoreAllNonExisting()
-                .ForMember(x => x.ProductAttributeMappings, y => y.Ignore())
                 .ForMember(x => x.FullDescription, y => y.MapFrom(src => WebUtility.HtmlEncode(src.FullDescription)))
                 .ForMember(x => x.Tags,
                     y => y.MapFrom(src => src.ProductProductTagMappings.Select(x => x.ProductTag.Name)));
