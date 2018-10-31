@@ -17,6 +17,7 @@ using Nop.Services.Localization;
 using Nop.Services.Stores;
 using Nop.Core.Domain.Messages;
 using Nop.Core.Caching;
+using Nop.Plugin.Api.Extensions;
 
 namespace Nop.Plugin.Api.Services
 {
@@ -78,7 +79,8 @@ namespace Nop.Plugin.Api.Services
         {
             IList<CustomerDto> result = new List<CustomerDto>();
 
-            var searchParams = EnsureSearchQueryIsValid(queryParams, ParseSearchQuery);
+            // var searchParams = EnsureSearchQueryIsValid(queryParams, ParseSearchQuery);
+            var searchParams = queryParams.EnsureSearchQueryIsValid(parser => parser.ParseSearchQuery());
 
             if (searchParams != null)
             {
@@ -223,43 +225,43 @@ namespace Nop.Plugin.Api.Services
             return customerDto;
         }
 
-        private Dictionary<string, string> EnsureSearchQueryIsValid(string query, Func<string, Dictionary<string, string>> parseSearchQuery)
-        {
-            if (!string.IsNullOrEmpty(query))
-            {
-                return parseSearchQuery(query);
-            }
+        //private Dictionary<string, string> EnsureSearchQueryIsValid(string query, Func<string, Dictionary<string, string>> parseSearchQuery)
+        //{
+        //    if (!string.IsNullOrEmpty(query))
+        //    {
+        //        return parseSearchQuery(query);
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
 
-        private Dictionary<string, string> ParseSearchQuery(string query)
-        {
-            var parsedQuery = new Dictionary<string, string>();
+        //private Dictionary<string, string> ParseSearchQuery(string query)
+        //{
+        //    var parsedQuery = new Dictionary<string, string>();
 
-            var splitPattern = @"(\w+):";
+        //    var splitPattern = @"(\w+):";
 
-            var fieldValueList = Regex.Split(query, splitPattern).Where(s => s != String.Empty).ToList();
+        //    var fieldValueList = Regex.Split(query, splitPattern).Where(s => s != String.Empty).ToList();
 
-            if (fieldValueList.Count < 2)
-            {
-                return parsedQuery;
-            }
+        //    if (fieldValueList.Count < 2)
+        //    {
+        //        return parsedQuery;
+        //    }
 
-            for (var i = 0; i < fieldValueList.Count; i += 2)
-            {
-                var field = fieldValueList[i];
-                var value = fieldValueList[i + 1];
+        //    for (var i = 0; i < fieldValueList.Count; i += 2)
+        //    {
+        //        var field = fieldValueList[i];
+        //        var value = fieldValueList[i + 1];
 
-                if (!string.IsNullOrEmpty(field) && !string.IsNullOrEmpty(value))
-                {
-                    field = field.Replace("_", string.Empty);
-                    parsedQuery.Add(field.Trim(), value.Trim());
-                }
-            }
+        //        if (!string.IsNullOrEmpty(field) && !string.IsNullOrEmpty(value))
+        //        {
+        //            field = field.Replace("_", string.Empty);
+        //            parsedQuery.Add(field.Trim(), value.Trim());
+        //        }
+        //    }
 
-            return parsedQuery;
-        }
+        //    return parsedQuery;
+        //}
 
         /// <summary>
         /// The idea of this method is to get the first and last name from the GenericAttribute table and to set them in the CustomerDto object.

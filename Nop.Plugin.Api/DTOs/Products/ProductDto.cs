@@ -19,9 +19,10 @@ namespace Nop.Plugin.Api.DTOs.Products
         private int? _productTypeId;
         private List<int> _storeIds;
         private List<int> _discountIds;
+        private List<int> _categoryIds;
         private List<int> _roleIds;
         private List<int> _manufacturerIds;
-        private List<LocalizedNameDto> _localizedNames;
+        private List<ProductLocalizedDto> _locales;
         private List<ImageMappingDto> _images;
         private List<ProductAttributeMappingDto> _productAttributeMappings;
         private List<ProductSpecificationAttributeDto> _productSpecificationAttributes;
@@ -46,15 +47,15 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// Gets or sets the localized names
         /// </summary>
         [JsonProperty("localized_names")]
-        public List<LocalizedNameDto> LocalizedNames
+        public List<ProductLocalizedDto> Locales
         {
             get
             {
-                return _localizedNames;
+                return _locales;
             }
             set
             {
-                _localizedNames = value;
+                _locales = value;
             }
         }
 
@@ -239,6 +240,12 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// </summary>
         [JsonProperty("is_tax_exempt")]
         public bool? IsTaxExempt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the tax category identifier
+        /// </summary>
+        [JsonProperty("tax_category_id")]
+        public int TaxCategoryId { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the product is telecommunications or broadcasting or electronic services
@@ -508,6 +515,30 @@ namespace Nop.Plugin.Api.DTOs.Products
             }
         }
 
+        /// <summary>
+        /// Gets or sets the product as new. Use this option for promoting new products.
+        /// </summary>
+        [JsonProperty("mark_as_new")]
+        public bool MarkAsNew { get; set; }
+
+        /// <summary>
+        /// Gets or sets the product as New from Date in Coordinated Universal Time (UTC).
+        /// </summary>
+        [JsonProperty("mark_as_new_start_date_time_utc")]
+        public DateTime? MarkAsNewStartDateTimeUtc { get; set; }
+
+        /// <summary>
+        /// Gets or sets the product as New to Date in Coordinated Universal Time (UTC).
+        /// </summary>
+        [JsonProperty("mark_as_new_end_date_time_utc")]
+        public DateTime? MarkAsNewEndDateTimeUtc { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value of used product template identifier
+        /// </summary>
+        [JsonProperty("product_template_id")]
+        public int ProductTemplateId { get; set; }
+
         [JsonProperty("parent_grouped_product_id")]
         public int? ParentGroupedProductId { get; set; }
 
@@ -521,6 +552,19 @@ namespace Nop.Plugin.Api.DTOs.Products
             set
             {
                 _roleIds = value;
+            }
+        }
+
+        [JsonProperty("category_ids")]
+        public List<int> CategoryIds
+        {
+            get
+            {
+                return _categoryIds;
+            }
+            set
+            {
+                _categoryIds = value;
             }
         }
 

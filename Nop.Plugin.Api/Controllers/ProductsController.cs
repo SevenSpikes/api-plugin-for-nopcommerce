@@ -43,6 +43,8 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IProductTagService _productTagService;
         private readonly IProductAttributeService _productAttributeService;
         private readonly IDTOHelper _dtoHelper;
+        private readonly ILocalizedEntityService _localizedEntityService;
+        private readonly ICategoryService _categoryService;
 
         public ProductsController(IProductApiService productApiService,
                                   IJsonFieldsSerializer jsonFieldsSerializer,
@@ -60,6 +62,8 @@ namespace Nop.Plugin.Api.Controllers
                                   IManufacturerService manufacturerService,
                                   IProductTagService productTagService,
                                   IProductAttributeService productAttributeService,
+                                  ILocalizedEntityService localizedEntityService,
+                                  ICategoryService categoryService,
                                   IDTOHelper dtoHelper) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService, pictureService)
         {
             _productApiService = productApiService;
@@ -69,6 +73,8 @@ namespace Nop.Plugin.Api.Controllers
             _urlRecordService = urlRecordService;
             _productService = productService;
             _productAttributeService = productAttributeService;
+            _localizedEntityService = localizedEntityService;
+            _categoryService = categoryService;
             _dtoHelper = dtoHelper;
         }
 
@@ -147,7 +153,7 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [Route("/api/products/{id}")]
+        [Route("/api/products/{id:int}")]
         [ProducesResponseType(typeof(ProductsRootObjectDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
@@ -161,6 +167,46 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             var product = _productApiService.GetProductById(id);
+
+            if (product == null)
+            {
+                return Error(HttpStatusCode.NotFound, "product", "not found");
+            }
+
+            var productDto = _dtoHelper.PrepareProductDTO(product);
+
+            var productsRootObject = new ProductsRootObjectDto();
+
+            productsRootObject.Products.Add(productDto);
+
+            var json = JsonFieldsSerializer.Serialize(productsRootObject, fields);
+
+            return new RawJsonActionResult(json);
+        }
+
+        /// <summary>
+        /// Retrieve product by spcified SKU
+        /// </summary>
+        /// <param name="sku">Sku of the product</param>
+        /// <param name="fields">Fields from the product you want your json to contain</param>
+        /// <response code="200">OK</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="401">Unauthorized</response>
+        [HttpGet]
+        [Route("/api/products/{sku:maxlength(400)}/sku")]
+        [ProducesResponseType(typeof(ProductsRootObjectDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [GetRequestsErrorInterceptorActionFilter]
+        public IActionResult GetProductBySku(string sku, string fields = "")
+        {
+            if (string.IsNullOrEmpty(sku))
+            {
+                return Error(HttpStatusCode.BadRequest, "sku", "invalid sku");
+            }
+
+            var product = _productApiService.GetProductBySku(sku);
 
             if (product == null)
             {
@@ -195,6 +241,9 @@ namespace Nop.Plugin.Api.Controllers
             var product = _factory.Initialize();
             productDelta.Merge(product);
 
+            product.CreatedOnUtc = DateTime.UtcNow;
+            product.UpdatedOnUtc = DateTime.UtcNow;
+
             _productService.InsertProduct(product);
 
             UpdateProductPictures(product, productDelta.Dto.Images);
@@ -208,6 +257,12 @@ namespace Nop.Plugin.Api.Controllers
             //search engine name
             var seName = _urlRecordService.ValidateSeName(product, productDelta.Dto.SeName, product.Name, true);
             _urlRecordService.SaveSlug(product, seName, 0);
+
+            //locales
+            UpdateLocales(product, productDelta);
+
+            //categories
+            UpdateCategoryMappings(product, productDelta.Dto.CategoryIds);
 
             UpdateAclRoles(product, productDelta.Dto.RoleIds);
 
@@ -233,7 +288,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpPut]
-        [Route("/api/products/{id}")]
+        [Route("/api/products/{id:int}")]
         [ProducesResponseType(typeof(ProductsRootObjectDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
@@ -276,6 +331,12 @@ namespace Nop.Plugin.Api.Controllers
                 _urlRecordService.SaveSlug(product, seName, 0);
             }
 
+            //locales
+            UpdateLocales(product, productDelta);
+
+            //categories
+            UpdateCategoryMappings(product, productDelta.Dto.CategoryIds);
+
             UpdateDiscountMappings(product, productDelta.Dto.DiscountIds);
 
             UpdateStoreMappings(product, productDelta.Dto.StoreIds);
@@ -300,7 +361,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpDelete]
-        [Route("/api/products/{id}")]
+        [Route("/api/products/{id:int}")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
@@ -327,6 +388,41 @@ namespace Nop.Plugin.Api.Controllers
                 string.Format(LocalizationService.GetResource("ActivityLog.DeleteProduct"), product.Name), product);
 
             return new RawJsonActionResult("{}");
+        }
+
+        protected virtual void UpdateLocales(Product entityToUpdate, Delta<ProductDto> productDtoDelta)
+        {
+            foreach (var localized in productDtoDelta.Dto.Locales)
+            {
+                _localizedEntityService.SaveLocalizedValue(entityToUpdate,
+                    x => x.Name,
+                    localized.Name,
+                    localized.LanguageId);
+                _localizedEntityService.SaveLocalizedValue(entityToUpdate,
+                    x => x.ShortDescription,
+                    localized.ShortDescription,
+                    localized.LanguageId);
+                _localizedEntityService.SaveLocalizedValue(entityToUpdate,
+                    x => x.FullDescription,
+                    localized.FullDescription,
+                    localized.LanguageId);
+                //_localizedEntityService.SaveLocalizedValue(entityToUpdate,
+                //    x => x.MetaKeywords,
+                //    localized.MetaKeywords,
+                //    localized.LanguageId);
+                //_localizedEntityService.SaveLocalizedValue(entityToUpdate,
+                //    x => x.MetaDescription,
+                //    localized.MetaDescription,
+                //    localized.LanguageId);
+                //_localizedEntityService.SaveLocalizedValue(entityToUpdate,
+                //    x => x.MetaTitle,
+                //    localized.MetaTitle,
+                //    localized.LanguageId);
+
+                //search engine name
+                var seName = _urlRecordService.ValidateSeName(entityToUpdate, string.Empty, localized.Name, false);
+                _urlRecordService.SaveSlug(entityToUpdate, seName, localized.LanguageId);
+            }
         }
 
         private void UpdateProductPictures(Product entityToUpdate, List<ImageMappingDto> setPictures)
@@ -550,7 +646,36 @@ namespace Nop.Plugin.Api.Controllers
             _productService.UpdateProduct(product);
             _productService.UpdateHasDiscountsApplied(product);
         }
-        
+
+        private void UpdateCategoryMappings(Product product, List<int> passedCategoryIds)
+        {
+            var existingProductCategories = _categoryService.GetProductCategoriesByProductId(product.Id, true);
+
+            //delete categories
+            foreach (var existingProductCategory in existingProductCategories)
+                if (!passedCategoryIds.Contains(existingProductCategory.CategoryId))
+                    _categoryService.DeleteProductCategory(existingProductCategory);
+
+            //add categories
+            foreach (var categoryId in passedCategoryIds)
+            {
+                if (_categoryService.FindProductCategory(existingProductCategories, product.Id, categoryId) == null)
+                {
+                    //find next display order
+                    var displayOrder = 1;
+                    var existingCategoryMapping = _categoryService.GetProductCategoriesByCategoryId(categoryId, showHidden: true);
+                    if (existingCategoryMapping.Any())
+                        displayOrder = existingCategoryMapping.Max(x => x.DisplayOrder) + 1;
+                    _categoryService.InsertProductCategory(new ProductCategory
+                    {
+                        ProductId = product.Id,
+                        CategoryId = categoryId,
+                        DisplayOrder = displayOrder
+                    });
+                }
+            }
+        }
+
         private void UpdateProductManufacturers(Product product, List<int> passedManufacturerIds)
         {
             // If no manufacturers specified then there is nothing to map 

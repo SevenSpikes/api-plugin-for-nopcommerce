@@ -80,7 +80,7 @@
         }
 
         [HttpGet]
-        [Route("edit/{id}")]
+        [Route("edit/{id:int}")]
         public IActionResult Edit(int id)
         {
             var clientModel = _clientService.FindClientByIdAsync(id);
@@ -104,7 +104,7 @@
         }
 
         [HttpPost, ActionName("Delete")]
-        [Route("delete/{id}")]
+        [Route("delete/{id:int}")]
         public IActionResult DeleteConfirmed(int id)
         {
             _clientService.DeleteClient(id);

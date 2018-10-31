@@ -69,6 +69,26 @@ namespace Nop.Plugin.Api.Services
             return _productRepository.Table.FirstOrDefault(product => product.Id == productId && !product.Deleted);
         }
 
+        public Product GetProductBySku(string sku)
+        {
+            if (string.IsNullOrEmpty(sku))
+            {
+                return null;
+            }
+
+            return _productRepository.Table.FirstOrDefault(product => product.Sku == sku && !product.Deleted);
+        }
+
+        public bool ProductSkuExists(string sku)
+        {
+            if (string.IsNullOrEmpty(sku))
+            {
+                return false;
+            }
+
+            return _productRepository.Table.Any(product => product.Sku == sku);
+        }
+
         private IQueryable<Product> GetProductsQuery(DateTime? createdAtMin = null, DateTime? createdAtMax = null, 
             DateTime? updatedAtMin = null, DateTime? updatedAtMax = null, string vendorName = null, 
             bool? publishedStatus = null, IList<int> ids = null, int? categoryId = null)

@@ -143,7 +143,7 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [Route("/api/categories/{id}")]
+        [Route("/api/categories/{id:int}")]
         [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
@@ -172,7 +172,44 @@ namespace Nop.Plugin.Api.Controllers
 
             return new RawJsonActionResult(json);
         }
-        
+
+        /// <summary>
+        /// Search for categories matching supplied query
+        /// </summary>
+        /// <response code="200">OK</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized</response>
+        [HttpGet]
+        [Route("/api/categories/search")]
+        [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        public IActionResult Search(CategoriesSearchParametersModel parameters)
+        {
+            if (parameters.Limit <= Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
+            {
+                return Error(HttpStatusCode.BadRequest, "limit", "Invalid limit parameter");
+            }
+
+            if (parameters.Page <= 0)
+            {
+                return Error(HttpStatusCode.BadRequest, "page", "Invalid page parameter");
+            }
+
+            var categories = _categoryApiService.Search(parameters.Query, parameters.Order, parameters.Page, parameters.Limit);
+
+            IList<CategoryDto> categoriesAsDtos = categories.Select(x => _dtoHelper.PrepareCategoryDTO(x)).ToList();
+
+            var categoriesRootObject = new CategoriesRootObject()
+            {
+                Categories = categoriesAsDtos
+            };
+
+            var json = JsonFieldsSerializer.Serialize(categoriesRootObject, parameters.Fields);
+
+            return new RawJsonActionResult(json);
+        }
+
         [HttpPost]
         [Route("/api/categories")]
         [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
@@ -238,7 +275,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpPut]
-        [Route("/api/categories/{id}")]
+        [Route("/api/categories/{id:int}")]
         [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
@@ -299,7 +336,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpDelete]
-        [Route("/api/categories/{id}")]
+        [Route("/api/categories/{id:int}")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
