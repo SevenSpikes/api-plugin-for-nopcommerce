@@ -57,6 +57,16 @@ namespace Nop.Plugin.Api.Converters
             }
             else if(type == typeof(bool?))
             {
+                // value is always true/false it seems.
+                // This one should be enough.
+                var boolResult  = _apiTypeConverter.ToBoolean(value);
+
+                if (boolResult.HasValue)
+                {
+                    return boolResult;
+                }
+
+                // Keeping this just in case ...
                 // Because currently status is the only boolean and we need to accept published and unpublished statuses.
                 return _apiTypeConverter.ToStatus(value);
             }

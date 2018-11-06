@@ -140,7 +140,7 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [Route("/api/customers/{id}")]
+        [Route("/api/customers/{id:int}")]
         [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
@@ -309,7 +309,7 @@ namespace Nop.Plugin.Api.Controllers
         }
         
         [HttpPut]
-        [Route("/api/customers/{id}")]
+        [Route("/api/customers/{id:int}")]
         [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
@@ -429,7 +429,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpDelete]
-        [Route("/api/customers/{id}")]
+        [Route("/api/customers/{id:int}")]
         [GetRequestsErrorInterceptorActionFilter]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]

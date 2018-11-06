@@ -19,9 +19,10 @@ namespace Nop.Plugin.Api.DTOs.Products
         private int? _productTypeId;
         private List<int> _storeIds;
         private List<int> _discountIds;
+        private List<int> _categoryIds;
         private List<int> _roleIds;
         private List<int> _manufacturerIds;
-        private List<LocalizedNameDto> _localizedNames;
+        private List<ProductLocalizedDto> _locales;
         private List<ImageMappingDto> _images;
         private List<ProductAttributeMappingDto> _productAttributeMappings;
         private List<ProductSpecificationAttributeDto> _productSpecificationAttributes;
@@ -46,15 +47,15 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// Gets or sets the localized names
         /// </summary>
         [JsonProperty("localized_names")]
-        public List<LocalizedNameDto> LocalizedNames
+        public List<ProductLocalizedDto> Locales
         {
             get
             {
-                return _localizedNames;
+                return _locales;
             }
             set
             {
-                _localizedNames = value;
+                _locales = value;
             }
         }
 
@@ -63,6 +64,7 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// </summary>
         [JsonProperty("short_description")]
         public string ShortDescription { get; set; }
+        
         /// <summary>
         /// Gets or sets the full description
         /// </summary>
@@ -80,11 +82,13 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// </summary>
         [JsonProperty("meta_keywords")]
         public string MetaKeywords { get; set; }
+        
         /// <summary>
         /// Gets or sets the meta description
         /// </summary>
         [JsonProperty("meta_description")]
         public string MetaDescription { get; set; }
+        
         /// <summary>
         /// Gets or sets the meta title
         /// </summary>
@@ -96,21 +100,25 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// </summary>
         [JsonProperty("allow_customer_reviews")]
         public bool? AllowCustomerReviews { get; set; }
+        
         /// <summary>
         /// Gets or sets the rating sum (approved reviews)
         /// </summary>
         [JsonProperty("approved_rating_sum")]
         public int? ApprovedRatingSum { get; set; }
+        
         /// <summary>
         /// Gets or sets the rating sum (not approved reviews)
         /// </summary>
         [JsonProperty("not_approved_rating_sum")]
         public int? NotApprovedRatingSum { get; set; }
+        
         /// <summary>
         /// Gets or sets the total rating votes (approved reviews)
         /// </summary>
         [JsonProperty("approved_total_reviews")]
         public int? ApprovedTotalReviews { get; set; }
+        
         /// <summary>
         /// Gets or sets the total rating votes (not approved reviews)
         /// </summary>
@@ -122,11 +130,13 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// </summary>
         [JsonProperty("sku")]
         public string Sku { get; set; }
+        
         /// <summary>
         /// Gets or sets the manufacturer part number
         /// </summary>
         [JsonProperty("manufacturer_part_number")]
         public string ManufacturerPartNumber { get; set; }
+        
         /// <summary>
         /// Gets or sets the Global Trade Item Number (GTIN). These identifiers include UPC (in North America), EAN (in Europe), JAN (in Japan), and ISBN (for books).
         /// </summary>
@@ -162,11 +172,13 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// </summary>
         [JsonProperty("unlimited_downloads")]
         public bool? UnlimitedDownloads { get; set; }
+        
         /// <summary>
         /// Gets or sets the maximum number of downloads
         /// </summary>
         [JsonProperty("max_number_of_downloads")]
         public int? MaxNumberOfDownloads { get; set; }
+        
         /// <summary>
         /// Gets or sets the number of days during customers keeps access to the file.
         /// </summary>
@@ -190,6 +202,7 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// </summary>
         [JsonProperty("is_recurring")]
         public bool? IsRecurring { get; set; }
+        
         /// <summary>
         /// Gets or sets the cycle length
         /// </summary>
@@ -207,6 +220,7 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// </summary>
         [JsonProperty("is_rental")]
         public bool? IsRental { get; set; }
+        
         /// <summary>
         /// Gets or sets the rental length for some period (price for this period)
         /// </summary>
@@ -218,16 +232,19 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// </summary>
         [JsonProperty("is_ship_enabled")]
         public bool? IsShipEnabled { get; set; }
+        
         /// <summary>
         /// Gets or sets a value indicating whether the entity is free shipping
         /// </summary>
         [JsonProperty("is_free_shipping")]
         public bool? IsFreeShipping { get; set; }
+        
         /// <summary>
         /// Gets or sets a value this product should be shipped separately (each item)
         /// </summary>
         [JsonProperty("ship_separately")]
         public bool? ShipSeparately { get; set; }
+        
         /// <summary>
         /// Gets or sets the additional shipping charge
         /// </summary>
@@ -241,6 +258,12 @@ namespace Nop.Plugin.Api.DTOs.Products
         public bool? IsTaxExempt { get; set; }
 
         /// <summary>
+        /// Gets or sets the tax category identifier
+        /// </summary>
+        [JsonProperty("tax_category_id")]
+        public int TaxCategoryId { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the product is telecommunications or broadcasting or electronic services
         /// </summary>
         [JsonProperty("is_telecommunications_or_broadcasting_or_electronic_services")]
@@ -251,6 +274,12 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// </summary>
         [JsonProperty("use_multiple_warehouses")]
         public bool? UseMultipleWarehouses { get; set; }
+
+        /// <summary>
+        /// Gets or sets a warehouse identifier
+        /// </summary>
+        [JsonProperty("warehouse_id")]
+        public int WarehouseId { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating how to manage inventory.
@@ -266,16 +295,19 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// </summary>
         [JsonProperty("stock_quantity")]
         public int? StockQuantity { get; set; }
+        
         /// <summary>
         /// Gets or sets a value indicating whether to display stock availability
         /// </summary>
         [JsonProperty("display_stock_availability")]
         public bool? DisplayStockAvailability { get; set; }
+        
         /// <summary>
         /// Gets or sets a value indicating whether to display stock quantity
         /// </summary>
         [JsonProperty("display_stock_quantity")]
         public bool? DisplayStockQuantity { get; set; }
+        
         /// <summary>
         /// Gets or sets the minimum stock quantity
         /// </summary>
@@ -293,21 +325,25 @@ namespace Nop.Plugin.Api.DTOs.Products
         /// </summary>
         [JsonProperty("allow_back_in_stock_subscriptions")]
         public bool? AllowBackInStockSubscriptions { get; set; }
+        
         /// <summary>
         /// Gets or sets the order minimum quantity
         /// </summary>
         [JsonProperty("order_minimum_quantity")]
         public int? OrderMinimumQuantity { get; set; }
+        
         /// <summary>
         /// Gets or sets the order maximum quantity
         /// </summary>
         [JsonProperty("order_maximum_quantity")]
         public int? OrderMaximumQuantity { get; set; }
+        
         /// <summary>
         /// Gets or sets the comma seperated list of allowed quantities. null or empty if any quantity is allowed
         /// </summary>
         [JsonProperty("allowed_quantities")]
         public string AllowedQuantities { get; set; }
+        
         /// <summary>
         /// Gets or sets a value indicating whether we allow adding to the cart/wishlist only attribute combinations that exist and have stock greater than zero.
         /// This option is used only when we have "manage inventory" set to "track inventory by product attributes"
@@ -508,6 +544,30 @@ namespace Nop.Plugin.Api.DTOs.Products
             }
         }
 
+        /// <summary>
+        /// Gets or sets the product as new. Use this option for promoting new products.
+        /// </summary>
+        [JsonProperty("mark_as_new")]
+        public bool MarkAsNew { get; set; }
+
+        /// <summary>
+        /// Gets or sets the product as New from Date in Coordinated Universal Time (UTC).
+        /// </summary>
+        [JsonProperty("mark_as_new_start_date_time_utc")]
+        public DateTime? MarkAsNewStartDateTimeUtc { get; set; }
+
+        /// <summary>
+        /// Gets or sets the product as New to Date in Coordinated Universal Time (UTC).
+        /// </summary>
+        [JsonProperty("mark_as_new_end_date_time_utc")]
+        public DateTime? MarkAsNewEndDateTimeUtc { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value of used product template identifier
+        /// </summary>
+        [JsonProperty("product_template_id")]
+        public int ProductTemplateId { get; set; }
+
         [JsonProperty("parent_grouped_product_id")]
         public int? ParentGroupedProductId { get; set; }
 
@@ -521,6 +581,19 @@ namespace Nop.Plugin.Api.DTOs.Products
             set
             {
                 _roleIds = value;
+            }
+        }
+
+        [JsonProperty("category_ids")]
+        public List<int> CategoryIds
+        {
+            get
+            {
+                return _categoryIds;
+            }
+            set
+            {
+                _categoryIds = value;
             }
         }
 

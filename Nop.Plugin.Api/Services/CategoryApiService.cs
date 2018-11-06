@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using Nop.Core.Data;
 using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.DataStructures;
+using Nop.Plugin.Api.Helpers;
+using Nop.Plugin.Api.Extensions;
 using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.Services
@@ -32,7 +35,6 @@ namespace Nop.Plugin.Api.Services
         {
             var query = GetCategoriesQuery(createdAtMin, createdAtMax, updatedAtMin, updatedAtMax, publishedStatus, productId, ids);
 
-
             if (sinceId > 0)
             {
                 query = query.Where(c => c.Id > sinceId);
@@ -59,6 +61,31 @@ namespace Nop.Plugin.Api.Services
                                            publishedStatus, productId);
 
             return query.Count(c => _storeMappingService.Authorize(c));
+        }
+
+        public IList<Category> Search(string queryParams = "", string order = Configurations.DefaultOrder,
+                                      int page = Configurations.DefaultPageValue, int limit = Configurations.DefaultLimit)
+        {
+            var searchParams = queryParams.EnsureSearchQueryIsValid(parser => parser.ParseSearchQuery());
+
+            if (searchParams != null)
+            {
+                var query = _categoryRepository.Table.Where(category => !category.Deleted);
+
+                foreach (var searchParam in searchParams)
+                {
+                    // Skip non existing properties.
+                    if (ReflectionHelper.HasProperty(searchParam.Key, typeof(Category)))
+                    {
+                        // @0 is a placeholder used by dynamic linq and it is used to prevent possible sql injections.
+                        query = query.Where(string.Format("{0} = @0 || {0}.Contains(@0)", searchParam.Key), searchParam.Value);
+                    }
+                }
+
+                return new ApiList<Category>(query, page - 1, limit);
+            }
+
+            return new List<Category>();
         }
 
         private IQueryable<Category> GetCategoriesQuery(

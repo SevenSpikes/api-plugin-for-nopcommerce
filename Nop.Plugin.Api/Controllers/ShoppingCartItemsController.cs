@@ -259,7 +259,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpPut]
-        [Route("/api/shopping_cart_items/{id}")]
+        [Route("/api/shopping_cart_items/{id:int}")]
         [ProducesResponseType(typeof(ShoppingCartItemsRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
@@ -327,7 +327,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpDelete]
-        [Route("/api/shopping_cart_items/{id}")]
+        [Route("/api/shopping_cart_items/{id:int}")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]

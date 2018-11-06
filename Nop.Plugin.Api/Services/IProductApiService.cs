@@ -19,5 +19,9 @@ namespace Nop.Plugin.Api.Services
         Product GetProductById(int productId);
 
         Product GetProductByIdNoTracking(int productId);
+
+        Product GetProductBySku(string sku);
+
+        bool ProductSkuExists(string sku);
     }
 }

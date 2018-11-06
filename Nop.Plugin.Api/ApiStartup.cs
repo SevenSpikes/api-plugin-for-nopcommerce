@@ -274,7 +274,7 @@ namespace Nop.Plugin.Api
 
                 configurationContext.SaveChanges();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Probably the upgrade script was already executed and we don't need to do anything.
             }

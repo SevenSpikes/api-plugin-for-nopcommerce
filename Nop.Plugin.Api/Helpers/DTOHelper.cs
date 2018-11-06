@@ -5,10 +5,12 @@ using Nop.Core.Domain.Localization;
 using Nop.Core.Domain.Media;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Stores;
+using Nop.Core.Domain.Tax;
 using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Plugin.Api.DTOs.Customers;
 using Nop.Plugin.Api.DTOs.Images;
 using Nop.Plugin.Api.DTOs.Languages;
+using Nop.Plugin.Api.DTOs.Manufacturers;
 using Nop.Plugin.Api.DTOs.OrderItems;
 using Nop.Plugin.Api.DTOs.Orders;
 using Nop.Plugin.Api.DTOs.ProductAttributes;
@@ -16,6 +18,7 @@ using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
 using Nop.Plugin.Api.DTOs.SpecificationAttributes;
 using Nop.Plugin.Api.DTOs.Stores;
+using Nop.Plugin.Api.DTOs.Tax;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.Services;
 using Nop.Services.Catalog;
@@ -89,6 +92,7 @@ namespace Nop.Plugin.Api.Helpers
 
             productDto.SeName = _urlRecordService.GetSeName(product);
             productDto.DiscountIds = product.AppliedDiscounts.Select(discount => discount.Id).ToList();
+            productDto.CategoryIds = product.ProductCategories.Select(productCategory => productCategory.CategoryId).ToList();
             productDto.ManufacturerIds = product.ProductManufacturers.Select(pm => pm.ManufacturerId).ToList();
             productDto.RoleIds = _aclService.GetAclRecords(product).Select(acl => acl.CustomerRoleId).ToList();
             productDto.StoreIds = _storeMappingService.GetStoreMappings(product).Select(mapping => mapping.StoreId)
@@ -103,17 +107,19 @@ namespace Nop.Plugin.Api.Helpers
 
             var allLanguages = _languageService.GetAllLanguages();
 
-            productDto.LocalizedNames = new List<LocalizedNameDto>();
+            productDto.Locales = new List<ProductLocalizedDto>();
 
             foreach (var language in allLanguages)
             {
-                var localizedNameDto = new LocalizedNameDto
+                var productLocalizedDto = new ProductLocalizedDto
                 {
                     LanguageId = language.Id,
-                    LocalizedName = _localizationService.GetLocalized(product, x => x.Name, language.Id)
+                    Name = _localizationService.GetLocalized(product, x => x.Name, language.Id),
+                    ShortDescription = _localizationService.GetLocalized(product, x => x.ShortDescription, language.Id),
+                    FullDescription = _localizationService.GetLocalized(product, x => x.FullDescription, language.Id)
                 };
 
-                productDto.LocalizedNames.Add(localizedNameDto);
+                productDto.Locales.Add(productLocalizedDto);
             }
 
             return productDto;
@@ -372,6 +378,16 @@ namespace Nop.Plugin.Api.Helpers
         public SpecificationAttributeDto PrepareSpecificationAttributeDto(SpecificationAttribute specificationAttribute)
         {
             return specificationAttribute.ToDto();
+        }
+
+        public TaxCategoryDto PrepateTaxCategoryDto(TaxCategory taxCategory)
+        {
+            return taxCategory.ToDto();
+        }
+
+        public ManufacturerDto PrepareManufacturerDTO(Manufacturer manufacturer)
+        {
+            return manufacturer.ToDto();
         }
     }
 }

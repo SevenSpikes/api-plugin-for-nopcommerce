@@ -105,6 +105,18 @@ namespace Nop.Plugin.Api.Converters
             return null;
         }
 
+        public bool? ToBoolean(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return (bool?)null;
+
+            if (bool.TryParse(value, out bool result))
+            {
+                return result;
+            }
+
+            return (bool?)null;
+        }
+
         public object ToEnumNullable(string value, Type type)
         {
             if (!string.IsNullOrEmpty(value))
