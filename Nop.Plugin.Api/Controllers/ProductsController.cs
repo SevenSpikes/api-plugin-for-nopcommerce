@@ -31,6 +31,10 @@ namespace Nop.Plugin.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using DTOs.Errors;
     using JSON.Serializers;
+    using Microsoft.AspNetCore.Http;
+    using Nop.Core.Infrastructure;
+    using System.Threading.Tasks;
+    using System.IO;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ProductsController : BaseApiController
@@ -45,6 +49,7 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IDTOHelper _dtoHelper;
         private readonly ILocalizedEntityService _localizedEntityService;
         private readonly ICategoryService _categoryService;
+        private readonly IPictureService _pictureService;
 
         public ProductsController(IProductApiService productApiService,
                                   IJsonFieldsSerializer jsonFieldsSerializer,
@@ -75,6 +80,7 @@ namespace Nop.Plugin.Api.Controllers
             _productAttributeService = productAttributeService;
             _localizedEntityService = localizedEntityService;
             _categoryService = categoryService;
+            _pictureService = pictureService;
             _dtoHelper = dtoHelper;
         }
 
@@ -386,6 +392,57 @@ namespace Nop.Plugin.Api.Controllers
             //activity log
             CustomerActivityService.InsertActivity("DeleteProduct",
                 string.Format(LocalizationService.GetResource("ActivityLog.DeleteProduct"), product.Name), product);
+
+            return new RawJsonActionResult("{}");
+        }
+
+        [HttpPost]
+        [Route("/api/products/{id:int}/pictures")]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [GetRequestsErrorInterceptorActionFilter]
+        public async Task<IActionResult> ProductPictureAdd(int id, List<IFormFile> images)
+        {
+            if (images.Count == 0 || images.Sum(f => f.Length) == 0)
+            {
+                return Error(HttpStatusCode.BadRequest, "pictures", "no pictures provided");
+            }
+
+            var product = _productApiService.GetProductById(id);
+
+            if (product == null)
+            {
+                return Error(HttpStatusCode.NotFound, "product", "not found");
+            }
+
+            IList<int> pictureIds;
+
+            try
+            {
+                pictureIds = await InsertPicturesFromStream(images);
+            }
+            catch (Exception ex)
+            {
+                return Error((HttpStatusCode)422, "pictures", ex.Message);
+            }
+
+            int displayOrder = 0;
+
+            foreach (var pictureId in pictureIds)
+            {
+                _pictureService.SetSeoFilename(pictureId, _pictureService.GetPictureSeName(product.Name));
+
+                _productService.InsertProductPicture(new ProductPicture
+                {
+                    PictureId = pictureId,
+                    ProductId = product.Id,
+                    DisplayOrder = displayOrder
+                });
+
+                displayOrder++;
+            }
 
             return new RawJsonActionResult("{}");
         }
@@ -729,6 +786,76 @@ namespace Nop.Plugin.Api.Controllers
                 newAssociatedProduct.ParentGroupedProductId = product.Id;
                 _productService.UpdateProduct(newAssociatedProduct);
             }
+        }
+
+        private string GetContentType(string contentType, string fileExtension)
+        {
+            //contentType is not always available 
+            //that's why we manually update it here
+            //http://www.sfsu.edu/training/mimetype.htm
+            if (string.IsNullOrEmpty(contentType))
+            {
+                switch (fileExtension)
+                {
+                    case ".bmp":
+                        contentType = Core.MimeTypes.ImageBmp;
+                        break;
+                    case ".gif":
+                        contentType = Core.MimeTypes.ImageGif;
+                        break;
+                    case ".jpeg":
+                    case ".jpg":
+                    case ".jpe":
+                    case ".jfif":
+                    case ".pjpeg":
+                    case ".pjp":
+                        contentType = Core.MimeTypes.ImageJpeg;
+                        break;
+                    case ".png":
+                        contentType = Core.MimeTypes.ImagePng;
+                        break;
+                    case ".tiff":
+                    case ".tif":
+                        contentType = Core.MimeTypes.ImageTiff;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return contentType;
+        }
+
+        private async Task<IList<int>> InsertPicturesFromStream(List<IFormFile> pictures)
+        {
+            var result = new List<int>();
+
+            foreach (var picture in pictures)
+            {
+                var fileName = picture.FileName;
+                var contentType = picture.ContentType;
+
+                var fileExtension = System.IO.Path.GetExtension(fileName);
+
+                if (!string.IsNullOrEmpty(fileExtension))
+                    fileExtension = fileExtension.ToLowerInvariant();
+
+                contentType = this.GetContentType(contentType, fileExtension);
+
+                using (var stream = new MemoryStream())
+                {
+                    await picture.CopyToAsync(stream);
+
+                    var image = _pictureService.InsertPicture(stream.ToArray(), contentType, null);
+
+                    if (image != null)
+                    {
+                        result.Add(image.Id);
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }
