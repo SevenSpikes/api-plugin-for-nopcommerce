@@ -11,6 +11,7 @@ using Nop.Plugin.Api.DTOs.Images;
 using Nop.Plugin.Api.DTOs.Languages;
 using Nop.Plugin.Api.DTOs.OrderItems;
 using Nop.Plugin.Api.DTOs.Orders;
+using Nop.Plugin.Api.DTOs.Manufacturers;
 using Nop.Plugin.Api.DTOs.ProductAttributes;
 using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
@@ -372,6 +373,42 @@ namespace Nop.Plugin.Api.Helpers
         public SpecificationAttributeDto PrepareSpecificationAttributeDto(SpecificationAttribute specificationAttribute)
         {
             return specificationAttribute.ToDto();
+        }
+        
+        public ManufacturerDto PrepareManufacturerDto(Manufacturer manufacturer)
+        {
+            var manufacturerDto = manufacturer.ToDto();
+
+            var picture = _pictureService.GetPictureById(manufacturer.PictureId);
+            var imageDto = PrepareImageDto(picture);
+
+            if (imageDto != null)
+            {
+                manufacturerDto.Image = imageDto;
+            }
+
+            manufacturerDto.SeName = _urlRecordService.GetSeName(manufacturer);
+            manufacturerDto.DiscountIds = manufacturer.AppliedDiscounts.Select(discount => discount.Id).ToList();
+            manufacturerDto.RoleIds = _aclService.GetAclRecords(manufacturer).Select(acl => acl.CustomerRoleId).ToList();
+            manufacturerDto.StoreIds = _storeMappingService.GetStoreMappings(manufacturer).Select(mapping => mapping.StoreId)
+                .ToList();
+
+            var allLanguages = _languageService.GetAllLanguages();
+
+            manufacturerDto.LocalizedNames = new List<LocalizedNameDto>();
+
+            foreach (var language in allLanguages)
+            {
+                var localizedNameDto = new LocalizedNameDto
+                {
+                    LanguageId = language.Id,
+                    LocalizedName = _localizationService.GetLocalized(manufacturer, x => x.Name, language.Id)
+                };
+
+                manufacturerDto.LocalizedNames.Add(localizedNameDto);
+            }
+
+            return manufacturerDto;
         }
     }
 }

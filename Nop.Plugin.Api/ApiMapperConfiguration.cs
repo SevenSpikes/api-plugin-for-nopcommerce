@@ -19,6 +19,7 @@ using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Plugin.Api.DTOs.CustomerRoles;
 using Nop.Plugin.Api.DTOs.Customers;
 using Nop.Plugin.Api.DTOs.Languages;
+using Nop.Plugin.Api.DTOs.Manufacturers;
 using Nop.Plugin.Api.DTOs.OrderItems;
 using Nop.Plugin.Api.DTOs.Orders;
 using Nop.Plugin.Api.DTOs.ProductAttributes;
@@ -49,6 +50,8 @@ namespace Nop.Plugin.Api
             CreateMap<Language, LanguageDto>();
 
             CreateMap<CustomerRole, CustomerRoleDto>();
+
+            CreateMap<Manufacturer, ManufacturerDto>();
 
             CreateClientToClientApiModelMap();
 
