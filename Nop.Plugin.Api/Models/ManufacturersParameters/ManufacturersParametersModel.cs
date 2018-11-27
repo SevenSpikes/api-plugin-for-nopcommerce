@@ -20,7 +20,7 @@ namespace Nop.Plugin.Api.Models.ManufacturersParameters
         }
 
         /// <summary>
-        /// A comma-separated list of category ids
+        /// A comma-separated list of manufacturer ids
         /// </summary>
         [JsonProperty("ids")]
         public List<int> Ids { get; set; }

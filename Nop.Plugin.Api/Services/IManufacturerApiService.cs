@@ -7,7 +7,7 @@ namespace Nop.Plugin.Api.Services
 {
     public interface IManufacturerApiService
     {
-        Manufacturer GetManufacturerById(int categoryId);
+        Manufacturer GetManufacturerById(int manufacturerId);
 
         IList<Manufacturer> GetManufacturers(IList<int> ids = null,
             DateTime? createdAtMin = null, DateTime? createdAtMax = null, DateTime? updatedAtMin = null, DateTime? updatedAtMax = null,

@@ -12,7 +12,7 @@ namespace Nop.Plugin.Api.Models.ProductManufacturerMappingsParameters
         public int? ProductId { get; set; }
 
         /// <summary>
-        /// Show all the product-category mappings for this category
+        /// Show all the product-manufacturer mappings for this manufacturer
         /// </summary>
         [JsonProperty("manufacturer_id")]
         public int? ManufacturerId { get; set; } 
