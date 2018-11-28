@@ -85,8 +85,6 @@ namespace Nop.Plugin.Api.Helpers
             var productDto = product.ToDto();
 
             PrepareProductImages(product.ProductPictures, productDto);
-            PrepareProductAttributes(product.ProductAttributeMappings, productDto);
-            PrepareProductSpecificationAttributes(product.ProductSpecificationAttributes, productDto);
 
             productDto.SeName = _urlRecordService.GetSeName(product);
             productDto.DiscountIds = product.AppliedDiscounts.Select(discount => discount.Id).ToList();
@@ -242,6 +240,7 @@ namespace Nop.Plugin.Api.Helpers
                     var productImageDto = new ImageMappingDto
                     {
                         Id = productPicture.Id,
+                        PictureId = productPicture.PictureId,
                         Position = productPicture.DisplayOrder,
                         Src = imageDto.Src,
                         Attachment = imageDto.Attachment
@@ -349,6 +348,26 @@ namespace Nop.Plugin.Api.Helpers
             return productAttributeValueDto;
         }
        
+        private void PrepareProductAttributeCombinations(IEnumerable<ProductAttributeCombination> productAttributeCombinations,
+            ProductDto productDto)
+        {
+            productDto.ProductAttributeCombinations = productDto.ProductAttributeCombinations ?? new List<ProductAttributeCombinationDto>();
+
+            foreach (var productAttributeCombination in productAttributeCombinations)
+            {
+                var productAttributeCombinationDto = PrepareProductAttributeCombinationDto(productAttributeCombination);
+                if (productAttributeCombinationDto != null)
+                {
+                    productDto.ProductAttributeCombinations.Add(productAttributeCombinationDto);
+                }
+            }
+        }
+
+        private ProductAttributeCombinationDto PrepareProductAttributeCombinationDto(ProductAttributeCombination productAttributeCombination)
+        {
+            return productAttributeCombination.ToDto();
+        }
+
         public void PrepareProductSpecificationAttributes(IEnumerable<ProductSpecificationAttribute> productSpecificationAttributes, ProductDto productDto)
         {
             if (productDto.ProductSpecificationAttributes == null)

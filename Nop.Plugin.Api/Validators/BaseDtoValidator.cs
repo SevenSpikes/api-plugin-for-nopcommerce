@@ -2,7 +2,6 @@
 using FluentValidation.Results;
 using FluentValidation.Validators;
 using Microsoft.AspNetCore.Http;
-using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.DTOs.Base;
 using Nop.Plugin.Api.Helpers;
 using System;
