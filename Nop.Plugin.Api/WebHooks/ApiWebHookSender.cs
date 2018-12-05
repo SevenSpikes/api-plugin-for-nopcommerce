@@ -10,7 +10,7 @@ namespace Nop.Plugin.Api.WebHooks
     {
         private const string WebHookIdKey = "WebHookId";
 
-        public ApiWebHookSender(ILogger<DataflowWebHookSender> logger) : base(logger)
+        public ApiWebHookSender(ILogger<ApiWebHookSender> logger) : base(logger)
         {
         }
 

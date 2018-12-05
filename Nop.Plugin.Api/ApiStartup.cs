@@ -46,7 +46,7 @@ namespace Nop.Plugin.Api
             services.AddDbContext<ApiObjectContext>(optionsBuilder =>
             {
                 optionsBuilder.UseSqlServerWithLazyLoading(services);
-            });
+            },ServiceLifetime.Transient);
 
             AddRequiredConfiguration();
 

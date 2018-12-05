@@ -16,31 +16,24 @@ namespace Nop.Plugin.Api.Data
         {
         }
 
+        public ApiObjectContext()
+        {
+            
+        }       
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new WebHooksMap());
-
-            //disable EdmMetadata generation
-            //modelBuilder.Conventions.Remove<IncludeMetadataConvention>();
+            
             base.OnModelCreating(modelBuilder);
         }
         
-        //TODO: Upgrade 4.10 Check this!
-        //public string CreateDatabaseScript()
-        //{
-        //    return ((IObjectContextAdapter)this).ObjectContext.CreateDatabaseScript();
-        //}
-
         /// <summary>
         /// Install
         /// </summary>
         public void Install()
         {
-            //TODO: Upgrade 4.10 Check this!
-            //create the table
-            //var dbScript = CreateDatabaseScript();
-            //Database.ExecuteSqlCommand(dbScript);
-            SaveChanges();
+            this.ExecuteSqlScript(this.GenerateCreateScript());
         }
 
         /// <summary>

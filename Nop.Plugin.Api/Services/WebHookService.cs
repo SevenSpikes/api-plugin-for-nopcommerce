@@ -1,81 +1,73 @@
-﻿//using Nop.Plugin.Api.WebHooks;
+﻿using Nop.Plugin.Api.WebHooks;
 
-//namespace Nop.Plugin.Api.Services
-//{
-//    using Microsoft.AspNet.WebHooks;
-//    using Microsoft.AspNet.WebHooks.Diagnostics;
-//    using Microsoft.AspNet.WebHooks.Services;
-//    using Nop.Plugin.Api.Domain;
-//    using Nop.Plugin.Api.Helpers;
-//    using System;
-//    using System.Collections.Generic;
-//    using System.Web.Http.Tracing;
+namespace Nop.Plugin.Api.Services
+{
+    using Microsoft.AspNetCore.WebHooks;
+    using Microsoft.Extensions.Logging;
+    using Nop.Plugin.Api.Helpers;
 
-//    public class WebHookService : IWebHookService
-//    {
-//        private IWebHookManager _webHookManager;
-//        private IWebHookSender _webHookSender;
-//        private IWebHookStore _webHookStore;
-//        private IWebHookFilterManager _webHookFilterManager;
-//        private ILogger _logger;
-                
-//        private readonly IConfigManagerHelper _configManagerHelper;
+    using System.Collections.Generic;
 
-//        public WebHookService(IConfigManagerHelper configManagerHelper,ILogger logger)
-//        {
-//            _configManagerHelper = configManagerHelper;
-//            _logger = logger;
-//        }
 
-//        public IWebHookFilterManager GetWebHookFilterManager()
-//        {
-//            if (_webHookFilterManager == null)
-//            {
-//                var filterProviders = new List<IWebHookFilterProvider>();
-//                filterProviders.Add(new FilterProvider());
-//                _webHookFilterManager = new WebHookFilterManager(filterProviders);
-//            }
+    public class WebHookService : IWebHookService
+    {
+        private IWebHookManager _webHookManager;
+        private IWebHookSender _webHookSender;
+        private IWebHookStore _webHookStore;
+        private IWebHookFilterManager _webHookFilterManager;
+        private ILogger<WebHookManager> _webHookManagerLogger;
+        private ILogger<ApiWebHookSender> _apiWebHookSenderLogger;
 
-//            return _webHookFilterManager;
-//        }
+        private readonly IConfigManagerHelper _configManagerHelper;
 
-//        public IWebHookManager GetWebHookManager()
-//        {
-//            if (_webHookManager == null)
-//            {
-//                _webHookManager = new WebHookManager(GetWebHookStore(), GetWebHookSender(), _logger);
-//            }
+        public WebHookService(IConfigManagerHelper configManagerHelper, ILogger<WebHookManager> webHookManagerLogger,
+            ILogger<ApiWebHookSender> apiWebHookSenderLogger)
+        {
+            _configManagerHelper = configManagerHelper;
+            _webHookManagerLogger = webHookManagerLogger;
+            _apiWebHookSenderLogger = apiWebHookSenderLogger;
+        }
 
-//            return _webHookManager;
-//        }
+        public IWebHookFilterManager GetWebHookFilterManager()
+        {
+            if (_webHookFilterManager == null)
+            {
+                var filterProviders = new List<IWebHookFilterProvider>();
+                filterProviders.Add(new FilterProvider());
+                _webHookFilterManager = new WebHookFilterManager(filterProviders);
+            }
 
-//        public IWebHookSender GetWebHookSender()
-//        {
-//            if (_webHookSender == null)
-//            {
-//                _webHookSender = new ApiWebHookSender(_logger);
-//            }
+            return _webHookFilterManager;
+        }
 
-//            return _webHookSender;
-//        }
+        public IWebHookManager GetWebHookManager()
+        {
+            if (_webHookManager == null)
+            {
+                _webHookManager = new WebHookManager(GetWebHookStore(), GetWebHookSender(), _webHookManagerLogger);
+            }
 
-//        public IWebHookStore GetWebHookStore()
-//        {
-//            if (_webHookStore == null)
-//            {
-//                var dataSettings = _configManagerHelper.DataSettings;
-//                Microsoft.AspNet.WebHooks.Config.SettingsDictionary settings = new Microsoft.AspNet.WebHooks.Config.SettingsDictionary();
-//                settings.Add("MS_SqlStoreConnectionString", dataSettings.DataConnectionString);
-//                settings.Connections.Add("MS_SqlStoreConnectionString", new Microsoft.AspNet.WebHooks.Config.ConnectionSettings("MS_SqlStoreConnectionString", dataSettings.DataConnectionString));
+            return _webHookManager;
+        }
 
-//                Microsoft.AspNet.WebHooks.IWebHookStore store = new Microsoft.AspNet.WebHooks.SqlWebHookStore(settings, _logger);
+        public IWebHookSender GetWebHookSender()
+        {
+            if (_webHookSender == null)
+            {
+                _webHookSender = new ApiWebHookSender(_apiWebHookSenderLogger);
+            }
 
-//                Microsoft.AspNet.WebHooks.Services.CustomServices.SetStore(store);
+            return _webHookSender;
+        }
 
-//                _webHookStore = CustomServices.GetStore();
-//            }
+        public IWebHookStore GetWebHookStore()
+        {
+            if (_webHookStore == null)
+            {
+                _webHookStore = new NopWebHookStore();
+            }
 
-//            return _webHookStore;
-//        }        
-//    }
-//}
+            return _webHookStore;
+        }
+    }
+}
