@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Nop.Core.Data;
@@ -89,7 +89,7 @@ namespace Nop.Plugin.Api.Services
                     // Skip non existing properties.
                     if (ReflectionHelper.HasProperty(searchParam.Key, typeof(Customer)))
                     {
-                        
+
                         // @0 is a placeholder used by dynamic linq and it is used to prevent possible sql injections.
                         query = query.Where(string.Format("{0} = @0 || {0}.Contains(@0)", searchParam.Key), searchParam.Value);
                     }
@@ -128,20 +128,15 @@ namespace Nop.Plugin.Api.Services
 
             // Here we expect to get two records, one for the first name and one for the last name.
             var customerAttributeMappings = (from customer in _customerRepository.Table //NoTracking
-                                                                           join attribute in _genericAttributeRepository.Table//NoTracking
-                                                                                                                              on customer.Id equals attribute.EntityId
-                                                                           where customer.Id == id &&
-                                                                                 attribute.KeyGroup.Equals(KeyGroup, StringComparison.InvariantCultureIgnoreCase) &&
-                                                                                 (attribute.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase) ||
-                                                                                  attribute.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase) ||
-                                                                                  attribute.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase) || 
-                                                                                  attribute.Key.Equals(DateOfBirth, StringComparison.InvariantCultureIgnoreCase) ||
-                                                                                  attribute.Key.Equals(Gender, StringComparison.InvariantCultureIgnoreCase))
-                                                                           select new CustomerAttributeMappingDto
-                                                                           {
-                                                                               Attribute = attribute,
-                                                                               Customer = customer
-                                                                           }).ToList();
+                                             join attribute in _genericAttributeRepository.Table//NoTracking
+                                                                                                on customer.Id equals attribute.EntityId
+                                             where customer.Id == id &&
+                                                   attribute.KeyGroup == "Customer"
+                                             select new CustomerAttributeMappingDto
+                                             {
+                                                 Attribute = attribute,
+                                                 Customer = customer
+                                             }).ToList();
 
             CustomerDto customerDto = null;
 
@@ -193,7 +188,7 @@ namespace Nop.Plugin.Api.Services
                         {
                             customerDto.LanguageId = mapping.Attribute.Value;
                         }
-                        else if(mapping.Attribute.Key.Equals(DateOfBirth, StringComparison.InvariantCultureIgnoreCase))
+                        else if (mapping.Attribute.Key.Equals(DateOfBirth, StringComparison.InvariantCultureIgnoreCase))
                         {
                             customerDto.DateOfBirth = string.IsNullOrEmpty(mapping.Attribute.Value) ? (DateTime?)null : DateTime.Parse(mapping.Attribute.Value);
                         }
@@ -290,12 +285,7 @@ namespace Nop.Plugin.Api.Services
                 (from customer in query
                  from attribute in _genericAttributeRepository.Table
                      .Where(attr => attr.EntityId == customer.Id &&
-                                    attr.KeyGroup.Equals(KeyGroup, StringComparison.InvariantCultureIgnoreCase) &&
-                                    (attr.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase) ||
-                                    attr.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase) ||
-                                    attr.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase) ||
-                                    attr.Key.Equals(DateOfBirth, StringComparison.InvariantCultureIgnoreCase) ||
-                                    attr.Key.Equals(Gender, StringComparison.InvariantCultureIgnoreCase))).DefaultIfEmpty()
+                                    attr.KeyGroup == "Customer").DefaultIfEmpty()
                  select new CustomerAttributeMappingDto
                  {
                      Attribute = attribute,
@@ -319,7 +309,7 @@ namespace Nop.Plugin.Api.Services
                     allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, LanguageId, searchParams[LanguageId]);
                 }
 
-                if(searchParams.ContainsKey(DateOfBirth))
+                if (searchParams.ContainsKey(DateOfBirth))
                 {
                     allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, DateOfBirth, searchParams[DateOfBirth]);
                 }
@@ -339,7 +329,7 @@ namespace Nop.Plugin.Api.Services
         /// This method is responsible for getting customer dto records with first and last names set from the attribute mappings.
         /// </summary>
         private IList<CustomerDto> GetFullCustomerDtos(IQueryable<IGrouping<int, CustomerAttributeMappingDto>> customerAttributesMappings,
-            int page = Configurations.DefaultPageValue, int limit = Configurations.DefaultLimit, string order = Configurations.DefaultOrder)
+        int page = Configurations.DefaultPageValue, int limit = Configurations.DefaultLimit, string order = Configurations.DefaultOrder)
         {
             var customerDtos = new List<CustomerDto>();
 
@@ -398,7 +388,7 @@ namespace Nop.Plugin.Api.Services
                     {
                         customerDto.LanguageId = attribute.Value;
                     }
-                    else if(attribute.Key.Equals(DateOfBirth, StringComparison.InvariantCultureIgnoreCase))
+                    else if (attribute.Key.Equals(DateOfBirth, StringComparison.InvariantCultureIgnoreCase))
                     {
                         customerDto.DateOfBirth = string.IsNullOrEmpty(attribute.Value) ? (DateTime?)null : DateTime.Parse(attribute.Value);
                     }
@@ -483,14 +473,14 @@ namespace Nop.Plugin.Api.Services
         [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
         private void SetNewsletterSubscribtionStatus(IList<CustomerDto> customerDtos)
         {
-            if(customerDtos == null)
+            if (customerDtos == null)
             {
                 return;
             }
 
             var allNewsletterCustomerEmail = GetAllNewsletterCustomersEmails();
 
-            foreach(var customerDto in customerDtos)
+            foreach (var customerDto in customerDtos)
             {
                 SetNewsletterSubscribtionStatus(customerDto, allNewsletterCustomerEmail);
             }
@@ -498,13 +488,13 @@ namespace Nop.Plugin.Api.Services
 
         private void SetNewsletterSubscribtionStatus(BaseCustomerDto customerDto, IEnumerable<String> allNewsletterCustomerEmail = null)
         {
-            if(customerDto == null || String.IsNullOrEmpty(customerDto.Email))
+            if (customerDto == null || String.IsNullOrEmpty(customerDto.Email))
             {
                 return;
             }
 
-            if(allNewsletterCustomerEmail == null)
-            { 
+            if (allNewsletterCustomerEmail == null)
+            {
                 allNewsletterCustomerEmail = GetAllNewsletterCustomersEmails();
             }
 
@@ -519,13 +509,13 @@ namespace Nop.Plugin.Api.Services
             return _cacheManager.Get(Configurations.NEWSLETTER_SUBSCRIBERS_KEY, () =>
             {
                 IEnumerable<String> subscriberEmails = (from nls in _subscriptionRepository.Table
-                    where nls.StoreId == _storeContext.CurrentStore.Id
-                          && nls.Active
-                    select nls.Email).ToList();
+                                                        where nls.StoreId == _storeContext.CurrentStore.Id
+                                                              && nls.Active
+                                                        select nls.Email).ToList();
 
-                
+
                 subscriberEmails = subscriberEmails.Where(e => !String.IsNullOrEmpty(e)).Select(e => e.ToLowerInvariant());
-             
+
                 return subscriberEmails.Where(e => !String.IsNullOrEmpty(e)).Select(e => e.ToLowerInvariant());
             });
         }

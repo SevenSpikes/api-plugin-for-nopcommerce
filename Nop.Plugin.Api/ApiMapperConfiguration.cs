@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using AutoMapper;
+﻿using AutoMapper;
 using IdentityServer4.EntityFramework.Entities;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Common;
@@ -19,16 +16,21 @@ using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Plugin.Api.DTOs.CustomerRoles;
 using Nop.Plugin.Api.DTOs.Customers;
 using Nop.Plugin.Api.DTOs.Languages;
+using Nop.Plugin.Api.DTOs.Manufacturers;
 using Nop.Plugin.Api.DTOs.OrderItems;
 using Nop.Plugin.Api.DTOs.Orders;
 using Nop.Plugin.Api.DTOs.ProductAttributes;
 using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
+using Nop.Plugin.Api.DTOs.ProductManufacturerMappings;
 using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
 using Nop.Plugin.Api.DTOs.SpecificationAttributes;
 using Nop.Plugin.Api.DTOs.Stores;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.Models;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 
 namespace Nop.Plugin.Api
 {
@@ -46,9 +48,13 @@ namespace Nop.Plugin.Api
 
             CreateMap<ProductCategory, ProductCategoryMappingDto>();
 
+            CreateMap<ProductManufacturer, ProductManufacturerMappingsDto>();
+
             CreateMap<Language, LanguageDto>();
 
             CreateMap<CustomerRole, CustomerRoleDto>();
+
+            CreateMap<Manufacturer, ManufacturerDto>();
 
             CreateClientToClientApiModelMap();
 
