@@ -308,34 +308,6 @@ namespace Nop.Plugin.Api.Controllers
             return new RawJsonActionResult(json);
         }
 
-        /// <summary>
-        /// Retrieve customer by spcified id
-        /// </summary>
-        /// <param name="id">Id of the customer</param>
-        /// <param name="fields">Fields from the customer you want your json to contain</param>
-        /// <response code="200">OK</response>
-        /// <response code="404">Not Found</response>
-        /// <response code="401">Unauthorized</response>
-        [HttpGet]
-        [Route("/api/customers/guest")]
-        [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult CreateGuestCustomer()
-        {
-            var customer = CustomerService.InsertGuestCustomer();
-            var customerDto = customer.ToDto();
-
-            var customersRootObject = new CustomersRootObject();
-            customersRootObject.Customers.Add(customerDto);
-
-            var json = JsonFieldsSerializer.Serialize(customersRootObject, string.Empty);
-
-            return new RawJsonActionResult(json);
-        }
-
         [HttpPut]
         [Route("/api/customers/{id}")]
         [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
