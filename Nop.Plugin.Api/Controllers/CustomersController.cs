@@ -278,7 +278,6 @@ namespace Nop.Plugin.Api.Controllers
             if (customerDelta.Dto.RoleIds.Count > 0)
             {
                 AddValidRoles(customerDelta, newCustomer);
-
                 CustomerService.UpdateCustomer(newCustomer);
             }
 
@@ -335,12 +334,6 @@ namespace Nop.Plugin.Api.Controllers
 
             if (customerDelta.Dto.RoleIds.Count > 0)
             {
-                // Remove all roles
-                while (currentCustomer.CustomerRoles.Count > 0)
-                {
-                    currentCustomer.CustomerRoles.Remove(currentCustomer.CustomerRoles.First());
-                }
-
                 AddValidRoles(customerDelta, currentCustomer);
             }
 
@@ -481,13 +474,23 @@ namespace Nop.Plugin.Api.Controllers
 
         private void AddValidRoles(Delta<CustomerDto> customerDelta, Customer currentCustomer)
         {
-            IList<CustomerRole> validCustomerRoles =
-                _customerRolesHelper.GetValidCustomerRoles(customerDelta.Dto.RoleIds).ToList();
-
-            // Add all newly passed roles
-            foreach (var role in validCustomerRoles)
+            var allCustomerRoles = CustomerService.GetAllCustomerRoles(true);
+            foreach (var customerRole in allCustomerRoles)
             {
-                currentCustomer.CustomerRoles.Add(role);
+                if (customerDelta.Dto.RoleIds.Contains(customerRole.Id))
+                {
+                    //new role
+                    if (currentCustomer.CustomerCustomerRoleMappings.Count(mapping => mapping.CustomerRoleId == customerRole.Id) == 0)
+                        currentCustomer.CustomerCustomerRoleMappings.Add(new CustomerCustomerRoleMapping { CustomerRole = customerRole });
+                }
+                else
+                {
+                    if (currentCustomer.CustomerCustomerRoleMappings.Count(mapping => mapping.CustomerRoleId == customerRole.Id) > 0)
+                    {
+                        currentCustomer.CustomerCustomerRoleMappings
+                            .Remove(currentCustomer.CustomerCustomerRoleMappings.FirstOrDefault(mapping => mapping.CustomerRoleId == customerRole.Id));
+                    }
+                }
             }
         }
 
