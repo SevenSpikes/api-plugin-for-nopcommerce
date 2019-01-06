@@ -54,9 +54,14 @@ namespace Nop.Plugin.Api.Services
 
         public int GetOrdersCount(DateTime? createdAtMin = null, DateTime? createdAtMax = null, OrderStatus? status = null,
                                  PaymentStatus? paymentStatus = null, ShippingStatus? shippingStatus = null,
-                                 int? customerId = null, int? storeId = null)
+                                 int? customerId = null, int? storeId = null, int sinceId = Configurations.DefaultSinceId)
         {
             var query = GetOrdersQuery(createdAtMin, createdAtMax, status, paymentStatus, shippingStatus, customerId: customerId, storeId: storeId);
+
+            if (sinceId > 0)
+            {
+                query = query.Where(order => order.Id > sinceId);
+            }
 
             return query.Count();
         }
