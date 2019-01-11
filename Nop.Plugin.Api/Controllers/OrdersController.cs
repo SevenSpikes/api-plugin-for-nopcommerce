@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -630,14 +630,7 @@ namespace Nop.Plugin.Api.Controllers
                         orderItem.RentalEndDateUtc = null;
                     }
 
-                    var existingItem = _shoppingCartService.FindShoppingCartItemInTheCart(
-                                                                                    customer.ShoppingCartItems.ToList(),
-                                                                                    ShoppingCartType.ShoppingCart,
-                                                                                    product,
-                                                                                    orderItem.AttributesXml,
-                                                                                    orderItem.UnitPriceExclTax.HasValue ? orderItem.UnitPriceExclTax.Value : 0M,
-                                                                                    orderItem.RentalStartDateUtc,
-                                                                                    orderItem.RentalEndDateUtc);
+                    var attributesXml = _productAttributeConverter.ConvertToXml(orderItem.Attributes.ToList(), product.Id);                
 
                     var errors = new List<string>();
 
