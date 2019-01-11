@@ -295,5 +295,28 @@ namespace Nop.Plugin.Api.DTOs.Orders
         /// </summary>
         [JsonProperty("customer_tax_display_type")]
         public string CustomerTaxDisplayType { get; set; }
+
+        
+        [JsonProperty("card_type")]
+        public string CardType { get; set; }
+
+        [JsonProperty("card_name")]
+        public string CardName { get; set; }
+
+        [JsonProperty("card_number")]
+        public string CardNumber { get; set; }
+
+        [JsonProperty("card_cvv2")]
+        public string CardCvv2 { get; set; }
+
+        [JsonProperty("card_expritation_month")]
+        public string CardExpirationMonth { get; set; }
+
+        [JsonProperty("card_expiration_year")]
+        public string CardExpirationYear { get; set; }
+
+        [JsonProperty("order_guid")]
+        public string OrderGuid { get; set; }
+
     }
 }
