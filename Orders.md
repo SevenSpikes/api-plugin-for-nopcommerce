@@ -348,7 +348,7 @@ HTTP/1.1 200 OK
 
 Retrieve a count of all orders
 
-|  GET |  /api/orders/id |
+<details><summary>Response</summary><p>
 
 ```text
 
@@ -363,6 +363,8 @@ HTTP/1.1 200 OK
 }
 
 ```
+
+</p></details>
 
 ## GET /api/orders/{id}
 
