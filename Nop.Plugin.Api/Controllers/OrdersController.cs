@@ -634,17 +634,15 @@ namespace Nop.Plugin.Api.Controllers
 
                     var errors = new List<string>();
 
-                    if (existingItem != null && orderItem.Quantity.HasValue && existingItem.Quantity != orderItem.Quantity)
+                   if (existingItem != null)
                     {
-                        existingItem.Quantity = orderItem.Quantity.Value;
-
-                        errors.AddRange(_shoppingCartService.UpdateShoppingCartItem(
-                            customer,
-                            existingItem.Id,
-                            existingItem.AttributesXml,
-                            existingItem.CustomerEnteredPrice,
-                            existingItem.RentalStartDateUtc,
-                            existingItem.RentalEndDateUtc));
+                        if (orderItem.Quantity.HasValue 
+                            && existingItem.Quantity != orderItem.Quantity)
+                        {
+                            existingItem.Quantity = orderItem.Quantity.Value;
+                                existingItem.RentalStartDateUtc,
+                                existingItem.RentalEndDateUtc));
+                        }
                     }
                     else
                     {
