@@ -29,6 +29,8 @@ using Nop.Services.Stores;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Nop.Plugin.Api.DTOs.Shipments;
+using Nop.Core.Domain.Shipping;
 
 namespace Nop.Plugin.Api.Helpers
 {
@@ -159,6 +161,7 @@ namespace Nop.Plugin.Api.Helpers
             var orderDto = order.ToDto();
 
             orderDto.OrderItems = order.OrderItems.Select(PrepareOrderItemDTO).ToList();
+            orderDto.Shipments = order.Shipments.Select(PrepareShippingItemDTO).ToList();
 
             var customerDto = _customerApiService.GetCustomerById(order.Customer.Id);
 
@@ -179,6 +182,12 @@ namespace Nop.Plugin.Api.Helpers
             return dto;
         }
 
+        public ShipmentDto PrepareShippingItemDTO(Shipment shipment)
+        {
+            var dto = shipment.ToDto();
+            return dto;
+
+        }
         public OrderItemDto PrepareOrderItemDTO(OrderItem orderItem)
         {
             var dto = orderItem.ToDto();
@@ -268,6 +277,30 @@ namespace Nop.Plugin.Api.Helpers
 
             return image;
         }
+
+        protected ImageMappingDto PrepareProductImageDto(ProductPicture productPicture)
+        {
+            ImageMappingDto imageMapping = null;
+            
+            if (productPicture != null)
+            {
+                // We don't use the image from the passed dto directly 
+                // because the picture may be passed with src and the result should only include the base64 format.
+                imageMapping = new ImageMappingDto
+                {
+                    //Attachment = Convert.ToBase64String(picture.PictureBinary),
+                    Id = productPicture.Id,
+                    ProductId = productPicture.ProductId,
+                    PictureId = productPicture.PictureId,
+                    Position = productPicture.DisplayOrder,
+                    MimeType = productPicture.Picture.MimeType,
+                    Src = _pictureService.GetPictureUrl(productPicture.Picture)
+                };
+            }
+
+            return imageMapping;
+        }
+
 
         private void PrepareProductAttributes(IEnumerable<ProductAttributeMapping> productAttributeMappings,
             ProductDto productDto)
@@ -428,6 +461,11 @@ namespace Nop.Plugin.Api.Helpers
             }
 
             return manufacturerDto;
+        }
+
+        public ImageMappingDto PrepareProductPictureDTO(ProductPicture productPicture)
+        {
+            return PrepareProductImageDto(productPicture);
         }
     }
 }

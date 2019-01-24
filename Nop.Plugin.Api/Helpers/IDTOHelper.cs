@@ -3,6 +3,7 @@ using Nop.Core.Domain.Localization;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.DTOs.Categories;
+using Nop.Plugin.Api.DTOs.Images;
 using Nop.Plugin.Api.DTOs.Languages;
 using Nop.Plugin.Api.DTOs.Manufacturers;
 using Nop.Plugin.Api.DTOs.OrderItems;
@@ -18,6 +19,7 @@ namespace Nop.Plugin.Api.Helpers
     public interface IDTOHelper
     {
         ProductDto PrepareProductDTO(Product product);
+        ImageMappingDto PrepareProductPictureDTO(ProductPicture productPicture);
         CategoryDto PrepareCategoryDTO(Category category);
         OrderDto PrepareOrderDTO(Order order);
         ShoppingCartItemDto PrepareShoppingCartItemDTO(ShoppingCartItem shoppingCartItem);

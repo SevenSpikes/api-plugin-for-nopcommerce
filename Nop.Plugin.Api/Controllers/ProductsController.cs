@@ -323,8 +323,7 @@ namespace Nop.Plugin.Api.Controllers
             _productService.DeleteProduct(product);
 
             //activity log
-            CustomerActivityService.InsertActivity("DeleteProduct",
-                string.Format(LocalizationService.GetResource("ActivityLog.DeleteProduct"), product.Name), product);
+            CustomerActivityService.InsertActivity("DeleteProduct", string.Format(LocalizationService.GetResource("ActivityLog.DeleteProduct"), product.Name), product);
 
             return new RawJsonActionResult("{}");
         }
@@ -334,7 +333,7 @@ namespace Nop.Plugin.Api.Controllers
             // If no pictures are specified means we don't have to update anything
             if (setPictures == null)
                 return;
-
+            
             // delete unused product pictures
             var unusedProductPictures = entityToUpdate.ProductPictures.Where(x => setPictures.All(y => y.Id != x.Id)).ToList();
             foreach (var unusedProductPicture in unusedProductPictures)

@@ -1,10 +1,11 @@
 ﻿using Newtonsoft.Json;
 using Nop.Plugin.Api.Attributes;
+using Nop.Plugin.Api.DTOs.Base;
 
 namespace Nop.Plugin.Api.DTOs.Images
 {
     [ImageValidation]
-    public class ImageDto
+    public class ImageDto : BaseDto
     {
         [JsonProperty("src")]
         public string Src { get; set; }
@@ -17,5 +18,8 @@ namespace Nop.Plugin.Api.DTOs.Images
 
         [JsonIgnore]
         public string MimeType { get; set; }
+
+        [JsonProperty("seoFilename")]
+        public string SeoFilename { get; set; }
     }
 }
