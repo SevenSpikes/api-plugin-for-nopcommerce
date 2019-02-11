@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Nop.Core.Domain.Catalog;
+﻿using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Localization;
 using Nop.Core.Domain.Media;
@@ -11,9 +9,11 @@ using Nop.Plugin.Api.DTOs.Images;
 using Nop.Plugin.Api.DTOs.Languages;
 using Nop.Plugin.Api.DTOs.OrderItems;
 using Nop.Plugin.Api.DTOs.Orders;
+using Nop.Plugin.Api.DTOs.Manufacturers;
 using Nop.Plugin.Api.DTOs.ProductAttributes;
 using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.DTOs.ShoppingCarts;
+using Nop.Plugin.Api.DTOs.SpecificationAttributes;
 using Nop.Plugin.Api.DTOs.Stores;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.Services;
@@ -24,6 +24,8 @@ using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Seo;
 using Nop.Services.Stores;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Nop.Plugin.Api.Helpers
 {
@@ -80,7 +82,6 @@ namespace Nop.Plugin.Api.Helpers
             var productDto = product.ToDto();
 
             PrepareProductImages(product.ProductPictures, productDto);
-            PrepareProductAttributes(product.ProductAttributeMappings, productDto);
 
             productDto.SeName = _urlRecordService.GetSeName(product);
             productDto.DiscountIds = product.AppliedDiscounts.Select(discount => discount.Id).ToList();
@@ -90,7 +91,8 @@ namespace Nop.Plugin.Api.Helpers
                 .ToList();
             productDto.Tags = _productTagService.GetAllProductTagsByProductId(product.Id).Select(tag => tag.Name)
                 .ToList();
-
+            productDto.Categories = product.ProductCategories.Select(c => PrepareCategoryDTO(c.Category)).ToList();
+            
             productDto.AssociatedProductIds =
                 _productService.GetAssociatedProducts(product.Id, showHidden: true)
                     .Select(associatedProduct => associatedProduct.Id)
@@ -105,7 +107,7 @@ namespace Nop.Plugin.Api.Helpers
                 var localizedNameDto = new LocalizedNameDto
                 {
                     LanguageId = language.Id,
-                    LocalizedName = _localizationService.GetLocalized(product, x => x.Name, language.Id, false, false)
+                    LocalizedName = _localizationService.GetLocalized(product, x => x.Name, language.Id)
                 };
 
                 productDto.LocalizedNames.Add(localizedNameDto);
@@ -141,7 +143,7 @@ namespace Nop.Plugin.Api.Helpers
                 var localizedNameDto = new LocalizedNameDto
                 {
                     LanguageId = language.Id,
-                    LocalizedName = _localizationService.GetLocalized(category, x => x.Name, language.Id, false, false)
+                    LocalizedName = _localizationService.GetLocalized(category, x => x.Name, language.Id)
                 };
 
                 categoryDto.LocalizedNames.Add(localizedNameDto);
@@ -154,7 +156,7 @@ namespace Nop.Plugin.Api.Helpers
         {
             var orderDto = order.ToDto();
 
-            orderDto.OrderItemDtos = order.OrderItems.Select(PrepareOrderItemDTO).ToList();
+            orderDto.OrderItems = order.OrderItems.Select(PrepareOrderItemDTO).ToList();
 
             var customerDto = _customerApiService.GetCustomerById(order.Customer.Id);
 
@@ -236,6 +238,7 @@ namespace Nop.Plugin.Api.Helpers
                     var productImageDto = new ImageMappingDto
                     {
                         Id = productPicture.Id,
+                        PictureId = productPicture.PictureId,
                         Position = productPicture.DisplayOrder,
                         Src = imageDto.Src,
                         Attachment = imageDto.Attachment
@@ -341,6 +344,88 @@ namespace Nop.Plugin.Api.Helpers
             }
 
             return productAttributeValueDto;
+        }
+       
+        private void PrepareProductAttributeCombinations(IEnumerable<ProductAttributeCombination> productAttributeCombinations,
+            ProductDto productDto)
+        {
+            productDto.ProductAttributeCombinations = productDto.ProductAttributeCombinations ?? new List<ProductAttributeCombinationDto>();
+
+            foreach (var productAttributeCombination in productAttributeCombinations)
+            {
+                var productAttributeCombinationDto = PrepareProductAttributeCombinationDto(productAttributeCombination);
+                if (productAttributeCombinationDto != null)
+                {
+                    productDto.ProductAttributeCombinations.Add(productAttributeCombinationDto);
+                }
+            }
+        }
+
+        private ProductAttributeCombinationDto PrepareProductAttributeCombinationDto(ProductAttributeCombination productAttributeCombination)
+        {
+            return productAttributeCombination.ToDto();
+        }
+
+        public void PrepareProductSpecificationAttributes(IEnumerable<ProductSpecificationAttribute> productSpecificationAttributes, ProductDto productDto)
+        {
+            if (productDto.ProductSpecificationAttributes == null)
+                productDto.ProductSpecificationAttributes = new List<ProductSpecificationAttributeDto>();
+
+            foreach (var productSpecificationAttribute in productSpecificationAttributes)
+            {
+                ProductSpecificationAttributeDto productSpecificationAttributeDto = PrepareProductSpecificationAttributeDto(productSpecificationAttribute);
+
+                if (productSpecificationAttributeDto != null)
+                {
+                    productDto.ProductSpecificationAttributes.Add(productSpecificationAttributeDto);
+                }
+            }
+        }
+
+        public ProductSpecificationAttributeDto PrepareProductSpecificationAttributeDto(ProductSpecificationAttribute productSpecificationAttribute)
+        {
+            return productSpecificationAttribute.ToDto();
+        }
+
+        public SpecificationAttributeDto PrepareSpecificationAttributeDto(SpecificationAttribute specificationAttribute)
+        {
+            return specificationAttribute.ToDto();
+        }
+        
+        public ManufacturerDto PrepareManufacturerDto(Manufacturer manufacturer)
+        {
+            var manufacturerDto = manufacturer.ToDto();
+
+            var picture = _pictureService.GetPictureById(manufacturer.PictureId);
+            var imageDto = PrepareImageDto(picture);
+
+            if (imageDto != null)
+            {
+                manufacturerDto.Image = imageDto;
+            }
+
+            manufacturerDto.SeName = _urlRecordService.GetSeName(manufacturer);
+            manufacturerDto.DiscountIds = manufacturer.AppliedDiscounts.Select(discount => discount.Id).ToList();
+            manufacturerDto.RoleIds = _aclService.GetAclRecords(manufacturer).Select(acl => acl.CustomerRoleId).ToList();
+            manufacturerDto.StoreIds = _storeMappingService.GetStoreMappings(manufacturer).Select(mapping => mapping.StoreId)
+                .ToList();
+
+            var allLanguages = _languageService.GetAllLanguages();
+
+            manufacturerDto.LocalizedNames = new List<LocalizedNameDto>();
+
+            foreach (var language in allLanguages)
+            {
+                var localizedNameDto = new LocalizedNameDto
+                {
+                    LanguageId = language.Id,
+                    LocalizedName = _localizationService.GetLocalized(manufacturer, x => x.Name, language.Id)
+                };
+
+                manufacturerDto.LocalizedNames.Add(localizedNameDto);
+            }
+
+            return manufacturerDto;
         }
     }
 }

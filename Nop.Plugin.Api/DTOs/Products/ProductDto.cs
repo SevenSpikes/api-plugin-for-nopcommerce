@@ -4,15 +4,18 @@ using FluentValidation.Attributes;
 using Newtonsoft.Json;
 using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.Attributes;
+using Nop.Plugin.Api.DTOs.Base;
+using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Plugin.Api.DTOs.Images;
 using Nop.Plugin.Api.DTOs.Languages;
+using Nop.Plugin.Api.DTOs.SpecificationAttributes;
 using Nop.Plugin.Api.Validators;
 
 namespace Nop.Plugin.Api.DTOs.Products
 {
     [JsonObject(Title = "product")]
     [Validator(typeof(ProductDtoValidator))]
-    public class ProductDto
+    public class ProductDto : BaseDto
     {
         private int? _productTypeId;
         private List<int> _storeIds;
@@ -22,14 +25,11 @@ namespace Nop.Plugin.Api.DTOs.Products
         private List<LocalizedNameDto> _localizedNames;
         private List<ImageMappingDto> _images;
         private List<ProductAttributeMappingDto> _productAttributeMappings;
+        private List<ProductAttributeCombinationDto> _productAttributeCombinations;
+        private List<ProductSpecificationAttributeDto> _productSpecificationAttributes;
         private List<int> _associatedProductIds;
         private List<string> _tags;
-
-        /// <summary>
-        /// Gets or sets the product id
-        /// </summary>
-        [JsonProperty("id")]
-        public string Id { get; set; }
+        private List<CategoryDto> _categories;
 
         /// <summary>
         /// Gets or sets the values indicating whether this product is visible in catalog or search results.
@@ -593,6 +593,33 @@ namespace Nop.Plugin.Api.DTOs.Products
             }
         }
 
+        [JsonProperty("product_attribute_combinations")]
+        public List<ProductAttributeCombinationDto> ProductAttributeCombinations
+        {
+            get
+            {
+                return _productAttributeCombinations;
+            }
+            set
+            {
+                _productAttributeCombinations = value;
+            }
+        }
+
+
+        [JsonProperty("product_specification_attributes")]
+        public List<ProductSpecificationAttributeDto> ProductSpecificationAttributes
+        {
+            get
+            {
+                return _productSpecificationAttributes;
+            }
+            set
+            {
+                _productSpecificationAttributes = value;
+            }
+        }
+
         [JsonProperty("associated_product_ids")]
         public List<int> AssociatedProductIds
         {
@@ -616,6 +643,19 @@ namespace Nop.Plugin.Api.DTOs.Products
             set
             {
                 _tags = value;
+            }
+        }
+
+        [JsonProperty("categories")]
+        public List<CategoryDto> Categories
+        {
+            get
+            {
+                return _categories;
+            }
+            set
+            {
+                _categories = value;
             }
         }
 
