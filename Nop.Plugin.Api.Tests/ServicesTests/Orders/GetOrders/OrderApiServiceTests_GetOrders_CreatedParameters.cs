@@ -92,7 +92,7 @@ namespace Nop.Plugin.Api.Tests.ServicesTests.Orders.GetOrders
         public void WhenCalledWithCreatedAtMaxParameter_GivenAllOrdersCreatedAfterThatDate_ShouldReturnEmptyCollection()
         {
             // Arange
-            DateTime createdAtMaxDate = _baseDate.Subtract(new TimeSpan(365)); // subtract one year
+            DateTime createdAtMaxDate = _baseDate.Subtract(new TimeSpan(365, 0, 0, 0, 0)); // subtract one year
 
             // Act
             var orders = _orderApiService.GetOrders(createdAtMax: createdAtMaxDate);
