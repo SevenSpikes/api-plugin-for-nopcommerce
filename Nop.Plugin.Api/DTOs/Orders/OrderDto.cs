@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Nop.Plugin.Api.DTOs.Base;
 using Nop.Plugin.Api.DTOs.Customers;
 using Nop.Plugin.Api.DTOs.OrderItems;
+using Nop.Plugin.Api.DTOs.Shipments;
 using Nop.Plugin.Api.Validators;
 
 namespace Nop.Plugin.Api.DTOs.Orders
@@ -14,6 +15,7 @@ namespace Nop.Plugin.Api.DTOs.Orders
     public class OrderDto : BaseDto
     {
         private ICollection<OrderItemDto> _orderItems;
+        private ICollection<ShipmentDto> _shipments;
 
         [JsonProperty("store_id")]
         public int? StoreId { get; set; }
@@ -271,6 +273,21 @@ namespace Nop.Plugin.Api.DTOs.Orders
                 return _orderItems;
             }
             set { _orderItems = value; }
+        }
+
+        [JsonProperty("shipments")]
+        public ICollection<ShipmentDto> Shipments
+        {
+            get
+            {
+                if (_shipments == null)
+                {
+                    _shipments = new List<ShipmentDto>();
+                }
+
+                return _shipments;
+            }
+            set { _shipments = value; }
         }
 
         /// <summary>

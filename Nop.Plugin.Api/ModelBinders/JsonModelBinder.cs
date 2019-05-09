@@ -159,8 +159,15 @@ namespace Nop.Plugin.Api.ModelBinders
         {
             // this method validates each property by checking if it has an attribute that inherits from BaseValidationAttribute
             // these attribtues are different than FluentValidation attributes, so they need to be validated manually
+            // this method also validates the class level attributes
 
-            var dtoProperties = dto.GetType().GetProperties();
+            var dtoType = dto.GetType();
+
+            var classValidationAttribute = dtoType.GetCustomAttribute(typeof(BaseValidationAttribute)) as BaseValidationAttribute;
+            if (classValidationAttribute != null)
+                ValidateAttribute(bindingContext, classValidationAttribute, dto);            
+
+            var dtoProperties = dtoType.GetProperties();
             foreach (var property in dtoProperties)
             {
                 // Check property type
@@ -174,16 +181,21 @@ namespace Nop.Plugin.Api.ModelBinders
 
                 if (validationAttribute != null)
                 {
-                    validationAttribute.Validate(property.GetValue(dto));
-                    var errors = validationAttribute.GetErrors();
+                    ValidateAttribute(bindingContext, validationAttribute, property.GetValue(dto));
+                }
+            }
+        }
 
-                    if (errors.Count > 0)
-                    {
-                        foreach (var error in errors)
-                        {
-                            bindingContext.ModelState.AddModelError(error.Key, error.Value);
-                        }
-                    }
+        private void ValidateAttribute(ModelBindingContext bindingContext, BaseValidationAttribute validator, object value)
+        {
+            validator.Validate(value);
+            var errors = validator.GetErrors();
+
+            if (errors.Count > 0)
+            {
+                foreach (var error in errors)
+                {
+                    bindingContext.ModelState.AddModelError(error.Key, error.Value);
                 }
             }
         }

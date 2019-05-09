@@ -215,12 +215,16 @@ namespace Nop.Plugin.Api.Controllers
 
             UpdateStoreMappings(category, categoryDelta.Dto.StoreIds);
 
-            //search engine name
-            if (categoryDelta.Dto.SeName != null)
-            {
-                var seName = _urlRecordService.ValidateSeName(category, categoryDelta.Dto.SeName, category.Name, true);
-                _urlRecordService.SaveSlug(category, seName, 0);
-            }
+            ////search engine name
+            //if (categoryDelta.Dto.SeName != null)
+            //{
+            //    var seName = _urlRecordService.ValidateSeName(category, categoryDelta.Dto.SeName, category.Name, true);
+            //    _urlRecordService.SaveSlug(category, seName, 0);
+            //}
+
+            var seName = _urlRecordService.ValidateSeName(category, categoryDelta.Dto.SeName, category.Name, true);
+            _urlRecordService.SaveSlug(category, seName, 0);
+            
 
             CustomerActivityService.InsertActivity("AddNewCategory",
                 LocalizationService.GetResource("ActivityLog.AddNewCategory"), category);
@@ -275,12 +279,12 @@ namespace Nop.Plugin.Api.Controllers
             UpdateStoreMappings(category, categoryDelta.Dto.StoreIds);
 
             //search engine name
-            if (categoryDelta.Dto.SeName != null)
-            {
+            //if (categoryDelta.Dto.SeName != null)
+            //{
                 
                 var seName = _urlRecordService.ValidateSeName(category, categoryDelta.Dto.SeName, category.Name, true);
                 _urlRecordService.SaveSlug(category, seName, 0);
-            }
+            //}
 
             _categoryService.UpdateCategory(category);
 
@@ -320,7 +324,7 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             _categoryService.DeleteCategory(categoryToDelete);
-
+            
             //activity log
             CustomerActivityService.InsertActivity("DeleteCategory", LocalizationService.GetResource("ActivityLog.DeleteCategory"), categoryToDelete);
 

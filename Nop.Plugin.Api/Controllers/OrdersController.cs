@@ -156,7 +156,8 @@ namespace Nop.Plugin.Api.Controllers
             var storeId = _storeContext.CurrentStore.Id;
 
             var ordersCount = _orderApiService.GetOrdersCount(parameters.CreatedAtMin, parameters.CreatedAtMax, parameters.Status,
-                                                              parameters.PaymentStatus, parameters.ShippingStatus, parameters.CustomerId, storeId);
+                                                              parameters.PaymentStatus, parameters.ShippingStatus, parameters.CustomerId, storeId, 
+                                                              parameters.SinceId);
 
             var ordersCountRootObject = new OrdersCountRootObject()
             {

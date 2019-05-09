@@ -20,6 +20,6 @@ namespace Nop.Plugin.Api.Services
 
         int GetOrdersCount(DateTime? createdAtMin = null, DateTime? createdAtMax = null, OrderStatus? status = null,
                            PaymentStatus? paymentStatus = null, ShippingStatus? shippingStatus = null,
-                           int? customerId = null, int? storeId = null);
+                           int? customerId = null, int? storeId = null, int sinceId = Configurations.DefaultSinceId);
     }
 }
