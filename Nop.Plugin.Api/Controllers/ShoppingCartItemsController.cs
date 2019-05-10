@@ -23,6 +23,7 @@ using Nop.Services.Security;
 using Nop.Services.Stores;
 using Nop.Plugin.Api.Helpers;
 using Nop.Core;
+using Nop.Core.Domain.Customers;
 
 namespace Nop.Plugin.Api.Controllers
 {
@@ -41,6 +42,7 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IProductAttributeConverter _productAttributeConverter;
         private readonly IDTOHelper _dtoHelper;
         private readonly IStoreContext _storeContext;
+        private readonly ICustomerService _customerService;
 
         public ShoppingCartItemsController(IShoppingCartItemApiService shoppingCartItemApiService,
             IJsonFieldsSerializer jsonFieldsSerializer,
@@ -75,6 +77,7 @@ namespace Nop.Plugin.Api.Controllers
             _productAttributeConverter = productAttributeConverter;
             _dtoHelper = dtoHelper;
             _storeContext = storeContext;
+            _customerService = customerService;
         }
 
         /// <summary>
@@ -197,8 +200,16 @@ namespace Nop.Plugin.Api.Controllers
                 return Error();
             }
 
+            //Add guest customer if none is passed
+            Customer customer = null;
+            if(shoppingCartItemDelta.Dto.Id == 0)
+            {
+                customer = _customerService.InsertGuestCustomer();
+            }
+
             var newShoppingCartItem = _factory.Initialize();
             shoppingCartItemDelta.Merge(newShoppingCartItem);
+            
 
             // We know that the product id and customer id will be provided because they are required by the validator.
             // TODO: validate
@@ -209,7 +220,10 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.NotFound, "product", "not found");
             }
 
-            var customer = CustomerService.GetCustomerById(newShoppingCartItem.CustomerId);
+            if (customer == null)
+            {
+                customer = CustomerService.GetCustomerById(newShoppingCartItem.CustomerId);
+            }
 
             if (customer == null)
             {
