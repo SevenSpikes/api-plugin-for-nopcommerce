@@ -212,7 +212,7 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [Route("/api/orders/customer/{customer_id}")]
+        [Route("/api/orders/customer/{customerId}")]
         [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
