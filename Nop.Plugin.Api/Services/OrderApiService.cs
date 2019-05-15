@@ -124,5 +124,16 @@ namespace Nop.Plugin.Api.Services
 
             return query;
         }
+
+        public Order GetOrderByOrderGuid(string orderGuid)
+        {
+            Guid ordrGuid;
+            if (!string.IsNullOrWhiteSpace(orderGuid)
+                && (Guid.TryParse(orderGuid,out ordrGuid)))
+            {
+                return _orderRepository.Table.FirstOrDefault(order => order.OrderGuid == ordrGuid); 
+            }
+            return null;
+        }
     }
 }

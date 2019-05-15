@@ -88,6 +88,16 @@ namespace Nop.Plugin.Api.Converters
             return null;
         }
 
+        public IList<string> ToListOfStrings(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return null;
+            }
+
+            return value.Split(",").ToList(); //TODO:  this will break if we have commas in the strings
+        }
+
         public bool? ToStatus(string value)
         {
             if (!string.IsNullOrEmpty(value))
