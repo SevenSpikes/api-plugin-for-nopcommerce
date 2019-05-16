@@ -399,14 +399,14 @@ namespace Nop.Plugin.Api.Controllers
                         customer, BuildShoppingCartItemsFromOrderItems(currentOrder.OrderItems.ToList(), customer.Id, storeId));
                 }
 
-                if (isValid)
-                {
-                    currentOrder.ShippingMethod = orderDelta.Dto.ShippingMethod;
-                }
-                else
-                {
-                    return Error(HttpStatusCode.BadRequest);
-                }
+				if (orderDelta.Dto.ShippingMethod != null)
+				{
+					currentOrder.ShippingMethod = orderDelta.Dto.ShippingMethod;
+				}
+				if (!isValid)
+				{
+					return Error(HttpStatusCode.BadRequest);
+				}
             }
 
             orderDelta.Merge(currentOrder);
@@ -422,7 +422,7 @@ namespace Nop.Plugin.Api.Controllers
             var ordersRootObject = new OrdersRootObject();
 
             var placedOrderDto = _dtoHelper.PrepareOrderDTO(currentOrder);
-            placedOrderDto.ShippingMethod = orderDelta.Dto.ShippingMethod;
+           
 
             ordersRootObject.Orders.Add(placedOrderDto);
 
