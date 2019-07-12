@@ -178,7 +178,7 @@ namespace Nop.Plugin.Api
 
             var migrationsAssembly = typeof(ApiStartup).GetTypeInfo().Assembly.GetName().Name;
 
-            services.AddIdentityServer(options => options.UserInteraction.LoginUrl = "/login")
+            services.AddIdentityServer()
                 .AddSigningCredential(signingKey)
                 .AddConfigurationStore(options =>
                 {
