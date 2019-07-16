@@ -14,9 +14,9 @@ using Nop.Services.Stores;
 namespace Nop.Plugin.Api.Controllers
 {
     using System.Net;
-    using Microsoft.AspNet.WebHooks;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.WebHooks;
     using Nop.Plugin.Api.Services;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -34,13 +34,13 @@ namespace Nop.Plugin.Api.Controllers
             ILocalizationService localizationService,
             IPictureService pictureService,
             IWebHookService webHookService) :
-            base(jsonFieldsSerializer, 
-                aclService, 
-                customerService, 
-                storeMappingService, 
-                storeService, 
-                discountService, 
-                customerActivityService, 
+            base(jsonFieldsSerializer,
+                aclService,
+                customerService,
+                storeMappingService,
+                storeService,
+                discountService,
+                customerActivityService,
                 localizationService,
                 pictureService)
         {

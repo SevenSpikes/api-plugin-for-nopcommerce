@@ -1,6 +1,6 @@
 ﻿namespace Nop.Plugin.Api.Services
 {
-    using Microsoft.AspNet.WebHooks;
+    using Microsoft.AspNetCore.WebHooks;
 
     public interface IWebHookService
     {

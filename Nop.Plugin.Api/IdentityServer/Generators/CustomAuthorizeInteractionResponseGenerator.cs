@@ -99,9 +99,8 @@ namespace Nop.Plugin.Api.IdentityServer.Generators
                 IsPersistent = true,
                 IssuedUtc = DateTime.UtcNow
             };
-
-            await _authenticationService.SignInAsync(_httpContextAccessor.HttpContext,
-                IdentityServerConstants.DefaultCookieAuthenticationScheme, request.Subject, authenticationProperties);
+            
+            await _httpContextAccessor.HttpContext.SignInAsync(IdentityServerConstants.DefaultCookieAuthenticationScheme, request.Subject, authenticationProperties);
             
             var result = new InteractionResponse();
             

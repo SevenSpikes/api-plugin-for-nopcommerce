@@ -35,9 +35,9 @@ namespace Nop.Plugin.Api.Helpers
         // Used in the SetValue private method and also in the Delta.
         private void ConvertAndSetValueIfValid(object objectToBeUpdated, PropertyInfo objectProperty, object propertyValue)
         {
-            TypeConverter converter = TypeDescriptor.GetConverter(objectProperty.PropertyType);
+            var converter = TypeDescriptor.GetConverter(objectProperty.PropertyType);
 
-            string propertyValueAsString = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", propertyValue);
+            var propertyValueAsString = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", propertyValue);
 
 			if (converter.IsValid(propertyValueAsString))
 			{
@@ -49,10 +49,10 @@ namespace Nop.Plugin.Api.Helpers
 
         private void SetValue(object objectToBeUpdated, KeyValuePair<string, object> propertyNameValuePair, Dictionary<object, object> objectPropertyNameValuePairs, bool handleComplexTypeCollections)
         {
-            string propertyName = propertyNameValuePair.Key;
-            object propertyValue = propertyNameValuePair.Value;
+            var propertyName = propertyNameValuePair.Key;
+            var propertyValue = propertyNameValuePair.Value;
 
-            PropertyInfo propertyToUpdate = objectToBeUpdated.GetType().GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+            var propertyToUpdate = objectToBeUpdated.GetType().GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
 
             if (propertyToUpdate != null)
             {
@@ -64,7 +64,7 @@ namespace Nop.Plugin.Api.Helpers
                     if (valueToUpdate == null)
                     {
                         // Check if there is registered factory for this type.
-                        Type factoryType = typeof(IFactory<>);
+                        var factoryType = typeof(IFactory<>);
                         var factoryTypeForCurrentProperty = factoryType.MakeGenericType(new Type[] { propertyToUpdate.PropertyType });
                         var initializerFactory = ((NopEngine)EngineContext.Current).ServiceProvider.GetService(factoryTypeForCurrentProperty);
 
@@ -91,16 +91,30 @@ namespace Nop.Plugin.Api.Helpers
                 // This case hadles collections.
                 else if (propertyValue != null && propertyValue is ICollection<object>)
                 {
-                    ICollection<object> propertyValueAsCollection = propertyValue as ICollection<object>;
+                    var propertyValueAsCollection = propertyValue as ICollection<object>;
 
-                    Type collectionElementsType = propertyToUpdate.PropertyType.GetGenericArguments()[0];
+                    var collectionElementsType = propertyToUpdate.PropertyType.GetGenericArguments()[0];
                     var collection = propertyToUpdate.GetValue(objectToBeUpdated);
 
                     if (collection == null)
                     {
-                        var listType = typeof(List<>);
-                        var constructedListType = listType.MakeGenericType(collectionElementsType);
-                        collection = Activator.CreateInstance(constructedListType);
+                        collection = CreateEmptyList(collectionElementsType);
+                        propertyToUpdate.SetValue(objectToBeUpdated, collection);
+                    }
+
+                    //this is a hack to fix a bug when "collection" cannot be cast to IList (ex:  it's a HashSet for Order.OrderItems)
+                    var collectionAsList = collection as IList;
+                    if (collectionAsList == null)
+                    {
+                        collectionAsList = CreateEmptyList(collectionElementsType);
+
+                        var collectionAsEnumerable = collection as IEnumerable;
+                        foreach (var collectionItem in collectionAsEnumerable)
+                        {
+                            collectionAsList.Add(collectionItem);
+                        }
+
+                        collection = collectionAsList;
                         propertyToUpdate.SetValue(objectToBeUpdated, collection);
                     }
 
@@ -143,7 +157,7 @@ namespace Nop.Plugin.Api.Helpers
 
         private void AddBaseItemInCollection(object newItem, IList collection, Type collectionElementsType)
         {
-            TypeConverter converter = TypeDescriptor.GetConverter(collectionElementsType);
+            var converter = TypeDescriptor.GetConverter(collectionElementsType);
 
             var newItemValueToString = newItem.ToString();
 
@@ -159,7 +173,7 @@ namespace Nop.Plugin.Api.Helpers
             if (newProperties.ContainsKey("Id"))
             {
                 // Every element in collection, that is not System type should have an id.
-                int id = int.Parse(newProperties["Id"].ToString());
+                var id = int.Parse(newProperties["Id"].ToString());
 
                 object itemToBeUpdated = null;
 
@@ -207,6 +221,15 @@ namespace Nop.Plugin.Api.Helpers
             collection.Add(newInstance);
         }
 
+        private IList CreateEmptyList(Type listItemType)
+        {
+            var listType = typeof(List<>);
+            var constructedListType = listType.MakeGenericType(listItemType);
+            var list = Activator.CreateInstance(constructedListType);
+
+            return list as IList;
+        }
+
         // We need this method, because the default value of DateTime is not in the sql server DateTime range and we will get an exception if we use it.
         private void SetEveryDatePropertyThatIsNotSetToDateTimeUtcNow(Dictionary<string, object> newProperties, PropertyInfo[] properties)
         {
@@ -214,7 +237,7 @@ namespace Nop.Plugin.Api.Helpers
             {
                 if (property.PropertyType == typeof(DateTime))
                 {
-                    bool keyFound = false;
+                    var keyFound = false;
 
                     // We need to loop through the keys, because the key may contain underscores in its name, which won't match the jsonProperty name.
                     foreach (var key in newProperties.Keys)

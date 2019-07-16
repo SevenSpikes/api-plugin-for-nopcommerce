@@ -4,7 +4,7 @@ using Nop.Plugin.Api.Constants;
 
 namespace Nop.Plugin.Api.WebHooks
 {
-    using Microsoft.AspNet.WebHooks;
+    using Microsoft.AspNetCore.WebHooks;
 
     public class FilterProvider : IWebHookFilterProvider
     {

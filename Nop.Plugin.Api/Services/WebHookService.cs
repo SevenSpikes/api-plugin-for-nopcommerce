@@ -2,14 +2,12 @@
 
 namespace Nop.Plugin.Api.Services
 {
-    using Microsoft.AspNet.WebHooks;
-    using Microsoft.AspNet.WebHooks.Diagnostics;
-    using Microsoft.AspNet.WebHooks.Services;
-    using Nop.Plugin.Api.Domain;
+    using Microsoft.AspNetCore.WebHooks;
+    using Microsoft.Extensions.Logging;
     using Nop.Plugin.Api.Helpers;
-    using System;
+
     using System.Collections.Generic;
-    using System.Web.Http.Tracing;
+
 
     public class WebHookService : IWebHookService
     {
@@ -17,14 +15,17 @@ namespace Nop.Plugin.Api.Services
         private IWebHookSender _webHookSender;
         private IWebHookStore _webHookStore;
         private IWebHookFilterManager _webHookFilterManager;
-        private ILogger _logger;
-                
+        private ILogger<WebHookManager> _webHookManagerLogger;
+        private ILogger<ApiWebHookSender> _apiWebHookSenderLogger;
+
         private readonly IConfigManagerHelper _configManagerHelper;
 
-        public WebHookService(IConfigManagerHelper configManagerHelper,ILogger logger)
+        public WebHookService(IConfigManagerHelper configManagerHelper, ILogger<WebHookManager> webHookManagerLogger,
+            ILogger<ApiWebHookSender> apiWebHookSenderLogger)
         {
             _configManagerHelper = configManagerHelper;
-            _logger = logger;
+            _webHookManagerLogger = webHookManagerLogger;
+            _apiWebHookSenderLogger = apiWebHookSenderLogger;
         }
 
         public IWebHookFilterManager GetWebHookFilterManager()
@@ -43,7 +44,7 @@ namespace Nop.Plugin.Api.Services
         {
             if (_webHookManager == null)
             {
-                _webHookManager = new WebHookManager(GetWebHookStore(), GetWebHookSender(), _logger);
+                _webHookManager = new WebHookManager(GetWebHookStore(), GetWebHookSender(), _webHookManagerLogger);
             }
 
             return _webHookManager;
@@ -53,7 +54,7 @@ namespace Nop.Plugin.Api.Services
         {
             if (_webHookSender == null)
             {
-                _webHookSender = new ApiWebHookSender(_logger);
+                _webHookSender = new ApiWebHookSender(_apiWebHookSenderLogger);
             }
 
             return _webHookSender;
@@ -63,19 +64,10 @@ namespace Nop.Plugin.Api.Services
         {
             if (_webHookStore == null)
             {
-                var dataSettings = _configManagerHelper.DataSettings;
-                Microsoft.AspNet.WebHooks.Config.SettingsDictionary settings = new Microsoft.AspNet.WebHooks.Config.SettingsDictionary();
-                settings.Add("MS_SqlStoreConnectionString", dataSettings.DataConnectionString);
-                settings.Connections.Add("MS_SqlStoreConnectionString", new Microsoft.AspNet.WebHooks.Config.ConnectionSettings("MS_SqlStoreConnectionString", dataSettings.DataConnectionString));
-
-                Microsoft.AspNet.WebHooks.IWebHookStore store = new Microsoft.AspNet.WebHooks.SqlWebHookStore(settings, _logger);
-
-                Microsoft.AspNet.WebHooks.Services.CustomServices.SetStore(store);
-
-                _webHookStore = CustomServices.GetStore();
+                _webHookStore = new NopWebHookStore();
             }
 
             return _webHookStore;
-        }        
+        }
     }
 }

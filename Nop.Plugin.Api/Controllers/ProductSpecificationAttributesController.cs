@@ -20,7 +20,6 @@ using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Stores;
-using System;
 using System.Linq;
 using System.Net;
 
@@ -84,7 +83,7 @@ namespace Nop.Plugin.Api.Controllers
                 ProductSpecificationAttributes = productSpecificationAttributeDtos
             };
 
-            var json = _jsonFieldsSerializer.Serialize(productSpecificationAttributesRootObject, parameters.Fields);
+            var json = JsonFieldsSerializer.Serialize(productSpecificationAttributesRootObject, parameters.Fields);
 
             return new RawJsonActionResult(json);
         }
@@ -146,7 +145,7 @@ namespace Nop.Plugin.Api.Controllers
             var productSpecificationAttributesRootObject = new ProductSpecificationAttributesRootObjectDto();
             productSpecificationAttributesRootObject.ProductSpecificationAttributes.Add(productSpecificationAttributeDto);
 
-            var json = _jsonFieldsSerializer.Serialize(productSpecificationAttributesRootObject, fields);
+            var json = JsonFieldsSerializer.Serialize(productSpecificationAttributesRootObject, fields);
 
             return new RawJsonActionResult(json);
         }
@@ -172,7 +171,7 @@ namespace Nop.Plugin.Api.Controllers
 
             _specificationAttributeService.InsertProductSpecificationAttribute(productSpecificationAttribute);
 
-            _customerActivityService.InsertActivity("AddNewProductSpecificationAttribute", productSpecificationAttribute.Id.ToString());
+            CustomerActivityService.InsertActivity("AddNewProductSpecificationAttribute", productSpecificationAttribute.Id.ToString());
 
             // Preparing the result dto of the new product
             var productSpecificationAttributeDto = _dtoHelper.PrepareProductSpecificationAttributeDto(productSpecificationAttribute);
@@ -180,7 +179,7 @@ namespace Nop.Plugin.Api.Controllers
             var productSpecificationAttributesRootObjectDto = new ProductSpecificationAttributesRootObjectDto();
             productSpecificationAttributesRootObjectDto.ProductSpecificationAttributes.Add(productSpecificationAttributeDto);
 
-            var json = _jsonFieldsSerializer.Serialize(productSpecificationAttributesRootObjectDto, string.Empty);
+            var json = JsonFieldsSerializer.Serialize(productSpecificationAttributesRootObjectDto, string.Empty);
 
             return new RawJsonActionResult(json);
         }
@@ -213,7 +212,7 @@ namespace Nop.Plugin.Api.Controllers
 
             _specificationAttributeService.UpdateProductSpecificationAttribute(productSpecificationAttribute);
           
-            _customerActivityService.InsertActivity("EditProductSpecificationAttribute", productSpecificationAttribute.Id.ToString());
+            CustomerActivityService.InsertActivity("EditProductSpecificationAttribute", productSpecificationAttribute.Id.ToString());
 
             // Preparing the result dto of the new product attribute
             var productSpecificationAttributeDto = _dtoHelper.PrepareProductSpecificationAttributeDto(productSpecificationAttribute);
@@ -221,7 +220,7 @@ namespace Nop.Plugin.Api.Controllers
             var productSpecificatoinAttributesRootObjectDto = new ProductSpecificationAttributesRootObjectDto();
             productSpecificatoinAttributesRootObjectDto.ProductSpecificationAttributes.Add(productSpecificationAttributeDto);
 
-            var json = _jsonFieldsSerializer.Serialize(productSpecificatoinAttributesRootObjectDto, string.Empty);
+            var json = JsonFieldsSerializer.Serialize(productSpecificatoinAttributesRootObjectDto, string.Empty);
 
             return new RawJsonActionResult(json);
         }
@@ -249,7 +248,7 @@ namespace Nop.Plugin.Api.Controllers
             _specificationAttributeService.DeleteProductSpecificationAttribute(productSpecificationAttribute);
 
             //activity log
-            _customerActivityService.InsertActivity("DeleteProductSpecificationAttribute", _localizationService.GetResource("ActivityLog.DeleteProductSpecificationAttribute"), productSpecificationAttribute.Id.ToString());
+            CustomerActivityService.InsertActivity("DeleteProductSpecificationAttribute", LocalizationService.GetResource("ActivityLog.DeleteProductSpecificationAttribute"), productSpecificationAttribute);
 
             return new RawJsonActionResult("{}");
         }

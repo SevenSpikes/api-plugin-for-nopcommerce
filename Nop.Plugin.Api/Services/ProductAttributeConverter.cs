@@ -29,7 +29,7 @@ namespace Nop.Plugin.Api.Services
 
         public string ConvertToXml(List<ProductItemAttributeDto> attributeDtos, int productId)
         {
-            string attributesXml = "";
+            var attributesXml = "";
 
             if (attributeDtos == null)
                 return attributesXml;
@@ -49,7 +49,7 @@ namespace Nop.Plugin.Api.Services
                             if (selectedAttribute != null)
                             {
                                 int selectedAttributeValue;
-                                bool isInt = int.TryParse(selectedAttribute.Value, out selectedAttributeValue);
+                                var isInt = int.TryParse(selectedAttribute.Value, out selectedAttributeValue);
                                 if (isInt && selectedAttributeValue > 0)
                                 {
                                     attributesXml = _productAttributeParser.AddProductAttribute(attributesXml,
@@ -65,7 +65,7 @@ namespace Nop.Plugin.Api.Services
                             foreach (var selectedAttribute in selectedAttributes)
                             {
                                 int selectedAttributeValue;
-                                bool isInt = int.TryParse(selectedAttribute.Value, out selectedAttributeValue);
+                                var isInt = int.TryParse(selectedAttribute.Value, out selectedAttributeValue);
                                 if (isInt && selectedAttributeValue > 0)
                                 {
                                     // currently there is no support for attribute quantity
@@ -114,7 +114,7 @@ namespace Nop.Plugin.Api.Services
                                 DateTime selectedDate;
 
                                 // Since nopCommerce uses this format to keep the date in the database to keep it consisten we will expect the same format to be passed
-                                bool validDate = DateTime.TryParseExact(selectedAttribute.Value, "D", CultureInfo.CurrentCulture,
+                                var validDate = DateTime.TryParseExact(selectedAttribute.Value, "D", CultureInfo.CurrentCulture,
                                                        DateTimeStyles.None, out selectedDate);
 
                                 if (validDate)
@@ -175,7 +175,7 @@ namespace Nop.Plugin.Api.Services
                                 var value = attributeValue.SelectSingleNode("Value").InnerText.Trim();
                                 // no support for quantity yet
                                 //var quantityNode = attributeValue.SelectSingleNode("Quantity");
-                                attributeDtos.Add(new ProductItemAttributeDto() { Id = attributeId, Value = value });
+                                attributeDtos.Add(new ProductItemAttributeDto { Id = attributeId, Value = value });
                             }
                         }
                     }

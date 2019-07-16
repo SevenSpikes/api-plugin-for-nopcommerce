@@ -6,7 +6,6 @@ namespace Nop.Plugin.Api.JSON.ActionResults
     using System;
     using System.IO;
     using System.Text;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.WebUtilities;
 
     // TODO: Move to BaseApiController as method.
@@ -27,7 +26,7 @@ namespace Nop.Plugin.Api.JSON.ActionResults
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            HttpResponse response = context.HttpContext.Response;
+            var response = context.HttpContext.Response;
             
             response.StatusCode = 200;
             response.ContentType = "application/json";

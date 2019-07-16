@@ -1,30 +1,21 @@
-﻿namespace Nop.Plugin.Api
+﻿using Nop.Plugin.Api.Data;
+using Nop.Web.Framework.Infrastructure.Extensions;
+
+namespace Nop.Plugin.Api
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IdentityModel.Tokens.Jwt;
-    using System.IO;
-    using System.Linq;
-    using System.Linq.Dynamic;
-    using System.Reflection;
-    using System.Security.Cryptography.X509Certificates;
-    using System.Xml.Linq;
-    using System.Xml.XPath;
     using IdentityServer4.EntityFramework.DbContexts;
     using IdentityServer4.EntityFramework.Entities;
     using IdentityServer4.Hosting;
     using IdentityServer4.Models;
-    using Microsoft.AspNet.WebHooks.Diagnostics;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Rewrite;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.IdentityModel.Tokens;
-    using Nop.Core;
     using Nop.Core.Data;
     using Nop.Core.Infrastructure;
     using Nop.Plugin.Api.Authorization.Policies;
@@ -34,14 +25,29 @@
     using Nop.Plugin.Api.IdentityServer.Endpoints;
     using Nop.Plugin.Api.IdentityServer.Generators;
     using Nop.Plugin.Api.IdentityServer.Middlewares;
-    using Nop.Plugin.Api.WebHooks;
+    using Nop.Web.Framework.Infrastructure;
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IdentityModel.Tokens.Jwt;
+    using System.IO;
+    using System.Linq;
+    using System.Linq.Dynamic.Core;
+    using System.Reflection;
     using ApiResource = IdentityServer4.EntityFramework.Entities.ApiResource;
 
     public class ApiStartup : INopStartup
     {
+        private const string ObjectContextName = "nop_object_context_web_api";
+
         // TODO: extract all methods into extensions.
-        public void ConfigureServices(IServiceCollection services, IConfigurationRoot configuration)
+        public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
+            services.AddDbContext<ApiObjectContext>(optionsBuilder =>
+            {
+                optionsBuilder.UseSqlServerWithLazyLoading(services);
+            },ServiceLifetime.Transient);
+
             AddRequiredConfiguration();
 
             AddBindingRedirectsFallbacks();
@@ -55,6 +61,12 @@
 
         public void Configure(IApplicationBuilder app)
         {
+            // During a clean install we should not register any middlewares i.e IdentityServer as it won't be able to create its  
+            // tables without a connection string and will throw an exception
+            var dataSettings = DataSettingsManager.LoadSettings();
+            if (!dataSettings?.IsValid ?? true)
+                return;
+
             // The default route templates for the Swagger docs and swagger - ui are "swagger/docs/{apiVersion}" and "swagger/ui/index#/{assetPath}" respectively.
             //app.UseSwagger();
             //app.UseSwaggerUI(options =>
@@ -76,9 +88,10 @@
 
             SeedData(app);
 
+
             var rewriteOptions = new RewriteOptions()
-                .AddRewrite("oauth/(.*)", "connect/$1",true)
-                .AddRewrite("api/token", "connect/token",true);
+                .AddRewrite("oauth/(.*)", "connect/$1", true)
+                .AddRewrite("api/token", "connect/token", true);
 
             app.UseRewriter(rewriteOptions);
 
@@ -87,6 +100,13 @@
             ////uncomment only if the client is an angular application that directly calls the oauth endpoint
             //// app.UseCors(Microsoft.Owin.Cors.CorsOptions.AllowAll);
             UseIdentityServer(app);
+
+            //need to enable rewind so we can read the request body multiple times (this should eventually be refactored, but both JsonModelBinder and all of the DTO validators need to read this stream)
+            app.Use(async (context, next) =>
+            {
+                context.Request.EnableBuffering();
+                await next();
+            });
         }
 
         private void UseIdentityServer(IApplicationBuilder app)
@@ -109,11 +129,13 @@
 
             // some of third party libaries that we use for WebHooks and Swagger use older versions
             // of certain assemblies so we need to redirect them to the once that nopCommerce uses
-            configManagerHelper.AddBindingRedirects();
+            //TODO: Upgrade 4.10 check this!
+            //configManagerHelper.AddBindingRedirects();
 
             // required by the WebHooks support
-            configManagerHelper.AddConnectionString();           
-            
+            //TODO: Upgrade 4.10 check this!
+            //configManagerHelper.AddConnectionString();           
+
             // This is required only in development.
             // It it is required only when you want to send a web hook to an https address with an invalid SSL certificate. (self-signed)
             // The code marks all certificates as valid.
@@ -145,12 +167,13 @@
         }
 
         private void AddTokenGenerationPipeline(IServiceCollection services)
-        {       
+        {
             RsaSecurityKey signingKey = CryptoHelper.CreateRsaSecurityKey();
 
-            DataSettingsManager dataSettingsManager = new DataSettingsManager();
+            DataSettings dataSettings = DataSettingsManager.LoadSettings();
+            if (!dataSettings?.IsValid ?? true)
+                return;
 
-            DataSettings dataSettings = dataSettingsManager.LoadSettings();
             string connectionStringFromNop = dataSettings.DataConnectionString;
 
             var migrationsAssembly = typeof(ApiStartup).GetTypeInfo().Assembly.GetName().Name;
@@ -194,7 +217,7 @@
             {
                 var configurationContext = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
 
-                if (!DynamicQueryable.Any(configurationContext.ApiResources))
+                if (!configurationContext.ApiResources.Any())
                 {
                     // In the simple case an API has exactly one scope. But there are cases where you might want to sub-divide the functionality of an API, and give different clients access to different parts. 
                     configurationContext.ApiResources.Add(new ApiResource()
@@ -220,7 +243,8 @@
 
         private string LoadUpgradeScript()
         {
-            string path = CommonHelper.MapPath("~/Plugins/Nop.Plugin.Api/upgrade_script.sql");
+            var fileProvider = EngineContext.Current.Resolve<INopFileProvider>();
+            string path = fileProvider.MapPath("~/Plugins/Nop.Plugin.Api/upgrade_script.sql");
             string script = File.ReadAllText(path);
 
             return script;
@@ -285,6 +309,6 @@
             AppDomain.CurrentDomain.AssemblyResolve += handler;
         }
 
-        public int Order { get; }
+        public int Order => new AuthenticationStartup().Order + 1;
     }
 }

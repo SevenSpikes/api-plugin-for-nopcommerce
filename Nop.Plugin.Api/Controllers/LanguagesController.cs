@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Nop.Core.Domain.Localization;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.DTOs.Languages;
 using Nop.Plugin.Api.Helpers;
@@ -18,8 +17,8 @@ namespace Nop.Plugin.Api.Controllers
     using System.Net;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Mvc;
-    using Nop.Plugin.Api.DTOs.Errors;
-    using Nop.Plugin.Api.JSON.Serializers;
+    using DTOs.Errors;
+    using JSON.Serializers;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class LanguagesController : BaseApiController
@@ -66,7 +65,7 @@ namespace Nop.Plugin.Api.Controllers
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetAllLanguages(string fields = "")
         {
-            IList<Language> allLanguages = _languageService.GetAllLanguages();
+            var allLanguages = _languageService.GetAllLanguages();
 
             IList<LanguageDto> languagesAsDto = allLanguages.Select(language => _dtoHelper.PrepateLanguageDto(language)).ToList();
 
@@ -75,7 +74,7 @@ namespace Nop.Plugin.Api.Controllers
                 Languages = languagesAsDto
             };
 
-            var json = _jsonFieldsSerializer.Serialize(languagesRootObject, fields);
+            var json = JsonFieldsSerializer.Serialize(languagesRootObject, fields);
 
             return new RawJsonActionResult(json);
         }

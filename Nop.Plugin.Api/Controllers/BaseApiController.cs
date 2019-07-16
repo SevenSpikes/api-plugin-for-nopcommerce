@@ -17,19 +17,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    using Nop.Plugin.Api.JSON.Serializers;
+    using JSON.Serializers;
 
     public class BaseApiController : Controller
     {
-        protected readonly IJsonFieldsSerializer _jsonFieldsSerializer;
-        protected readonly IAclService _aclService;
-        protected readonly ICustomerService _customerService;
-        protected readonly IStoreMappingService _storeMappingService;
-        protected readonly IStoreService _storeService;
-        protected readonly IDiscountService _discountService;
-        protected readonly ICustomerActivityService _customerActivityService;
-        protected readonly ILocalizationService _localizationService;
-        protected readonly IPictureService _pictureService;
+        protected readonly IJsonFieldsSerializer JsonFieldsSerializer;
+        protected readonly IAclService AclService;
+        protected readonly ICustomerService CustomerService;
+        protected readonly IStoreMappingService StoreMappingService;
+        protected readonly IStoreService StoreService;
+        protected readonly IDiscountService DiscountService;
+        protected readonly ICustomerActivityService CustomerActivityService;
+        protected readonly ILocalizationService LocalizationService;
+        protected readonly IPictureService PictureService;
 
         public BaseApiController(IJsonFieldsSerializer jsonFieldsSerializer, 
             IAclService aclService, 
@@ -41,15 +41,15 @@ namespace Nop.Plugin.Api.Controllers
             ILocalizationService localizationService,
             IPictureService pictureService)
         {
-            _jsonFieldsSerializer = jsonFieldsSerializer;
-            _aclService = aclService;
-            _customerService = customerService;
-            _storeMappingService = storeMappingService;
-            _storeService = storeService;
-            _discountService = discountService;
-            _customerActivityService = customerActivityService;
-            _localizationService = localizationService;
-            _pictureService = pictureService;
+            JsonFieldsSerializer = jsonFieldsSerializer;
+            AclService = aclService;
+            CustomerService = customerService;
+            StoreMappingService = storeMappingService;
+            StoreService = storeService;
+            DiscountService = discountService;
+            CustomerActivityService = customerActivityService;
+            LocalizationService = localizationService;
+            PictureService = pictureService;
         }
 
         protected IActionResult Error(HttpStatusCode statusCode = (HttpStatusCode)422, string propertyKey = "", string errorMessage = "")
@@ -66,13 +66,10 @@ namespace Nop.Plugin.Api.Controllers
             {
                 var errorMessages = item.Value.Errors.Select(x => x.ErrorMessage);
 
-                List<string> validErrorMessages = new List<string>();
+                var validErrorMessages = new List<string>();
 
-                if (errorMessages != null)
-                {
-                    validErrorMessages.AddRange(errorMessages.Where(message => !string.IsNullOrEmpty(message)));
-                }
-
+                validErrorMessages.AddRange(errorMessages.Where(message => !string.IsNullOrEmpty(message)));
+                
                 if (validErrorMessages.Count > 0)
                 {
                     if (errors.ContainsKey(item.Key))
@@ -91,7 +88,7 @@ namespace Nop.Plugin.Api.Controllers
                 Errors = errors
             };
 
-            var errorsJson = _jsonFieldsSerializer.Serialize(errorsRootObject, null);
+            var errorsJson = JsonFieldsSerializer.Serialize(errorsRootObject, null);
 
             return new ErrorActionResult(errorsJson, statusCode);
         }
@@ -105,22 +102,22 @@ namespace Nop.Plugin.Api.Controllers
 
             entity.SubjectToAcl = passedRoleIds.Any();
 
-            var existingAclRecords = _aclService.GetAclRecords(entity);
-            var allCustomerRoles = _customerService.GetAllCustomerRoles(true);
+            var existingAclRecords = AclService.GetAclRecords(entity);
+            var allCustomerRoles = CustomerService.GetAllCustomerRoles(true);
             foreach (var customerRole in allCustomerRoles)
             {
                 if (passedRoleIds.Contains(customerRole.Id))
                 {
                     //new role
                     if (existingAclRecords.Count(acl => acl.CustomerRoleId == customerRole.Id) == 0)
-                        _aclService.InsertAclRecord(entity, customerRole.Id);
+                        AclService.InsertAclRecord(entity, customerRole.Id);
                 }
                 else
                 {
                     //remove role
                     var aclRecordToDelete = existingAclRecords.FirstOrDefault(acl => acl.CustomerRoleId == customerRole.Id);
                     if (aclRecordToDelete != null)
-                        _aclService.DeleteAclRecord(aclRecordToDelete);
+                        AclService.DeleteAclRecord(aclRecordToDelete);
                 }
             }
         }
@@ -132,22 +129,22 @@ namespace Nop.Plugin.Api.Controllers
 
             entity.LimitedToStores = passedStoreIds.Any();
 
-            var existingStoreMappings = _storeMappingService.GetStoreMappings(entity);
-            var allStores = _storeService.GetAllStores();
+            var existingStoreMappings = StoreMappingService.GetStoreMappings(entity);
+            var allStores = StoreService.GetAllStores();
             foreach (var store in allStores)
             {
                 if (passedStoreIds.Contains(store.Id))
                 {
                     //new store
                     if (existingStoreMappings.Count(sm => sm.StoreId == store.Id) == 0)
-                        _storeMappingService.InsertStoreMapping(entity, store.Id);
+                        StoreMappingService.InsertStoreMapping(entity, store.Id);
                 }
                 else
                 {
                     //remove store
                     var storeMappingToDelete = existingStoreMappings.FirstOrDefault(sm => sm.StoreId == store.Id);
                     if (storeMappingToDelete != null)
-                        _storeMappingService.DeleteStoreMapping(storeMappingToDelete);
+                        StoreMappingService.DeleteStoreMapping(storeMappingToDelete);
                 }
             }
         }

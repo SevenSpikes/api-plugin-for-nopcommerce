@@ -13,7 +13,7 @@ namespace Nop.Plugin.Api.Helpers
         
         public static JsonObjectAttribute GetJsonObjectAttribute(Type objectType)
         {
-            JsonObjectAttribute jsonObject = objectType.GetCustomAttribute(typeof(JsonObjectAttribute)) as JsonObjectAttribute;
+            var jsonObject = objectType.GetCustomAttribute(typeof(JsonObjectAttribute)) as JsonObjectAttribute;
 
             return jsonObject;
         }

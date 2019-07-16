@@ -5,43 +5,31 @@ namespace Nop.Plugin.Api.AutoMapper
 {
     public static class AutoMapperApiConfiguration
     {
-        private static MapperConfigurationExpression _mapperConfigurationExpression;
-        private static IMapper _mapper;
+        private static MapperConfigurationExpression s_mapperConfigurationExpression;
+        private static IMapper s_mapper;
+        private static readonly object s_mapperLockObject = new object();
 
-        private static readonly object mapperConfigurationExpressionLockObject = new object();
-        private static readonly object mapperLockObject = new object();
-
-        public static MapperConfigurationExpression MapperConfigurationExpression
-        {
-            get
-            {
-                if (_mapperConfigurationExpression == null)
-                {
-                    _mapperConfigurationExpression = new MapperConfigurationExpression(); ;
-                }
-
-                return _mapperConfigurationExpression;
-            }
-        }        
+        public static MapperConfigurationExpression MapperConfigurationExpression => s_mapperConfigurationExpression ??
+                                                                                     (s_mapperConfigurationExpression = new MapperConfigurationExpression());
 
         public static IMapper Mapper
         {
             get
             {
-                if (_mapper == null)
+                if (s_mapper == null)
                 {
-                    lock (mapperLockObject)
+                    lock (s_mapperLockObject)
                     {
-                        if (_mapper == null)
+                        if (s_mapper == null)
                         {
                             var mapperConfiguration = new MapperConfiguration(MapperConfigurationExpression);
 
-                            _mapper = mapperConfiguration.CreateMapper();
+                            s_mapper = mapperConfiguration.CreateMapper();
                         }
                     }
                 }
 
-                return _mapper;
+                return s_mapper;
             }
         }
 

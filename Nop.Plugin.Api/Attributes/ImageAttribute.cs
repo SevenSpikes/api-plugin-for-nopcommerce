@@ -25,15 +25,15 @@ namespace Nop.Plugin.Api.Attributes
 
         public override void Validate(object instance)
         {
-            ImageDto imageDto = instance as ImageDto;
+            var imageDto = instance as ImageDto;
 
-            bool imageSrcSet = imageDto != null && !string.IsNullOrEmpty(imageDto.Src);
-            bool imageAttachmentSet = imageDto != null && !string.IsNullOrEmpty(imageDto.Attachment);
+            var imageSrcSet = imageDto != null && !string.IsNullOrEmpty(imageDto.Src);
+            var imageAttachmentSet = imageDto != null && !string.IsNullOrEmpty(imageDto.Attachment);
             
             if (imageSrcSet || imageAttachmentSet)
             {
                 byte[] imageBytes = null;
-                string mimeType = string.Empty;
+                var mimeType = string.Empty;
 
                 // Validation of the image object
 
@@ -108,7 +108,7 @@ namespace Nop.Plugin.Api.Attributes
             }
             catch (Exception ex)
             {
-                string message = string.Format("{0} - {1}", "src is invalid", ex.Message);
+                var message = string.Format("{0} - {1}", "src is invalid", ex.Message);
 
                 _errors.Add(key, message);
             }
@@ -116,9 +116,9 @@ namespace Nop.Plugin.Api.Attributes
 
         private void ValidateAttachmentFormat(string attachment)
         {
-            Regex validBase64Pattern =
+            var validBase64Pattern =
                 new Regex("^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$");
-            bool isMatch = validBase64Pattern.IsMatch(attachment);
+            var isMatch = validBase64Pattern.IsMatch(attachment);
             if (!isMatch)
             {
                 var key = string.Format("{0} type", "image");
@@ -134,10 +134,10 @@ namespace Nop.Plugin.Api.Attributes
 
         private static string GetMimeTypeFromByteArray(byte[] imageBytes)
         {
-            MemoryStream stream = new MemoryStream(imageBytes, 0, imageBytes.Length);
-            Image image = Image.FromStream(stream, true);
-            ImageFormat format = image.RawFormat;
-            ImageCodecInfo codec = ImageCodecInfo.GetImageDecoders().First(c => c.FormatID == format.Guid);
+            var stream = new MemoryStream(imageBytes, 0, imageBytes.Length);
+            var image = Image.FromStream(stream, true);
+            var format = image.RawFormat;
+            var codec = ImageCodecInfo.GetImageDecoders().First(c => c.FormatID == format.Guid);
             return codec.MimeType;
         }
 
@@ -152,7 +152,7 @@ namespace Nop.Plugin.Api.Attributes
                 catch (Exception ex)
                 {
                     var key = string.Format("{0} invalid", "image");
-                    string message = string.Format("{0} - {1}", "source is invalid", ex.Message);
+                    var message = string.Format("{0} - {1}", "source is invalid", ex.Message);
 
                     _errors.Add(key, message);
                 }
@@ -161,7 +161,7 @@ namespace Nop.Plugin.Api.Attributes
             if (imageBytes == null)
             {
                 var key = string.Format("{0} invalid", "image");
-                string message = "You have provided an invalid image source/attachment";
+                var message = "You have provided an invalid image source/attachment";
 
                 _errors.Add(key, message);
             }

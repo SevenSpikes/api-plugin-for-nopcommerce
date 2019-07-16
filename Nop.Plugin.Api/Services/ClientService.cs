@@ -10,8 +10,8 @@ namespace Nop.Plugin.Api.Services
     using IdentityServer4.EntityFramework.Interfaces;
     using IdentityServer4.Models;
     using Microsoft.EntityFrameworkCore;
-    using Nop.Plugin.Api.MappingExtensions;
-    using Nop.Plugin.Api.Models;
+    using MappingExtensions;
+    using Models;
     using Client = IdentityServer4.EntityFramework.Entities.Client;
 
     public class ClientService : IClientService
@@ -43,7 +43,7 @@ namespace Nop.Plugin.Api.Services
                 throw new ArgumentNullException(nameof(model));
             }
 
-            var client = new Client()
+            var client = new Client
             {
                 ClientId = model.ClientId,
                 Enabled = model.Enabled,
@@ -57,43 +57,43 @@ namespace Nop.Plugin.Api.Services
             AddOrUpdateClientSecret(client, model.ClientSecret);
             AddOrUpdateClientRedirectUrl(client, model.RedirectUrl);
             
-            client.AllowedGrantTypes = new List<ClientGrantType>()
+            client.AllowedGrantTypes = new List<ClientGrantType>
             {
-                new ClientGrantType()
+                new ClientGrantType
                 {
                     Client = client,
                     GrantType = OidcConstants.GrantTypes.AuthorizationCode
                 },
-                new ClientGrantType()
+                new ClientGrantType
                 {
                     Client = client,
                     GrantType = OidcConstants.GrantTypes.RefreshToken
                 },
-                new ClientGrantType()
+                new ClientGrantType
                 {
                     Client = client,
                     GrantType = OidcConstants.GrantTypes.JwtBearer
                 }
             };
 
-            client.AllowedScopes = new List<ClientScope>()
+            client.AllowedScopes = new List<ClientScope>
             {
-                new ClientScope()
+                new ClientScope
                 {
                     Client = client,
                     Scope = "nop_api"
                 }
             };
 
-            client.Claims = new List<ClientClaim>()
+            client.Claims = new List<ClientClaim>
             {
-                new ClientClaim()
+                new ClientClaim
                 {
                     Client = client,
                     Type = JwtClaimTypes.Subject,
                     Value = client.ClientId
                 },
-                new ClientClaim()
+                new ClientClaim
                 {
                     Client = client,
                     Type = JwtClaimTypes.Name,
@@ -115,7 +115,7 @@ namespace Nop.Plugin.Api.Services
                 throw new ArgumentNullException(nameof(model));
             }
             
-            Client currentClient = _configurationDbContext.Clients
+            var currentClient = _configurationDbContext.Clients
                 .Include(client => client.ClientSecrets)
                 .Include(client => client.RedirectUris)
                 .FirstOrDefault(client => client.ClientId == model.ClientId);
@@ -140,7 +140,7 @@ namespace Nop.Plugin.Api.Services
 
         public ClientApiModel FindClientByIdAsync(int id)
         {
-            Client currentClient = _configurationDbContext.Clients
+            var currentClient = _configurationDbContext.Clients
                 .Include(client => client.ClientSecrets)
                 .Include(client => client.RedirectUris)
                 .FirstOrDefault(client => client.Id == id);
@@ -150,7 +150,7 @@ namespace Nop.Plugin.Api.Services
 
         public ClientApiModel FindClientByClientId(string clientId)
         {
-            Client currentClient = _configurationDbContext.Clients
+            var currentClient = _configurationDbContext.Clients
                 .Include(client => client.ClientSecrets)
                 .Include(client => client.RedirectUris)
                 .FirstOrDefault(client => client.ClientId == clientId);
@@ -160,7 +160,7 @@ namespace Nop.Plugin.Api.Services
 
         public void DeleteClient(int id)
         {
-            Client client = _configurationDbContext.Clients
+            var client = _configurationDbContext.Clients
                 .Include(entity => entity.ClientSecrets)
                 .Include(entity => entity.RedirectUris)
                 .FirstOrDefault(x => x.Id == id);
@@ -181,7 +181,7 @@ namespace Nop.Plugin.Api.Services
             }
 
             // Currently, the api works with only one client redirect uri.
-            ClientRedirectUri currentClientRedirectUri = currentClient.RedirectUris.FirstOrDefault();
+            var currentClientRedirectUri = currentClient.RedirectUris.FirstOrDefault();
 
             // Add new redirectUri
             if ((currentClientRedirectUri != null && currentClientRedirectUri.RedirectUri != modelRedirectUrl) ||
@@ -190,7 +190,7 @@ namespace Nop.Plugin.Api.Services
                 // Remove all redirect uris as we may have only one.
                 currentClient.RedirectUris.Clear();
 
-                currentClient.RedirectUris.Add(new ClientRedirectUri()
+                currentClient.RedirectUris.Add(new ClientRedirectUri
                 {
                     Client = currentClient,
                     RedirectUri = modelRedirectUrl
@@ -207,7 +207,7 @@ namespace Nop.Plugin.Api.Services
             }
 
             // Currently, the api works with only one client secret.
-            ClientSecret currentClientSecret = currentClient.ClientSecrets.FirstOrDefault();
+            var currentClientSecret = currentClient.ClientSecrets.FirstOrDefault();
 
             // Add new secret
             if ((currentClientSecret != null && currentClientSecret.Description != modelClientSecretDescription) ||
@@ -216,7 +216,7 @@ namespace Nop.Plugin.Api.Services
                 // Remove all secrets as we may have only one valid.
                 currentClient.ClientSecrets.Clear();
 
-                currentClient.ClientSecrets.Add(new ClientSecret()
+                currentClient.ClientSecrets.Add(new ClientSecret
                 {
                     Client = currentClient,
                     Value = modelClientSecretDescription.Sha256(),

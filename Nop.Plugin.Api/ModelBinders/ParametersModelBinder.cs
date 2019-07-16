@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Nop.Plugin.Api.Converters;
+﻿using Nop.Plugin.Api.Converters;
 
 namespace Nop.Plugin.Api.ModelBinders
 {
@@ -26,7 +25,7 @@ namespace Nop.Plugin.Api.ModelBinders
             
             if (bindingContext.HttpContext.Request.QueryString.HasValue)
             {
-                Dictionary<string, string> queryParameters = bindingContext.HttpContext.Request.Query.ToDictionary(pair => pair.Key, pair => pair.Value.ToString());
+                var queryParameters = bindingContext.HttpContext.Request.Query.ToDictionary(pair => pair.Key, pair => pair.Value.ToString());
 
                 bindingContext.Model = _objectConverter.ToObject<T>(queryParameters);
             }

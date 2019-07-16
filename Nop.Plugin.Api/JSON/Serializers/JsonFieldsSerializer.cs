@@ -13,14 +13,14 @@
         {
             if (objectToSerialize == null)
             {
-                throw new ArgumentNullException("objectToSerialize");
+                throw new ArgumentNullException(nameof(objectToSerialize));
             }
 
             IList<string> fieldsList = null;
 
             if (!string.IsNullOrEmpty(jsonFields))
             {
-                string primaryPropertyName = objectToSerialize.GetPrimaryPropertyName();
+                var primaryPropertyName = objectToSerialize.GetPrimaryPropertyName();
 
                 fieldsList = GetPropertiesIntoList(jsonFields);
 
@@ -28,21 +28,21 @@
                 fieldsList.Add(primaryPropertyName);
             }
 
-            string json = Serialize(objectToSerialize, fieldsList);
+            var json = Serialize(objectToSerialize, fieldsList);
 
             return json;
         }
 
         private string Serialize(object objectToSerialize, IList<string> jsonFields = null)
         {
-            JToken jToken = JToken.FromObject(objectToSerialize);
+            var jToken = JToken.FromObject(objectToSerialize);
 
             if (jsonFields != null)
             {
                 jToken = jToken.RemoveEmptyChildrenAndFilterByFields(jsonFields);
             }
 
-            string jTokenResult = jToken.ToString();
+            var jTokenResult = jToken.ToString();
 
             return jTokenResult;
         }

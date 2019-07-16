@@ -8,7 +8,7 @@
     {
         public bool IsActive()
         {
-            ApiSettings settings = EngineContext.Current.Resolve<ApiSettings>();
+            var settings = EngineContext.Current.Resolve<ApiSettings>();
 
             if (settings.EnableApi)
             {

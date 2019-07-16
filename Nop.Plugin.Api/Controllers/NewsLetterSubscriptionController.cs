@@ -1,20 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
-using Nop.Core.Domain.Messages;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.Constants;
-using Nop.Plugin.Api.Delta;
 using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Plugin.Api.DTOs.Errors;
-using Nop.Plugin.Api.Factories;
 using Nop.Plugin.Api.JSON.ActionResults;
 using Nop.Plugin.Api.JSON.Serializers;
 using Nop.Plugin.Api.MappingExtensions;
-using Nop.Plugin.Api.ModelBinders;
 using Nop.Plugin.Api.Models.CustomersParameters;
 using Nop.Plugin.Api.Services;
 using Nop.Services.Customers;
@@ -80,14 +75,14 @@ namespace Nop.Plugin.Api.Controllers
                                                                              parameters.Limit, parameters.Page, parameters.SinceId,
                                                                              parameters.OnlyActive);
 
-            List<NewsLetterSubscriptionDto> newsLetterSubscriptionsDtos = newsLetterSubscriptions.Select(nls => nls.ToDto()).ToList();
+            var newsLetterSubscriptionsDtos = newsLetterSubscriptions.Select(nls => nls.ToDto()).ToList();
 
             var newsLetterSubscriptionsRootObject = new NewsLetterSubscriptionsRootObject()
             {
                 NewsLetterSubscriptions = newsLetterSubscriptionsDtos
             };
 
-            var json = _jsonFieldsSerializer.Serialize(newsLetterSubscriptionsRootObject, parameters.Fields);
+            var json = JsonFieldsSerializer.Serialize(newsLetterSubscriptionsRootObject, parameters.Fields);
 
             return new RawJsonActionResult(json);
         }

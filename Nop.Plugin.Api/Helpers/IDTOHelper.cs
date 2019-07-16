@@ -4,6 +4,7 @@ using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Stores;
 using Nop.Plugin.Api.DTOs.Categories;
 using Nop.Plugin.Api.DTOs.Languages;
+using Nop.Plugin.Api.DTOs.Manufacturers;
 using Nop.Plugin.Api.DTOs.OrderItems;
 using Nop.Plugin.Api.DTOs.Orders;
 using Nop.Plugin.Api.DTOs.ProductAttributes;
@@ -26,5 +27,6 @@ namespace Nop.Plugin.Api.Helpers
         ProductAttributeDto PrepareProductAttributeDTO(ProductAttribute productAttribute);
         ProductSpecificationAttributeDto PrepareProductSpecificationAttributeDto(ProductSpecificationAttribute productSpecificationAttribute);
         SpecificationAttributeDto PrepareSpecificationAttributeDto(SpecificationAttribute specificationAttribute);
-    }
+        ManufacturerDto PrepareManufacturerDto(Manufacturer manufacturer);
+  }
 }

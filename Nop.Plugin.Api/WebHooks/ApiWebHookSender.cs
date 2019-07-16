@@ -3,14 +3,14 @@ using Newtonsoft.Json.Linq;
 
 namespace Nop.Plugin.Api.WebHooks
 {
-    using Microsoft.AspNet.WebHooks;
-    using Microsoft.AspNet.WebHooks.Diagnostics;
+    using Microsoft.AspNetCore.WebHooks;
+    using Microsoft.Extensions.Logging;
 
     public class ApiWebHookSender : DataflowWebHookSender
     {
         private const string WebHookIdKey = "WebHookId";
 
-        public ApiWebHookSender(ILogger logger) : base(logger)
+        public ApiWebHookSender(ILogger<ApiWebHookSender> logger) : base(logger)
         {
         }
 

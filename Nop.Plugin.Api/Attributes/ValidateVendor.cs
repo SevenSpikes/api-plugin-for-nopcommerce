@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Nop.Core.Domain.Vendors;
 using Nop.Core.Infrastructure;
 using Nop.Services.Vendors;
 
@@ -31,13 +30,13 @@ namespace Nop.Plugin.Api.Attributes
 
         public override void Validate(object instance)
         {
-            int vendorId = 0;
+            var vendorId = 0;
 
             if (instance != null && int.TryParse(instance.ToString(), out vendorId))
             {
                 if (vendorId > 0)
                 {
-                    Vendor vendor = VendorService.GetVendorById(vendorId);
+                    var vendor = VendorService.GetVendorById(vendorId);
 
                     if (vendor == null)
                     {

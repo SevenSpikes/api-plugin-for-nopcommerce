@@ -18,7 +18,6 @@ using Nop.Core;
 using Nop.Plugin.Api.Constants;
 using Nop.Services.Media;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNet.WebHooks;
 using Nop.Plugin.Api.Services;
 
 namespace Nop.Plugin.Api.Controllers
@@ -30,6 +29,7 @@ namespace Nop.Plugin.Api.Controllers
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.WebHooks;
     using Nop.Plugin.Api.JSON.Serializers;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -97,7 +97,7 @@ namespace Nop.Plugin.Api.Controllers
         /// </summary>
         /// <returns>The registered <see cref="WebHook"/> instance for a given user.</returns>
         [HttpGet]
-        [Route("/api/webhooks/registrations/{id}",Name = WebHookNames.GetWebhookByIdAction)]
+        [Route("/api/webhooks/registrations/{id}", Name = WebHookNames.GetWebhookByIdAction)]
         [ProducesResponseType(typeof(WebHook), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
@@ -163,7 +163,7 @@ namespace Nop.Plugin.Api.Controllers
 
                 if (!webHook.Filters.Any())
                 {
-                    string msg = _localizationService.GetResource("Api.WebHooks.CouldNotRegisterDuplicateWebhook");
+                    string msg = LocalizationService.GetResource("Api.WebHooks.CouldNotRegisterDuplicateWebhook");
                     return Error(HttpStatusCode.Conflict, ErrorPropertyKey, msg);
                 }
             }
@@ -190,7 +190,7 @@ namespace Nop.Plugin.Api.Controllers
             }
             catch (Exception ex)
             {
-                string msg = string.Format(CultureInfo.InvariantCulture, _localizationService.GetResource("Api.WebHooks.CouldNotRegisterWebhook"), ex.Message);
+                string msg = string.Format(CultureInfo.InvariantCulture, LocalizationService.GetResource("Api.WebHooks.CouldNotRegisterWebhook"), ex.Message);
                 //Configuration.DependencyResolver.GetLogger().Error(msg, ex);
                 return Error(HttpStatusCode.Conflict, ErrorPropertyKey, msg);
             }
@@ -230,8 +230,8 @@ namespace Nop.Plugin.Api.Controllers
             }
             catch (Exception ex)
             {
-                string msg = string.Format(CultureInfo.InvariantCulture, _localizationService.GetResource("Api.WebHooks.CouldNotUpdateWebhook"), ex.Message);
-               // Configuration.DependencyResolver.GetLogger().Error(msg, ex);
+                string msg = string.Format(CultureInfo.InvariantCulture, LocalizationService.GetResource("Api.WebHooks.CouldNotUpdateWebhook"), ex.Message);
+                // Configuration.DependencyResolver.GetLogger().Error(msg, ex);
                 return Error(HttpStatusCode.InternalServerError, ErrorPropertyKey, msg);
             }
         }
@@ -256,7 +256,7 @@ namespace Nop.Plugin.Api.Controllers
             }
             catch (Exception ex)
             {
-                string msg = string.Format(CultureInfo.InvariantCulture, _localizationService.GetResource("Api.WebHooks.CouldNotDeleteWebhook"), ex.Message);
+                string msg = string.Format(CultureInfo.InvariantCulture, LocalizationService.GetResource("Api.WebHooks.CouldNotDeleteWebhook"), ex.Message);
                 //Configuration.DependencyResolver.GetLogger().Error(msg, ex);
                 return Error(HttpStatusCode.InternalServerError, ErrorPropertyKey, msg);
             }
@@ -281,8 +281,8 @@ namespace Nop.Plugin.Api.Controllers
             }
             catch (Exception ex)
             {
-                string msg = string.Format(CultureInfo.InvariantCulture, _localizationService.GetResource("Api.WebHooks.CouldNotDeleteWebhooks"), ex.Message);
-               // Configuration.DependencyResolver.GetLogger().Error(msg, ex);
+                string msg = string.Format(CultureInfo.InvariantCulture, LocalizationService.GetResource("Api.WebHooks.CouldNotDeleteWebhooks"), ex.Message);
+                // Configuration.DependencyResolver.GetLogger().Error(msg, ex);
                 return Error(HttpStatusCode.InternalServerError, ErrorPropertyKey, msg);
             }
         }
@@ -303,7 +303,7 @@ namespace Nop.Plugin.Api.Controllers
                 webHook.Filters.Add(WildcardWebHookFilterProvider.Name);
                 return;
             }
-            
+
             IDictionary<string, WebHookFilter> filters = await _filterManager.GetAllWebHookFiltersAsync();
             HashSet<string> normalizedFilters = new HashSet<string>();
             List<string> invalidFilters = new List<string>();
@@ -324,9 +324,9 @@ namespace Nop.Plugin.Api.Controllers
             {
                 string invalidFiltersMsg = string.Join(", ", invalidFilters);
                 string link = Url.Link(WebHookNames.FiltersGetAction, null);
-                string msg = string.Format(CultureInfo.CurrentCulture, _localizationService.GetResource("Api.WebHooks.InvalidFilters"), invalidFiltersMsg, link);
+                string msg = string.Format(CultureInfo.CurrentCulture, LocalizationService.GetResource("Api.WebHooks.InvalidFilters"), invalidFiltersMsg, link);
                 //Configuration.DependencyResolver.GetLogger().Info(msg);
-                
+
                 throw new VerificationException(msg);
             }
             else
@@ -392,7 +392,7 @@ namespace Nop.Plugin.Api.Controllers
         /// Gets the user ID for this request.
         /// </summary>
         private string GetUserId()
-        {          
+        {
             // If we are here the client is already authorized.
             // So there is a client ID and the client is active.
             var clientId =

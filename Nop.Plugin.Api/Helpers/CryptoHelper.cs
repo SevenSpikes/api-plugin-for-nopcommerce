@@ -1,10 +1,14 @@
-﻿namespace Nop.Plugin.Api.Helpers
+﻿using Nop.Core.Infrastructure;
+
+namespace Nop.Plugin.Api.Helpers
 {
     using Microsoft.IdentityModel.Tokens;
     using Newtonsoft.Json;
     using System.IO;
     using System.Security.Cryptography;
     using Nop.Core;
+    using Microsoft.Extensions.DependencyInjection;
+
 
     public static class CryptoHelper
     {
@@ -16,7 +20,7 @@
         {
             if (_key == null)
             {
-                string pathToKey = CommonHelper.MapPath($"~/App_Data/{TokenSigningKeyFileName}");
+                string pathToKey = CommonHelper.DefaultFileProvider.MapPath($"~/App_Data/{TokenSigningKeyFileName}");
 
                 if (!File.Exists(pathToKey))
                 {

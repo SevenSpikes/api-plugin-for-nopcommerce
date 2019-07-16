@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
-using Nop.Core.Domain.Directory;
 using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.Constants;
@@ -32,10 +30,9 @@ using Nop.Services.Stores;
 namespace Nop.Plugin.Api.Controllers
 {
     using Microsoft.AspNetCore.Authentication.JwtBearer;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Nop.Plugin.Api.DTOs.Errors;
-    using Nop.Plugin.Api.JSON.Serializers;
+    using DTOs.Errors;
+    using JSON.Serializers;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CustomersController : BaseApiController
@@ -122,14 +119,14 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid request parameters");
             }
 
-            IList<CustomerDto> allCustomers = _customerApiService.GetCustomersDtos(parameters.CreatedAtMin, parameters.CreatedAtMax, parameters.Limit, parameters.Page, parameters.SinceId);
+            var allCustomers = _customerApiService.GetCustomersDtos(parameters.CreatedAtMin, parameters.CreatedAtMax, parameters.Limit, parameters.Page, parameters.SinceId);
 
             var customersRootObject = new CustomersRootObject()
             {
                 Customers = allCustomers
             };
 
-            var json = _jsonFieldsSerializer.Serialize(customersRootObject, parameters.Fields);
+            var json = JsonFieldsSerializer.Serialize(customersRootObject, parameters.Fields);
 
             return new RawJsonActionResult(json);
         }
@@ -156,7 +153,7 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "id", "invalid id");
             }
 
-            CustomerDto customer = _customerApiService.GetCustomerById(id);
+            var customer = _customerApiService.GetCustomerById(id);
 
             if (customer == null)
             {
@@ -166,7 +163,7 @@ namespace Nop.Plugin.Api.Controllers
             var customersRootObject = new CustomersRootObject();
             customersRootObject.Customers.Add(customer);
 
-            var json = _jsonFieldsSerializer.Serialize(customersRootObject, fields);
+            var json = JsonFieldsSerializer.Serialize(customersRootObject, fields);
 
             return new RawJsonActionResult(json);
         }
@@ -217,14 +214,14 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid page parameter");
             }
             
-            IList<CustomerDto> customersDto = _customerApiService.Search(parameters.Query, parameters.Order, parameters.Page, parameters.Limit);
+            var customersDto = _customerApiService.Search(parameters.Query, parameters.Order, parameters.Page, parameters.Limit);
 
             var customersRootObject = new CustomersRootObject()
             {
                 Customers = customersDto
             };
 
-            var json = _jsonFieldsSerializer.Serialize(customersRootObject, parameters.Fields);
+            var json = JsonFieldsSerializer.Serialize(customersRootObject, parameters.Fields);
 
             return new RawJsonActionResult(json);
         }
@@ -245,10 +242,10 @@ namespace Nop.Plugin.Api.Controllers
             //If the validation has passed the customerDelta object won't be null for sure so we don't need to check for this.
 
             // Inserting the new customer
-            Customer newCustomer = _factory.Initialize();
+            var newCustomer = _factory.Initialize();
             customerDelta.Merge(newCustomer);
 
-            foreach (var address in customerDelta.Dto.CustomerAddresses)
+            foreach (var address in customerDelta.Dto.Addresses)
             {
                 // we need to explicitly set the date as if it is not specified
                 // it will default to 01/01/0001 which is not supported by SQL Server and throws and exception
@@ -259,16 +256,14 @@ namespace Nop.Plugin.Api.Controllers
                 newCustomer.Addresses.Add(address.ToEntity());
             }
             
-            _customerService.InsertCustomer(newCustomer);
+            CustomerService.InsertCustomer(newCustomer);
 
             InsertFirstAndLastNameGenericAttributes(customerDelta.Dto.FirstName, customerDelta.Dto.LastName, newCustomer);
 
-            int languageId = 0;
-
-            if (!string.IsNullOrEmpty(customerDelta.Dto.LanguageId) && int.TryParse(customerDelta.Dto.LanguageId, out languageId)
+            if (!string.IsNullOrEmpty(customerDelta.Dto.LanguageId) && int.TryParse(customerDelta.Dto.LanguageId, out var languageId)
                 && _languageService.GetLanguageById(languageId) != null)
             {
-                _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.LanguageId, languageId);
+                _genericAttributeService.SaveAttribute(newCustomer, NopCustomerDefaults.LanguageIdAttribute, languageId);
             }
 
             //password
@@ -284,12 +279,12 @@ namespace Nop.Plugin.Api.Controllers
             {
                 AddValidRoles(customerDelta, newCustomer);
 
-                _customerService.UpdateCustomer(newCustomer);
+                CustomerService.UpdateCustomer(newCustomer);
             }
 
             // Preparing the result dto of the new customer
             // We do not prepare the shopping cart items because we have a separate endpoint for them.
-            CustomerDto newCustomerDto = newCustomer.ToDto();
+            var newCustomerDto = newCustomer.ToDto();
 
             // This is needed because the entity framework won't populate the navigation properties automatically
             // and the country will be left null. So we do it by hand here.
@@ -302,13 +297,13 @@ namespace Nop.Plugin.Api.Controllers
             newCustomerDto.LanguageId = customerDelta.Dto.LanguageId;
 
             //activity log
-            _customerActivityService.InsertActivity("AddNewCustomer", _localizationService.GetResource("ActivityLog.AddNewCustomer"), newCustomer.Id);
+            CustomerActivityService.InsertActivity("AddNewCustomer", LocalizationService.GetResource("ActivityLog.AddNewCustomer"), newCustomer);
 
             var customersRootObject = new CustomersRootObject();
 
             customersRootObject.Customers.Add(newCustomerDto);
 
-            var json = _jsonFieldsSerializer.Serialize(customersRootObject, string.Empty);
+            var json = JsonFieldsSerializer.Serialize(customersRootObject, string.Empty);
 
             return new RawJsonActionResult(json);
         }
@@ -328,10 +323,8 @@ namespace Nop.Plugin.Api.Controllers
                 return Error();
             }
 
-            //If the validation has passed the customerDelta object won't be null for sure so we don't need to check for this.
-            
             // Updateting the customer
-            Customer currentCustomer = _customerApiService.GetCustomerEntityById(int.Parse(customerDelta.Dto.Id));
+            var currentCustomer = _customerApiService.GetCustomerEntityById(customerDelta.Dto.Id);
 
             if (currentCustomer == null)
             {
@@ -351,18 +344,17 @@ namespace Nop.Plugin.Api.Controllers
                 AddValidRoles(customerDelta, currentCustomer);
             }
 
-            if (customerDelta.Dto.CustomerAddresses.Count > 0)
+            if (customerDelta.Dto.Addresses.Count > 0)
             {
                 var currentCustomerAddresses = currentCustomer.Addresses.ToDictionary(address => address.Id, address => address);
 
-                foreach (var passedAddress in customerDelta.Dto.CustomerAddresses)
+                foreach (var passedAddress in customerDelta.Dto.Addresses)
                 {
-                    int passedAddressId = int.Parse(passedAddress.Id);
-                    Address addressEntity = passedAddress.ToEntity();
+                    var addressEntity = passedAddress.ToEntity();
 
-                    if (currentCustomerAddresses.ContainsKey(passedAddressId))
+                    if (currentCustomerAddresses.ContainsKey(passedAddress.Id))
                     {
-                        _mappingHelper.Merge(passedAddress, currentCustomerAddresses[passedAddressId]);
+                        _mappingHelper.Merge(passedAddress, currentCustomerAddresses[passedAddress.Id]);
                     }
                     else
                     {
@@ -371,17 +363,15 @@ namespace Nop.Plugin.Api.Controllers
                 }
             }
 
-            _customerService.UpdateCustomer(currentCustomer);
+            CustomerService.UpdateCustomer(currentCustomer);
 
             InsertFirstAndLastNameGenericAttributes(customerDelta.Dto.FirstName, customerDelta.Dto.LastName, currentCustomer);
 
 
-            int languageId = 0;
-
-            if (!string.IsNullOrEmpty(customerDelta.Dto.LanguageId) && int.TryParse(customerDelta.Dto.LanguageId, out languageId)
+            if (!string.IsNullOrEmpty(customerDelta.Dto.LanguageId) && int.TryParse(customerDelta.Dto.LanguageId, out var languageId)
                 && _languageService.GetLanguageById(languageId) != null)
             {
-                _genericAttributeService.SaveAttribute(currentCustomer, SystemCustomerAttributeNames.LanguageId, languageId);
+                _genericAttributeService.SaveAttribute(currentCustomer, NopCustomerDefaults.LanguageIdAttribute, languageId);
             }
 
             //password
@@ -394,7 +384,7 @@ namespace Nop.Plugin.Api.Controllers
            
             // Preparing the result dto of the new customer
             // We do not prepare the shopping cart items because we have a separate endpoint for them.
-            CustomerDto updatedCustomer = currentCustomer.ToDto();
+            var updatedCustomer = currentCustomer.ToDto();
 
             // This is needed because the entity framework won't populate the navigation properties automatically
             // and the country name will be left empty because the mapping depends on the navigation property
@@ -427,13 +417,13 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             //activity log
-            _customerActivityService.InsertActivity("UpdateCustomer", _localizationService.GetResource("ActivityLog.UpdateCustomer"), currentCustomer.Id);
+            CustomerActivityService.InsertActivity("UpdateCustomer", LocalizationService.GetResource("ActivityLog.UpdateCustomer"), currentCustomer);
 
             var customersRootObject = new CustomersRootObject();
 
             customersRootObject.Customers.Add(updatedCustomer);
 
-            var json = _jsonFieldsSerializer.Serialize(customersRootObject, string.Empty);
+            var json = JsonFieldsSerializer.Serialize(customersRootObject, string.Empty);
 
             return new RawJsonActionResult(json);
         }
@@ -452,17 +442,17 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "id", "invalid id");
             }
 
-            Customer customer = _customerApiService.GetCustomerEntityById(id);
+            var customer = _customerApiService.GetCustomerEntityById(id);
 
             if (customer == null)
             {
                 return Error(HttpStatusCode.NotFound, "customer", "not found");
             }
 
-            _customerService.DeleteCustomer(customer);
+            CustomerService.DeleteCustomer(customer);
 
             //remove newsletter subscription (if exists)
-            foreach (var store in _storeService.GetAllStores())
+            foreach (var store in StoreService.GetAllStores())
             {
                 var subscription = _newsLetterSubscriptionService.GetNewsLetterSubscriptionByEmailAndStoreId(customer.Email, store.Id);
                 if (subscription != null)
@@ -470,7 +460,7 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             //activity log
-            _customerActivityService.InsertActivity("DeleteCustomer", _localizationService.GetResource("ActivityLog.DeleteCustomer"), customer.Id);
+            CustomerActivityService.InsertActivity("DeleteCustomer", LocalizationService.GetResource("ActivityLog.DeleteCustomer"), customer);
             
             return new RawJsonActionResult("{}");
         }
@@ -480,12 +470,12 @@ namespace Nop.Plugin.Api.Controllers
             // we assume that if the first name is not sent then it will be null and in this case we don't want to update it
             if (firstName != null)
             {
-                _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.FirstName, firstName);
+                _genericAttributeService.SaveAttribute(newCustomer, NopCustomerDefaults.FirstNameAttribute, firstName);
             }
 
             if (lastName != null)
             {
-                _genericAttributeService.SaveAttribute(newCustomer, SystemCustomerAttributeNames.LastName, lastName);
+                _genericAttributeService.SaveAttribute(newCustomer, NopCustomerDefaults.LastNameAttribute, lastName);
             }
         }
 
@@ -503,7 +493,7 @@ namespace Nop.Plugin.Api.Controllers
 
         private void PopulateAddressCountryNames(CustomerDto newCustomerDto)
         {
-            foreach (var address in newCustomerDto.CustomerAddresses)
+            foreach (var address in newCustomerDto.Addresses)
             {
                 SetCountryName(address);
             }
@@ -523,7 +513,7 @@ namespace Nop.Plugin.Api.Controllers
         {
             if (string.IsNullOrEmpty(address.CountryName) && address.CountryId.HasValue)
             {
-                Country country = _countryService.GetCountryById(address.CountryId.Value);
+                var country = _countryService.GetCountryById(address.CountryId.Value);
                 address.CountryName = country.Name;
             }
         }
@@ -552,17 +542,17 @@ namespace Nop.Plugin.Api.Controllers
                     break;
                 case PasswordFormat.Hashed:
                     {
-                        string saltKey = _encryptionService.CreateSaltKey(5);
+                        var saltKey = _encryptionService.CreateSaltKey(5);
                         customerPassword.PasswordSalt = saltKey;
                         customerPassword.Password = _encryptionService.CreatePasswordHash(newPassword, saltKey, CustomerSettings.HashedPasswordFormat);
                     }
                     break;
             }
 
-            _customerService.InsertCustomerPassword(customerPassword);
+            CustomerService.InsertCustomerPassword(customerPassword);
 
             // TODO: remove this.
-            _customerService.UpdateCustomer(customer);
+            CustomerService.UpdateCustomer(customer);
         }
     }
 }

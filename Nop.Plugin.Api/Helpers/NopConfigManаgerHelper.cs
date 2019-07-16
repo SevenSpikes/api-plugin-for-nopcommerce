@@ -1,12 +1,9 @@
 ﻿using System.Xml.Linq;
-using Nop.Core;
 using Nop.Core.Data;
 
 namespace Nop.Plugin.Api.Helpers
 {
     using System;
-    using System.Collections.Generic;
-    using System.Globalization;
     using System.Reflection;
     using System.Xml;
     using System.Xml.XPath;
@@ -20,18 +17,17 @@ namespace Nop.Plugin.Api.Helpers
 
         public NopConfigManagerHelper()
         {
-            var dataSettingsManager = new DataSettingsManager();
-            DataSettings = dataSettingsManager.LoadSettings();
+            DataSettings = DataSettingsManager.LoadSettings();
         }
 
         public void AddBindingRedirects()
         {
-            bool hasChanged = false;
+            var hasChanged = false;
 
             // load Nop.Web.exe.config
             XDocument appConfig = null;
 
-            string nopWebAssemblyConfigLocation = $"{Assembly.GetEntryAssembly().Location}.config";
+            var nopWebAssemblyConfigLocation = $"{Assembly.GetEntryAssembly().Location}.config";
 
             using (var fs = System.IO.File.OpenRead(nopWebAssemblyConfigLocation))
             {
@@ -56,7 +52,7 @@ namespace Nop.Plugin.Api.Helpers
                 //AddAssemblyBinding(runtime, "Microsoft.AspNetCore.Mvc.Formatters.Json", "adb9793829ddae60", "0.0.0.0-2.0.0.0", "2.0.0.0");
 
                 // Required by WebHooks
-                AddAssemblyBinding(runtime, "Microsoft.AspNetCore.DataProtection.Abstractions", "adb9793829ddae60", "0.0.0.0-2.0.0.0", "2.0.0.0");
+                //AddAssemblyBinding(runtime, "Microsoft.AspNetCore.DataProtection.Abstractions", "adb9793829ddae60", "0.0.0.0-2.0.0.0", "2.0.0.0");
 
                 if (hasChanged)
                 {
@@ -65,9 +61,10 @@ namespace Nop.Plugin.Api.Helpers
                     {
                         appConfig.Save(nopWebAssemblyConfigLocation);
 
-                        System.Configuration.ConfigurationManager.RefreshSection("runtime");
+                        //TODO: Upgrade 4.10 Check this!
+                        //System.Configuration.ConfigurationManager.RefreshSection("runtime");
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         // we should do nothing here as throwing an exception breaks nopCommerce.
                         // The right thing to do is to write a message in the Log that the user needs to provide Write access to Web.config
@@ -88,12 +85,12 @@ namespace Nop.Plugin.Api.Helpers
 
         public void AddConnectionString()
         {
-            bool hasChanged = false;
+            var hasChanged = false;
 
             // load web.config
             XDocument appConfig = null;
 
-            string nopWebAssemblyConfigLocation = $"{Assembly.GetEntryAssembly().Location}.config";
+            var nopWebAssemblyConfigLocation = $"{Assembly.GetEntryAssembly().Location}.config";
 
             using (var fs = System.IO.File.OpenRead(nopWebAssemblyConfigLocation))
             {
@@ -113,7 +110,7 @@ namespace Nop.Plugin.Api.Helpers
                     configuration.Add(connectionStrings);
                 }
 
-                string connectionStringFromNop = DataSettings.DataConnectionString;
+                var connectionStringFromNop = DataSettings.DataConnectionString;
 
                 var element = appConfig.XPathSelectElement("configuration//connectionStrings//add[@name='MS_SqlStoreConnectionString']");
 
@@ -130,7 +127,7 @@ namespace Nop.Plugin.Api.Helpers
                 {
                     // Check if the connection string is changed.
                     // If so update the connection string in the config.
-                    string connectionStringInConfig = element.Attribute("connectionString").Value;
+                    var connectionStringInConfig = element.Attribute("connectionString").Value;
 
                     if (!String.Equals(connectionStringFromNop, connectionStringInConfig, StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -145,7 +142,8 @@ namespace Nop.Plugin.Api.Helpers
                     {
                         appConfig.Save(nopWebAssemblyConfigLocation);
 
-                        System.Configuration.ConfigurationManager.RefreshSection("connectionStrings");
+                        //TODO: Upgrade 4.1. Check this!
+                        //System.Configuration.ConfigurationManager.RefreshSection("connectionStrings");
                     }
                     catch
                     {
@@ -166,10 +164,10 @@ namespace Nop.Plugin.Api.Helpers
 
         private void AddAssemblyBinding(XElement runtime, string name, string publicToken, string oldVersion, string newVersion)
         {
-            XmlNamespaceManager xmlNamespaceManager = new XmlNamespaceManager(new NameTable());
+            var xmlNamespaceManager = new XmlNamespaceManager(new NameTable());
             xmlNamespaceManager.AddNamespace("bind", "urn:schemas-microsoft-com:asm.v1");
 
-            XElement assemblyBindingElement = runtime.XPathSelectElement(
+            var assemblyBindingElement = runtime.XPathSelectElement(
                     $"bind:assemblyBinding//bind:dependentAssembly//bind:assemblyIdentity[@name='{name}']", xmlNamespaceManager);
 
             // create the binding redirect if it does not exist

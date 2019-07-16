@@ -1,37 +1,73 @@
-﻿using System;
-using System.Linq.Expressions;
-using FluentValidation;
+﻿using Microsoft.AspNetCore.Http;
 using Nop.Plugin.Api.DTOs;
+using Nop.Plugin.Api.Helpers;
+using System.Collections.Generic;
 
 namespace Nop.Plugin.Api.Validators
 {
-    public class AddressDtoValidator : AbstractValidator<AddressDto>
+    public class AddressDtoValidator : BaseDtoValidator<AddressDto>
     {
-        public AddressDtoValidator()
+
+        #region Constructors
+
+        public AddressDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary) : base(httpContextAccessor, jsonHelper, requestJsonDictionary)
         {
-            SetNotNullOrEmptyRule(dto => dto.FirstName, "first_name required");
+            SetFirstNameRule();
+            SetLastNameRule();
+            SetEmailRule();
 
-            SetNotNullOrEmptyRule(dto => dto.LastName, "last_name required");
-
-            SetNotNullOrEmptyRule(dto => dto.Email, "email required");
-
-            SetNotNullOrEmptyRule(dto => dto.CountryId <= 0 ? string.Empty : dto.CountryId.ToString(), "country_id required");
-
-            SetNotNullOrEmptyRule(dto => dto.City, "city required");
-
-            SetNotNullOrEmptyRule(dto => dto.Address1, "address1 required");
-
-            SetNotNullOrEmptyRule(dto => dto.ZipPostalCode, "zip_postal_code required");
-
-            SetNotNullOrEmptyRule(dto => dto.PhoneNumber, "phone_number required");
+            SetAddress1Rule();
+            SetCityRule();
+            SetZipPostalCodeRule();
+            SetCountryIdRule();
+            SetPhoneNumberRule();
         }
-        
-        private void SetNotNullOrEmptyRule(Expression<Func<AddressDto, string>> expression, string errorMessage)
+
+        #endregion
+
+        #region Private Methods
+
+        private void SetAddress1Rule()
         {
-            RuleFor(expression)
-                   .NotNull()
-                   .NotEmpty()
-                   .WithMessage(errorMessage);
+            SetNotNullOrEmptyCreateOrUpdateRule(a => a.Address1, "address1 required", "address1");
         }
+
+        private void SetCityRule()
+        {
+            SetNotNullOrEmptyCreateOrUpdateRule(a => a.City, "city required", "city");
+        }
+
+        private void SetCountryIdRule()
+        {
+            SetGreaterThanZeroCreateOrUpdateRule(a => a.CountryId, "country_id required", "country_id");
+        }
+
+        private void SetEmailRule()
+        {
+            SetNotNullOrEmptyCreateOrUpdateRule(a => a.Email, "email required", "email");
+        }
+
+        private void SetFirstNameRule()
+        {
+            SetNotNullOrEmptyCreateOrUpdateRule(a => a.FirstName, "first_name required", "first_name");
+        }
+
+        private void SetLastNameRule()
+        {
+            SetNotNullOrEmptyCreateOrUpdateRule(a => a.LastName, "first_name required", "last_name");
+        }
+
+        private void SetPhoneNumberRule()
+        {
+            SetNotNullOrEmptyCreateOrUpdateRule(a => a.PhoneNumber, "phone_number required", "phone_number");
+        }
+
+        private void SetZipPostalCodeRule()
+        {
+            SetNotNullOrEmptyCreateOrUpdateRule(a => a.ZipPostalCode, "zip_postal_code required", "zip_postal_code");
+        }
+
+        #endregion
+
     }
 }

@@ -69,8 +69,8 @@ namespace Nop.Plugin.Api.Converters
         {
             if (!string.IsNullOrEmpty(value))
             {
-                List<string> stringIds = value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                List<int> intIds = new List<int>();
+                var stringIds = value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                var intIds = new List<int>();
 
                 foreach (var id in stringIds)
                 {
@@ -109,7 +109,7 @@ namespace Nop.Plugin.Api.Converters
         {
             if (!string.IsNullOrEmpty(value))
             {
-                Type enumType = Nullable.GetUnderlyingType(type);
+                var enumType = Nullable.GetUnderlyingType(type);
 
                 var enumNames = enumType.GetEnumNames();
 

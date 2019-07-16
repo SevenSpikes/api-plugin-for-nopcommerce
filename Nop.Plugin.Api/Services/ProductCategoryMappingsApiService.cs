@@ -41,7 +41,7 @@ namespace Nop.Plugin.Api.Services
         private IQueryable<ProductCategory> GetMappingsQuery(int? productId = null, 
             int? categoryId = null, int sinceId = Configurations.DefaultSinceId)
         {
-            var query = _productCategoryMappingsRepository.TableNoTracking;
+            var query = _productCategoryMappingsRepository.Table;
 
             if (productId != null)
             {

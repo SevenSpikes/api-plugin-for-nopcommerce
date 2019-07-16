@@ -9,6 +9,9 @@ namespace Nop.Plugin.Api.DTOs.Images
         [JsonProperty("id")]
         public int Id { get; set; }
 
+        [JsonProperty("picture_id")]
+        public int PictureId { get; set; }
+
         [JsonProperty("position")]
         public int Position { get; set; }
     }
