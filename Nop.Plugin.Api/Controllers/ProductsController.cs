@@ -536,14 +536,14 @@ namespace Nop.Plugin.Api.Controllers
                 if (passedDiscountIds.Contains(discount.Id))
                 {
                     //new discount
-                    if (product.AppliedDiscounts.Count(d => d.Id == discount.Id) == 0)
-                        product.AppliedDiscounts.Add(discount);
+                    if (product.DiscountProductMappings.Count(d => d.DiscountId == discount.Id) == 0)
+                        product.DiscountProductMappings.Add(new DiscountProductMapping { Discount = discount });
                 }
                 else
                 {
                     //remove discount
-                    if (product.AppliedDiscounts.Count(d => d.Id == discount.Id) > 0)
-                        product.AppliedDiscounts.Remove(discount);
+                    if (product.DiscountProductMappings.Count(d => d.DiscountId == discount.Id) > 0)
+                        product.DiscountProductMappings.Remove(product.DiscountProductMappings.FirstOrDefault(x => x.DiscountId == discount.Id));
                 }
             }
 
