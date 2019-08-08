@@ -253,7 +253,8 @@ namespace Nop.Plugin.Api.Controllers
                 {
                     address.CreatedOnUtc = DateTime.UtcNow;
                 }
-                newCustomer.Addresses.Add(address.ToEntity());
+                var addressEntity = address.ToEntity();
+                newCustomer.CustomerAddressMappings.Add(new CustomerAddressMapping { Address = addressEntity });
             }
             
             CustomerService.InsertCustomer(newCustomer);
