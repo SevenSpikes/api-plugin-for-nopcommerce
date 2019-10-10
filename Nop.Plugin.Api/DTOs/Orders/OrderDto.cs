@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using FluentValidation.Attributes;
 using Newtonsoft.Json;
 using Nop.Plugin.Api.DTOs.Base;
 using Nop.Plugin.Api.DTOs.Customers;
@@ -10,7 +9,6 @@ using Nop.Plugin.Api.Validators;
 namespace Nop.Plugin.Api.DTOs.Orders
 {
     [JsonObject(Title = "order")]
-    [Validator(typeof(OrderDtoValidator))]
     public class OrderDto : BaseDto
     {
         private ICollection<OrderItemDto> _orderItems;

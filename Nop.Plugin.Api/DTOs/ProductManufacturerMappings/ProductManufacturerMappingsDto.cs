@@ -1,12 +1,10 @@
-﻿using FluentValidation.Attributes;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Nop.Plugin.Api.DTOs.Base;
 using Nop.Plugin.Api.Validators;
 
 namespace Nop.Plugin.Api.DTOs.ProductManufacturerMappings
 {
     [JsonObject(Title = "product_manufacturer_mapping")]
-    [Validator(typeof(ProductManufacturerMappingDtoValidator))]
     public class ProductManufacturerMappingsDto : BaseDto
     {
         /// <summary>

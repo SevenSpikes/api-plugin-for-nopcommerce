@@ -1,5 +1,4 @@
-﻿using FluentValidation.Attributes;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.Validators;
 using System;
@@ -7,7 +6,6 @@ using System;
 namespace Nop.Plugin.Api.DTOs.SpecificationAttributes
 {
     [JsonObject(Title = "product_specification_attribute")]
-    [Validator(typeof(ProductSpecificationAttributeDtoValidator))]
     public class ProductSpecificationAttributeDto
     {
         /// <summary>

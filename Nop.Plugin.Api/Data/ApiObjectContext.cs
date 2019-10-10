@@ -1,11 +1,10 @@
-﻿using System;
-//using System.Data.Entity.Infrastructure;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Nop.Core;
 using Nop.Data;
 using Nop.Data.Extensions;
 using Nop.Plugin.Api.DataMappings;
+using System;
+using System.Linq;
 
 namespace Nop.Plugin.Api.Data
 {
@@ -70,13 +69,7 @@ namespace Nop.Plugin.Api.Data
             return this.Database.GenerateCreateScript();
         }
 
-        /// <summary>
-        /// Creates a LINQ query for the query type based on a raw SQL query
-        /// </summary>
-        /// <typeparam name="TQuery">Query type</typeparam>
-        /// <param name="sql">The raw SQL query</param>
-        /// <returns>An IQueryable representing the raw SQL query</returns>
-        public virtual IQueryable<TQuery> QueryFromSql<TQuery>(string sql) where TQuery : class
+        public IQueryable<TQuery> QueryFromSql<TQuery>(string sql, params object[] parameters) where TQuery : class
         {
             throw new NotImplementedException();
         }

@@ -1,7 +1,9 @@
-﻿namespace Nop.Plugin.Api.Attributes
+﻿using Nop.Core.Infrastructure;
+using Nop.Services.Plugins;
+
+namespace Nop.Plugin.Api.Attributes
 {
     using Microsoft.AspNetCore.Authorization;
-    using Core.Plugins;
 
     // We need the ApiAuthorize attribute because when the api plugin assembly is loaded in memory by PluginManager 
     // all of its attributes are being initialized by the .NetFramework.
@@ -26,7 +28,9 @@
         
         private static string GetAuthenticationSchemeName(string value)
         {
-            var pluginInstalled = PluginManager.FindPlugin(typeof(ApiStartup))?.Installed ?? false;
+            var pluginService = EngineContext.Current.Resolve<IPluginService>();
+            var pluginDescriptor = pluginService.GetPluginDescriptorBySystemName<IPlugin>(Nop.Plugin.Api.Constants.Plugin.SystemName);
+            bool pluginInstalled = pluginDescriptor != null && pluginDescriptor.Installed;
 
             if (pluginInstalled)
             {

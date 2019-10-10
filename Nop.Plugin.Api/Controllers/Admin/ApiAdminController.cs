@@ -1,44 +1,41 @@
 ﻿namespace Nop.Plugin.Api.Controllers.Admin
 {
-    using Microsoft.AspNetCore.Mvc;
-    using Core;
     using Constants;
+    using Core;
     using Domain;
     using MappingExtensions;
+    using Microsoft.AspNetCore.Mvc;
     using Models;
     using Nop.Services.Configuration;
     using Nop.Services.Localization;
     using Nop.Services.Logging;
-    using Nop.Services.Stores;
-    using Web.Framework;
+    using Nop.Services.Messages;
     using Nop.Web.Framework.Controllers;
+    using Web.Framework;
     using Web.Framework.Mvc.Filters;
 
     [AuthorizeAdmin]
     [Area(AreaNames.Admin)]
     public class ApiAdminController : BasePluginController
     {
-        private readonly IStoreService _storeService;
         private readonly IStoreContext _storeContext;
-        private readonly IWorkContext _workContext;
         private readonly ISettingService _settingService;
         private readonly ICustomerActivityService _customerActivityService;
         private readonly ILocalizationService _localizationService;
+        private readonly INotificationService _notificationService;
 
         public ApiAdminController(
-            IStoreService storeService,
             IStoreContext storeContext,
-            IWorkContext workContext,
             ISettingService settingService,
             ICustomerActivityService customerActivityService,
-            ILocalizationService localizationService)
+            ILocalizationService localizationService,
+            INotificationService notificationService)
         {
-            _storeService = storeService;
             _storeContext = storeContext;
-            _workContext = workContext;
             _settingService = settingService;
             _customerActivityService = customerActivityService;
             _localizationService = localizationService;
+            _notificationService = notificationService;
         }
         
         [HttpGet]
@@ -87,7 +84,7 @@
 
             _customerActivityService.InsertActivity("EditApiSettings", "Edit Api Settings");
 
-            SuccessNotification(_localizationService.GetResource("Admin.Plugins.Saved"));
+            _notificationService.SuccessNotification(_localizationService.GetResource("Admin.Plugins.Saved"));
 
             return View(ViewNames.AdminApiSettings, configurationModel);
         }

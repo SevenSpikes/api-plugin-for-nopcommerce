@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using FluentValidation.Attributes;
 using Newtonsoft.Json;
 using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.Attributes;
@@ -13,7 +12,6 @@ using Nop.Plugin.Api.Validators;
 namespace Nop.Plugin.Api.DTOs.Products
 {
     [JsonObject(Title = "product")]
-    [Validator(typeof(ProductDtoValidator))]
     public class ProductDto : BaseDto
     {
         private int? _productTypeId;

@@ -3,6 +3,7 @@ using Nop.Web.Framework.Infrastructure.Extensions;
 
 namespace Nop.Plugin.Api
 {
+    using IdentityServer4.EntityFramework;
     using IdentityServer4.EntityFramework.DbContexts;
     using IdentityServer4.EntityFramework.Entities;
     using IdentityServer4.Hosting;

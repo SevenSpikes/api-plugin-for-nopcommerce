@@ -5,12 +5,12 @@
     using Microsoft.EntityFrameworkCore.Migrations;
     using Nop.Core;
     using Nop.Core.Infrastructure;
-    using Nop.Core.Plugins;
     using Nop.Plugin.Api.Data;
     using Nop.Plugin.Api.Domain;
     using Nop.Plugin.Api.Helpers;
     using Nop.Services.Configuration;
     using Nop.Services.Localization;
+    using Nop.Services.Plugins;
     using Nop.Web.Framework.Menu;
 
     public class ApiPlugin : BasePlugin, IAdminMenuPlugin

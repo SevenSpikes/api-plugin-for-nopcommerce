@@ -1,4 +1,6 @@
-﻿namespace Nop.Plugin.Api.Controllers.Admin
+﻿using Nop.Services.Messages;
+
+namespace Nop.Plugin.Api.Controllers.Admin
 {
     using System.Linq;
     using Microsoft.AspNetCore.Mvc;
@@ -6,11 +8,11 @@
     using Nop.Services.Localization;
     using Web.Framework;
     using Nop.Web.Framework.Controllers;
-    using Web.Framework.Kendoui;
     using Web.Framework.Mvc.Filters;
     using Models;
     using Services;
     using System;
+    using Nop.Plugin.Api.Kendoui;
 
     [AuthorizeAdmin]
     [Area(AreaNames.Admin)]
@@ -19,11 +21,13 @@
     {
         private readonly IClientService _clientService;
         private readonly ILocalizationService _localizationService;
+        private readonly INotificationService _notificationService;
 
-        public ManageClientsAdminController(ILocalizationService localizationService, IClientService clientService)
+        public ManageClientsAdminController(ILocalizationService localizationService, IClientService clientService, INotificationService notificationService)
         {
             _localizationService = localizationService;
             _clientService = clientService;
+            _notificationService = notificationService;
         }
 
         [HttpGet]
@@ -72,7 +76,8 @@
             {
                 var clientId = _clientService.InsertClient(model);
 
-                SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Created"));
+                _notificationService.SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Created"));
+
                 return continueEditing ? RedirectToAction("Edit", new { id = clientId }) : RedirectToAction("List");
             }
 
@@ -96,7 +101,8 @@
             {
                 _clientService.UpdateClient(model);
               
-                SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Edit"));
+                _notificationService.SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Edit"));
+
                 return continueEditing ? RedirectToAction("Edit", new { id = model.Id }) : RedirectToAction("List");
             }
 
@@ -109,7 +115,8 @@
         {
             _clientService.DeleteClient(id);
 
-            SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Deleted"));
+            _notificationService.SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Deleted"));
+
             return RedirectToAction("List");
         }
     }
