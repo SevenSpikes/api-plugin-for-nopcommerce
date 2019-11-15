@@ -63,3 +63,7 @@
             }
         }
    ```
+
+### Exploring and testing with Postman
+
+[Postman can be used to use quickly explore and test these webhook APIs.](PostmanHowTo.md)

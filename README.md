@@ -39,3 +39,7 @@ With the nopCommerce API, you can perform any of the four CRUD actions against a
 ## What about security?
 
 The API plugin currently supports OAuth 2.0 Authorization Code grant type flow. So in order to access the resource endpoints you need to provide a valid AccessToken. To understand how the authorization code grant flow works please refer to the [**Sample Application**](https://github.com/SevenSpikes/nopCommerce-Api-SampleApplication).
+
+## Exploring and testing with Postman
+
+Postman is a tool for testing and exploring REST APIs. [This guide](PostmanHowTo.md) shows how to configure Postman with OAuth 2.0 against the nopCommerce API Plugin.
