@@ -1,4 +1,4 @@
-# API plugin for nopCommerce
+# API plugin for nopCommerce 4.3
 
 This plugin provides a RESTful API for managing resources in nopCommerce.
 
