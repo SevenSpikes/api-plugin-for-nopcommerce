@@ -1,5 +1,5 @@
-﻿using Nop.Plugin.Api.DTOs;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Nop.Plugin.Api.DTO;
 
 namespace Nop.Plugin.Api.Services
 {

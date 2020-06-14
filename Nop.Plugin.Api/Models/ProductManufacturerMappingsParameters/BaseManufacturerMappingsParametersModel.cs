@@ -6,15 +6,15 @@ namespace Nop.Plugin.Api.Models.ProductManufacturerMappingsParameters
     public class BaseManufacturerMappingsParametersModel
     {
         /// <summary>
-        /// Show all the product-manufacturer mappings for this product
+        ///     Show all the product-manufacturer mappings for this product
         /// </summary>
         [JsonProperty("product_id")]
         public int? ProductId { get; set; }
 
         /// <summary>
-        /// Show all the product-manufacturer mappings for this manufacturer
+        ///     Show all the product-manufacturer mappings for this manufacturer
         /// </summary>
         [JsonProperty("manufacturer_id")]
-        public int? ManufacturerId { get; set; } 
+        public int? ManufacturerId { get; set; }
     }
 }

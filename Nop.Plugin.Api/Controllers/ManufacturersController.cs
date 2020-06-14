@@ -1,16 +1,19 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Discounts;
 using Nop.Core.Domain.Media;
 using Nop.Plugin.Api.Attributes;
-using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.Delta;
-using Nop.Plugin.Api.DTOs.Errors;
-using Nop.Plugin.Api.DTOs.Images;
-using Nop.Plugin.Api.DTOs.Manufacturers;
+using Nop.Plugin.Api.DTO.Errors;
+using Nop.Plugin.Api.DTO.Images;
+using Nop.Plugin.Api.DTO.Manufacturers;
 using Nop.Plugin.Api.Factories;
 using Nop.Plugin.Api.Helpers;
+using Nop.Plugin.Api.Infrastructure;
 using Nop.Plugin.Api.JSON.ActionResults;
 using Nop.Plugin.Api.JSON.Serializers;
 using Nop.Plugin.Api.ModelBinders;
@@ -25,37 +28,34 @@ using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Seo;
 using Nop.Services.Stores;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ManufacturersController : BaseApiController
     {
-        private readonly IFactory<Manufacturer> _factory;
         private readonly IDTOHelper _dtoHelper;
-        private readonly IManufacturerService _manufacturerService;
+        private readonly IFactory<Manufacturer> _factory;
         private readonly IManufacturerApiService _manufacturerApiService;
-        private readonly IUrlRecordService _urlRecordService; 
+        private readonly IManufacturerService _manufacturerService;
+        private readonly IUrlRecordService _urlRecordService;
 
-        public ManufacturersController(IJsonFieldsSerializer jsonFieldsSerializer, 
+        public ManufacturersController(
+            IJsonFieldsSerializer jsonFieldsSerializer,
             IAclService aclService,
-            ICustomerService customerService, 
+            ICustomerService customerService,
             IStoreMappingService storeMappingService,
             IStoreService storeService,
             IDiscountService discountService,
             ICustomerActivityService customerActivityService,
             ILocalizationService localizationService,
-            IPictureService pictureService, 
-            IDTOHelper dtoHelper, 
+            IPictureService pictureService,
+            IDTOHelper dtoHelper,
             IManufacturerService manufacturerService,
             IManufacturerApiService manufacturerApiService,
             IUrlRecordService urlRecordService,
-            IFactory<Manufacturer> factory) 
-            : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService, pictureService)
+            IFactory<Manufacturer> factory)
+            : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService,
+                   localizationService, pictureService)
         {
             _dtoHelper = dtoHelper;
             _manufacturerService = manufacturerService;
@@ -65,7 +65,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         /// <summary>
-        /// Receive a list of all manufacturers
+        ///     Receive a list of all manufacturers
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="400">Bad Request</response>
@@ -77,25 +77,25 @@ namespace Nop.Plugin.Api.Controllers
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetManufacturers(ManufacturersParametersModel parameters)
         {
-            if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
+            if (parameters.Limit < Constants.Configurations.MinLimit || parameters.Limit > Constants.Configurations.MaxLimit)
             {
                 return Error(HttpStatusCode.BadRequest, "limit", "Invalid limit parameter");
             }
 
-            if (parameters.Page < Configurations.DefaultPageValue)
+            if (parameters.Page < Constants.Configurations.DefaultPageValue)
             {
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid page parameter");
             }
 
             var allManufacturers = _manufacturerApiService.GetManufacturers(parameters.Ids, parameters.CreatedAtMin, parameters.CreatedAtMax,
-                                                                             parameters.UpdatedAtMin, parameters.UpdatedAtMax,
-                                                                             parameters.Limit, parameters.Page, parameters.SinceId,
-                                                                             parameters.ProductId, parameters.PublishedStatus, parameters.LanguageId)
-                                                   .Where(c => StoreMappingService.Authorize(c));
+                                                                            parameters.UpdatedAtMin, parameters.UpdatedAtMax,
+                                                                            parameters.Limit, parameters.Page, parameters.SinceId,
+                                                                            parameters.ProductId, parameters.PublishedStatus, parameters.LanguageId)
+                                                          .Where(c => StoreMappingService.Authorize(c));
 
             IList<ManufacturerDto> manufacturersAsDtos = allManufacturers.Select(manufacturer => _dtoHelper.PrepareManufacturerDto(manufacturer)).ToList();
 
-            var manufacturersRootObject = new ManufacturersRootObject()
+            var manufacturersRootObject = new ManufacturersRootObject
             {
                 Manufacturers = manufacturersAsDtos
             };
@@ -106,7 +106,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         /// <summary>
-        /// Receive a count of all Manufacturers
+        ///     Receive a count of all Manufacturers
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
@@ -119,10 +119,10 @@ namespace Nop.Plugin.Api.Controllers
         public IActionResult GetManufacturersCount(ManufacturersCountParametersModel parameters)
         {
             var allManufacturersCount = _manufacturerApiService.GetManufacturersCount(parameters.CreatedAtMin, parameters.CreatedAtMax,
-                                                                            parameters.UpdatedAtMin, parameters.UpdatedAtMax,
-                                                                            parameters.PublishedStatus, parameters.ProductId);
+                                                                                      parameters.UpdatedAtMin, parameters.UpdatedAtMax,
+                                                                                      parameters.PublishedStatus, parameters.ProductId);
 
-            var manufacturersCountRootObject = new ManufacturersCountRootObject()
+            var manufacturersCountRootObject = new ManufacturersCountRootObject
             {
                 Count = allManufacturersCount
             };
@@ -131,7 +131,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         /// <summary>
-        /// Retrieve manufacturer by spcified id
+        ///     Retrieve manufacturer by spcified id
         /// </summary>
         /// <param name="id">Id of the manufacturer</param>
         /// <param name="fields">Fields from the manufacturer you want your json to contain</param>
@@ -175,7 +175,9 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        public IActionResult CreateManufacturer([ModelBinder(typeof(JsonModelBinder<ManufacturerDto>))] Delta<ManufacturerDto> manufacturerDelta)
+        public IActionResult CreateManufacturer(
+            [ModelBinder(typeof(JsonModelBinder<ManufacturerDto>))]
+            Delta<ManufacturerDto> manufacturerDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -188,7 +190,7 @@ namespace Nop.Plugin.Api.Controllers
             Picture insertedPicture = null;
 
             // We need to insert the picture before the manufacturer so we can obtain the picture id and map it to the manufacturer.
-            if (manufacturerDelta.Dto.Image != null && manufacturerDelta.Dto.Image.Binary != null)
+            if (manufacturerDelta.Dto.Image?.Binary != null)
             {
                 insertedPicture = PictureService.InsertPicture(manufacturerDelta.Dto.Image.Binary, manufacturerDelta.Dto.Image.MimeType, string.Empty);
             }
@@ -219,7 +221,7 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             CustomerActivityService.InsertActivity("AddNewManufacturer",
-                LocalizationService.GetResource("ActivityLog.AddNewManufacturer"), manufacturer);
+                                                   LocalizationService.GetResource("ActivityLog.AddNewManufacturer"), manufacturer);
 
             // Preparing the result dto of the new manufacturer
             var newManufacturerDto = _dtoHelper.PrepareManufacturerDto(manufacturer);
@@ -240,7 +242,9 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        public IActionResult UpdateManufacturer([ModelBinder(typeof(JsonModelBinder<ManufacturerDto>))] Delta<ManufacturerDto> manufacturerDelta)
+        public IActionResult UpdateManufacturer(
+            [ModelBinder(typeof(JsonModelBinder<ManufacturerDto>))]
+            Delta<ManufacturerDto> manufacturerDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -272,7 +276,6 @@ namespace Nop.Plugin.Api.Controllers
             //search engine name
             if (manufacturerDelta.Dto.SeName != null)
             {
-
                 var seName = _urlRecordService.ValidateSeName(manufacturer, manufacturerDelta.Dto.SeName, manufacturer.Name, true);
                 _urlRecordService.SaveSlug(manufacturer, seName, 0);
             }
@@ -280,7 +283,7 @@ namespace Nop.Plugin.Api.Controllers
             _manufacturerService.UpdateManufacturer(manufacturer);
 
             CustomerActivityService.InsertActivity("UpdateManufacturer",
-                LocalizationService.GetResource("ActivityLog.UpdateManufacturer"), manufacturer);
+                                                   LocalizationService.GetResource("ActivityLog.UpdateManufacturer"), manufacturer);
 
             var manufacturerDto = _dtoHelper.PrepareManufacturerDto(manufacturer);
 
@@ -326,7 +329,9 @@ namespace Nop.Plugin.Api.Controllers
         {
             // no image specified then do nothing
             if (imageDto == null)
+            {
                 return;
+            }
 
             Picture updatedPicture;
             var currentManufacturerPicture = PictureService.GetPictureById(manufacturerEntityToUpdate.PictureId);
@@ -361,22 +366,40 @@ namespace Nop.Plugin.Api.Controllers
         private void UpdateDiscounts(Manufacturer manufacturer, List<int> passedDiscountIds)
         {
             if (passedDiscountIds == null)
+            {
                 return;
+            }
 
             var allDiscounts = DiscountService.GetAllDiscounts(DiscountType.AssignedToManufacturers, showHidden: true);
             foreach (var discount in allDiscounts)
             {
+                var appliedDiscounts = DiscountService.GetAppliedDiscounts(manufacturer);
                 if (passedDiscountIds.Contains(discount.Id))
                 {
                     //new discount
-                    if (manufacturer.AppliedDiscounts.Count(d => d.Id == discount.Id) == 0)
-                        manufacturer.AppliedDiscounts.Add(discount);
+                    if (appliedDiscounts.Count(d => d.Id == discount.Id) == 0)
+                    {
+                        _manufacturerService.InsertDiscountManufacturerMapping(
+                            new DiscountManufacturerMapping
+                            {
+                                DiscountId = discount.Id,
+                                EntityId = manufacturer.Id
+                            });
+                    }
                 }
                 else
                 {
                     //remove discount
-                    if (manufacturer.AppliedDiscounts.Count(d => d.Id == discount.Id) > 0)
-                        manufacturer.AppliedDiscounts.Remove(discount);
+                    if (appliedDiscounts.Count(d => d.Id == discount.Id) > 0)
+                    {
+                        _manufacturerService.DeleteDiscountManufacturerMapping(
+                            new DiscountManufacturerMapping
+                            {
+                                DiscountId = discount.Id,
+                                EntityId = manufacturer.Id
+                            });
+
+                    }
                 }
             }
             _manufacturerService.UpdateManufacturer(manufacturer);

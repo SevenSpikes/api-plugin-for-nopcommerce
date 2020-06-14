@@ -1,6 +1,6 @@
 ﻿using Nop.Core.Domain.Messages;
 using Nop.Plugin.Api.AutoMapper;
-using Nop.Plugin.Api.DTOs.Categories;
+using Nop.Plugin.Api.DTO.NewsLetterSubscriptions;
 
 namespace Nop.Plugin.Api.MappingExtensions
 {

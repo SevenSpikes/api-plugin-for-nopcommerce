@@ -13,13 +13,15 @@ namespace Nop.Plugin.Api.Attributes
             // Product Type is not required so it could be null
             // and there is nothing to validate in this case
             if (instance == null)
+            {
                 return;
+            }
 
             var isDefined = Enum.IsDefined(typeof(ProductType), instance);
 
             if (!isDefined)
-            { 
-                _errors.Add("ProductType","Invalid product type");
+            {
+                _errors.Add("ProductType", "Invalid product type");
             }
         }
 

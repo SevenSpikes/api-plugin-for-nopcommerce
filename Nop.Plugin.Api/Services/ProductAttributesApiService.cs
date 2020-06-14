@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Nop.Core.Data;
+using Nop.Data;
 using Nop.Core.Domain.Catalog;
-using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.DataStructures;
+using Nop.Plugin.Api.Infrastructure;
 
 namespace Nop.Plugin.Api.Services
 {
@@ -16,8 +16,9 @@ namespace Nop.Plugin.Api.Services
             _productAttributesRepository = productAttributesRepository;
         }
 
-        public IList<ProductAttribute> GetProductAttributes(int limit = Configurations.DefaultLimit,
-             int page = Configurations.DefaultPageValue, int sinceId = Configurations.DefaultSinceId)
+        public IList<ProductAttribute> GetProductAttributes(
+            int limit = Constants.Configurations.DefaultLimit,
+            int page = Constants.Configurations.DefaultPageValue, int sinceId = Constants.Configurations.DefaultSinceId)
         {
             var query = GetProductAttributesQuery(sinceId);
 
@@ -32,12 +33,14 @@ namespace Nop.Plugin.Api.Services
         ProductAttribute IProductAttributesApiService.GetById(int id)
         {
             if (id <= 0)
+            {
                 return null;
+            }
 
             return _productAttributesRepository.GetById(id);
         }
 
-        private IQueryable<ProductAttribute> GetProductAttributesQuery(int sinceId = Configurations.DefaultSinceId)
+        private IQueryable<ProductAttribute> GetProductAttributesQuery(int sinceId = Constants.Configurations.DefaultSinceId)
         {
             var query = _productAttributesRepository.Table;
 

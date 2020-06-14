@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Nop.Plugin.Api.DTOs.Products
+namespace Nop.Plugin.Api.DTO.Products
 {
     public class ProductsRootObjectDto : ISerializableObject
     {
@@ -21,7 +21,7 @@ namespace Nop.Plugin.Api.DTOs.Products
 
         public Type GetPrimaryPropertyType()
         {
-            return typeof (ProductDto);
+            return typeof(ProductDto);
         }
     }
 }

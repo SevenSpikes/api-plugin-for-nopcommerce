@@ -5,35 +5,26 @@ using Newtonsoft.Json;
 using Nop.Core.Caching;
 using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.Attributes;
-using Nop.Plugin.Api.Constants;
+using Nop.Plugin.Api.Infrastructure;
+using Nop.Services.Caching;
 
 namespace Nop.Plugin.Api.Maps
 {
     public class JsonPropertyMapper : IJsonPropertyMapper
     {
         private IStaticCacheManager _cacheManager;
-
-        private IStaticCacheManager StaticCacheManager
-        {
-            get
-            {
-                if (_cacheManager == null)
-                {
-                    _cacheManager = EngineContext.Current.Resolve<IStaticCacheManager>();
-                }
-
-                return _cacheManager;
-            }
-        }
+        private ICacheKeyService _cacheKeyService => EngineContext.Current.Resolve<ICacheKeyService>();
+        private IStaticCacheManager StaticCacheManager => _cacheManager ?? (_cacheManager = EngineContext.Current.Resolve<IStaticCacheManager>());
 
         public Dictionary<string, Tuple<string, Type>> GetMap(Type type)
         {
-            if (!StaticCacheManager.IsSet(Configurations.JsonTypeMapsPattern))
+            if (!StaticCacheManager.IsSet(Constants.Configurations.JsonTypeMapsPattern))
             {
-                StaticCacheManager.Set(Configurations.JsonTypeMapsPattern, new Dictionary<string, Dictionary<string, Tuple<string, Type>>>(), int.MaxValue);
+                StaticCacheManager.Set(_cacheKeyService.PrepareKeyForDefaultCache(Constants.Configurations.JsonTypeMapsPattern), new Dictionary<string, Dictionary<string, Tuple<string, Type>>>());
             }
 
-            var typeMaps = StaticCacheManager.Get<Dictionary<string, Dictionary<string, Tuple<string, Type>>>>(Configurations.JsonTypeMapsPattern, () => null);
+            var typeMaps =
+                StaticCacheManager.Get<Dictionary<string, Dictionary<string, Tuple<string, Type>>>>(_cacheKeyService.PrepareKeyForDefaultCache(Constants.Configurations.JsonTypeMapsPattern), () => null);
 
             if (!typeMaps.ContainsKey(type.Name))
             {
@@ -46,12 +37,12 @@ namespace Nop.Plugin.Api.Maps
         private void Build(Type type)
         {
             var typeMaps =
-                StaticCacheManager.Get<Dictionary<string, Dictionary<string, Tuple<string, Type>>>>(Configurations.JsonTypeMapsPattern, () => null);
+                StaticCacheManager.Get<Dictionary<string, Dictionary<string, Tuple<string, Type>>>>(_cacheKeyService.PrepareKeyForDefaultCache(Constants.Configurations.JsonTypeMapsPattern), () => null);
 
             var mapForCurrentType = new Dictionary<string, Tuple<string, Type>>();
 
             var typeProps = type.GetProperties();
-            
+
             foreach (var property in typeProps)
             {
                 var jsonAttribute = property.GetCustomAttribute(typeof(JsonPropertyAttribute)) as JsonPropertyAttribute;
@@ -67,7 +58,7 @@ namespace Nop.Plugin.Api.Maps
                     }
                 }
             }
-            
+
             if (!typeMaps.ContainsKey(type.Name))
             {
                 typeMaps.Add(type.Name, mapForCurrentType);

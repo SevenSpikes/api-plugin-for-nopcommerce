@@ -9,8 +9,9 @@ namespace Nop.Plugin.Api.AutoMapper
         private static IMapper s_mapper;
         private static readonly object s_mapperLockObject = new object();
 
-        public static MapperConfigurationExpression MapperConfigurationExpression => s_mapperConfigurationExpression ??
-                                                                                     (s_mapperConfigurationExpression = new MapperConfigurationExpression());
+        public static MapperConfigurationExpression MapperConfigurationExpression =>
+            s_mapperConfigurationExpression ??
+            (s_mapperConfigurationExpression = new MapperConfigurationExpression());
 
         public static IMapper Mapper
         {

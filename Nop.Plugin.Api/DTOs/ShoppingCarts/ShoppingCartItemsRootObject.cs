@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Nop.Plugin.Api.DTOs.ShoppingCarts
+namespace Nop.Plugin.Api.DTO.ShoppingCarts
 {
     public class ShoppingCartItemsRootObject : ISerializableObject
     {
@@ -21,7 +21,7 @@ namespace Nop.Plugin.Api.DTOs.ShoppingCarts
 
         public Type GetPrimaryPropertyType()
         {
-            return typeof (ShoppingCartItemDto);
+            return typeof(ShoppingCartItemDto);
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Nop.Plugin.Api.DTOs.Categories
+namespace Nop.Plugin.Api.DTO.NewsLetterSubscriptions
 {
     public class NewsLetterSubscriptionsRootObject : ISerializableObject
     {
@@ -21,7 +21,7 @@ namespace Nop.Plugin.Api.DTOs.Categories
 
         public Type GetPrimaryPropertyType()
         {
-            return typeof (NewsLetterSubscriptionDto);
+            return typeof(NewsLetterSubscriptionDto);
         }
     }
 }

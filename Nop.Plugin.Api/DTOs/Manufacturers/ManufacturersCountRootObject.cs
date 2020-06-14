@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Nop.Plugin.Api.DTOs.Manufacturers
+namespace Nop.Plugin.Api.DTO.Manufacturers
 {
     public class ManufacturersCountRootObject
     {

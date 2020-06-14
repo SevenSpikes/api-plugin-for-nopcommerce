@@ -1,9 +1,9 @@
-﻿namespace Nop.Plugin.Api.Authorization.Requirements
-{
-    using Microsoft.AspNetCore.Authorization;
-    using Nop.Core.Infrastructure;
-    using Nop.Plugin.Api.Domain;
+﻿using Microsoft.AspNetCore.Authorization;
+using Nop.Core.Infrastructure;
+using Nop.Plugin.Api.Domain;
 
+namespace Nop.Plugin.Api.Authorization.Requirements
+{
     public class ActiveApiPluginRequirement : IAuthorizationRequirement
     {
         public bool IsActive()

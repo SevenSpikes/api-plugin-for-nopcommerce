@@ -25,7 +25,7 @@ namespace Nop.Plugin.Api.Converters
                 {
                     var itemKey = item.Key.Replace("_", string.Empty);
                     var currentProperty = someObjectType.GetProperty(itemKey,
-                        BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                                                                     BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
 
                     if (currentProperty != null)
                     {
@@ -43,24 +43,24 @@ namespace Nop.Plugin.Api.Converters
             {
                 return _apiTypeConverter.ToUtcDateTimeNullable(value);
             }
-            else if (type == typeof (int?))
+            if (type == typeof(int?))
             {
                 return _apiTypeConverter.ToIntNullable(value);
             }
-            else if (type == typeof(int))
+            if (type == typeof(int))
             {
                 return _apiTypeConverter.ToInt(value);
             }
-            else if (type == typeof(List<int>))
+            if (type == typeof(List<int>))
             {
                 return _apiTypeConverter.ToListOfInts(value);
             }
-            else if(type == typeof(bool?))
+            if (type == typeof(bool?))
             {
                 // Because currently status is the only boolean and we need to accept published and unpublished statuses.
                 return _apiTypeConverter.ToStatus(value);
             }
-            else if (IsNullableEnum(type))
+            if (IsNullableEnum(type))
             {
                 return _apiTypeConverter.ToEnumNullable(value, type);
             }
@@ -72,7 +72,7 @@ namespace Nop.Plugin.Api.Converters
         private bool IsNullableEnum(Type t)
         {
             var u = Nullable.GetUnderlyingType(t);
-            return (u != null) && u.IsEnum;
+            return u != null && u.IsEnum;
         }
     }
 }

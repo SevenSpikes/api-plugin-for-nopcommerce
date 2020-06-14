@@ -1,15 +1,14 @@
-﻿using System.Net;
+﻿using System;
+using System.IO;
+using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Nop.Plugin.Api.JSON.ActionResults
 {
-    using System;
-    using System.IO;
-    using System.Text;
-    using Microsoft.AspNetCore.WebUtilities;
-
-    public class ErrorActionResult : IActionResult 
+    public class ErrorActionResult : ActionResult
     {
         private readonly string _jsonString;
         private readonly HttpStatusCode _statusCode;
@@ -19,23 +18,22 @@ namespace Nop.Plugin.Api.JSON.ActionResults
             _jsonString = jsonString;
             _statusCode = statusCode;
         }
-        
-        public Task ExecuteResultAsync(ActionContext context)
-        {
+
+        public override void ExecuteResult(ActionContext context)
+        {            
             if (context == null)
+            {
                 throw new ArgumentNullException(nameof(context));
+            }
 
-            var response = context.HttpContext.Response;
-
-            response.StatusCode = (int)_statusCode;
+            var response = context.HttpContext.Response;            
+            response.StatusCode = (int) _statusCode;
             response.ContentType = "application/json";
-
             using (TextWriter writer = new HttpResponseStreamWriter(response.Body, Encoding.UTF8))
             {
                 writer.Write(_jsonString);
             }
 
-            return Task.CompletedTask;
         }
     }
 }

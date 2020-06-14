@@ -1,16 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Nop.Plugin.Api.ModelBinders;
 
-namespace Nop.Plugin.Api.Models.SpecificationAttributes
+namespace Nop.Plugin.Api.Models.SpecificationAttributesParameters
 {
     // JsonProperty is used only for swagger
-    [ModelBinder(typeof(ParametersModelBinder<SpecifcationAttributesCountParametersModel>))]
-    public class SpecifcationAttributesCountParametersModel
+    [ModelBinder(typeof(ParametersModelBinder<SpecificationAttributesCountParametersModel>))]
+    public class SpecificationAttributesCountParametersModel
     {
-        public SpecifcationAttributesCountParametersModel()
-        {
-
-        }
     }
 }

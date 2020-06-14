@@ -1,7 +1,6 @@
-﻿namespace Nop.Plugin.Api.DTOs.Customers
+﻿namespace Nop.Plugin.Api.DTO.Customers
 {
     public class OrderCustomerDto : BaseCustomerDto
     {
-         
     }
 }

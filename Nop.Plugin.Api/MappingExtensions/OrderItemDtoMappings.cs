@@ -1,6 +1,6 @@
 ﻿using Nop.Core.Domain.Orders;
 using Nop.Plugin.Api.AutoMapper;
-using Nop.Plugin.Api.DTOs.OrderItems;
+using Nop.Plugin.Api.DTO.OrderItems;
 
 namespace Nop.Plugin.Api.MappingExtensions
 {

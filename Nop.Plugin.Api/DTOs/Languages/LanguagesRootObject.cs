@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Nop.Plugin.Api.DTOs.Languages
+namespace Nop.Plugin.Api.DTO.Languages
 {
     public class LanguagesRootObject : ISerializableObject
     {

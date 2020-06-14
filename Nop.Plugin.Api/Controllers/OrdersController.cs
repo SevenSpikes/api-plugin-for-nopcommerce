@@ -2,23 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.Attributes;
-using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.Delta;
-using Nop.Plugin.Api.DTOs;
-using Nop.Plugin.Api.DTOs.OrderItems;
-using Nop.Plugin.Api.DTOs.Orders;
+using Nop.Plugin.Api.DTO.Errors;
+using Nop.Plugin.Api.DTO.OrderItems;
+using Nop.Plugin.Api.DTO.Orders;
 using Nop.Plugin.Api.Factories;
 using Nop.Plugin.Api.Helpers;
+using Nop.Plugin.Api.Infrastructure;
 using Nop.Plugin.Api.JSON.ActionResults;
+using Nop.Plugin.Api.JSON.Serializers;
 using Nop.Plugin.Api.ModelBinders;
 using Nop.Plugin.Api.Models.OrdersParameters;
 using Nop.Plugin.Api.Services;
-using Nop.Plugin.Api.Validators;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
 using Nop.Services.Customers;
@@ -31,36 +32,29 @@ using Nop.Services.Payments;
 using Nop.Services.Security;
 using Nop.Services.Shipping;
 using Nop.Services.Stores;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    using Microsoft.AspNetCore.Authentication.JwtBearer;
-    using DTOs.Errors;
-    using JSON.Serializers;
-
-    [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class OrdersController : BaseApiController
     {
+        private readonly IDTOHelper _dtoHelper;
+        private readonly IFactory<Order> _factory;
+        private readonly IGenericAttributeService _genericAttributeService;
         private readonly IOrderApiService _orderApiService;
-        private readonly IProductService _productService;
         private readonly IOrderProcessingService _orderProcessingService;
         private readonly IOrderService _orderService;
-        private readonly IShoppingCartService _shoppingCartService;
-        private readonly IGenericAttributeService _genericAttributeService;
-        private readonly IShippingService _shippingService;
-        private readonly IDTOHelper _dtoHelper;        
         private readonly IProductAttributeConverter _productAttributeConverter;
+        private readonly IProductService _productService;
+        private readonly IShippingService _shippingService;
+        private readonly IShoppingCartService _shoppingCartService;
         private readonly IStoreContext _storeContext;
-        private readonly IFactory<Order> _factory;
 
         // We resolve the order settings this way because of the tests.
         // The auto mocking does not support concreate types as dependencies. It supports only interfaces.
         private OrderSettings _orderSettings;
 
-        private OrderSettings OrderSettings => _orderSettings ?? (_orderSettings = EngineContext.Current.Resolve<OrderSettings>());
-
-        public OrdersController(IOrderApiService orderApiService,
+        public OrdersController(
+            IOrderApiService orderApiService,
             IJsonFieldsSerializer jsonFieldsSerializer,
             IAclService aclService,
             ICustomerService customerService,
@@ -81,7 +75,7 @@ namespace Nop.Plugin.Api.Controllers
             IDTOHelper dtoHelper,
             IProductAttributeConverter productAttributeConverter)
             : base(jsonFieldsSerializer, aclService, customerService, storeMappingService,
-                 storeService, discountService, customerActivityService, localizationService,pictureService)
+                   storeService, discountService, customerActivityService, localizationService, pictureService)
         {
             _orderApiService = orderApiService;
             _factory = factory;
@@ -96,26 +90,28 @@ namespace Nop.Plugin.Api.Controllers
             _productAttributeConverter = productAttributeConverter;
         }
 
+        private OrderSettings OrderSettings => _orderSettings ?? (_orderSettings = EngineContext.Current.Resolve<OrderSettings>());
+
         /// <summary>
-        /// Receive a list of all Orders
+        ///     Receive a list of all Orders
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="400">Bad Request</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
         [Route("/api/orders")]
-        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(OrdersRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetOrders(OrdersParametersModel parameters)
         {
-            if (parameters.Page < Configurations.DefaultPageValue)
+            if (parameters.Page < Constants.Configurations.DefaultPageValue)
             {
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid page parameter");
             }
 
-            if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
+            if (parameters.Limit < Constants.Configurations.MinLimit || parameters.Limit > Constants.Configurations.MaxLimit)
             {
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid limit parameter");
             }
@@ -123,17 +119,17 @@ namespace Nop.Plugin.Api.Controllers
             var storeId = _storeContext.CurrentStore.Id;
 
             var orders = _orderApiService.GetOrders(parameters.Ids, parameters.CreatedAtMin,
-                parameters.CreatedAtMax,
-                parameters.Limit, parameters.Page, parameters.SinceId,
-                parameters.Status, parameters.PaymentStatus, parameters.ShippingStatus,
-                parameters.CustomerId, storeId);
+                                                    parameters.CreatedAtMax,
+                                                    parameters.Limit, parameters.Page, parameters.SinceId,
+                                                    parameters.Status, parameters.PaymentStatus, parameters.ShippingStatus,
+                                                    parameters.CustomerId, storeId);
 
             IList<OrderDto> ordersAsDtos = orders.Select(x => _dtoHelper.PrepareOrderDTO(x)).ToList();
 
-            var ordersRootObject = new OrdersRootObject()
-            {
-                Orders = ordersAsDtos
-            };
+            var ordersRootObject = new OrdersRootObject
+                                   {
+                                       Orders = ordersAsDtos
+                                   };
 
             var json = JsonFieldsSerializer.Serialize(ordersRootObject, parameters.Fields);
 
@@ -141,15 +137,15 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         /// <summary>
-        /// Receive a count of all Orders
+        ///     Receive a count of all Orders
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
         [Route("/api/orders/count")]
-        [ProducesResponseType(typeof(OrdersCountRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(OrdersCountRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetOrdersCount(OrdersCountParametersModel parameters)
         {
@@ -158,28 +154,29 @@ namespace Nop.Plugin.Api.Controllers
             var ordersCount = _orderApiService.GetOrdersCount(parameters.CreatedAtMin, parameters.CreatedAtMax, parameters.Status,
                                                               parameters.PaymentStatus, parameters.ShippingStatus, parameters.CustomerId, storeId);
 
-            var ordersCountRootObject = new OrdersCountRootObject()
-            {
-                Count = ordersCount
-            };
+            var ordersCountRootObject = new OrdersCountRootObject
+                                        {
+                                            Count = ordersCount
+                                        };
 
             return Ok(ordersCountRootObject);
         }
 
         /// <summary>
-        /// Retrieve order by spcified id
+        ///     Retrieve order by spcified id
         /// </summary>
-        ///   /// <param name="id">Id of the order</param>
+        /// ///
+        /// <param name="id">Id of the order</param>
         /// <param name="fields">Fields from the order you want your json to contain</param>
         /// <response code="200">OK</response>
         /// <response code="404">Not Found</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
         [Route("/api/orders/{id}")]
-        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(OrdersRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetOrderById(int id, string fields = "")
         {
@@ -206,36 +203,38 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         /// <summary>
-        /// Retrieve all orders for customer
+        ///     Retrieve all orders for customer
         /// </summary>
         /// <param name="customerId">Id of the customer whoes orders you want to get</param>
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
         [Route("/api/orders/customer/{customer_id}")]
-        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(OrdersRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetOrdersByCustomerId(int customerId)
         {
             IList<OrderDto> ordersForCustomer = _orderApiService.GetOrdersByCustomerId(customerId).Select(x => _dtoHelper.PrepareOrderDTO(x)).ToList();
 
-            var ordersRootObject = new OrdersRootObject()
-            {
-                Orders = ordersForCustomer
-            };
+            var ordersRootObject = new OrdersRootObject
+                                   {
+                                       Orders = ordersForCustomer
+                                   };
 
             return Ok(ordersRootObject);
         }
 
         [HttpPost]
         [Route("/api/orders")]
-        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(OrdersRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult CreateOrder([ModelBinder(typeof(JsonModelBinder<OrderDto>))] Delta<OrderDto> orderDelta)
+        public IActionResult CreateOrder(
+            [ModelBinder(typeof(JsonModelBinder<OrderDto>))]
+            Delta<OrderDto> orderDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -250,7 +249,7 @@ namespace Nop.Plugin.Api.Controllers
 
             // We doesn't have to check for value because this is done by the order validator.
             var customer = CustomerService.GetCustomerById(orderDelta.Dto.CustomerId.Value);
-            
+
             if (customer == null)
             {
                 return Error(HttpStatusCode.NotFound, "customer", "not found");
@@ -274,12 +273,12 @@ namespace Nop.Plugin.Api.Controllers
                 var isValid = true;
 
                 isValid &= SetShippingOption(orderDelta.Dto.ShippingRateComputationMethodSystemName,
-                                            orderDelta.Dto.ShippingMethod,
-                                            orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id,
-                                            customer, 
-                                            BuildShoppingCartItemsFromOrderItemDtos(orderDelta.Dto.OrderItems.ToList(), 
-                                                                                    customer.Id, 
-                                                                                    orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id));
+                                             orderDelta.Dto.ShippingMethod,
+                                             orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id,
+                                             customer,
+                                             BuildShoppingCartItemsFromOrderItemDtos(orderDelta.Dto.OrderItems.ToList(),
+                                                                                     customer.Id,
+                                                                                     orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id));
 
                 if (!isValid)
                 {
@@ -290,18 +289,19 @@ namespace Nop.Plugin.Api.Controllers
             var newOrder = _factory.Initialize();
             orderDelta.Merge(newOrder);
 
-            customer.BillingAddress = newOrder.BillingAddress;
-            customer.ShippingAddress = newOrder.ShippingAddress;
+            customer.BillingAddressId = newOrder.BillingAddressId = orderDelta.Dto.BillingAddress.Id;
+            customer.ShippingAddressId = newOrder.ShippingAddressId = orderDelta.Dto.ShippingAddress.Id;
+                       
 
             // If the customer has something in the cart it will be added too. Should we clear the cart first? 
-            newOrder.Customer = customer;
+            newOrder.CustomerId = customer.Id;
 
             // The default value will be the currentStore.id, but if it isn't passed in the json we need to set it by hand.
             if (!orderDelta.Dto.StoreId.HasValue)
             {
                 newOrder.StoreId = _storeContext.CurrentStore.Id;
             }
-            
+
             var placeOrderResult = PlaceOrder(newOrder, customer);
 
             if (!placeOrderResult.Success)
@@ -315,7 +315,7 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             CustomerActivityService.InsertActivity("AddNewOrder",
-                 LocalizationService.GetResource("ActivityLog.AddNewOrder"), newOrder);
+                                                   LocalizationService.GetResource("ActivityLog.AddNewOrder"), newOrder);
 
             var ordersRootObject = new OrdersRootObject();
 
@@ -330,10 +330,10 @@ namespace Nop.Plugin.Api.Controllers
 
         [HttpDelete]
         [Route("/api/orders/{id}")]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult DeleteOrder(int id)
@@ -342,7 +342,7 @@ namespace Nop.Plugin.Api.Controllers
             {
                 return Error(HttpStatusCode.BadRequest, "id", "invalid id");
             }
-            
+
             var orderToDelete = _orderApiService.GetOrderById(id);
 
             if (orderToDelete == null)
@@ -360,12 +360,14 @@ namespace Nop.Plugin.Api.Controllers
 
         [HttpPut]
         [Route("/api/orders/{id}")]
-        [ProducesResponseType(typeof(OrdersRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(OrdersRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult UpdateOrder([ModelBinder(typeof(JsonModelBinder<OrderDto>))] Delta<OrderDto> orderDelta)
+        public IActionResult UpdateOrder(
+            [ModelBinder(typeof(JsonModelBinder<OrderDto>))]
+            Delta<OrderDto> orderDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -380,9 +382,9 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.NotFound, "order", "not found");
             }
 
-            var customer = currentOrder.Customer;
-
-            var shippingRequired = currentOrder.OrderItems.Any(item => !item.Product.IsFreeShipping);
+            var customer = CustomerService.GetCustomerById(currentOrder.CustomerId);
+            
+            var shippingRequired = _orderService.GetOrderItems(currentOrder.Id).Any(item => !_productService.GetProductById(item.Id).IsFreeShipping);
 
             if (shippingRequired)
             {
@@ -394,9 +396,9 @@ namespace Nop.Plugin.Api.Controllers
                     var storeId = orderDelta.Dto.StoreId ?? _storeContext.CurrentStore.Id;
 
                     isValid &= SetShippingOption(orderDelta.Dto.ShippingRateComputationMethodSystemName ?? currentOrder.ShippingRateComputationMethodSystemName,
-                        orderDelta.Dto.ShippingMethod, 
-                        storeId,
-                        customer, BuildShoppingCartItemsFromOrderItems(currentOrder.OrderItems.ToList(), customer.Id, storeId));
+                                                 orderDelta.Dto.ShippingMethod,
+                                                 storeId,
+                                                 customer, BuildShoppingCartItemsFromOrderItems(_orderService.GetOrderItems(currentOrder.Id).ToList(), customer.Id, storeId));
                 }
 
                 if (isValid)
@@ -410,14 +412,15 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             orderDelta.Merge(currentOrder);
-            
-            customer.BillingAddress = currentOrder.BillingAddress;
-            customer.ShippingAddress = currentOrder.ShippingAddress;
+
+            customer.BillingAddressId = currentOrder.BillingAddressId = orderDelta.Dto.BillingAddress.Id;
+            customer.ShippingAddressId = currentOrder.ShippingAddressId = orderDelta.Dto.ShippingAddress.Id;
+
 
             _orderService.UpdateOrder(currentOrder);
 
             CustomerActivityService.InsertActivity("UpdateOrder",
-                 LocalizationService.GetResource("ActivityLog.UpdateOrder"), currentOrder);
+                                                   LocalizationService.GetResource("ActivityLog.UpdateOrder"), currentOrder);
 
             var ordersRootObject = new OrdersRootObject();
 
@@ -431,7 +434,8 @@ namespace Nop.Plugin.Api.Controllers
             return new RawJsonActionResult(json);
         }
 
-        private bool SetShippingOption(string shippingRateComputationMethodSystemName, string shippingOptionName, int storeId, Customer customer, List<ShoppingCartItem> shoppingCartItems)
+        private bool SetShippingOption(
+            string shippingRateComputationMethodSystemName, string shippingOptionName, int storeId, Customer customer, List<ShoppingCartItem> shoppingCartItems)
         {
             var isValid = true;
 
@@ -440,7 +444,7 @@ namespace Nop.Plugin.Api.Controllers
                 isValid = false;
 
                 ModelState.AddModelError("shipping_rate_computation_method_system_name",
-                    "Please provide shipping_rate_computation_method_system_name");
+                                         "Please provide shipping_rate_computation_method_system_name");
             }
             else if (string.IsNullOrEmpty(shippingOptionName))
             {
@@ -450,8 +454,8 @@ namespace Nop.Plugin.Api.Controllers
             }
             else
             {
-                var shippingOptionResponse = _shippingService.GetShippingOptions(shoppingCartItems, customer.ShippingAddress, customer,
-                        shippingRateComputationMethodSystemName, storeId);
+                var shippingOptionResponse = _shippingService.GetShippingOptions(shoppingCartItems, CustomerService.GetCustomerShippingAddress(customer), customer,
+                                                                                 shippingRateComputationMethodSystemName, storeId);
 
                 if (shippingOptionResponse.Success)
                 {
@@ -459,10 +463,10 @@ namespace Nop.Plugin.Api.Controllers
 
                     var shippingOption = shippingOptions
                         .Find(so => !string.IsNullOrEmpty(so.Name) && so.Name.Equals(shippingOptionName, StringComparison.InvariantCultureIgnoreCase));
-                    
+
                     _genericAttributeService.SaveAttribute(customer,
-                        NopCustomerDefaults.SelectedShippingOptionAttribute,
-                        shippingOption, storeId);
+                                                           NopCustomerDefaults.SelectedShippingOptionAttribute,
+                                                           shippingOption, storeId);
                 }
                 else
                 {
@@ -484,17 +488,16 @@ namespace Nop.Plugin.Api.Controllers
 
             foreach (var orderItem in orderItems)
             {
-                shoppingCartItems.Add(new ShoppingCartItem()
-                {
-                    ProductId = orderItem.ProductId,
-                    CustomerId = customerId,
-                    Quantity = orderItem.Quantity,
-                    RentalStartDateUtc = orderItem.RentalStartDateUtc,
-                    RentalEndDateUtc = orderItem.RentalEndDateUtc,
-                    StoreId = storeId,
-                    Product = orderItem.Product,
-                    ShoppingCartType = ShoppingCartType.ShoppingCart
-                });
+                shoppingCartItems.Add(new ShoppingCartItem
+                                      {
+                                          ProductId = orderItem.ProductId,
+                                          CustomerId = customerId,
+                                          Quantity = orderItem.Quantity,
+                                          RentalStartDateUtc = orderItem.RentalStartDateUtc,
+                                          RentalEndDateUtc = orderItem.RentalEndDateUtc,
+                                          StoreId = storeId,
+                                          ShoppingCartType = ShoppingCartType.ShoppingCart
+                                      });
             }
 
             return shoppingCartItems;
@@ -508,17 +511,16 @@ namespace Nop.Plugin.Api.Controllers
             {
                 if (orderItem.ProductId != null)
                 {
-                    shoppingCartItems.Add(new ShoppingCartItem()
-                    {
-                        ProductId = orderItem.ProductId.Value, // required field
-                        CustomerId = customerId,
-                        Quantity = orderItem.Quantity ?? 1,
-                        RentalStartDateUtc = orderItem.RentalStartDateUtc,
-                        RentalEndDateUtc = orderItem.RentalEndDateUtc,
-                        StoreId = storeId,
-                        Product = _productService.GetProductById(orderItem.ProductId.Value),
-                        ShoppingCartType = ShoppingCartType.ShoppingCart
-                    });
+                    shoppingCartItems.Add(new ShoppingCartItem
+                                          {
+                                              ProductId = orderItem.ProductId.Value, // required field
+                                              CustomerId = customerId,
+                                              Quantity = orderItem.Quantity ?? 1,
+                                              RentalStartDateUtc = orderItem.RentalStartDateUtc,
+                                              RentalEndDateUtc = orderItem.RentalEndDateUtc,
+                                              StoreId = storeId,
+                                              ShoppingCartType = ShoppingCartType.ShoppingCart
+                                          });
                 }
             }
 
@@ -528,11 +530,11 @@ namespace Nop.Plugin.Api.Controllers
         private PlaceOrderResult PlaceOrder(Order newOrder, Customer customer)
         {
             var processPaymentRequest = new ProcessPaymentRequest
-            {
-                StoreId = newOrder.StoreId,
-                CustomerId = customer.Id,
-                PaymentMethodSystemName = newOrder.PaymentMethodSystemName
-            };
+                                        {
+                                            StoreId = newOrder.StoreId,
+                                            CustomerId = customer.Id,
+                                            PaymentMethodSystemName = newOrder.PaymentMethodSystemName
+                                        };
 
 
             var placeOrderResult = _orderProcessingService.PlaceOrder(processPaymentRequest);
@@ -573,12 +575,12 @@ namespace Nop.Plugin.Api.Controllers
                         orderItem.RentalEndDateUtc = null;
                     }
 
-                    var attributesXml = _productAttributeConverter.ConvertToXml(orderItem.Attributes.ToList(), product.Id);                
+                    var attributesXml = _productAttributeConverter.ConvertToXml(orderItem.Attributes.ToList(), product.Id);
 
                     var errors = _shoppingCartService.AddToCart(customer, product,
-                        ShoppingCartType.ShoppingCart, storeId,attributesXml,
-                        0M, orderItem.RentalStartDateUtc, orderItem.RentalEndDateUtc,
-                        orderItem.Quantity ?? 1);
+                                                                ShoppingCartType.ShoppingCart, storeId, attributesXml,
+                                                                0M, orderItem.RentalStartDateUtc, orderItem.RentalEndDateUtc,
+                                                                orderItem.Quantity ?? 1);
 
                     if (errors.Count > 0)
                     {
@@ -594,5 +596,5 @@ namespace Nop.Plugin.Api.Controllers
 
             return shouldReturnError;
         }
-     }
+    }
 }

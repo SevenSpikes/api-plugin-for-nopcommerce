@@ -10,14 +10,14 @@ namespace Nop.Plugin.Api.Validators
 {
     public class TypeValidator<T>
     {
-        public List<string> InvalidProperties { get; set; }
-
         public TypeValidator()
         {
             InvalidProperties = new List<string>();
         }
 
-        public bool IsValid(Dictionary<string, object> propertyValuePaires)
+        public List<string> InvalidProperties { get; set; }
+
+        public bool IsValid(Dictionary<string, object> propertyValuePairs)
         {
             var isValid = true;
 
@@ -36,7 +36,7 @@ namespace Nop.Plugin.Api.Validators
                 }
             }
 
-            foreach (var pair in propertyValuePaires)
+            foreach (var pair in propertyValuePairs)
             {
                 var isCurrentPropertyValid = true;
 
@@ -59,7 +59,10 @@ namespace Nop.Plugin.Api.Validators
                         {
                             isCurrentPropertyValid = IsCurrentPropertyValid(elementsType, item);
 
-                            if (!isCurrentPropertyValid) break;
+                            if (!isCurrentPropertyValid)
+                            {
+                                break;
+                            }
                         }
                     }
                     else
@@ -85,7 +88,10 @@ namespace Nop.Plugin.Api.Validators
 
             var isValidMethod = constructedType.GetMethod("IsValid");
 
-            var isCurrentPropertyValid = (bool)isValidMethod.Invoke(typeValidatorForNestedProperty, new object[] { value });
+            var isCurrentPropertyValid = (bool) isValidMethod.Invoke(typeValidatorForNestedProperty, new object[]
+                                                                                                     {
+                                                                                                         value
+                                                                                                     });
 
             return isCurrentPropertyValid;
         }
@@ -106,13 +112,16 @@ namespace Nop.Plugin.Api.Validators
                     valueToValidate = string.Format(CultureInfo.InvariantCulture, "{0}", value);
                 }
 
-                if (!converter.IsValid(valueToValidate)) isCurrentPropertyValid = false;
+                if (!converter.IsValid(valueToValidate))
+                {
+                    isCurrentPropertyValid = false;
+                }
             }
             else
             {
                 if (value != null)
                 {
-                    isCurrentPropertyValid = ValidateNestedProperty(type, (Dictionary<string, object>)value);
+                    isCurrentPropertyValid = ValidateNestedProperty(type, (Dictionary<string, object>) value);
                 }
             }
 

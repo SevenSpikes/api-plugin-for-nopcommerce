@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Nop.Core.Data;
+using Nop.Data;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Vendors;
-using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.DataStructures;
+using Nop.Plugin.Api.Infrastructure;
 using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.Services
 {
     public class ProductApiService : IProductApiService
     {
-        private readonly IStoreMappingService _storeMappingService;
-        private readonly IRepository<Product> _productRepository;
         private readonly IRepository<ProductCategory> _productCategoryMappingRepository;
+        private readonly IRepository<Product> _productRepository;
+        private readonly IStoreMappingService _storeMappingService;
         private readonly IRepository<Vendor> _vendorRepository;
 
-        public ProductApiService(IRepository<Product> productRepository,
+        public ProductApiService(
+            IRepository<Product> productRepository,
             IRepository<ProductCategory> productCategoryMappingRepository,
             IRepository<Vendor> vendorRepository,
             IStoreMappingService storeMappingService)
@@ -28,10 +29,12 @@ namespace Nop.Plugin.Api.Services
             _storeMappingService = storeMappingService;
         }
 
-        public IList<Product> GetProducts(IList<int> ids = null,
+        public IList<Product> GetProducts(
+            IList<int> ids = null,
             DateTime? createdAtMin = null, DateTime? createdAtMax = null, DateTime? updatedAtMin = null, DateTime? updatedAtMax = null,
-           int limit = Configurations.DefaultLimit, int page = Configurations.DefaultPageValue, int sinceId = Configurations.DefaultSinceId,
-           int? categoryId = null, string vendorName = null, bool? publishedStatus = null)
+            int limit = Constants.Configurations.DefaultLimit, int page = Constants.Configurations.DefaultPageValue,
+            int sinceId = Constants.Configurations.DefaultSinceId,
+            int? categoryId = null, string vendorName = null, bool? publishedStatus = null)
         {
             var query = GetProductsQuery(createdAtMin, createdAtMax, updatedAtMin, updatedAtMax, vendorName, publishedStatus, ids, categoryId);
 
@@ -42,9 +45,10 @@ namespace Nop.Plugin.Api.Services
 
             return new ApiList<Product>(query, page - 1, limit);
         }
-        
-        public int GetProductsCount(DateTime? createdAtMin = null, DateTime? createdAtMax = null, 
-            DateTime? updatedAtMin = null, DateTime? updatedAtMax = null, bool? publishedStatus = null, string vendorName = null, 
+
+        public int GetProductsCount(
+            DateTime? createdAtMin = null, DateTime? createdAtMax = null,
+            DateTime? updatedAtMin = null, DateTime? updatedAtMax = null, bool? publishedStatus = null, string vendorName = null,
             int? categoryId = null)
         {
             var query = GetProductsQuery(createdAtMin, createdAtMax, updatedAtMin, updatedAtMax, vendorName,
@@ -56,7 +60,9 @@ namespace Nop.Plugin.Api.Services
         public Product GetProductById(int productId)
         {
             if (productId == 0)
+            {
                 return null;
+            }
 
             return _productRepository.Table.FirstOrDefault(product => product.Id == productId && !product.Deleted);
         }
@@ -64,15 +70,18 @@ namespace Nop.Plugin.Api.Services
         public Product GetProductByIdNoTracking(int productId)
         {
             if (productId == 0)
+            {
                 return null;
+            }
 
             return _productRepository.Table.FirstOrDefault(product => product.Id == productId && !product.Deleted);
         }
 
-        private IQueryable<Product> GetProductsQuery(DateTime? createdAtMin = null, DateTime? createdAtMax = null, 
-            DateTime? updatedAtMin = null, DateTime? updatedAtMax = null, string vendorName = null, 
+        private IQueryable<Product> GetProductsQuery(
+            DateTime? createdAtMin = null, DateTime? createdAtMax = null,
+            DateTime? updatedAtMin = null, DateTime? updatedAtMax = null, string vendorName = null,
             bool? publishedStatus = null, IList<int> ids = null, int? categoryId = null)
-            
+
         {
             var query = _productRepository.Table;
 
@@ -101,7 +110,7 @@ namespace Nop.Plugin.Api.Services
 
             if (updatedAtMin != null)
             {
-               query = query.Where(c => c.UpdatedOnUtc > updatedAtMin.Value);
+                query = query.Where(c => c.UpdatedOnUtc > updatedAtMin.Value);
             }
 
             if (updatedAtMax != null)

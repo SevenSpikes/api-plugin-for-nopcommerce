@@ -1,25 +1,24 @@
-﻿using Nop.Plugin.Api.Attributes;
-using Nop.Plugin.Api.Delta;
-using Nop.Plugin.Api.Helpers;
-using Nop.Plugin.Api.Validators;
-using Nop.Services.Localization;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Nop.Plugin.Api.Attributes;
+using Nop.Plugin.Api.Delta;
+using Nop.Plugin.Api.Helpers;
+using Nop.Plugin.Api.Validators;
+using Nop.Services.Localization;
 
 namespace Nop.Plugin.Api.ModelBinders
 {
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.ModelBinding;
-    using System;
-
     public class JsonModelBinder<T> : IModelBinder where T : class, new()
     {
         private readonly IJsonHelper _jsonHelper;
-        private readonly ILocalizationService _localizationService;
 
         private readonly int _languageId;
+        private readonly ILocalizationService _localizationService;
 
         public JsonModelBinder(IJsonHelper jsonHelper, ILocalizationService localizationService, ILanguageService languageService)
         {
@@ -56,12 +55,12 @@ namespace Nop.Plugin.Api.ModelBinders
 
                 if (routeDataId != null)
                 {
-                    // Here we insert the route data id in the value paires.
+                    // Here we insert the route data id in the value pairs.
                     // If id is contained in the category json body the one from the route data is used instead.
-                    InsertIdInTheValuePaires(propertyValuePairs, routeDataId);
+                    InsertIdInTheValuePairs(propertyValuePairs, routeDataId);
                 }
 
-                // We need to call this method here so it will be certain that the routeDataId will be in the propertyValuePaires
+                // We need to call this method here so it will be certain that the routeDataId will be in the propertyValuePairs
                 // when the request is PUT.
                 ValidateValueTypes(bindingContext, propertyValuePairs);
 
@@ -103,7 +102,7 @@ namespace Nop.Plugin.Api.ModelBinders
                     result = _jsonHelper.GetRequestJsonDictionaryFromStream(bindingContext.HttpContext.Request.Body, true);
                     var rootPropertyName = _jsonHelper.GetRootPropertyName<T>();
 
-                    result = (Dictionary<string, object>)result[rootPropertyName];
+                    result = (Dictionary<string, object>) result[rootPropertyName];
                 }
                 catch (Exception ex)
                 {
@@ -126,14 +125,14 @@ namespace Nop.Plugin.Api.ModelBinders
             return routeDataId;
         }
 
-        private void ValidateValueTypes(ModelBindingContext bindingContext, Dictionary<string, object> propertyValuePaires)
+        private void ValidateValueTypes(ModelBindingContext bindingContext, Dictionary<string, object> propertyValuePairs)
         {
             var errors = new Dictionary<string, string>();
 
             // Validate if the property value pairs passed maches the type.
             var typeValidator = new TypeValidator<T>();
 
-            if (!typeValidator.IsValid(propertyValuePaires))
+            if (!typeValidator.IsValid(propertyValuePairs))
             {
                 foreach (var invalidProperty in typeValidator.InvalidProperties)
                 {
@@ -145,7 +144,7 @@ namespace Nop.Plugin.Api.ModelBinders
                     }
                 }
             }
-            
+
             if (errors.Count > 0)
             {
                 foreach (var error in errors)
@@ -155,7 +154,7 @@ namespace Nop.Plugin.Api.ModelBinders
             }
         }
 
-        private void ValidateModel(ModelBindingContext bindingContext, Dictionary<string, object> propertyValuePaires, T dto)
+        private void ValidateModel(ModelBindingContext bindingContext, Dictionary<string, object> propertyValuePairs, T dto)
         {
             // this method validates each property by checking if it has an attribute that inherits from BaseValidationAttribute
             // these attribtues are different than FluentValidation attributes, so they need to be validated manually
@@ -188,15 +187,15 @@ namespace Nop.Plugin.Api.ModelBinders
             }
         }
 
-        private void InsertIdInTheValuePaires(Dictionary<string, object> propertyValuePaires, object requestId)
+        private void InsertIdInTheValuePairs(IDictionary<string, object> propertyValuePairs, object requestId)
         {
-            if (propertyValuePaires.ContainsKey("id"))
+            if (propertyValuePairs.ContainsKey("id"))
             {
-                propertyValuePaires["id"] = requestId;
+                propertyValuePairs["id"] = requestId;
             }
             else
             {
-                propertyValuePaires.Add("id", requestId);
+                propertyValuePairs.Add("id", requestId);
             }
         }
     }

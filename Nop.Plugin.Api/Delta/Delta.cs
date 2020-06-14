@@ -9,55 +9,33 @@ namespace Nop.Plugin.Api.Delta
 {
     public class Delta<TDto> where TDto : class, new()
     {
-        private TDto _dto;
+        private readonly Dictionary<string, object> _changedJsonPropertyNames;
+
+        private readonly IJsonPropertyMapper _jsonPropertyMapper;
 
         private readonly IMappingHelper _mappingHelper = new MappingHelper();
+        private TDto _dto;
 
-        private readonly Dictionary<string, object> _changedJsonPropertyNames;
-        
-        private readonly IJsonPropertyMapper _jsonPropertyMapper;
+        private Dictionary<string, object> _propertyValuePairs;
 
         public Dictionary<object, object> ObjectPropertyNameValuePairs = new Dictionary<object, object>();
 
-        private Dictionary<string, object> _propertyValuePairs; 
-
-        private Dictionary<string, object> PropertyValuePairs
-        {
-            get
-            {
-                if (_propertyValuePairs == null)
-                {
-                    _propertyValuePairs = GetPropertyValuePairs(typeof(TDto), _changedJsonPropertyNames);
-                }
-
-                return _propertyValuePairs;
-            }
-        } 
-
-        public TDto Dto
-        {
-            get
-            {
-                if (_dto == null)
-                {
-                    _dto = new TDto();
-                }
-
-                return _dto;
-            }
-        }
-
-        public Delta(Dictionary<string, object> passedChangedJsonPropertyValuePaires)
+        public Delta(Dictionary<string, object> passedChangedJsonPropertyValuePairs)
         {
             _jsonPropertyMapper = EngineContext.Current.Resolve<IJsonPropertyMapper>();
-            _changedJsonPropertyNames = passedChangedJsonPropertyValuePaires;
+            _changedJsonPropertyNames = passedChangedJsonPropertyValuePairs;
 
             _mappingHelper.SetValues(PropertyValuePairs, Dto, typeof(TDto), ObjectPropertyNameValuePairs, true);
         }
 
+        private Dictionary<string, object> PropertyValuePairs =>
+            _propertyValuePairs ?? (_propertyValuePairs = GetPropertyValuePairs(typeof(TDto), _changedJsonPropertyNames));
+
+        public TDto Dto => _dto ?? (_dto = new TDto());
+
         public void Merge<TEntity>(TEntity entity, bool mergeComplexTypeCollections = true)
         {
-            _mappingHelper.SetValues(PropertyValuePairs, entity, entity.GetType(), null,mergeComplexTypeCollections);
+            _mappingHelper.SetValues(PropertyValuePairs, entity, entity.GetType(), null, mergeComplexTypeCollections);
         }
 
         public void Merge<TEntity>(object dto, TEntity entity, bool mergeComplexTypeCollections = true)
@@ -69,12 +47,14 @@ namespace Nop.Plugin.Api.Delta
             }
         }
 
-       private Dictionary<string, object> GetPropertyValuePairs(Type type, Dictionary<string, object> changedJsonPropertyNames)
+        private Dictionary<string, object> GetPropertyValuePairs(Type type, Dictionary<string, object> changedJsonPropertyNames)
         {
             var propertyValuePairs = new Dictionary<string, object>();
 
             if (changedJsonPropertyNames == null)
+            {
                 return propertyValuePairs;
+            }
 
             var typeMap = _jsonPropertyMapper.GetMap(type);
 
@@ -101,10 +81,12 @@ namespace Nop.Plugin.Api.Delta
                         // skip any collections that are passed as null
                         // we can handle only empty collection, which will delete any items if exist
                         // or collections that has some elements which need to be updated/added/deleted.
-                        if(changedProperty.Value == null)
+                        if (changedProperty.Value == null)
+                        {
                             continue;
+                        }
 
-                            var collection = changedProperty.Value as IEnumerable<object>;
+                        var collection = changedProperty.Value as IEnumerable<object>;
                         var collectionElementsType = propertyType.GetGenericArguments()[0];
                         var resultCollection = new List<object>();
 
@@ -122,7 +104,7 @@ namespace Nop.Plugin.Api.Delta
                                 var itemDictionary =
                                     item as Dictionary<string, object>;
 
-                                resultCollection.Add(GetPropertyValuePairs(collectionElementsType,itemDictionary));
+                                resultCollection.Add(GetPropertyValuePairs(collectionElementsType, itemDictionary));
                             }
                         }
 

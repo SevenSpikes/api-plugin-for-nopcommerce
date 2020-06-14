@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Nop.Plugin.Api.DTOs.ProductCategoryMappings
+namespace Nop.Plugin.Api.DTO.ProductCategoryMappings
 {
     public class ProductCategoryMappingsRootObject : ISerializableObject
     {
@@ -21,7 +21,7 @@ namespace Nop.Plugin.Api.DTOs.ProductCategoryMappings
 
         public Type GetPrimaryPropertyType()
         {
-            return typeof (ProductCategoryMappingDto);
+            return typeof(ProductCategoryMappingDto);
         }
     }
 }

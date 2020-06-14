@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Nop.Plugin.Api.DTOs.OrderItems
+namespace Nop.Plugin.Api.DTO.OrderItems
 {
     public class OrderItemsRootObject : ISerializableObject
     {

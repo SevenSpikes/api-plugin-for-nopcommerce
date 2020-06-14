@@ -1,11 +1,10 @@
-﻿using Newtonsoft.Json;
-using Nop.Plugin.Api.Constants;
+﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Nop.Plugin.Api.Infrastructure;
 using Nop.Plugin.Api.ModelBinders;
 
 namespace Nop.Plugin.Api.Models.CustomersParameters
 {
-    using Microsoft.AspNetCore.Mvc;
-
     // JsonProperty is used only for swagger
     [ModelBinder(typeof(ParametersModelBinder<CustomersSearchParametersModel>))]
     public class CustomersSearchParametersModel
@@ -14,37 +13,37 @@ namespace Nop.Plugin.Api.Models.CustomersParameters
         {
             Order = "Id";
             Query = string.Empty;
-            Page = Configurations.DefaultPageValue;
-            Limit = Configurations.DefaultLimit;
+            Page = Constants.Configurations.DefaultPageValue;
+            Limit = Constants.Configurations.DefaultLimit;
             Fields = string.Empty;
         }
 
         /// <summary>
-        /// Field and direction to order results by (default: id DESC)
+        ///     Field and direction to order results by (default: id DESC)
         /// </summary>
         [JsonProperty("order")]
         public string Order { get; set; }
 
         /// <summary>
-        /// Text to search customers
+        ///     Text to search customers
         /// </summary>
         [JsonProperty("query")]
         public string Query { get; set; }
 
         /// <summary>
-        /// Page to show (default: 1)
+        ///     Page to show (default: 1)
         /// </summary>
         [JsonProperty("page")]
         public int Page { get; set; }
 
         /// <summary>
-        /// Amount of results (default: 50) (maximum: 250)
+        ///     Amount of results (default: 50) (maximum: 250)
         /// </summary>
         [JsonProperty("limit")]
         public int Limit { get; set; }
 
         /// <summary>
-        /// Comma-separated list of fields to include in the response
+        ///     Comma-separated list of fields to include in the response
         /// </summary>
         [JsonProperty("fields")]
         public string Fields { get; set; }
