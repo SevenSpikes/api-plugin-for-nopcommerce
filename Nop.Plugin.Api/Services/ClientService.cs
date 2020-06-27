@@ -13,6 +13,8 @@ namespace Nop.Plugin.Api.Services
     using MappingExtensions;
     using Models;
     using Client = IdentityServer4.EntityFramework.Entities.Client;
+    using Nop.Web.Framework.Models.Extensions;
+    using Nop.Core;
 
     public class ClientService : IClientService
     {
@@ -23,17 +25,19 @@ namespace Nop.Plugin.Api.Services
             _configurationDbContext = configurationDbContext;
         }
         
-        public IList<ClientApiModel> GetAllClients()
+        public ClientApiListModel GetAllClients(ClientApiSearchModel searchModel)
         {
-            IQueryable<Client> clientsQuery = _configurationDbContext.Clients
-                .Include(x => x.ClientSecrets)
-                .Include(x => x.RedirectUris);
+            IQueryable<Client> clientsQuery = _configurationDbContext.Clients.Include(x => x.ClientSecrets)
+                                                                             .Include(x => x.RedirectUris);
 
             IList<Client> clients = clientsQuery.ToList();
 
-            IList<ClientApiModel> clientApiModels = clients.Select(client => client.ToApiModel()).ToList();
-
-            return clientApiModels;
+            var apiList = new ClientApiListModel().PrepareToGrid(searchModel, new PagedList<Client>(clients, searchModel.Page, searchModel.PageSize), () =>
+            {
+                return clients.Select(client => client.ToApiModel());
+            });
+            
+            return apiList;
         }
         
         public int InsertClient(ClientApiModel model)

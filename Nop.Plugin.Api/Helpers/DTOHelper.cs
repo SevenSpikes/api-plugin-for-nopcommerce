@@ -31,6 +31,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Nop.Plugin.Api.DTOs.Shipments;
 using Nop.Core.Domain.Shipping;
+using Nop.Plugin.Api.DTOs.TaxCategory;
+using Nop.Core.Domain.Tax;
+using Nop.Services.Tax;
+using Nop.Services.Configuration;
+using Nop.Plugin.Api.Constants;
 
 namespace Nop.Plugin.Api.Helpers
 {
@@ -50,6 +55,8 @@ namespace Nop.Plugin.Api.Helpers
         private readonly IStoreMappingService _storeMappingService;
         private readonly IStoreService _storeService;
         private readonly IUrlRecordService _urlRecordService;
+        private readonly ITaxCategoryService _taxCategoryService;
+        private readonly ISettingService _settingService;
 
         public DTOHelper(IProductService productService,
             IAclService aclService,
@@ -64,7 +71,9 @@ namespace Nop.Plugin.Api.Helpers
             IStoreService storeService,
             ILocalizationService localizationService,
             IUrlRecordService urlRecordService,
-            IProductTagService productTagService)
+            IProductTagService productTagService, 
+            ITaxCategoryService taxCategoryService,
+            ISettingService settingService)
         {
             _productService = productService;
             _aclService = aclService;
@@ -80,6 +89,8 @@ namespace Nop.Plugin.Api.Helpers
             _localizationService = localizationService;
             _urlRecordService = urlRecordService;
             _productTagService = productTagService;
+            _taxCategoryService = taxCategoryService;
+            _settingService = settingService;
         }
 
         public ProductDto PrepareProductDTO(Product product)
@@ -301,7 +312,6 @@ namespace Nop.Plugin.Api.Helpers
             return imageMapping;
         }
 
-
         private void PrepareProductAttributes(IEnumerable<ProductAttributeMapping> productAttributeMappings,
             ProductDto productDto)
         {
@@ -466,6 +476,26 @@ namespace Nop.Plugin.Api.Helpers
         public ImageMappingDto PrepareProductPictureDTO(ProductPicture productPicture)
         {
             return PrepareProductImageDto(productPicture);
+        }
+
+        public TaxCategoryDto PrepareTaxCategoryDTO(TaxCategory taxCategory)
+        {
+            var taxRateModel = new TaxCategoryDto()
+            {
+                Id = taxCategory.Id,
+                Name = taxCategory.Name,
+                DisplayOrder = taxCategory.DisplayOrder,
+                Rate = _settingService.GetSettingByKey<decimal>(string.Format(Configurations.FixedRateSettingsKey, taxCategory.Id))
+            };
+
+            //var taxRateModels = _taxCategoryService.GetAllTaxCategories().Select(t => new TaxCategoryDto
+            //{
+            //    Id = t.Id,
+            //    Name = t.Name,
+            //    Rate = _settingService.GetSettingByKey<decimal>(string.Format(Configurations.FixedRateSettingsKey, taxCategory.Id))
+            //}).ToList();
+
+            return taxRateModel;
         }
     }
 }

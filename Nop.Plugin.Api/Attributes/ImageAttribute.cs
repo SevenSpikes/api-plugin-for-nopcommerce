@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Nop.Core.Infrastructure;
 using Nop.Services.Media;
+using FluentValidation;
 
 namespace Nop.Plugin.Api.Attributes
 {

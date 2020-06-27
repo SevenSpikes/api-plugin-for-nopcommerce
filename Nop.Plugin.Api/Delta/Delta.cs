@@ -57,7 +57,7 @@ namespace Nop.Plugin.Api.Delta
 
         public void Merge<TEntity>(TEntity entity, bool mergeComplexTypeCollections = true)
         {
-            _mappingHelper.SetValues(PropertyValuePairs, entity, entity.GetType(), null,mergeComplexTypeCollections);
+            _mappingHelper.SetValues(PropertyValuePairs, entity, entity.GetType(), null, mergeComplexTypeCollections);
         }
 
         public void Merge<TEntity>(object dto, TEntity entity, bool mergeComplexTypeCollections = true)

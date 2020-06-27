@@ -82,6 +82,18 @@ namespace Nop.Plugin.Api.Data
         }
 
         /// <summary>
+        /// Creates a LINQ query for the query based on a raw SQL query and parameters
+        /// </summary>
+        /// <typeparam name="TQuery">Query type</typeparam>
+        /// <param name="sql">The raw SQL query</param>
+        /// <param name="parameters">A list of parameters for the provided query</param>
+        /// <returns>An IQueryable representing the raw SQL query</returns>
+        public IQueryable<TQuery> QueryFromSql<TQuery>(string sql, params object[] parameters) where TQuery : class
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Creates a LINQ query for the entity based on a raw SQL query
         /// </summary>
         /// <typeparam name="TEntity">Entity type</typeparam>
@@ -121,5 +133,6 @@ namespace Nop.Plugin.Api.Data
         {
             throw new NotImplementedException();
         }
+
     }
 }

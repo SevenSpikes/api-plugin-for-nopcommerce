@@ -106,8 +106,11 @@ namespace Nop.Plugin.Api.Controllers
             {
                 return Error();
             }
-            
+
+            CustomerActivityService.InsertActivity("APIService", string.Format("Attempting to create picture with name {0}.", productPictureDelta.Dto.SeoFilename), null);
+
             var newPicture = PictureService.InsertPicture(Convert.FromBase64String(productPictureDelta.Dto.Attachment), productPictureDelta.Dto.MimeType, productPictureDelta.Dto.SeoFilename);
+
             var productPicture = new ProductPicture()
             {
                 PictureId = newPicture.Id,
@@ -119,11 +122,13 @@ namespace Nop.Plugin.Api.Controllers
 
             var product = _productService.GetProductById(productPictureDelta.Dto.ProductId);
             PictureService.SetSeoFilename(newPicture.Id, PictureService.GetPictureSeName(product.Name));
-
+            
             var productImagesRootObject = new ProductPicturesRootObjectDto();
             productImagesRootObject.Image = _dtoHelper.PrepareProductPictureDTO(productPicture);
-
+            
             var json = JsonFieldsSerializer.Serialize(productImagesRootObject, string.Empty);
+
+            CustomerActivityService.InsertActivity("APIService", string.Format("Successfully created and returned image {0}.", productPictureDelta.Dto.SeoFilename), null);
 
             return new RawJsonActionResult(json);
         }
@@ -142,6 +147,8 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "id", "invalid id");
             }
 
+            CustomerActivityService.InsertActivity("APIService", string.Format("Attempting delete of picture {0}.", id), null);
+
             var productPicture = _productService.GetProductPictureById(id);
             if (productPicture == null)
                 return Error(HttpStatusCode.NotFound, "product picture", "not found");
@@ -155,7 +162,7 @@ namespace Nop.Plugin.Api.Controllers
             PictureService.DeletePicture(picture);
             
 
-            CustomerActivityService.InsertActivity("DeleteProductImage", string.Format("Deleted picture {0}.", picture.Id), picture);
+            CustomerActivityService.InsertActivity("APIService", string.Format("Deleted picture {0}.", picture.Id), picture);
 
             return new RawJsonActionResult("{}");
         }

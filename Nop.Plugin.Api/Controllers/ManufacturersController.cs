@@ -39,22 +39,22 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IDTOHelper _dtoHelper;
         private readonly IManufacturerService _manufacturerService;
         private readonly IManufacturerApiService _manufacturerApiService;
-        private readonly IUrlRecordService _urlRecordService; 
+        private readonly IUrlRecordService _urlRecordService;
 
-        public ManufacturersController(IJsonFieldsSerializer jsonFieldsSerializer, 
+        public ManufacturersController(IJsonFieldsSerializer jsonFieldsSerializer,
             IAclService aclService,
-            ICustomerService customerService, 
+            ICustomerService customerService,
             IStoreMappingService storeMappingService,
             IStoreService storeService,
             IDiscountService discountService,
             ICustomerActivityService customerActivityService,
             ILocalizationService localizationService,
-            IPictureService pictureService, 
-            IDTOHelper dtoHelper, 
+            IPictureService pictureService,
+            IDTOHelper dtoHelper,
             IManufacturerService manufacturerService,
             IManufacturerApiService manufacturerApiService,
             IUrlRecordService urlRecordService,
-            IFactory<Manufacturer> factory) 
+            IFactory<Manufacturer> factory)
             : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService, pictureService)
         {
             _dtoHelper = dtoHelper;
@@ -204,7 +204,6 @@ namespace Nop.Plugin.Api.Controllers
 
             _manufacturerService.InsertManufacturer(manufacturer);
 
-
             UpdateAclRoles(manufacturer, manufacturerDelta.Dto.RoleIds);
 
             UpdateDiscounts(manufacturer, manufacturerDelta.Dto.DiscountIds);
@@ -212,14 +211,10 @@ namespace Nop.Plugin.Api.Controllers
             UpdateStoreMappings(manufacturer, manufacturerDelta.Dto.StoreIds);
 
             //search engine name
-            if (manufacturerDelta.Dto.SeName != null)
-            {
-                var seName = _urlRecordService.ValidateSeName(manufacturer, manufacturerDelta.Dto.SeName, manufacturer.Name, true);
-                _urlRecordService.SaveSlug(manufacturer, seName, 0);
-            }
-
-            CustomerActivityService.InsertActivity("AddNewManufacturer",
-                LocalizationService.GetResource("ActivityLog.AddNewManufacturer"), manufacturer);
+            var seName = _urlRecordService.ValidateSeName(manufacturer, manufacturerDelta.Dto.SeName, manufacturer.Name, true);
+            _urlRecordService.SaveSlug(manufacturer, seName, 0);
+            
+            CustomerActivityService.InsertActivity("AddNewManufacturer", LocalizationService.GetResource("ActivityLog.AddNewManufacturer"), manufacturer);
 
             // Preparing the result dto of the new manufacturer
             var newManufacturerDto = _dtoHelper.PrepareManufacturerDto(manufacturer);

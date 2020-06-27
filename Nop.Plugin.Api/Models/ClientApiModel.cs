@@ -1,8 +1,10 @@
-﻿namespace Nop.Plugin.Api.Models
+﻿using Nop.Web.Framework.Models;
+
+namespace Nop.Plugin.Api.Models
 {
-    public class ClientApiModel
+    public class ClientApiModel : BaseNopModel
     {
-        
+
         public int Id { get; set; }
         public string ClientName { get; set; }
 
@@ -22,14 +24,20 @@
 
         public int AccessTokenLifetime
         {
-            get;set;
+            get; set;
         }
 
         public int RefreshTokenLifetime
         {
-            get;set;
+            get; set;
         }
 
         public bool Enabled { get; set; }
     }
+
+    public class ClientApiListModel : BasePagedListModel<ClientApiModel>
+    {
+
+    }
+
 }

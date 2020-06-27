@@ -33,6 +33,7 @@ namespace Nop.Plugin.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using DTOs.Errors;
     using JSON.Serializers;
+    using Nop.Services.Plugins;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CustomersController : BaseApiController
@@ -80,6 +81,7 @@ namespace Nop.Plugin.Api.Controllers
             IFactory<Customer> factory, 
             ICountryService countryService, 
             IMappingHelper mappingHelper, 
+            IPluginService pluginService,
             INewsLetterSubscriptionService newsLetterSubscriptionService,
             IPictureService pictureService, ILanguageService languageService) : 
             base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService,pictureService)

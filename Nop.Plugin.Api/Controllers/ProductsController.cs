@@ -43,6 +43,7 @@ namespace Nop.Plugin.Api.Controllers
         private readonly IProductTagService _productTagService;
         private readonly IProductAttributeService _productAttributeService;
         private readonly IDTOHelper _dtoHelper;
+        private readonly ILogger _logger;
 
         public ProductsController(IProductApiService productApiService,
                                   IJsonFieldsSerializer jsonFieldsSerializer,
@@ -60,6 +61,7 @@ namespace Nop.Plugin.Api.Controllers
                                   IManufacturerService manufacturerService,
                                   IProductTagService productTagService,
                                   IProductAttributeService productAttributeService,
+                                  ILogger logger,
                                   IDTOHelper dtoHelper) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService, pictureService)
         {
             _productApiService = productApiService;
@@ -69,6 +71,7 @@ namespace Nop.Plugin.Api.Controllers
             _urlRecordService = urlRecordService;
             _productService = productService;
             _productAttributeService = productAttributeService;
+            _logger = logger;
             _dtoHelper = dtoHelper;
         }
 
@@ -100,7 +103,7 @@ namespace Nop.Plugin.Api.Controllers
                                                                         parameters.UpdatedAtMax, parameters.Limit, parameters.Page, parameters.SinceId, parameters.CategoryId,
                                                                         parameters.VendorName, parameters.PublishedStatus)
                                                 .Where(p => StoreMappingService.Authorize(p));
-            
+
             IList<ProductDto> productsAsDtos = allProducts.Select(product => _dtoHelper.PrepareProductDTO(product)).ToList();
 
             var productsRootObject = new ProductsRootObjectDto()
@@ -191,10 +194,12 @@ namespace Nop.Plugin.Api.Controllers
                 return Error();
             }
 
+            CustomerActivityService.InsertActivity("APIService", "Starting Product Create", null);
+
             // Inserting the new product
             var product = _factory.Initialize();
             productDelta.Merge(product);
-
+            
             _productService.InsertProduct(product);
 
             UpdateProductPictures(product, productDelta.Dto.Images);
@@ -217,8 +222,7 @@ namespace Nop.Plugin.Api.Controllers
 
             _productService.UpdateProduct(product);
 
-            CustomerActivityService.InsertActivity("AddNewProduct",
-                LocalizationService.GetResource("ActivityLog.AddNewProduct"), product);
+            CustomerActivityService.InsertActivity("APIService", LocalizationService.GetResource("ActivityLog.AddNewProduct"), product);
 
             // Preparing the result dto of the new product
             var productDto = _dtoHelper.PrepareProductDTO(product);
@@ -228,7 +232,7 @@ namespace Nop.Plugin.Api.Controllers
             productsRootObject.Products.Add(productDto);
 
             var json = JsonFieldsSerializer.Serialize(productsRootObject, string.Empty);
-
+            
             return new RawJsonActionResult(json);
         }
 
@@ -246,6 +250,7 @@ namespace Nop.Plugin.Api.Controllers
             {
                 return Error();
             }
+            CustomerActivityService.InsertActivity("APIService", "Starting Product Update", null);
 
             var product = _productApiService.GetProductById(productDelta.Dto.Id);
 
@@ -284,8 +289,7 @@ namespace Nop.Plugin.Api.Controllers
 
             _productService.UpdateProduct(product);
 
-            CustomerActivityService.InsertActivity("UpdateProduct",
-               LocalizationService.GetResource("ActivityLog.UpdateProduct"), product);
+            CustomerActivityService.InsertActivity("APIService", LocalizationService.GetResource("ActivityLog.UpdateProduct"), product);
 
             // Preparing the result dto of the new product
             var productDto = _dtoHelper.PrepareProductDTO(product);
@@ -323,7 +327,7 @@ namespace Nop.Plugin.Api.Controllers
             _productService.DeleteProduct(product);
 
             //activity log
-            CustomerActivityService.InsertActivity("DeleteProduct", string.Format(LocalizationService.GetResource("ActivityLog.DeleteProduct"), product.Name), product);
+            CustomerActivityService.InsertActivity("APIService", string.Format(LocalizationService.GetResource("ActivityLog.DeleteProduct"), product.Name), product);
 
             return new RawJsonActionResult("{}");
         }
@@ -333,7 +337,7 @@ namespace Nop.Plugin.Api.Controllers
             // If no pictures are specified means we don't have to update anything
             if (setPictures == null)
                 return;
-            
+
             // delete unused product pictures
             var unusedProductPictures = entityToUpdate.ProductPictures.Where(x => setPictures.All(y => y.Id != x.Id)).ToList();
             foreach (var unusedProductPicture in unusedProductPictures)
@@ -394,8 +398,8 @@ namespace Nop.Plugin.Api.Controllers
                     var productAttributeMappingToUpdate = entityToUpdate.ProductAttributeMappings.FirstOrDefault(x => x.Id == productAttributeMappingDto.Id);
                     if (productAttributeMappingToUpdate != null)
                     {
-                        productDtoDelta.Merge(productAttributeMappingDto,productAttributeMappingToUpdate,false);
-                       
+                        productDtoDelta.Merge(productAttributeMappingDto, productAttributeMappingToUpdate, false);
+
                         _productAttributeService.UpdateProductAttributeMapping(productAttributeMappingToUpdate);
 
                         UpdateProductAttributeValues(productAttributeMappingDto, productDtoDelta);
@@ -403,7 +407,7 @@ namespace Nop.Plugin.Api.Controllers
                 }
                 else
                 {
-                    var newProductAttributeMapping = new ProductAttributeMapping {ProductId = entityToUpdate.Id};
+                    var newProductAttributeMapping = new ProductAttributeMapping { ProductId = entityToUpdate.Id };
 
                     productDtoDelta.Merge(productAttributeMappingDto, newProductAttributeMapping);
 
@@ -549,7 +553,7 @@ namespace Nop.Plugin.Api.Controllers
             _productService.UpdateProduct(product);
             _productService.UpdateHasDiscountsApplied(product);
         }
-        
+
         private void UpdateProductManufacturers(Product product, List<int> passedManufacturerIds)
         {
             // If no manufacturers specified then there is nothing to map 

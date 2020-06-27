@@ -19,5 +19,8 @@
         public const string JsonTypeMapsPattern = "json.maps";
 
         public const string NEWSLETTER_SUBSCRIBERS_KEY = "Nop.api.newslettersubscribers";
+
+        public const string FixedRateSettingsKey = "Tax.TaxProvider.FixedOrByCountryStateZip.TaxCategoryId{0}";
+
     }
 }

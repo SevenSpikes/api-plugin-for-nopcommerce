@@ -1,16 +1,16 @@
 ﻿namespace Nop.Plugin.Api.Controllers.Admin
 {
-    using System.Linq;
-    using Microsoft.AspNetCore.Mvc;
     using Constants;
-    using Nop.Services.Localization;
-    using Web.Framework;
-    using Nop.Web.Framework.Controllers;
-    using Web.Framework.Kendoui;
-    using Web.Framework.Mvc.Filters;
+    using Microsoft.AspNetCore.Mvc;
     using Models;
+    using Nop.Services.Localization;
+    using Nop.Services.Messages;
+    using Nop.Services.Security;
+    using Nop.Web.Framework.Controllers;
     using Services;
     using System;
+    using Web.Framework;
+    using Web.Framework.Mvc.Filters;
 
     [AuthorizeAdmin]
     [Area(AreaNames.Admin)]
@@ -19,10 +19,12 @@
     {
         private readonly IClientService _clientService;
         private readonly ILocalizationService _localizationService;
+        private readonly INotificationService _notificationService;
 
-        public ManageClientsAdminController(ILocalizationService localizationService, IClientService clientService)
+        public ManageClientsAdminController(ILocalizationService localizationService, IClientService clientService, INotificationService notificationService)
         {
             _localizationService = localizationService;
+            _notificationService = notificationService;
             _clientService = clientService;
         }
 
@@ -35,17 +37,19 @@
 
         [HttpPost]
         [Route("list")]
-        public ActionResult List(DataSourceRequest command)
+        public ActionResult List(ClientApiSearchModel searchModel)
         {
-            var gridModel = _clientService.GetAllClients();
+            var clients = _clientService.GetAllClients(searchModel);
 
-            var grids = new DataSourceResult()
-            {
-                Data = gridModel,
-                Total = gridModel.Count()
-            };
+            //throw new NotImplementedException();
 
-            return Json(grids);
+            //var grids = new DataSourceResult()
+            //{
+            //    Data = gridModel,
+            //    Total = gridModel.Count()
+            //};
+
+            return Json(clients);
         }
 
         [HttpGet]
@@ -72,7 +76,7 @@
             {
                 var clientId = _clientService.InsertClient(model);
 
-                SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Created"));
+                _notificationService.SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Created"));
                 return continueEditing ? RedirectToAction("Edit", new { id = clientId }) : RedirectToAction("List");
             }
 
@@ -95,8 +99,8 @@
             if (ModelState.IsValid)
             {
                 _clientService.UpdateClient(model);
-              
-                SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Edit"));
+
+                _notificationService.SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Edit"));
                 return continueEditing ? RedirectToAction("Edit", new { id = model.Id }) : RedirectToAction("List");
             }
 
@@ -109,7 +113,7 @@
         {
             _clientService.DeleteClient(id);
 
-            SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Deleted"));
+            _notificationService.SuccessNotification(_localizationService.GetResource("Plugins.Api.Admin.Client.Deleted"));
             return RedirectToAction("List");
         }
     }

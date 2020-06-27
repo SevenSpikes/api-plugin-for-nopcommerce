@@ -214,20 +214,11 @@ namespace Nop.Plugin.Api.Controllers
             UpdateDiscounts(category, categoryDelta.Dto.DiscountIds);
 
             UpdateStoreMappings(category, categoryDelta.Dto.StoreIds);
-
-            ////search engine name
-            //if (categoryDelta.Dto.SeName != null)
-            //{
-            //    var seName = _urlRecordService.ValidateSeName(category, categoryDelta.Dto.SeName, category.Name, true);
-            //    _urlRecordService.SaveSlug(category, seName, 0);
-            //}
-
+            
             var seName = _urlRecordService.ValidateSeName(category, categoryDelta.Dto.SeName, category.Name, true);
             _urlRecordService.SaveSlug(category, seName, 0);
             
-
-            CustomerActivityService.InsertActivity("AddNewCategory",
-                LocalizationService.GetResource("ActivityLog.AddNewCategory"), category);
+            CustomerActivityService.InsertActivity("AddNewCategory", LocalizationService.GetResource("ActivityLog.AddNewCategory"), category);
 
             // Preparing the result dto of the new category
             var newCategoryDto = _dtoHelper.PrepareCategoryDTO(category);

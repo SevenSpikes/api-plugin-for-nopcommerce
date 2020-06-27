@@ -138,6 +138,9 @@ namespace Nop.Plugin.Api.DTOs.Categories
         [JsonProperty("created_on_utc")]
         public DateTime? CreatedOnUtc { get; set; }
 
+        [JsonProperty("allow_customers_to_select_page_size")]
+        public bool AllowCustomersToSelectPageSize { get; set; }
+
         /// <summary>
         /// Gets or sets the date and time of instance update
         /// </summary>
