@@ -522,6 +522,12 @@ namespace Nop.Plugin.Api.Controllers
 
                 var seName = _urlRecordService.ValidateSeName(productTag, string.Empty, productTag.Name, true);
                 _urlRecordService.SaveSlug(productTag, seName, 0);
+
+                _productTagService.InsertProductProductTagMapping(new ProductProductTagMapping()
+                {
+                    ProductId = product.Id,
+                    ProductTagId = productTag.Id
+                });
             }
         }
         private void UpdateDiscountMappings(Product product, List<int> passedDiscountIds)

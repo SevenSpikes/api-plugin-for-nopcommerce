@@ -237,6 +237,10 @@ namespace Nop.Plugin.Api.Controllers
                 return Error();
             }
 
+            var customer = CustomerService.GetCustomerByEmail(customerDelta.Dto.Email);
+            if (customer != null)
+                return Error(HttpStatusCode.Conflict, nameof(Customer.Email), "Email is already registered");
+
             //If the validation has passed the customerDelta object won't be null for sure so we don't need to check for this.
 
             // Inserting the new customer
@@ -481,14 +485,18 @@ namespace Nop.Plugin.Api.Controllers
                     //new role
                     if (!CustomerService.IsInCustomerRole(currentCustomer, customerRole.Name))
                     {
-                        CustomerService.InsertCustomerRole(customerRole);
+                        CustomerService.AddCustomerRoleMapping(new CustomerCustomerRoleMapping()
+                        {
+                            CustomerId = currentCustomer.Id,
+                            CustomerRoleId = customerRole.Id
+                        });
                     }
                 }
                 else
                 {
                     if (CustomerService.IsInCustomerRole(currentCustomer, customerRole.Name))
                     {
-                        CustomerService.DeleteCustomerRole(customerRole);
+                        CustomerService.RemoveCustomerRoleMapping(currentCustomer, customerRole);
                     }
                 }
             }
