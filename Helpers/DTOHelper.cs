@@ -1,4 +1,5 @@
 ﻿using Nop.Core.Domain.Catalog;
+using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Localization;
 using Nop.Core.Domain.Media;
@@ -7,6 +8,7 @@ using Nop.Core.Domain.Shipping;
 using Nop.Core.Domain.Stores;
 using Nop.Core.Domain.Tax;
 using Nop.Plugin.Api.DTO.Categories;
+using Nop.Plugin.Api.DTO.Customers;
 using Nop.Plugin.Api.DTO.Images;
 using Nop.Plugin.Api.DTO.Languages;
 using Nop.Plugin.Api.DTO.Manufacturers;
@@ -333,28 +335,6 @@ namespace Nop.Plugin.Api.Helpers
             return image;
         }
 
-        //protected ImageMappingDto PrepareProductImageDto(ProductPicture productPicture)
-        //{
-        //    ImageMappingDto imageMapping = null;
-
-        //    if (productPicture != null)
-        //    {
-        //        // We don't use the image from the passed dto directly 
-        //        // because the picture may be passed with src and the result should only include the base64 format.
-        //        imageMapping = new ImageMappingDto
-        //        {
-        //            //Attachment = Convert.ToBase64String(picture.PictureBinary),
-        //            Id = productPicture.Id,
-        //            ProductId = productPicture.ProductId,
-        //            PictureId = productPicture.PictureId,
-        //            Position = productPicture.DisplayOrder,
-        //            MimeType = productPicture.Picture.MimeType,
-        //            Src = _pictureService.GetPictureUrl(productPicture.Picture)
-        //        };
-        //    }
-
-        //    return imageMapping;
-        //}
 
         private void PrepareProductAttributes(IEnumerable<ProductAttributeMapping> productAttributeMappings,
             ProductDto productDto)
@@ -405,37 +385,18 @@ namespace Nop.Plugin.Api.Helpers
 
             return productAttributeMappingDto;
         }
-        //private ProductAttributeValueDto PrepareProductAttributeValueDto(ProductAttributeValue productAttributeValue,
-        //    Product product)
-        //{
-        //    ProductAttributeValueDto productAttributeValueDto = null;
 
-        //    if (productAttributeValue != null)
-        //    {
-        //        productAttributeValueDto = productAttributeValue.ToDto();
-        //        if (productAttributeValue.ImageSquaresPictureId > 0)
-        //        {
-        //            var imageSquaresPicture =
-        //                _pictureService.GetPictureById(productAttributeValue.ImageSquaresPictureId);
-        //            var imageDto = PrepareImageDto(imageSquaresPicture);
-        //            productAttributeValueDto.ImageSquaresImage = imageDto;
-        //        }
+        public CustomerDto PrepareCustomerDTO(Customer customer)
+        {
+            var result = customer.ToDto();
+            var customerRoles = this._customerService.GetCustomerRoles(customer);
+            foreach (var item in customerRoles)
+            {
+                result.RoleIds.Add(item.Id);
+            }
 
-        //        if (productAttributeValue.PictureId > 0)
-        //        {
-        //            // make sure that the picture is mapped to the product
-        //            // This is needed since if you delete the product picture mapping from the nopCommerce administrationthe
-        //            // then the attribute value is not updated and it will point to a picture that has been deleted
-        //            var productPicture = product.ProductPictures.FirstOrDefault(pp => pp.PictureId == productAttributeValue.PictureId);
-        //            if (productPicture != null)
-        //            {
-        //                productAttributeValueDto.ProductPictureId = productPicture.Id;
-        //            }
-        //        }
-        //    }
-
-        //    return productAttributeValueDto;
-        //}
+            return result;
+        }
 
         private void PrepareProductAttributeCombinations(IEnumerable<ProductAttributeCombination> productAttributeCombinations,
             ProductDto productDto)
@@ -530,14 +491,33 @@ namespace Nop.Plugin.Api.Helpers
                 Rate = _settingService.GetSettingByKey<decimal>(string.Format(Configurations.FixedRateSettingsKey, taxCategory.Id))
             };
 
-            //var taxRateModels = _taxCategoryService.GetAllTaxCategories().Select(t => new TaxCategoryDto
-            //{
-            //    Id = t.Id,
-            //    Name = t.Name,
-            //    Rate = _settingService.GetSettingByKey<decimal>(string.Format(Configurations.FixedRateSettingsKey, taxCategory.Id))
-            //}).ToList();
-
             return taxRateModel;
         }
+
     }
 }
+
+
+
+//protected ImageMappingDto PrepareProductImageDto(ProductPicture productPicture)
+//{
+//    ImageMappingDto imageMapping = null;
+
+//    if (productPicture != null)
+//    {
+//        // We don't use the image from the passed dto directly 
+//        // because the picture may be passed with src and the result should only include the base64 format.
+//        imageMapping = new ImageMappingDto
+//        {
+//            //Attachment = Convert.ToBase64String(picture.PictureBinary),
+//            Id = productPicture.Id,
+//            ProductId = productPicture.ProductId,
+//            PictureId = productPicture.PictureId,
+//            Position = productPicture.DisplayOrder,
+//            MimeType = productPicture.Picture.MimeType,
+//            Src = _pictureService.GetPictureUrl(productPicture.Picture)
+//        };
+//    }
+
+//    return imageMapping;
+//}

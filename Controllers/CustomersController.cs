@@ -43,6 +43,7 @@ namespace Nop.Plugin.Api.Controllers
         private readonly INewsLetterSubscriptionService _newsLetterSubscriptionService;
         private readonly ILanguageService _languageService;
         private readonly IFactory<Customer> _factory;
+        private readonly IDTOHelper _dtoHelper;
 
         // We resolve the customer settings this way because of the tests.
         // The auto mocking does not support concreate types as dependencies. It supports only interfaces.
@@ -79,8 +80,18 @@ namespace Nop.Plugin.Api.Controllers
             IMappingHelper mappingHelper, 
             IPluginService pluginService,
             INewsLetterSubscriptionService newsLetterSubscriptionService,
-            IPictureService pictureService, ILanguageService languageService) : 
-            base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService,pictureService)
+            IPictureService pictureService,
+            ILanguageService languageService,
+            IDTOHelper dtoHelper) : 
+            base(jsonFieldsSerializer, 
+                aclService, 
+                customerService, 
+                storeMappingService,
+                storeService, 
+                discountService, 
+                customerActivityService,
+                localizationService,
+                pictureService)
         {
             _customerApiService = customerApiService;
             _factory = factory;
@@ -91,6 +102,7 @@ namespace Nop.Plugin.Api.Controllers
             _encryptionService = encryptionService;
             _genericAttributeService = genericAttributeService;
             _customerRolesHelper = customerRolesHelper;
+            _dtoHelper = dtoHelper;
         }
 
         /// <summary>
@@ -117,16 +129,28 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid request parameters");
             }
 
-            var allCustomers = _customerApiService.GetCustomersDtos(parameters.CreatedAtMin, parameters.CreatedAtMax, parameters.Limit, parameters.Page, parameters.SinceId);
-
-            var customersRootObject = new CustomersRootObject()
+            try
             {
-                Customers = allCustomers
-            };
+                var allCustomers = _customerApiService.GetCustomersDtos(parameters.CreatedAtMin,
+                parameters.CreatedAtMax,
+                parameters.Limit,
+                parameters.Page,
+                parameters.SinceId);
 
-            var json = JsonFieldsSerializer.Serialize(customersRootObject, parameters.Fields);
+                var customersRootObject = new CustomersRootObject()
+                {
+                    Customers = allCustomers
+                };
 
-            return new RawJsonActionResult(json);
+                var json = JsonFieldsSerializer.Serialize(customersRootObject, parameters.Fields);
+
+                return new RawJsonActionResult(json);
+            } 
+            catch (Exception ex)
+            {
+                throw;
+            }
+            
         }
 
         /// <summary>
@@ -238,7 +262,7 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             var customer = CustomerService.GetCustomerByEmail(customerDelta.Dto.Email);
-            if (customer != null)
+            if (customer != null && !customer.Deleted)
                 return Error(HttpStatusCode.Conflict, nameof(Customer.Email), "Email is already registered");
 
             //If the validation has passed the customerDelta object won't be null for sure so we don't need to check for this.
@@ -281,12 +305,11 @@ namespace Nop.Plugin.Api.Controllers
             if (customerDelta.Dto.RoleIds.Count > 0)
             {
                 AddValidRoles(customerDelta, newCustomer);
-                CustomerService.UpdateCustomer(newCustomer);
             }
 
             // Preparing the result dto of the new customer
             // We do not prepare the shopping cart items because we have a separate endpoint for them.
-            var newCustomerDto = newCustomer.ToDto();
+            var newCustomerDto = _dtoHelper.PrepareCustomerDTO(newCustomer);
 
             // This is needed because the entity framework won't populate the navigation properties automatically
             // and the country will be left null. So we do it by hand here.
@@ -380,7 +403,7 @@ namespace Nop.Plugin.Api.Controllers
 
             // Preparing the result dto of the new customer
             // We do not prepare the shopping cart items because we have a separate endpoint for them.
-            var updatedCustomer = currentCustomer.ToDto();
+            var updatedCustomer = _dtoHelper.PrepareCustomerDTO(currentCustomer); 
 
             // This is needed because the entity framework won't populate the navigation properties automatically
             // and the country name will be left empty because the mapping depends on the navigation property
@@ -483,7 +506,7 @@ namespace Nop.Plugin.Api.Controllers
                 if (customerDelta.Dto.RoleIds.Contains(customerRole.Id))
                 {
                     //new role
-                    if (!CustomerService.IsInCustomerRole(currentCustomer, customerRole.Name))
+                    if (!CustomerService.IsInCustomerRole(currentCustomer, customerRole.SystemName))
                     {
                         CustomerService.AddCustomerRoleMapping(new CustomerCustomerRoleMapping()
                         {
@@ -494,7 +517,7 @@ namespace Nop.Plugin.Api.Controllers
                 }
                 else
                 {
-                    if (CustomerService.IsInCustomerRole(currentCustomer, customerRole.Name))
+                    if (CustomerService.IsInCustomerRole(currentCustomer, customerRole.SystemName))
                     {
                         CustomerService.RemoveCustomerRoleMapping(currentCustomer, customerRole);
                     }

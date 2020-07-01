@@ -49,7 +49,8 @@ namespace Nop.Plugin.Api.Services
             IStoreContext storeContext,
             ILanguageService languageService,
             IStoreMappingService storeMappingService,
-            IStaticCacheManager staticCacheManager)
+            IStaticCacheManager staticCacheManager,
+            ICustomerService customerService)
         {
             _customerRepository = customerRepository;
             _genericAttributeRepository = genericAttributeRepository;
@@ -60,6 +61,7 @@ namespace Nop.Plugin.Api.Services
             _languageService = languageService;
             _storeMappingService = storeMappingService;
             _cacheManager = staticCacheManager;
+            _customerService = customerService;
         }
 
         public IList<CustomerDto> GetCustomersDtos(DateTime? createdAtMin = null, DateTime? createdAtMax = null, int limit = Configurations.DefaultLimit,
@@ -154,6 +156,10 @@ namespace Nop.Plugin.Api.Services
                 var customer = customerAttributeMappings.First().Customer;
                 // The customer object is the same in all mappings.
                 customerDto = customer.ToDto();
+
+                var customerRoles = _customerService.GetCustomerRoles(customer);
+                foreach (var role in customerRoles)
+                    customerDto.RoleIds.Add(role.Id);
 
                 var defaultStoreLanguageId = GetDefaultStoreLangaugeId();
 
@@ -288,7 +294,7 @@ namespace Nop.Plugin.Api.Services
             //      attribute that contains the first name of customer 2
             //      attribute that contains the last name of customer 2
             // etc.
-
+            
             var allRecordsGroupedByCustomerId =
                 (from customer in query
                  from attribute in _genericAttributeRepository.Table
@@ -348,15 +354,23 @@ namespace Nop.Plugin.Api.Services
             // Get the default language id for the current store.
             var defaultLanguageId = GetDefaultStoreLangaugeId();
 
-            foreach (var group in customerAttributeGroupsList)
+            try
             {
-                IList<CustomerAttributeMappingDto> mappingsForMerge = group.Select(x => x).ToList();
+                foreach (var group in customerAttributeGroupsList)
+                {
+                    IList<CustomerAttributeMappingDto> mappingsForMerge = group.Select(x => x).ToList();
 
-                var customerDto = Merge(mappingsForMerge, defaultLanguageId);
+                    var customerDto = Merge(mappingsForMerge, defaultLanguageId);
 
-                customerDtos.Add(customerDto);
+                    customerDtos.Add(customerDto);
+                }
+
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+           
             // Needed so we can apply the order parameter
             return customerDtos.AsQueryable().OrderBy(order).ToList();
         }
