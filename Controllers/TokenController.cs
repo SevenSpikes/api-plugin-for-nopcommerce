@@ -63,7 +63,7 @@ namespace Nop.Plugin.Api.Controllers
                 return Json(GenerateToken(customer));
             }
 
-            return Json(new TokenResponse("Access Denied"));
+            return Forbid();// new HttpStatusCodeResult(HttpStatusCode.Forbidden);// Json(new TokenResponse("Access Denied"));
         }
 
         private CustomerLoginResults LoginCustomer(TokenRequest model)

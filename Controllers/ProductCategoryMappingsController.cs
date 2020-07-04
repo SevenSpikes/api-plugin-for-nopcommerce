@@ -268,8 +268,7 @@ namespace Nop.Plugin.Api.Controllers
             _categoryService.UpdateProductCategory(productCategoryEntityToUpdate);
 
             //activity log
-            CustomerActivityService.InsertActivity("UpdateProdutCategoryMapping",
-                LocalizationService.GetResource("ActivityLog.UpdateProdutCategoryMapping"), productCategoryEntityToUpdate);
+            CustomerActivityService.InsertActivity("UpdateProdutCategoryMapping", LocalizationService.GetResource("ActivityLog.UpdateProdutCategoryMapping"), productCategoryEntityToUpdate);
 
             var updatedProductCategoryDto = productCategoryEntityToUpdate.ToDto();
 
