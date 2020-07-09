@@ -20,6 +20,5 @@ namespace Nop.Plugin.Api.Services
         IList<CustomerDto> Search(string query = "", string order = Configurations.DefaultOrder, 
             int page = Configurations.DefaultPageValue, int limit = Configurations.DefaultLimit);
 
-        Dictionary<string, string> GetFirstAndLastNameByCustomerId(int customerId);
     }
 }

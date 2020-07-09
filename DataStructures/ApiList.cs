@@ -12,7 +12,7 @@ namespace Nop.Plugin.Api.DataStructures
         {
             PageSize = pageSize;
             PageIndex = pageIndex;
-            AddRange(source.Skip(pageIndex * pageSize).Take(pageSize));
+            AddRange(source.Skip(pageIndex * pageSize).Take(pageSize).ToList());
         }
     }
 }
