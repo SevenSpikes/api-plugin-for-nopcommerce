@@ -24,6 +24,7 @@ using Nop.Plugin.Api.DTO.TaxCategory;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.Services;
 using Nop.Services.Catalog;
+using Nop.Services.Common;
 using Nop.Services.Configuration;
 using Nop.Services.Customers;
 using Nop.Services.Directory;
@@ -36,6 +37,7 @@ using Nop.Services.Seo;
 using Nop.Services.Shipping;
 using Nop.Services.Stores;
 using Nop.Services.Tax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Nop.Plugin.Api.Infrastructure.Constants;
@@ -65,6 +67,8 @@ namespace Nop.Plugin.Api.Helpers
         private readonly IUrlRecordService _urlRecordService;
         private readonly IOrderService _orderService;
         private readonly IShipmentService _shipmentService;
+        private readonly IAddressService _addressService;
+
         public DTOHelper(IProductService productService,
             IAclService aclService,
             IStoreMappingService storeMappingService,
@@ -85,7 +89,8 @@ namespace Nop.Plugin.Api.Helpers
             ITaxCategoryService taxCategoryService,
             ISettingService settingService,
             IShipmentService shipmentService,
-        IOrderService orderService)
+            IOrderService orderService,
+            IAddressService addressService)
         {
             _productService = productService;
             _aclService = aclService;
@@ -108,6 +113,7 @@ namespace Nop.Plugin.Api.Helpers
             _manufacturerService = manufacturerService;
             _orderService = orderService;
             _shipmentService = shipmentService;
+            _addressService = addressService;
         }
 
         public ProductDto PrepareProductDTO(Product product)
@@ -215,19 +221,36 @@ namespace Nop.Plugin.Api.Helpers
 
         public OrderDto PrepareOrderDTO(Order order)
         {
-            var orderDto = order.ToDto();
-
-            orderDto.OrderItems = _orderService.GetOrderItems(order.Id).Select(PrepareOrderItemDTO).ToList();
-            orderDto.Shipments = _shipmentService.GetShipmentsByOrderId(order.Id).Select(PrepareShippingItemDTO).ToList();
-
-            var customerDto = _customerApiService.GetCustomerById(order.CustomerId);
-
-            if (customerDto != null)
+            try
             {
-                orderDto.Customer = customerDto.ToOrderCustomerDto();
-            }
+                var orderDto = order.ToDto();
 
-            return orderDto;
+                orderDto.OrderItems = _orderService.GetOrderItems(order.Id).Select(PrepareOrderItemDTO).ToList();
+                orderDto.Shipments = _shipmentService.GetShipmentsByOrderId(order.Id).Select(PrepareShippingItemDTO).ToList();
+                
+                var billingAddress = _addressService.GetAddressById(order.BillingAddressId);
+                orderDto.BillingAddress = billingAddress.ToDto();
+
+                if (order.ShippingAddressId.HasValue)
+                {
+                    var shippingAddress = _addressService.GetAddressById(order.ShippingAddressId.Value);
+                    orderDto.ShippingAddress = shippingAddress.ToDto();
+                }
+                
+                var customerDto = _customerApiService.GetCustomerById(order.CustomerId);
+
+                if (customerDto != null)
+                {
+                    orderDto.Customer = customerDto.ToOrderCustomerDto();
+                }
+
+                return orderDto;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            
         }
 
         public ShoppingCartItemDto PrepareShoppingCartItemDTO(ShoppingCartItem shoppingCartItem)
@@ -241,8 +264,17 @@ namespace Nop.Plugin.Api.Helpers
 
         public ShipmentDto PrepareShippingItemDTO(Shipment shipment)
         {
-            var dto = shipment.ToDto();
-            return dto;
+            return new ShipmentDto()
+            {
+                AdminComment = shipment.AdminComment,
+                CreatedOnUtc = shipment.CreatedOnUtc,
+                DeliveryDateUtc = shipment.DeliveryDateUtc,
+                Id = shipment.Id,
+                OrderId = shipment.OrderId,
+                ShippedDateUtc = shipment.ShippedDateUtc,
+                TotalWeight = shipment.TotalWeight,
+                TrackingNumber = shipment.TrackingNumber
+            };
 
         }
         public OrderItemDto PrepareOrderItemDTO(OrderItem orderItem)
