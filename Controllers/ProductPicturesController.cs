@@ -46,7 +46,16 @@ namespace Nop.Plugin.Api.Controllers
                                         ILocalizationService localizationService,
                                         IPictureService pictureService,
                                         IProductService productService,
-                                        IDTOHelper dtoHelper) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService, pictureService)
+                                        IDTOHelper dtoHelper) : 
+            base(jsonFieldsSerializer, 
+                aclService, 
+                customerService, 
+                storeMappingService, 
+                storeService,
+                discountService, 
+                customerActivityService, 
+                localizationService, 
+                pictureService)
         {
             _productService = productService;
             _dtoHelper = dtoHelper;

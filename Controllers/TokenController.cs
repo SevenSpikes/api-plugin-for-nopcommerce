@@ -118,6 +118,7 @@ namespace Nop.Plugin.Api.Controllers
 
             var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_apiConfiguration.SecurityKey)),
                                                             SecurityAlgorithms.HmacSha256);
+
             var token = new JwtSecurityToken(new JwtHeader(signingCredentials), new JwtPayload(claims));
             var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
 

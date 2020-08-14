@@ -298,6 +298,8 @@ namespace Nop.Plugin.Api.Controllers
             var json = JsonFieldsSerializer.Serialize(productsRootObject, string.Empty);
 
             return new RawJsonActionResult(json);
+            
+            
         }
 
         [HttpDelete]
@@ -500,35 +502,48 @@ namespace Nop.Plugin.Api.Controllers
                 }
             }
 
-            this._productTagService.UpdateProductTags(product, productTagsToRemove.Select(o => o.Name).ToArray());
-        
-            foreach (var productTagName in productTags)
+            try
             {
-                ProductTag productTag;
-                var productTag2 = _productTagService.GetProductTagByName(productTagName);
-                if (productTag2 == null)
+                this._productTagService.UpdateProductTags(product, productTagsToRemove.Select(o => o.Name).ToArray());
+
+                foreach (var productTagName in productTags)
                 {
-                    //add new product tag
-                    productTag = new ProductTag
+                    ProductTag productTag;
+                    var productTag2 = _productTagService.GetProductTagByName(productTagName);
+                    if (productTag2 == null)
                     {
-                        Name = productTagName
-                    };
-                    _productTagService.InsertProductTag(productTag);
-                }
-                else
-                {
-                    productTag = productTag2;
-                }
+                        //add new product tag
+                        productTag = new ProductTag
+                        {
+                            Name = productTagName
+                        };
+                        _productTagService.InsertProductTag(productTag);
+                    }
+                    else
+                    {
+                        productTag = productTag2;
+                    }
 
-                var seName = _urlRecordService.ValidateSeName(productTag, string.Empty, productTag.Name, true);
-                _urlRecordService.SaveSlug(productTag, seName, 0);
+                    var seName = _urlRecordService.ValidateSeName(productTag, string.Empty, productTag.Name, true);
+                    _urlRecordService.SaveSlug(productTag, seName, 0);
 
-                _productTagService.InsertProductProductTagMapping(new ProductProductTagMapping()
-                {
-                    ProductId = product.Id,
-                    ProductTagId = productTag.Id
-                });
-            }
+                    //Perform a final check to deal with duplicates etc.
+                    var currentProductTags = _productTagService.GetAllProductTagsByProductId(product.Id);
+                    if (!currentProductTags.Any(o => o.Id == productTag.Id))
+                    {
+                        _productTagService.InsertProductProductTagMapping(new ProductProductTagMapping()
+                        {
+                            ProductId = product.Id,
+                            ProductTagId = productTag.Id
+                        });
+                    }
+
+                }
+            } 
+            catch (Exception ex)
+            {
+                throw;
+            }            
         }
         private void UpdateDiscountMappings(Product product, List<int> passedDiscountIds)
         {
