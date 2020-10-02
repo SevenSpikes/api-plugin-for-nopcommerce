@@ -48,7 +48,7 @@ namespace Nop.Plugin.Api.Controllers
         private CustomerSettings _customerSettings;
 
         public CustomersController(
-            //ICustomerApiService customerApiService,
+            ICustomerApiService customerApiService,
             IJsonFieldsSerializer jsonFieldsSerializer,
             IAclService aclService,
             ICustomerService customerService,
@@ -68,7 +68,7 @@ namespace Nop.Plugin.Api.Controllers
             base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService,
                  localizationService, pictureService)
         {
-            //_customerApiService = customerApiService;
+            _customerApiService = customerApiService;
             _factory = factory;
             _countryService = countryService;
             _mappingHelper = mappingHelper;
@@ -117,7 +117,9 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             var allCustomers =
+
                 _customerApiService.GetCustomersDtos(parameters.CreatedAtMin, parameters.CreatedAtMax, parameters.Limit, parameters.Page, parameters.SinceId);
+
 
             var customersRootObject = new CustomersRootObject
             {
@@ -225,14 +227,26 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpPost]
+        [Route("/api/customers2")]
+        [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorsRootObject), 422)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        public IActionResult CreateCustomer1()
+        {
+            return Ok();
+        }
+
+
+        [HttpPost]
         [Route("/api/customers")]
         [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         public IActionResult CreateCustomer(
-            [ModelBinder(typeof(JsonModelBinder<CustomerDto>))]
+        [ModelBinder(typeof(JsonModelBinder<CustomerDto>))]
             Delta<CustomerDto> customerDelta)
         {
+
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
             {
@@ -485,7 +499,7 @@ namespace Nop.Plugin.Api.Controllers
                 if (customerDelta.Dto.RoleIds.Contains(customerRole.Id))
                 {
                     //new role
-                    if (!CustomerService.IsInCustomerRole(currentCustomer,customerRole.Name))
+                    if (!CustomerService.IsInCustomerRole(currentCustomer, customerRole.Name))
                     {
                         CustomerService.InsertCustomerRole(customerRole);
                     }
@@ -494,7 +508,7 @@ namespace Nop.Plugin.Api.Controllers
                 {
                     if (CustomerService.IsInCustomerRole(currentCustomer, customerRole.Name))
                     {
-                        CustomerService.DeleteCustomerRole(customerRole);                        
+                        CustomerService.DeleteCustomerRole(customerRole);
                     }
                 }
             }

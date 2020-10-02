@@ -23,12 +23,12 @@ namespace Nop.Plugin.Api.Services
 {
     public class CustomerApiService : ICustomerApiService
     {
-        private const string FirstName = "firstname";
-        private const string LastName = "lastname";
-        private const string LanguageId = "languageid";
-        private const string DateOfBirth = "dateofbirth";
-        private const string Gender = "gender";
-        private const string KeyGroup = "customer";
+        private const string FIRST_NAME = "firstname";
+        private const string LAST_NAME = "lastname";
+        private const string LANGUAGE_ID = "languageid";
+        private const string DATE_OF_BIRTH = "dateofbirth";
+        private const string GENDER = "gender";
+        private const string KEY_GROUP = "customer";
         private readonly IStaticCacheManager _cacheManager;
         private readonly IRepository<Customer> _customerRepository;
         private readonly IRepository<GenericAttribute> _genericAttributeRepository;
@@ -114,8 +114,8 @@ namespace Nop.Plugin.Api.Services
         {
             return _genericAttributeRepository.Table.Where(
                                                            x =>
-                                                               x.KeyGroup == KeyGroup && x.EntityId == customerId &&
-                                                               (x.Key == FirstName || x.Key == LastName))
+                                                               x.KeyGroup == KEY_GROUP && x.EntityId == customerId &&
+                                                               (x.Key == FIRST_NAME || x.Key == LAST_NAME))
                                               .ToDictionary(x => x.Key.ToLowerInvariant(), y => y.Value);
         }
 
@@ -140,10 +140,10 @@ namespace Nop.Plugin.Api.Services
                                              where customer.Id == id &&
                                                    attribute.KeyGroup == "Customer"
                                              select new CustomerAttributeMappingDto
-                                                    {
-                                                        Attribute = attribute,
-                                                        Customer = customer
-                                                    }).ToList();
+                                             {
+                                                 Attribute = attribute,
+                                                 Customer = customer
+                                             }).ToList();
 
             CustomerDto customerDto = null;
 
@@ -158,19 +158,19 @@ namespace Nop.Plugin.Api.Services
 
                 // If there is no Language Id generic attribute create one with the default language id.
                 if (!customerAttributeMappings.Any(cam => cam?.Attribute != null &&
-                                                          cam.Attribute.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase)))
+                                                          cam.Attribute.Key.Equals(LANGUAGE_ID, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     var languageId = new GenericAttribute
-                                     {
-                                         Key = LanguageId,
-                                         Value = defaultStoreLanguageId.ToString()
-                                     };
+                    {
+                        Key = LANGUAGE_ID,
+                        Value = defaultStoreLanguageId.ToString()
+                    };
 
                     var customerAttributeMappingDto = new CustomerAttributeMappingDto
-                                                      {
-                                                          Customer = customer,
-                                                          Attribute = languageId
-                                                      };
+                    {
+                        Customer = customer,
+                        Attribute = languageId
+                    };
 
                     customerAttributeMappings.Add(customerAttributeMappingDto);
                 }
@@ -184,25 +184,25 @@ namespace Nop.Plugin.Api.Services
 
                     if (mapping.Attribute != null)
                     {
-                        if (mapping.Attribute.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase))
+                        if (mapping.Attribute.Key.Equals(FIRST_NAME, StringComparison.InvariantCultureIgnoreCase))
                         {
                             customerDto.FirstName = mapping.Attribute.Value;
                         }
-                        else if (mapping.Attribute.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase))
+                        else if (mapping.Attribute.Key.Equals(LAST_NAME, StringComparison.InvariantCultureIgnoreCase))
                         {
                             customerDto.LastName = mapping.Attribute.Value;
                         }
-                        else if (mapping.Attribute.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase))
+                        else if (mapping.Attribute.Key.Equals(LANGUAGE_ID, StringComparison.InvariantCultureIgnoreCase))
                         {
                             customerDto.LanguageId = mapping.Attribute.Value;
                         }
-                        else if (mapping.Attribute.Key.Equals(DateOfBirth, StringComparison.InvariantCultureIgnoreCase))
+                        else if (mapping.Attribute.Key.Equals(DATE_OF_BIRTH, StringComparison.InvariantCultureIgnoreCase))
                         {
                             customerDto.DateOfBirth = string.IsNullOrEmpty(mapping.Attribute.Value)
-                                                          ? (DateTime?) null
+                                                          ? (DateTime?)null
                                                           : DateTime.Parse(mapping.Attribute.Value);
                         }
-                        else if (mapping.Attribute.Key.Equals(Gender, StringComparison.InvariantCultureIgnoreCase))
+                        else if (mapping.Attribute.Key.Equals(GENDER, StringComparison.InvariantCultureIgnoreCase))
                         {
                             customerDto.Gender = mapping.Attribute.Value;
                         }
@@ -307,36 +307,36 @@ namespace Nop.Plugin.Api.Services
                                                               .Where(attr => attr.EntityId == customer.Id &&
                                                                              attr.KeyGroup == "Customer").DefaultIfEmpty()
                  select new CustomerAttributeMappingDto
-                        {
-                            Attribute = attribute,
-                            Customer = customer
-                        }).GroupBy(x => x.Customer.Id);
+                 {
+                     Attribute = attribute,
+                     Customer = customer
+                 }).GroupBy(x => x.Customer.Id);
 
             if (searchParams != null && searchParams.Count > 0)
             {
-                if (searchParams.ContainsKey(FirstName))
+                if (searchParams.ContainsKey(FIRST_NAME))
                 {
-                    allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, FirstName, searchParams[FirstName]);
+                    allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, FIRST_NAME, searchParams[FIRST_NAME]);
                 }
 
-                if (searchParams.ContainsKey(LastName))
+                if (searchParams.ContainsKey(LAST_NAME))
                 {
-                    allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, LastName, searchParams[LastName]);
+                    allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, LAST_NAME, searchParams[LAST_NAME]);
                 }
 
-                if (searchParams.ContainsKey(LanguageId))
+                if (searchParams.ContainsKey(LANGUAGE_ID))
                 {
-                    allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, LanguageId, searchParams[LanguageId]);
+                    allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, LANGUAGE_ID, searchParams[LANGUAGE_ID]);
                 }
 
-                if (searchParams.ContainsKey(DateOfBirth))
+                if (searchParams.ContainsKey(DATE_OF_BIRTH))
                 {
-                    allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, DateOfBirth, searchParams[DateOfBirth]);
+                    allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, DATE_OF_BIRTH, searchParams[DATE_OF_BIRTH]);
                 }
 
-                if (searchParams.ContainsKey(Gender))
+                if (searchParams.ContainsKey(GENDER))
                 {
-                    allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, Gender, searchParams[Gender]);
+                    allRecordsGroupedByCustomerId = GetCustomerAttributesMappingsByKey(allRecordsGroupedByCustomerId, GENDER, searchParams[GENDER]);
                 }
             }
 
@@ -385,13 +385,13 @@ namespace Nop.Plugin.Api.Services
             var attributes = mappingsForMerge.Select(x => x.Attribute).ToList();
 
             // If there is no Language Id generic attribute create one with the default language id.
-            if (!attributes.Any(atr => atr != null && atr.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase)))
+            if (!attributes.Any(atr => atr != null && atr.Key.Equals(LANGUAGE_ID, StringComparison.InvariantCultureIgnoreCase)))
             {
                 var languageId = new GenericAttribute
-                                 {
-                                     Key = LanguageId,
-                                     Value = defaultLanguageId.ToString()
-                                 };
+                {
+                    Key = LANGUAGE_ID,
+                    Value = defaultLanguageId.ToString()
+                };
 
                 attributes.Add(languageId);
             }
@@ -400,25 +400,25 @@ namespace Nop.Plugin.Api.Services
             {
                 if (attribute != null)
                 {
-                    if (attribute.Key.Equals(FirstName, StringComparison.InvariantCultureIgnoreCase))
+                    if (attribute.Key.Equals(FIRST_NAME, StringComparison.InvariantCultureIgnoreCase))
                     {
                         customerDto.FirstName = attribute.Value;
                     }
-                    else if (attribute.Key.Equals(LastName, StringComparison.InvariantCultureIgnoreCase))
+                    else if (attribute.Key.Equals(LAST_NAME, StringComparison.InvariantCultureIgnoreCase))
                     {
                         customerDto.LastName = attribute.Value;
                     }
-                    else if (attribute.Key.Equals(LanguageId, StringComparison.InvariantCultureIgnoreCase))
+                    else if (attribute.Key.Equals(LANGUAGE_ID, StringComparison.InvariantCultureIgnoreCase))
                     {
                         customerDto.LanguageId = attribute.Value;
                     }
-                    else if (attribute.Key.Equals(DateOfBirth, StringComparison.InvariantCultureIgnoreCase))
+                    else if (attribute.Key.Equals(DATE_OF_BIRTH, StringComparison.InvariantCultureIgnoreCase))
                     {
                         customerDto.DateOfBirth = string.IsNullOrEmpty(attribute.Value)
-                                                      ? (DateTime?) null
+                                                      ? (DateTime?)null
                                                       : DateTime.Parse(attribute.Value);
                     }
-                    else if (attribute.Key.Equals(Gender, StringComparison.InvariantCultureIgnoreCase))
+                    else if (attribute.Key.Equals(GENDER, StringComparison.InvariantCultureIgnoreCase))
                     {
                         customerDto.Gender = attribute.Value;
                     }
@@ -446,10 +446,13 @@ namespace Nop.Plugin.Api.Services
             var query = _customerRepository.Table //NoTracking
                                            .Where(customer => !customer.Deleted && !customer.IsSystemAccount && customer.Active);
 
+            //query = query.Where(customer =>
+            //                        !customer.CustomerCustomerRoleMappings.Any(ccrm => ccrm.CustomerRole.Active &&
+            //                                                                           ccrm.CustomerRole.SystemName == NopCustomerDefaults.GuestsRoleName)
+            //                        && (customer.RegisteredInStoreId == 0 || customer.RegisteredInStoreId == _storeContext.CurrentStore.Id));
+
             query = query.Where(customer =>
-                                    !customer.CustomerCustomerRoleMappings.Any(ccrm => ccrm.CustomerRole.Active &&
-                                                                                       ccrm.CustomerRole.SystemName == NopCustomerDefaults.GuestsRoleName)
-                                    && (customer.RegisteredInStoreId == 0 || customer.RegisteredInStoreId == _storeContext.CurrentStore.Id));
+                                    (customer.RegisteredInStoreId == 0 || customer.RegisteredInStoreId == _storeContext.CurrentStore.Id));
 
             if (createdAtMin != null)
             {

@@ -28,10 +28,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Services\CustomerApiService.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="9.0.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2019.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.4" />
