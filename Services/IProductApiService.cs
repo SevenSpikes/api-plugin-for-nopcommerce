@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Nop.Core.Domain.Catalog;
 using static Nop.Plugin.Api.Infrastructure.Constants;
-using static Nop.Plugin.Api.Infrastructure.Constants;
+
 
 namespace Nop.Plugin.Api.Services
 {

@@ -590,10 +590,10 @@ namespace Nop.Plugin.Api.Controllers
             var productmanufacturers = _manufacturerService.GetProductManufacturersByProductId(product.Id);
             var unusedProductManufacturers = productmanufacturers.Where(x => !passedManufacturerIds.Contains(x.Id)).ToList();
 
-            // remove all manufacturers that are not passed
+            // remove all manufacturers bindins that are not passed
             foreach (var unusedProductManufacturer in unusedProductManufacturers)
             {
-                //_manufacturerService.DeleteProductManufacturer(unusedProductManufacturer);
+                _manufacturerService.DeleteProductManufacturer(unusedProductManufacturer);
             }
 
             foreach (var passedManufacturerId in passedManufacturerIds)

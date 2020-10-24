@@ -246,6 +246,11 @@ namespace Nop.Plugin.Api.DTO.Products
         [JsonProperty("tax_category_id")]
         public int TaxCategoryId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the backorder mode id
+        /// </summary>
+        [JsonProperty("backorder_mode_id")]
+        public int? BackorderModeId { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the product is telecommunications or broadcasting or electronic services

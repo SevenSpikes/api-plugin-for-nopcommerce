@@ -70,8 +70,8 @@ namespace Nop.Plugin.Api.Services
             PaymentStatus? paymentStatus = null, ShippingStatus? shippingStatus = null, IList<int> ids = null, 
             int? customerId = null, int? storeId = null)
         {
-            var query = _orderRepository.Table;
-            
+            var query = _orderRepository.Table.Where(order => !order.Deleted);
+
             if (customerId != null)
             {
                 query = query.Where(order => order.CustomerId == customerId);
@@ -97,7 +97,6 @@ namespace Nop.Plugin.Api.Services
                 query = query.Where(order => order.ShippingStatusId == (int)shippingStatus);
             }
 
-            query = query.Where(order => !order.Deleted);
 
             if (createdAtMin != null)
             {

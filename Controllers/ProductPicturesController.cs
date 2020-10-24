@@ -1,14 +1,10 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Nop.Core.Domain.Catalog;
-using Nop.Core.Domain.Media;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.Delta;
 using Nop.Plugin.Api.DTO.Errors;
 using Nop.Plugin.Api.DTO.Images;
 using Nop.Plugin.Api.DTO.ProductImages;
-using Nop.Plugin.Api.DTO.Products;
-using Nop.Plugin.Api.Factories;
 using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.JSON.ActionResults;
 using Nop.Plugin.Api.JSON.Serializers;
@@ -22,10 +18,7 @@ using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Stores;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 
 namespace Nop.Plugin.Api.Controllers
 {

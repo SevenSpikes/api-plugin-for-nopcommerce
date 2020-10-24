@@ -1,13 +1,15 @@
 ﻿@using Nop.Plugin.Api.Infrastructure
 @model Nop.Plugin.Api.Areas.Admin.Models.ConfigurationModel
 
-@{ Layout = Constants.ViewNames.AdminLayout;
+@{ 
+    Layout = Constants.ViewNames.AdminLayout;
 
-                //page title
-                ViewBag.Title = T("Plugins.Api.Admin.Page.Settings.Title").Text;
+    //page title
+    ViewBag.Title = T("Plugins.Api.Admin.Page.Settings.Title").Text;
 
-                //active menu item (system name)
-                Html.SetActiveMenuItemSystemName("Api-Settings-Menu"); }
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Api-Settings-Menu"); 
+}
 
 <form asp-controller="ApiAdmin" asp-action="Settings" method="post">
     @Html.AntiForgeryToken()

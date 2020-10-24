@@ -54,20 +54,30 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
 
   </ItemGroup> 
-  <ItemGroup>
+  
+  <!--<ItemGroup>
     <ProjectReference Include="..\..\Nop-4.3\Libraries\Nop.Core\Nop.Core.csproj" />
     <ProjectReference Include="..\..\Nop-4.3\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
-  </ItemGroup> 
+  </ItemGroup>-->
+
+  
   <ItemGroup>
     <Folder Include="Configuration\" />
     <Folder Include="Models\Authentication\" />
   </ItemGroup>
- 
-  <Target Name="FilterCopyLocalItems" AfterTargets="ResolveLockFileCopyLocalProjectDeps">
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Nop-4.3\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
+    <ProjectReference Include="..\..\Nop-4.3\Presentation\Nop.Web\Nop.Web.csproj" />
+    <ClearPluginAssemblies Include="$(MSBuildProjectDirectory)\..\..\Nop-4.3\Build\ClearPluginAssemblies.proj" />
+  </ItemGroup>
+  
+  <!--<Target Name="FilterCopyLocalItems" AfterTargets="ResolveLockFileCopyLocalProjectDeps">
     <ItemGroup>
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' != 'FluentValidation' AND '%(Filename)' != 'AutoMapper' AND '%(Filename)' != 'IdentityServer4' AND '%(Filename)' != 'IdentityServer4.AccessTokenValidation' AND '%(Filename)' != 'IdentityServer4.EntityFramework' AND '%(Filename)' != 'IdentityServer4.EntityFramework.Storage' AND '%(Filename)' != 'IdentityServer4.Storage' AND '%(Filename)' != 'FluentValidation.ValidatorAttribute' AND '%(Filename)' != 'Microsoft.AspNetCore.Rewrite' AND '%(Filename)' != 'IdentityModel.AspNetCore.OAuth2Introspection' AND '%(Filename)' != 'IdentityModel' AND '%(Filename)' != 'System.IdentityModel.Tokens.Jwt'" />
     </ItemGroup>
-  </Target>
+  </Target>-->
 
   <!-- This target execute after "Build" target -->
   <Target Name="NopTarget" AfterTargets="Build">
