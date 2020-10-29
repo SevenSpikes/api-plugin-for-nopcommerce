@@ -1,0 +1,82 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Description>This plugin allows you to access/create Nop resources outside of the system</Description>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\Presentation\Nop.Web\Plugins\Nop.Plugin.Api</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\Presentation\Nop.Web\Plugins\Nop.Plugin.Api</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <None Remove="Areas\Admin\Views\_ViewImports.cshtml" />
+    <None Remove="logo.jpg" />
+    <None Remove="plugin.json" />
+  </ItemGroup> 
+  <ItemGroup>
+    <Content Include="Areas\Admin\Views\_ViewImports.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="logo.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="plugin.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\ApiAdmin\Settings.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup> 
+  <ItemGroup>
+    
+   
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Rewrite" Version="2.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+
+  </ItemGroup> 
+  
+  <!--<ItemGroup>
+    <ProjectReference Include="..\..\Nop-4.3\Libraries\Nop.Core\Nop.Core.csproj" />
+    <ProjectReference Include="..\..\Nop-4.3\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
+  </ItemGroup>-->
+
+  
+  <ItemGroup>
+    <Folder Include="Configuration\" />
+    <Folder Include="Models\Authentication\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Libraries\Nop.Core\Nop.Core.csproj" />
+    <ProjectReference Include="..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
+  </ItemGroup>
+  
+  <!--<Target Name="FilterCopyLocalItems" AfterTargets="ResolveLockFileCopyLocalProjectDeps">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' != 'FluentValidation' AND '%(Filename)' != 'AutoMapper' AND '%(Filename)' != 'IdentityServer4' AND '%(Filename)' != 'IdentityServer4.AccessTokenValidation' AND '%(Filename)' != 'IdentityServer4.EntityFramework' AND '%(Filename)' != 'IdentityServer4.EntityFramework.Storage' AND '%(Filename)' != 'IdentityServer4.Storage' AND '%(Filename)' != 'FluentValidation.ValidatorAttribute' AND '%(Filename)' != 'Microsoft.AspNetCore.Rewrite' AND '%(Filename)' != 'IdentityModel.AspNetCore.OAuth2Introspection' AND '%(Filename)' != 'IdentityModel' AND '%(Filename)' != 'System.IdentityModel.Tokens.Jwt'" />
+    </ItemGroup>
+  </Target>-->
+
+  <!-- This target execute after "Build" target -->
+  <Target Name="NopTarget" AfterTargets="Build">
+    <!-- Delete unnecessary libraries from plugins path -->
+    <MSBuild Projects="@(ClearPluginAssemblies)" Properties="PluginPath=$(MSBuildProjectDirectory)\$(OutDir)" Targets="NopClear" />
+  </Target>
+
+</Project>
