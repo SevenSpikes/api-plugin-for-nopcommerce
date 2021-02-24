@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -21,6 +22,9 @@ namespace Nop.Plugin.Api.Infrastructure
     {
         public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<KestrelServerOptions>(x => x.AllowSynchronousIO = true)
+                .Configure<IISServerOptions>(x => x.AllowSynchronousIO = true);
+
             var apiConfigSection = configuration.GetSection("Api");
 
             if (apiConfigSection != null)
@@ -33,6 +37,7 @@ namespace Nop.Plugin.Api.Infrastructure
                             {
                                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
                             })
                             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwtBearerOptions =>
                             {
@@ -51,11 +56,11 @@ namespace Nop.Plugin.Api.Infrastructure
 
                     JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
                     AddAuthorizationPipeline(services);
-                    //services.AddHostedService<ApplicationPartsLogger>();
+                    services.AddHostedService<ApplicationPartsLogger>();
 
                 }
             }
-           
+
         }
 
         public void Configure(IApplicationBuilder app)
@@ -64,6 +69,8 @@ namespace Nop.Plugin.Api.Infrastructure
                 .AddRewrite("api/token", "/token", true);
 
             app.UseRewriter(rewriteOptions);
+
+
 
             app.UseCors(x => x
                              .AllowAnyOrigin()
@@ -89,10 +96,11 @@ namespace Nop.Plugin.Api.Infrastructure
                 ),
                 a =>
                 {
-                    
+
                     a.Use(async (context, next) =>
                                 {
                                     Console.WriteLine("API Call");
+
                                     context.Request.EnableBuffering();
                                     await next();
                                 });
@@ -107,8 +115,8 @@ namespace Nop.Plugin.Api.Infrastructure
                         endpoints
                             .MapControllers();
                     });
-                    
-                    
+
+
                 }
             );
         }
@@ -126,12 +134,14 @@ namespace Nop.Plugin.Api.Infrastructure
                                       policy.Requirements.Add(new AuthorizationSchemeRequirement());
                                       policy.Requirements.Add(new CustomerRoleRequirement());
                                       policy.RequireAuthenticatedUser();
+
                                   });
             });
 
             services.AddSingleton<IAuthorizationHandler, ActiveApiPluginAuthorizationPolicy>();
             services.AddSingleton<IAuthorizationHandler, ValidSchemeAuthorizationPolicy>();
             services.AddSingleton<IAuthorizationHandler, CustomerRoleAuthorizationPolicy>();
+
 
         }
     }
