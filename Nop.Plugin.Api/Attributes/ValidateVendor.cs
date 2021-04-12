@@ -6,33 +6,20 @@ namespace Nop.Plugin.Api.Attributes
 {
     public class ValidateVendor : BaseValidationAttribute
     {
-        private Dictionary<string, string> _errors;
+        private readonly Dictionary<string, string> _errors;
 
         private IVendorService _vendorService;
-
-        private IVendorService VendorService
-        {
-            get
-            {
-                if (_vendorService == null)
-                {
-                    _vendorService = EngineContext.Current.Resolve<IVendorService>();
-                }
-
-                return _vendorService;
-            }
-        }
 
         public ValidateVendor()
         {
             _errors = new Dictionary<string, string>();
         }
 
+        private IVendorService VendorService => _vendorService ?? (_vendorService = EngineContext.Current.Resolve<IVendorService>());
+
         public override void Validate(object instance)
         {
-            var vendorId = 0;
-
-            if (instance != null && int.TryParse(instance.ToString(), out vendorId))
+            if (instance != null && int.TryParse(instance.ToString(), out var vendorId))
             {
                 if (vendorId > 0)
                 {

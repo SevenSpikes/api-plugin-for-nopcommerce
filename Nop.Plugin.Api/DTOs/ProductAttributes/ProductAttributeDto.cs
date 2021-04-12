@@ -1,13 +1,14 @@
 ﻿using Newtonsoft.Json;
-using Nop.Plugin.Api.DTOs.Base;
+using Nop.Plugin.Api.DTO.Base;
 
-namespace Nop.Plugin.Api.DTOs.ProductAttributes
+namespace Nop.Plugin.Api.DTO.ProductAttributes
 {
     [JsonObject(Title = "product_attribute")]
+    //[Validator(typeof(ProductAttributeDtoValidator))]
     public class ProductAttributeDto : BaseDto
     {
         /// <summary>
-        /// Gets or sets the name
+        ///     Gets or sets the name
         /// </summary>
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -29,7 +30,7 @@ namespace Nop.Plugin.Api.DTOs.ProductAttributes
         //}
 
         /// <summary>
-        /// Gets or sets the description
+        ///     Gets or sets the description
         /// </summary>
         [JsonProperty("description")]
         public string Description { get; set; }

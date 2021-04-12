@@ -1,4 +1,4 @@
-# API plugin for nopCommerce
+# API plugin for nopCommerce 4.3
 
 This plugin provides a RESTful API for managing resources in nopCommerce.
 
@@ -18,7 +18,7 @@ In a HTTP request, you need to define the type of action that you want to perfor
 
 **DELETE** (Delete)
 
-A resource is a data object that can be accessed via an HTTP request. The API allows you to “access your nopCommerce site’s data (resources) through an easy-to-use HTTP REST API”. In the case of the most recent version of the API (nopCommerce version 3.80), the resources include the following 7 nopCommerce objects:
+A resource is a data object that can be accessed via an HTTP request. The API allows you to “access your nopCommerce site’s data (resources) through an easy-to-use HTTP REST API”. In the case of the most recent version of the API (nopCommerce version 4.30), the resources include the following 7 nopCommerce objects:
 
 [**Customers**](Customers.md)
 
@@ -38,4 +38,4 @@ With the nopCommerce API, you can perform any of the four CRUD actions against a
 
 ## What about security?
 
-The API plugin currently supports OAuth 2.0 Authorization Code grant type flow. So in order to access the resource endpoints you need to provide a valid AccessToken. To understand how the authorization code grant flow works please refer to the [**Sample Application**](https://github.com/SevenSpikes/nopCommerce-Api-SampleApplication).
+## The API plugin currently supports only JWT Bearer Authentication. Will add support of OAuth 2.0 Authorization Code grant type flow later.

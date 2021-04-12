@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Nop.Plugin.Api.DTOs.Base
+namespace Nop.Plugin.Api.DTO.Base
 {
     public abstract class BaseDto
     {

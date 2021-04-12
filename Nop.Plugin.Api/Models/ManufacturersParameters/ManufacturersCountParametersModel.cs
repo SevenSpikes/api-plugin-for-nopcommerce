@@ -1,8 +1,8 @@
-﻿using Nop.Plugin.Api.ModelBinders;
+﻿using Microsoft.AspNetCore.Mvc;
+using Nop.Plugin.Api.ModelBinders;
+
 namespace Nop.Plugin.Api.Models.ManufacturersParameters
 {
-    using Microsoft.AspNetCore.Mvc;
-
     [ModelBinder(typeof(ParametersModelBinder<ManufacturersCountParametersModel>))]
     public class ManufacturersCountParametersModel : BaseManufacturersParametersModel
     {

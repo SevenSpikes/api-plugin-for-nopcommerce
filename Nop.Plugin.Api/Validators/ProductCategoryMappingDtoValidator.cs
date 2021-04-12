@@ -1,16 +1,20 @@
-﻿using Microsoft.AspNetCore.Http;
-using Nop.Plugin.Api.DTOs.ProductCategoryMappings;
+﻿using System.Collections.Generic;
+using JetBrains.Annotations;
+using Microsoft.AspNetCore.Http;
+using Nop.Plugin.Api.DTO.ProductCategoryMappings;
 using Nop.Plugin.Api.Helpers;
-using System.Collections.Generic;
 
 namespace Nop.Plugin.Api.Validators
 {
+    [UsedImplicitly]
     public class ProductCategoryMappingDtoValidator : BaseDtoValidator<ProductCategoryMappingDto>
     {
-
         #region Constructors
 
-        public ProductCategoryMappingDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary) : base(httpContextAccessor, jsonHelper, requestJsonDictionary)
+        public ProductCategoryMappingDtoValidator(
+            IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary) : base(httpContextAccessor,
+                                                                                                                                       jsonHelper,
+                                                                                                                                       requestJsonDictionary)
         {
             SetCategoryIdRule();
             SetProductIdRule();
@@ -31,6 +35,5 @@ namespace Nop.Plugin.Api.Validators
         }
 
         #endregion
-
     }
 }

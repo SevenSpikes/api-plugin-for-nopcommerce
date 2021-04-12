@@ -1,17 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Microsoft.AspNetCore.Mvc;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Infrastructure;
 using Nop.Plugin.Api.Attributes;
-using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.Delta;
-using Nop.Plugin.Api.DTOs;
-using Nop.Plugin.Api.DTOs.Customers;
+using Nop.Plugin.Api.DTO;
+using Nop.Plugin.Api.DTO.Customers;
+using Nop.Plugin.Api.DTO.Errors;
 using Nop.Plugin.Api.Factories;
 using Nop.Plugin.Api.Helpers;
+using Nop.Plugin.Api.Infrastructure;
 using Nop.Plugin.Api.JSON.ActionResults;
+using Nop.Plugin.Api.JSON.Serializers;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.ModelBinders;
 using Nop.Plugin.Api.Models.CustomersParameters;
@@ -29,27 +31,53 @@ using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    using Microsoft.AspNetCore.Authentication.JwtBearer;
-    using Microsoft.AspNetCore.Mvc;
-    using DTOs.Errors;
-    using JSON.Serializers;
-
-    [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CustomersController : BaseApiController
     {
+        private readonly ICountryService _countryService;
         private readonly ICustomerApiService _customerApiService;
         private readonly ICustomerRolesHelper _customerRolesHelper;
-        private readonly IGenericAttributeService _genericAttributeService;
         private readonly IEncryptionService _encryptionService;
-        private readonly ICountryService _countryService;
+        private readonly IFactory<Customer> _factory;
+        private readonly IGenericAttributeService _genericAttributeService;
+        private readonly ILanguageService _languageService;
         private readonly IMappingHelper _mappingHelper;
         private readonly INewsLetterSubscriptionService _newsLetterSubscriptionService;
-        private readonly ILanguageService _languageService;
-        private readonly IFactory<Customer> _factory;
 
         // We resolve the customer settings this way because of the tests.
         // The auto mocking does not support concreate types as dependencies. It supports only interfaces.
         private CustomerSettings _customerSettings;
+
+        public CustomersController(
+            ICustomerApiService customerApiService,
+            IJsonFieldsSerializer jsonFieldsSerializer,
+            IAclService aclService,
+            ICustomerService customerService,
+            IStoreMappingService storeMappingService,
+            IStoreService storeService,
+            IDiscountService discountService,
+            ICustomerActivityService customerActivityService,
+            ILocalizationService localizationService,
+            ICustomerRolesHelper customerRolesHelper,
+            IGenericAttributeService genericAttributeService,
+            IEncryptionService encryptionService,
+            IFactory<Customer> factory,
+            ICountryService countryService,
+            IMappingHelper mappingHelper,
+            INewsLetterSubscriptionService newsLetterSubscriptionService,
+            IPictureService pictureService, ILanguageService languageService) :
+            base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService,
+                 localizationService, pictureService)
+        {
+            _customerApiService = customerApiService;
+            _factory = factory;
+            _countryService = countryService;
+            _mappingHelper = mappingHelper;
+            _newsLetterSubscriptionService = newsLetterSubscriptionService;
+            _languageService = languageService;
+            _encryptionService = encryptionService;
+            _genericAttributeService = genericAttributeService;
+            _customerRolesHelper = customerRolesHelper;
+        }
 
         private CustomerSettings CustomerSettings
         {
@@ -64,39 +92,8 @@ namespace Nop.Plugin.Api.Controllers
             }
         }
 
-        public CustomersController(
-            ICustomerApiService customerApiService, 
-            IJsonFieldsSerializer jsonFieldsSerializer,
-            IAclService aclService,
-            ICustomerService customerService,
-            IStoreMappingService storeMappingService,
-            IStoreService storeService,
-            IDiscountService discountService,
-            ICustomerActivityService customerActivityService,
-            ILocalizationService localizationService,
-            ICustomerRolesHelper customerRolesHelper,
-            IGenericAttributeService genericAttributeService,
-            IEncryptionService encryptionService,
-            IFactory<Customer> factory, 
-            ICountryService countryService, 
-            IMappingHelper mappingHelper, 
-            INewsLetterSubscriptionService newsLetterSubscriptionService,
-            IPictureService pictureService, ILanguageService languageService) : 
-            base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService,pictureService)
-        {
-            _customerApiService = customerApiService;
-            _factory = factory;
-            _countryService = countryService;
-            _mappingHelper = mappingHelper;
-            _newsLetterSubscriptionService = newsLetterSubscriptionService;
-            _languageService = languageService;
-            _encryptionService = encryptionService;
-            _genericAttributeService = genericAttributeService;
-            _customerRolesHelper = customerRolesHelper;
-        }
-
         /// <summary>
-        /// Retrieve all customers of a shop
+        ///     Retrieve all customers of a shop
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
@@ -109,19 +106,22 @@ namespace Nop.Plugin.Api.Controllers
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetCustomers(CustomersParametersModel parameters)
         {
-            if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
+            if (parameters.Limit < Constants.Configurations.MinLimit || parameters.Limit > Constants.Configurations.MaxLimit)
             {
                 return Error(HttpStatusCode.BadRequest, "limit", "Invalid limit parameter");
             }
 
-            if (parameters.Page < Configurations.DefaultPageValue)
+            if (parameters.Page < Constants.Configurations.DefaultPageValue)
             {
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid request parameters");
             }
 
-            var allCustomers = _customerApiService.GetCustomersDtos(parameters.CreatedAtMin, parameters.CreatedAtMax, parameters.Limit, parameters.Page, parameters.SinceId);
+            var allCustomers =
 
-            var customersRootObject = new CustomersRootObject()
+                _customerApiService.GetCustomersDtos(parameters.CreatedAtMin, parameters.CreatedAtMax, parameters.Limit, parameters.Page, parameters.SinceId);
+
+
+            var customersRootObject = new CustomersRootObject
             {
                 Customers = allCustomers
             };
@@ -132,7 +132,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         /// <summary>
-        /// Retrieve customer by spcified id
+        ///     Retrieve customer by spcified id
         /// </summary>
         /// <param name="id">Id of the customer</param>
         /// <param name="fields">Fields from the customer you want your json to contain</param>
@@ -159,7 +159,7 @@ namespace Nop.Plugin.Api.Controllers
             {
                 return Error(HttpStatusCode.NotFound, "customer", "not found");
             }
-            
+
             var customersRootObject = new CustomersRootObject();
             customersRootObject.Customers.Add(customer);
 
@@ -170,7 +170,7 @@ namespace Nop.Plugin.Api.Controllers
 
 
         /// <summary>
-        /// Get a count of all customers
+        ///     Get a count of all customers
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
@@ -183,7 +183,7 @@ namespace Nop.Plugin.Api.Controllers
         {
             var allCustomersCount = _customerApiService.GetCustomersCount();
 
-            var customersCountRootObject = new CustomersCountRootObject()
+            var customersCountRootObject = new CustomersCountRootObject
             {
                 Count = allCustomersCount
             };
@@ -192,7 +192,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         /// <summary>
-        /// Search for customers matching supplied query
+        ///     Search for customers matching supplied query
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="400">Bad Request</response>
@@ -204,19 +204,19 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         public IActionResult Search(CustomersSearchParametersModel parameters)
         {
-            if (parameters.Limit <= Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
+            if (parameters.Limit <= Constants.Configurations.MinLimit || parameters.Limit > Constants.Configurations.MaxLimit)
             {
-                return Error(HttpStatusCode.BadRequest, "limit" ,"Invalid limit parameter");
+                return Error(HttpStatusCode.BadRequest, "limit", "Invalid limit parameter");
             }
 
             if (parameters.Page <= 0)
             {
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid page parameter");
             }
-            
+
             var customersDto = _customerApiService.Search(parameters.Query, parameters.Order, parameters.Page, parameters.Limit);
 
-            var customersRootObject = new CustomersRootObject()
+            var customersRootObject = new CustomersRootObject
             {
                 Customers = customersDto
             };
@@ -227,12 +227,26 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpPost]
+        [Route("/api/customers2")]
+        [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorsRootObject), 422)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        public IActionResult CreateCustomer1()
+        {
+            return Ok();
+        }
+
+
+        [HttpPost]
         [Route("/api/customers")]
         [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        public IActionResult CreateCustomer([ModelBinder(typeof(JsonModelBinder<CustomerDto>))] Delta<CustomerDto> customerDelta)
+        public IActionResult CreateCustomer(
+        [ModelBinder(typeof(JsonModelBinder<CustomerDto>))]
+            Delta<CustomerDto> customerDelta)
         {
+
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
             {
@@ -253,15 +267,16 @@ namespace Nop.Plugin.Api.Controllers
                 {
                     address.CreatedOnUtc = DateTime.UtcNow;
                 }
-                newCustomer.Addresses.Add(address.ToEntity());
+
+                CustomerService.InsertCustomerAddress(newCustomer, address.ToEntity());
             }
-            
+
             CustomerService.InsertCustomer(newCustomer);
 
             InsertFirstAndLastNameGenericAttributes(customerDelta.Dto.FirstName, customerDelta.Dto.LastName, newCustomer);
 
             if (!string.IsNullOrEmpty(customerDelta.Dto.LanguageId) && int.TryParse(customerDelta.Dto.LanguageId, out var languageId)
-                && _languageService.GetLanguageById(languageId) != null)
+                                                                    && _languageService.GetLanguageById(languageId) != null)
             {
                 _genericAttributeService.SaveAttribute(newCustomer, NopCustomerDefaults.LanguageIdAttribute, languageId);
             }
@@ -271,7 +286,7 @@ namespace Nop.Plugin.Api.Controllers
             {
                 AddPassword(customerDelta.Dto.Password, newCustomer);
             }
-            
+
             // We need to insert the entity first so we can have its id in order to map it to anything.
             // TODO: Localization
             // TODO: move this before inserting the customer.
@@ -306,7 +321,7 @@ namespace Nop.Plugin.Api.Controllers
 
             return new RawJsonActionResult(json);
         }
-        
+
         [HttpPut]
         [Route("/api/customers/{id}")]
         [ProducesResponseType(typeof(CustomersRootObject), (int)HttpStatusCode.OK)]
@@ -314,7 +329,9 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        public IActionResult UpdateCustomer([ModelBinder(typeof(JsonModelBinder<CustomerDto>))] Delta<CustomerDto> customerDelta)
+        public IActionResult UpdateCustomer(
+            [ModelBinder(typeof(JsonModelBinder<CustomerDto>))]
+            Delta<CustomerDto> customerDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -339,7 +356,7 @@ namespace Nop.Plugin.Api.Controllers
 
             if (customerDelta.Dto.Addresses.Count > 0)
             {
-                var currentCustomerAddresses = currentCustomer.Addresses.ToDictionary(address => address.Id, address => address);
+                var currentCustomerAddresses = CustomerService.GetAddressesByCustomerId(currentCustomer.Id).ToDictionary(address => address.Id, address => address);
 
                 foreach (var passedAddress in customerDelta.Dto.Addresses)
                 {
@@ -351,7 +368,7 @@ namespace Nop.Plugin.Api.Controllers
                     }
                     else
                     {
-                        currentCustomer.Addresses.Add(addressEntity);
+                        CustomerService.InsertCustomerAddress(currentCustomer, addressEntity);
                     }
                 }
             }
@@ -362,7 +379,7 @@ namespace Nop.Plugin.Api.Controllers
 
 
             if (!string.IsNullOrEmpty(customerDelta.Dto.LanguageId) && int.TryParse(customerDelta.Dto.LanguageId, out var languageId)
-                && _languageService.GetLanguageById(languageId) != null)
+                                                                    && _languageService.GetLanguageById(languageId) != null)
             {
                 _genericAttributeService.SaveAttribute(currentCustomer, NopCustomerDefaults.LanguageIdAttribute, languageId);
             }
@@ -372,9 +389,9 @@ namespace Nop.Plugin.Api.Controllers
             {
                 AddPassword(customerDelta.Dto.Password, currentCustomer);
             }
-            
+
             // TODO: Localization
-           
+
             // Preparing the result dto of the new customer
             // We do not prepare the shopping cart items because we have a separate endpoint for them.
             var updatedCustomer = currentCustomer.ToDto();
@@ -386,7 +403,7 @@ namespace Nop.Plugin.Api.Controllers
 
             // Set the fist and last name separately because they are not part of the customer entity, but are saved in the generic attributes.
             var firstNameGenericAttribute = _genericAttributeService.GetAttributesForEntity(currentCustomer.Id, typeof(Customer).Name)
-                .FirstOrDefault(x => x.Key == "FirstName");
+                                                                    .FirstOrDefault(x => x.Key == "FirstName");
 
             if (firstNameGenericAttribute != null)
             {
@@ -394,7 +411,7 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             var lastNameGenericAttribute = _genericAttributeService.GetAttributesForEntity(currentCustomer.Id, typeof(Customer).Name)
-                .FirstOrDefault(x => x.Key == "LastName");
+                                                                   .FirstOrDefault(x => x.Key == "LastName");
 
             if (lastNameGenericAttribute != null)
             {
@@ -402,7 +419,7 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             var languageIdGenericAttribute = _genericAttributeService.GetAttributesForEntity(currentCustomer.Id, typeof(Customer).Name)
-                .FirstOrDefault(x => x.Key == "LanguageId");
+                                                                     .FirstOrDefault(x => x.Key == "LanguageId");
 
             if (languageIdGenericAttribute != null)
             {
@@ -449,12 +466,14 @@ namespace Nop.Plugin.Api.Controllers
             {
                 var subscription = _newsLetterSubscriptionService.GetNewsLetterSubscriptionByEmailAndStoreId(customer.Email, store.Id);
                 if (subscription != null)
+                {
                     _newsLetterSubscriptionService.DeleteNewsLetterSubscription(subscription);
+                }
             }
 
             //activity log
             CustomerActivityService.InsertActivity("DeleteCustomer", LocalizationService.GetResource("ActivityLog.DeleteCustomer"), customer);
-            
+
             return new RawJsonActionResult("{}");
         }
 
@@ -480,15 +499,16 @@ namespace Nop.Plugin.Api.Controllers
                 if (customerDelta.Dto.RoleIds.Contains(customerRole.Id))
                 {
                     //new role
-                    if (currentCustomer.CustomerCustomerRoleMappings.Count(mapping => mapping.CustomerRoleId == customerRole.Id) == 0)
-                        currentCustomer.CustomerCustomerRoleMappings.Add(new CustomerCustomerRoleMapping { CustomerRole = customerRole });
+                    if (!CustomerService.IsInCustomerRole(currentCustomer, customerRole.Name))
+                    {
+                        CustomerService.InsertCustomerRole(customerRole);
+                    }
                 }
                 else
                 {
-                    if (currentCustomer.CustomerCustomerRoleMappings.Count(mapping => mapping.CustomerRoleId == customerRole.Id) > 0)
+                    if (CustomerService.IsInCustomerRole(currentCustomer, customerRole.Name))
                     {
-                        currentCustomer.CustomerCustomerRoleMappings
-                            .Remove(currentCustomer.CustomerCustomerRoleMappings.FirstOrDefault(mapping => mapping.CustomerRoleId == customerRole.Id));
+                        CustomerService.DeleteCustomerRole(customerRole);
                     }
                 }
             }
@@ -526,7 +546,7 @@ namespace Nop.Plugin.Api.Controllers
             // TODO: call this method before inserting the customer.
             var customerPassword = new CustomerPassword
             {
-                Customer = customer,
+                CustomerId = customer.Id,
                 PasswordFormat = CustomerSettings.DefaultPasswordFormat,
                 CreatedOnUtc = DateTime.UtcNow
             };
@@ -554,7 +574,6 @@ namespace Nop.Plugin.Api.Controllers
 
             CustomerService.InsertCustomerPassword(customerPassword);
 
-            // TODO: remove this.
             CustomerService.UpdateCustomer(customer);
         }
     }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Nop.Plugin.Api.DTOs.Stores
+namespace Nop.Plugin.Api.DTO.Stores
 {
     public class StoresRootObject : ISerializableObject
     {

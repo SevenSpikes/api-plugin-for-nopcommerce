@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
-namespace Nop.Plugin.Api.DTOs.Manufacturers
+namespace Nop.Plugin.Api.DTO.Manufacturers
 {
     public class ManufacturersRootObject : ISerializableObject
     {

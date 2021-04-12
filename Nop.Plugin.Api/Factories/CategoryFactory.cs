@@ -7,8 +7,8 @@ namespace Nop.Plugin.Api.Factories
 {
     public class CategoryFactory : IFactory<Category>
     {
-        private readonly ICategoryTemplateService _categoryTemplateService;
         private readonly CatalogSettings _catalogSettings;
+        private readonly ICategoryTemplateService _categoryTemplateService;
 
         public CategoryFactory(ICategoryTemplateService categoryTemplateService, CatalogSettings catalogSettings)
         {
@@ -28,7 +28,7 @@ namespace Nop.Plugin.Api.Factories
             {
                 defaultCategory.CategoryTemplateId = firstTemplate.Id;
             }
-            
+
             //default values
             defaultCategory.PageSize = _catalogSettings.DefaultCategoryPageSize;
             defaultCategory.PageSizeOptions = _catalogSettings.DefaultCategoryPageSizeOptions;

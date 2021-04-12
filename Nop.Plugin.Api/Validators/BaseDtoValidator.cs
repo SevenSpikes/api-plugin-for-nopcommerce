@@ -1,20 +1,19 @@
-﻿using FluentValidation;
-using FluentValidation.Results;
-using FluentValidation.Validators;
-using Microsoft.AspNetCore.Http;
-using Nop.Plugin.Api.DTOs.Base;
-using Nop.Plugin.Api.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
+using FluentValidation;
+using FluentValidation.Results;
+using FluentValidation.Validators;
+using Microsoft.AspNetCore.Http;
+using Nop.Plugin.Api.DTO.Base;
+using Nop.Plugin.Api.Helpers;
 
 namespace Nop.Plugin.Api.Validators
 {
     public abstract class BaseDtoValidator<T> : AbstractValidator<T> where T : BaseDto, new()
     {
-
         #region Private Fields
 
         private Dictionary<string, object> _requestValuesDictionary;
@@ -23,12 +22,12 @@ namespace Nop.Plugin.Api.Validators
 
         #region Constructors
 
-        public BaseDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary)
+        protected BaseDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary)
         {
             HttpContextAccessor = httpContextAccessor;
             JsonHelper = jsonHelper;
 
-            // this is hacky - can't make requestJsonDictionary an optional parameter because Nop tries to resolve it
+            // this is a hack - can't make requestJsonDictionary an optional parameter because Nop tries to resolve it
             //
             // when DI (or the Nop Engine) resolves this class, requestJsonDictionary will be empty (length 0)
             //    in this case, HttpMethod should be whatever the current context is
@@ -51,30 +50,20 @@ namespace Nop.Plugin.Api.Validators
 
         #endregion
 
-        #region Protected Properties
-
-        protected IHttpContextAccessor HttpContextAccessor { get; private set; }
-
-        protected Dictionary<string, object> RequestJsonDictionary
-        {
-            get
-            {
-                if (_requestValuesDictionary == null)
-                {
-                    _requestValuesDictionary = GetRequestJsonDictionaryDictionaryFromHttpContext();
-                }
-
-                return _requestValuesDictionary;
-            }
-        }
-
-        protected IJsonHelper JsonHelper { get; private set; }
-
-        #endregion
-
         #region Public Properties
 
         public HttpMethod HttpMethod { get; set; }
+
+        #endregion
+
+        #region Protected Properties
+
+        protected IHttpContextAccessor HttpContextAccessor { get; }
+
+        protected Dictionary<string, object> RequestJsonDictionary =>
+            _requestValuesDictionary ?? (_requestValuesDictionary = GetRequestJsonDictionaryDictionaryFromHttpContext());
+
+        protected IJsonHelper JsonHelper { get; }
 
         #endregion
 
@@ -93,10 +82,11 @@ namespace Nop.Plugin.Api.Validators
 
         protected Dictionary<string, object> GetRequestJsonDictionaryCollectionItemDictionary<TDto>(string collectionKey, TDto dto) where TDto : BaseDto
         {
-            var collectionItems = (List<object>)RequestJsonDictionary[collectionKey];
+            var collectionItems = (List<object>) RequestJsonDictionary[collectionKey];
             var collectionItemDictionary = collectionItems.FirstOrDefault(x =>
-                ((Dictionary<string, object>)x).ContainsKey("id") && ((int)(long)((Dictionary<string, object>)x)["id"]) == dto.Id
-            ) as Dictionary<string, object>;
+                                                                              ((Dictionary<string, object>) x).ContainsKey("id") &&
+                                                                              (int) (long) ((Dictionary<string, object>) x)["id"] == dto.Id
+                                                                         ) as Dictionary<string, object>;
 
             return collectionItemDictionary;
         }
@@ -144,7 +134,7 @@ namespace Nop.Plugin.Api.Validators
 
             if (requestJsonDictionary.ContainsKey(rootPropertyName))
             {
-                requestJsonDictionary = (Dictionary<string, object>)requestJsonDictionary[rootPropertyName];
+                requestJsonDictionary = (Dictionary<string, object>) requestJsonDictionary[rootPropertyName];
             }
 
             return requestJsonDictionary;
@@ -159,6 +149,5 @@ namespace Nop.Plugin.Api.Validators
         }
 
         #endregion
-
     }
 }

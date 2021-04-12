@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
-namespace Nop.Plugin.Api.DTOs.ProductManufacturerMappings
+namespace Nop.Plugin.Api.DTO.ProductManufacturerMappings
 {
     public class ProductManufacturerMappingsRootObject : ISerializableObject
     {
@@ -21,7 +21,7 @@ namespace Nop.Plugin.Api.DTOs.ProductManufacturerMappings
 
         public Type GetPrimaryPropertyType()
         {
-            return typeof (ProductManufacturerMappingsDto);
+            return typeof(ProductManufacturerMappingsDto);
         }
     }
 }

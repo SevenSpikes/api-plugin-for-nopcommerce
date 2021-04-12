@@ -1,12 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Microsoft.AspNetCore.Mvc;
 using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.Attributes;
-using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.Delta;
-using Nop.Plugin.Api.DTOs.ProductManufacturerMappings;
+using Nop.Plugin.Api.DTO.Errors;
+using Nop.Plugin.Api.DTO.ProductManufacturerMappings;
+using Nop.Plugin.Api.Infrastructure;
 using Nop.Plugin.Api.JSON.ActionResults;
+using Nop.Plugin.Api.JSON.Serializers;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Api.ModelBinders;
 using Nop.Plugin.Api.Models.ProductManufacturerMappingsParameters;
@@ -22,20 +25,15 @@ using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    using Microsoft.AspNetCore.Authentication.JwtBearer;
-    using Microsoft.AspNetCore.Mvc;
-    using DTOs.Errors;
-    using JSON.Serializers;
-
-    [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ProductManufacturerMappingsController : BaseApiController
     {
-        private readonly IProductManufacturerMappingsApiService _productManufacturerMappingsService;
-        private readonly IManufacturerService _manufacturerService;
         private readonly IManufacturerApiService _manufacturerApiService;
+        private readonly IManufacturerService _manufacturerService;
         private readonly IProductApiService _productApiService;
+        private readonly IProductManufacturerMappingsApiService _productManufacturerMappingsService;
 
-        public ProductManufacturerMappingsController(IProductManufacturerMappingsApiService productManufacturerMappingsService,
+        public ProductManufacturerMappingsController(
+            IProductManufacturerMappingsApiService productManufacturerMappingsService,
             IManufacturerService manufacturerService,
             IJsonFieldsSerializer jsonFieldsSerializer,
             IAclService aclService,
@@ -44,11 +42,12 @@ namespace Nop.Plugin.Api.Controllers
             IStoreService storeService,
             IDiscountService discountService,
             ICustomerActivityService customerActivityService,
-            ILocalizationService localizationService, 
-            IManufacturerApiService manufacturerApiService, 
+            ILocalizationService localizationService,
+            IManufacturerApiService manufacturerApiService,
             IProductApiService productApiService,
             IPictureService pictureService)
-            : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService,pictureService)
+            : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService,
+                   localizationService, pictureService)
         {
             _productManufacturerMappingsService = productManufacturerMappingsService;
             _manufacturerService = manufacturerService;
@@ -57,40 +56,40 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         /// <summary>
-        /// Receive a list of all Product-Manufacturer mappings
+        ///     Receive a list of all Product-Manufacturer mappings
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="400">Bad Request</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
         [Route("/api/product_manufacturer_mappings")]
-        [ProducesResponseType(typeof(ProductManufacturerMappingsRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ProductManufacturerMappingsRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetMappings(ProductManufacturerMappingsParametersModel parameters)
         {
-            if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
+            if (parameters.Limit < Constants.Configurations.MinLimit || parameters.Limit > Constants.Configurations.MaxLimit)
             {
                 return Error(HttpStatusCode.BadRequest, "limit", "invalid limit parameter");
             }
 
-            if (parameters.Page < Configurations.DefaultPageValue)
+            if (parameters.Page < Constants.Configurations.DefaultPageValue)
             {
                 return Error(HttpStatusCode.BadRequest, "page", "invalid page parameter");
             }
 
             IList<ProductManufacturerMappingsDto> mappingsAsDtos =
                 _productManufacturerMappingsService.GetMappings(parameters.ProductId,
-                    parameters.ManufacturerId,
-                    parameters.Limit,
-                    parameters.Page,
-                    parameters.SinceId).Select(x => x.ToDto()).ToList();
+                                                                parameters.ManufacturerId,
+                                                                parameters.Limit,
+                                                                parameters.Page,
+                                                                parameters.SinceId).Select(x => x.ToDto()).ToList();
 
-            var productManufacturerMappingRootObject = new ProductManufacturerMappingsRootObject()
-            {
-                ProductManufacturerMappingsDtos = mappingsAsDtos
-            };
+            var productManufacturerMappingRootObject = new ProductManufacturerMappingsRootObject
+                                                       {
+                                                           ProductManufacturerMappingsDtos = mappingsAsDtos
+                                                       };
 
             var json = JsonFieldsSerializer.Serialize(productManufacturerMappingRootObject, parameters.Fields);
 
@@ -98,15 +97,15 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         /// <summary>
-        /// Receive a count of all Product-Manufacturer mappings
+        ///     Receive a count of all Product-Manufacturer mappings
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
         [Route("/api/product_manufacturer_mappings/count")]
-        [ProducesResponseType(typeof(ProductManufacturerMappingsCountRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ProductManufacturerMappingsCountRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetMappingsCount(ProductManufacturerMappingsCountParametersModel parameters)
         {
@@ -121,30 +120,31 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             var mappingsCount = _productManufacturerMappingsService.GetMappingsCount(parameters.ProductId,
-                parameters.ManufacturerId);
+                                                                                     parameters.ManufacturerId);
 
-            var productManufacturerMappingsCountRootObject = new ProductManufacturerMappingsCountRootObject()
-            {
-                Count = mappingsCount
-            };
+            var productManufacturerMappingsCountRootObject = new ProductManufacturerMappingsCountRootObject
+                                                             {
+                                                                 Count = mappingsCount
+                                                             };
 
             return Ok(productManufacturerMappingsCountRootObject);
         }
 
         /// <summary>
-        /// Retrieve Product-Manufacturer mappings by spcified id
+        ///     Retrieve Product-Manufacturer mappings by spcified id
         /// </summary>
-        ///   /// <param name="id">Id of the Product-Manufacturer mapping</param>
+        /// ///
+        /// <param name="id">Id of the Product-Manufacturer mapping</param>
         /// <param name="fields">Fields from the Product-Manufacturer mapping you want your json to contain</param>
         /// <response code="200">OK</response>
         /// <response code="404">Not Found</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
         [Route("/api/product_manufacturer_mappings/{id}")]
-        [ProducesResponseType(typeof(ProductManufacturerMappingsRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ProductManufacturerMappingsRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetMappingById(int id, string fields = "")
         {
@@ -170,12 +170,14 @@ namespace Nop.Plugin.Api.Controllers
 
         [HttpPost]
         [Route("/api/product_manufacturer_mappings")]
-        [ProducesResponseType(typeof(ProductManufacturerMappingsRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ProductManufacturerMappingsRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult CreateProductManufacturerMapping([ModelBinder(typeof(JsonModelBinder<ProductManufacturerMappingsDto>))] Delta<ProductManufacturerMappingsDto> productManufacturerDelta)
+        public IActionResult CreateProductManufacturerMapping(
+            [ModelBinder(typeof(JsonModelBinder<ProductManufacturerMappingsDto>))]
+            Delta<ProductManufacturerMappingsDto> productManufacturerDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -218,19 +220,22 @@ namespace Nop.Plugin.Api.Controllers
             var json = JsonFieldsSerializer.Serialize(productManufacturerMappingsRootObject, string.Empty);
 
             //activity log 
-            CustomerActivityService.InsertActivity("AddNewProductManufacturerMapping", LocalizationService.GetResource("ActivityLog.AddNewProductManufacturerMapping"), newProductManufacturer);
+            CustomerActivityService.InsertActivity("AddNewProductManufacturerMapping",
+                                                   LocalizationService.GetResource("ActivityLog.AddNewProductManufacturerMapping"), newProductManufacturer);
 
             return new RawJsonActionResult(json);
         }
 
         [HttpPut]
         [Route("/api/product_manufacturer_mappings/{id}")]
-        [ProducesResponseType(typeof(ProductManufacturerMappingsRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ProductManufacturerMappingsRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        public IActionResult UpdateProductManufacturerMapping([ModelBinder(typeof(JsonModelBinder<ProductManufacturerMappingsDto>))] Delta<ProductManufacturerMappingsDto> productManufacturerDelta)
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        public IActionResult UpdateProductManufacturerMapping(
+            [ModelBinder(typeof(JsonModelBinder<ProductManufacturerMappingsDto>))]
+            Delta<ProductManufacturerMappingsDto> productManufacturerDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -272,7 +277,8 @@ namespace Nop.Plugin.Api.Controllers
 
             //activity log
             CustomerActivityService.InsertActivity("UpdateProdutManufacturerMapping",
-                LocalizationService.GetResource("ActivityLog.UpdateProdutManufacturerMapping"), productManufacturerEntityToUpdate);
+                                                   LocalizationService.GetResource("ActivityLog.UpdateProdutManufacturerMapping"),
+                                                   productManufacturerEntityToUpdate);
 
             var updatedProductManufacturerDto = productManufacturerEntityToUpdate.ToDto();
 
@@ -287,10 +293,10 @@ namespace Nop.Plugin.Api.Controllers
 
         [HttpDelete]
         [Route("/api/product_manufacturer_mappings/{id}")]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult DeleteProductManufacturerMapping(int id)
         {
@@ -309,7 +315,8 @@ namespace Nop.Plugin.Api.Controllers
             _manufacturerService.DeleteProductManufacturer(productManufacturer);
 
             //activity log 
-            CustomerActivityService.InsertActivity("DeleteProductManufacturerMapping", LocalizationService.GetResource("ActivityLog.DeleteProductManufacturerMapping"), productManufacturer);
+            CustomerActivityService.InsertActivity("DeleteProductManufacturerMapping",
+                                                   LocalizationService.GetResource("ActivityLog.DeleteProductManufacturerMapping"), productManufacturer);
 
             return new RawJsonActionResult("{}");
         }

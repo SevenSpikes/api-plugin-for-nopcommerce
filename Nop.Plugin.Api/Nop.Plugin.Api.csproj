@@ -1,83 +1,73 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Version Condition=" '$(BUILD_BUILDNUMBER)' == '' ">0.0.1-local</Version>
+    <Version Condition=" '$(BUILD_BUILDNUMBER)' != '' ">$(BUILD_BUILDNUMBER)</Version>
     <Description>This plugin allows you to access/create Nop resources outside of the system</Description>
+    <Copyright></Copyright>
+    <Authors></Authors>
+    <Company></Company>
+    <AssemblyName>Nop.Plugin.Api</AssemblyName>
+    <RootNamespace>Nop.Plugin.Api</RootNamespace>
+    <PluginDirectory>Nop.Plugin.Api</PluginDirectory>
+  <!--Set this parameter to true to get the dlls copied from the NuGet cache to the output of your project.
+    You need to set this parameter to true if your plugin has a nuget package 
+    to ensure that the dlls copied from the NuGet cache to the output of your project-->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>..\..\Presentation\Nop.Web\Plugins\Nop.Plugin.Api</OutputPath>
     <OutDir>$(OutputPath)</OutDir>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>..\..\Presentation\Nop.Web\Plugins\Nop.Plugin.Api</OutputPath>
     <OutDir>$(OutputPath)</OutDir>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
-  
+
   <ItemGroup>
-    <None Remove="logo.jpg" />
-    <None Remove="plugin.json" />
-    <None Remove="Views\Clients\ClientSettings.cshtml" />
-    <None Remove="Views\Clients\Create.cshtml" />
-    <None Remove="Views\Clients\CreateOrUpdate.cshtml" />
-    <None Remove="Views\Clients\Edit.cshtml" />
-    <None Remove="Views\Clients\List.cshtml" />
-    <None Remove="Views\Clients\_ViewStart.cshtml" />
-    <None Remove="Views\Settings.cshtml" />
-    <None Remove="Views\_ViewImports.cshtml" />
-  </ItemGroup> 
-  <ItemGroup>
-    <Content Include="logo.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="plugin.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Clients\ClientSettings.cshtml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Clients\Create.cshtml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Clients\CreateOrUpdate.cshtml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Clients\Edit.cshtml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Clients\List.cshtml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Settings.cshtml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\_ViewImports.cshtml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup> 
-  <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="8.1.0" />
-    <PackageReference Include="IdentityServer4" Version="2.5.0-preview.3.10" />
-    <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="2.5.0" />
-    <PackageReference Include="IdentityServer4.EntityFramework" Version="2.5.0-preview.3.10" />
-    <PackageReference Include="IdentityServer4.EntityFramework.Storage" Version="2.5.0-preview.3.10" />
-    <PackageReference Include="IdentityServer4.Storage" Version="2.5.0-preview.3.10" />
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="JetBrains.Annotations" Version="2019.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.4" />
     <PackageReference Include="Microsoft.AspNetCore.Rewrite" Version="2.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Rewrite" Version="2.2.0" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\Libraries\Nop.Core\Nop.Core.csproj" />
     <ProjectReference Include="..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
+
+    <ClearPluginAssemblies Include="$(MSBuildProjectDirectory)\..\..\Build\ClearPluginAssemblies.proj" />
   </ItemGroup>
- 
+
+  <ItemGroup>
+    <None Update="Areas\Admin\Views\ApiAdmin\Settings.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Areas\Admin\Views\_ViewImports.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="logo.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="plugin.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  
   <Target Name="FilterCopyLocalItems" AfterTargets="ResolveLockFileCopyLocalProjectDeps">
     <ItemGroup>
-      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' != 'IdentityServer4' AND '%(Filename)' != 'IdentityServer4.Storage' AND '%(Filename)' != 'IdentityServer4.AccessTokenValidation' AND '%(Filename)' != 'IdentityServer4.EntityFramework' AND '%(Filename)' != 'IdentityServer4.EntityFramework.Storage' AND '%(Filename)' != 'Microsoft.AspNetCore.Rewrite' AND '%(Filename)' != 'IdentityModel.AspNetCore.OAuth2Introspection' AND '%(Filename)' != 'IdentityModel' AND '%(Filename)' != 'System.IdentityModel.Tokens.Jwt'" />
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' != 'Microsoft.AspNetCore.Rewrite' AND '%(Filename)' != 'System.IdentityModel.Tokens.Jwt'" />
     </ItemGroup>
+  </Target>
+
+  <!-- This target execute after "Build" target -->
+  <Target Name="NopTarget" AfterTargets="Build">
+    <!-- Delete unnecessary libraries from plugins path -->
+    <MSBuild Projects="@(ClearPluginAssemblies)" Properties="PluginPath=$(MSBuildProjectDirectory)\$(OutDir)" Targets="NopClear" />
   </Target>
 
 </Project>

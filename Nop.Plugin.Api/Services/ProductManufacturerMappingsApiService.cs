@@ -1,9 +1,9 @@
-﻿using Nop.Core.Data;
-using Nop.Core.Domain.Catalog;
-using Nop.Plugin.Api.Constants;
-using Nop.Plugin.Api.DataStructures;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Nop.Data;
+using Nop.Core.Domain.Catalog;
+using Nop.Plugin.Api.DataStructures;
+using Nop.Plugin.Api.Infrastructure;
 
 namespace Nop.Plugin.Api.Services
 {
@@ -16,9 +16,10 @@ namespace Nop.Plugin.Api.Services
             _productManufacturerMappingsRepository = productManufacturerMappingsRepository;
         }
 
-        public IList<ProductManufacturer> GetMappings(int? productId = null, 
-            int? manufacturerId = null, int limit = Configurations.DefaultLimit, 
-            int page = Configurations.DefaultPageValue, int sinceId = Configurations.DefaultSinceId)
+        public IList<ProductManufacturer> GetMappings(
+            int? productId = null,
+            int? manufacturerId = null, int limit = Constants.Configurations.DefaultLimit,
+            int page = Constants.Configurations.DefaultPageValue, int sinceId = Constants.Configurations.DefaultSinceId)
         {
             var query = GetMappingsQuery(productId, manufacturerId, sinceId);
 
@@ -33,13 +34,16 @@ namespace Nop.Plugin.Api.Services
         public ProductManufacturer GetById(int id)
         {
             if (id <= 0)
+            {
                 return null;
+            }
 
             return _productManufacturerMappingsRepository.GetById(id);
         }
 
-        private IQueryable<ProductManufacturer> GetMappingsQuery(int? productId = null, 
-            int? manufacturerId = null, int sinceId = Configurations.DefaultSinceId)
+        private IQueryable<ProductManufacturer> GetMappingsQuery(
+            int? productId = null,
+            int? manufacturerId = null, int sinceId = Constants.Configurations.DefaultSinceId)
         {
             var query = _productManufacturerMappingsRepository.Table;
 

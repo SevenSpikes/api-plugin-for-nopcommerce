@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Nop.Core.Data;
+using Nop.Data;
 using Nop.Core.Domain.Catalog;
-using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.DataStructures;
+using Nop.Plugin.Api.Infrastructure;
 using Nop.Services.Stores;
 
 namespace Nop.Plugin.Api.Services
 {
     public class CategoryApiService : ICategoryApiService
     {
-        private readonly IStoreMappingService _storeMappingService;
         private readonly IRepository<Category> _categoryRepository;
         private readonly IRepository<ProductCategory> _productCategoryMappingRepository;
+        private readonly IStoreMappingService _storeMappingService;
 
-        public CategoryApiService(IRepository<Category> categoryRepository,
+        public CategoryApiService(
+            IRepository<Category> categoryRepository,
             IRepository<ProductCategory> productCategoryMappingRepository,
             IStoreMappingService storeMappingService)
         {
@@ -24,9 +25,11 @@ namespace Nop.Plugin.Api.Services
             _storeMappingService = storeMappingService;
         }
 
-        public IList<Category> GetCategories(IList<int> ids = null,
+        public IList<Category> GetCategories(
+            IList<int> ids = null,
             DateTime? createdAtMin = null, DateTime? createdAtMax = null, DateTime? updatedAtMin = null, DateTime? updatedAtMax = null,
-            int limit = Configurations.DefaultLimit, int page = Configurations.DefaultPageValue, int sinceId = Configurations.DefaultSinceId, 
+            int limit = Constants.Configurations.DefaultLimit, int page = Constants.Configurations.DefaultPageValue,
+            int sinceId = Constants.Configurations.DefaultSinceId,
             int? productId = null,
             bool? publishedStatus = null)
         {
@@ -44,14 +47,17 @@ namespace Nop.Plugin.Api.Services
         public Category GetCategoryById(int id)
         {
             if (id <= 0)
+            {
                 return null;
+            }
 
             var category = _categoryRepository.Table.FirstOrDefault(cat => cat.Id == id && !cat.Deleted);
 
             return category;
         }
 
-        public int GetCategoriesCount(DateTime? createdAtMin = null, DateTime? createdAtMax = null,
+        public int GetCategoriesCount(
+            DateTime? createdAtMin = null, DateTime? createdAtMax = null,
             DateTime? updatedAtMin = null, DateTime? updatedAtMax = null,
             bool? publishedStatus = null, int? productId = null)
         {
@@ -86,7 +92,6 @@ namespace Nop.Plugin.Api.Services
 
             if (createdAtMax != null)
             {
-
                 query = query.Where(c => c.CreatedOnUtc < createdAtMax.Value);
             }
 

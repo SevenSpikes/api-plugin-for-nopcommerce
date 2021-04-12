@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Nop.Plugin.Api.DTOs.Errors
+namespace Nop.Plugin.Api.DTO.Errors
 {
     public class ErrorsRootObject : ISerializableObject
     {

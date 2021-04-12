@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Nop.Plugin.Api.DTOs.SpecificationAttributes
+namespace Nop.Plugin.Api.DTO.SpecificationAttributes
 {
     public class SpecificationAttributesCountRootObject
     {

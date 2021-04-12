@@ -1,6 +1,6 @@
-﻿using Nop.Plugin.Api.AutoMapper;
-using Nop.Core.Domain.Customers;
-using Nop.Plugin.Api.DTOs.Customers;
+﻿using Nop.Core.Domain.Customers;
+using Nop.Plugin.Api.AutoMapper;
+using Nop.Plugin.Api.DTO.Customers;
 
 namespace Nop.Plugin.Api.MappingExtensions
 {

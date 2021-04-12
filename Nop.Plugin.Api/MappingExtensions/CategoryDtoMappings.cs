@@ -1,6 +1,6 @@
 ﻿using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.AutoMapper;
-using Nop.Plugin.Api.DTOs.Categories;
+using Nop.Plugin.Api.DTO.Categories;
 
 namespace Nop.Plugin.Api.MappingExtensions
 {

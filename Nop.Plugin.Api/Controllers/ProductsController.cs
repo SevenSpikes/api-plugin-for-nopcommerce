@@ -2,15 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Discounts;
 using Nop.Plugin.Api.Attributes;
-using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.Delta;
-using Nop.Plugin.Api.DTOs.Images;
-using Nop.Plugin.Api.DTOs.Products;
+using Nop.Plugin.Api.DTO.Errors;
+using Nop.Plugin.Api.DTO.Images;
+using Nop.Plugin.Api.DTO.Products;
 using Nop.Plugin.Api.Factories;
+using Nop.Plugin.Api.Helpers;
+using Nop.Plugin.Api.Infrastructure;
 using Nop.Plugin.Api.JSON.ActionResults;
+using Nop.Plugin.Api.JSON.Serializers;
 using Nop.Plugin.Api.ModelBinders;
 using Nop.Plugin.Api.Models.ProductsParameters;
 using Nop.Plugin.Api.Services;
@@ -23,44 +28,39 @@ using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Seo;
 using Nop.Services.Stores;
-using Nop.Plugin.Api.Helpers;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    using Microsoft.AspNetCore.Authentication.JwtBearer;
-    using Microsoft.AspNetCore.Mvc;
-    using DTOs.Errors;
-    using JSON.Serializers;
-
-    [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ProductsController : BaseApiController
     {
-        private readonly IProductApiService _productApiService;
-        private readonly IProductService _productService;
-        private readonly IUrlRecordService _urlRecordService;
-        private readonly IManufacturerService _manufacturerService;
-        private readonly IFactory<Product> _factory;
-        private readonly IProductTagService _productTagService;
-        private readonly IProductAttributeService _productAttributeService;
         private readonly IDTOHelper _dtoHelper;
+        private readonly IFactory<Product> _factory;
+        private readonly IManufacturerService _manufacturerService;
+        private readonly IProductApiService _productApiService;
+        private readonly IProductAttributeService _productAttributeService;
+        private readonly IProductService _productService;
+        private readonly IProductTagService _productTagService;
+        private readonly IUrlRecordService _urlRecordService;
 
-        public ProductsController(IProductApiService productApiService,
-                                  IJsonFieldsSerializer jsonFieldsSerializer,
-                                  IProductService productService,
-                                  IUrlRecordService urlRecordService,
-                                  ICustomerActivityService customerActivityService,
-                                  ILocalizationService localizationService,
-                                  IFactory<Product> factory,
-                                  IAclService aclService,
-                                  IStoreMappingService storeMappingService,
-                                  IStoreService storeService,
-                                  ICustomerService customerService,
-                                  IDiscountService discountService,
-                                  IPictureService pictureService,
-                                  IManufacturerService manufacturerService,
-                                  IProductTagService productTagService,
-                                  IProductAttributeService productAttributeService,
-                                  IDTOHelper dtoHelper) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService, pictureService)
+        public ProductsController(
+            IProductApiService productApiService,
+            IJsonFieldsSerializer jsonFieldsSerializer,
+            IProductService productService,
+            IUrlRecordService urlRecordService,
+            ICustomerActivityService customerActivityService,
+            ILocalizationService localizationService,
+            IFactory<Product> factory,
+            IAclService aclService,
+            IStoreMappingService storeMappingService,
+            IStoreService storeService,
+            ICustomerService customerService,
+            IDiscountService discountService,
+            IPictureService pictureService,
+            IManufacturerService manufacturerService,
+            IProductTagService productTagService,
+            IProductAttributeService productAttributeService,
+            IDTOHelper dtoHelper) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService,
+                                         customerActivityService, localizationService, pictureService)
         {
             _productApiService = productApiService;
             _factory = factory;
@@ -71,9 +71,9 @@ namespace Nop.Plugin.Api.Controllers
             _productAttributeService = productAttributeService;
             _dtoHelper = dtoHelper;
         }
-
+               
         /// <summary>
-        /// Receive a list of all products
+        ///     Receive a list of all products
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="400">Bad Request</response>
@@ -86,24 +86,24 @@ namespace Nop.Plugin.Api.Controllers
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetProducts(ProductsParametersModel parameters)
         {
-            if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
+            if (parameters.Limit < Constants.Configurations.MinLimit || parameters.Limit > Constants.Configurations.MaxLimit)
             {
                 return Error(HttpStatusCode.BadRequest, "limit", "invalid limit parameter");
             }
 
-            if (parameters.Page < Configurations.DefaultPageValue)
+            if (parameters.Page < Constants.Configurations.DefaultPageValue)
             {
                 return Error(HttpStatusCode.BadRequest, "page", "invalid page parameter");
             }
 
             var allProducts = _productApiService.GetProducts(parameters.Ids, parameters.CreatedAtMin, parameters.CreatedAtMax, parameters.UpdatedAtMin,
-                                                                        parameters.UpdatedAtMax, parameters.Limit, parameters.Page, parameters.SinceId, parameters.CategoryId,
-                                                                        parameters.VendorName, parameters.PublishedStatus)
+                                                             parameters.UpdatedAtMax, parameters.Limit, parameters.Page, parameters.SinceId, parameters.CategoryId,
+                                                             parameters.VendorName, parameters.PublishedStatus)
                                                 .Where(p => StoreMappingService.Authorize(p));
-            
+
             IList<ProductDto> productsAsDtos = allProducts.Select(product => _dtoHelper.PrepareProductDTO(product)).ToList();
 
-            var productsRootObject = new ProductsRootObjectDto()
+            var productsRootObject = new ProductsRootObjectDto
             {
                 Products = productsAsDtos
             };
@@ -114,7 +114,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         /// <summary>
-        /// Receive a count of all products
+        ///     Receive a count of all products
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
@@ -130,7 +130,7 @@ namespace Nop.Plugin.Api.Controllers
                                                                        parameters.UpdatedAtMax, parameters.PublishedStatus, parameters.VendorName,
                                                                        parameters.CategoryId);
 
-            var productsCountRootObject = new ProductsCountRootObject()
+            var productsCountRootObject = new ProductsCountRootObject
             {
                 Count = allProductsCount
             };
@@ -139,7 +139,7 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         /// <summary>
-        /// Retrieve product by spcified id
+        ///     Retrieve product by spcified id
         /// </summary>
         /// <param name="id">Id of the product</param>
         /// <param name="fields">Fields from the product you want your json to contain</param>
@@ -174,7 +174,6 @@ namespace Nop.Plugin.Api.Controllers
             productsRootObject.Products.Add(productDto);
 
             var json = JsonFieldsSerializer.Serialize(productsRootObject, fields);
-
             return new RawJsonActionResult(json);
         }
 
@@ -183,7 +182,9 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(ProductsRootObjectDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult CreateProduct([ModelBinder(typeof(JsonModelBinder<ProductDto>))] Delta<ProductDto> productDelta)
+        public IActionResult CreateProduct(
+            [ModelBinder(typeof(JsonModelBinder<ProductDto>))]
+            Delta<ProductDto> productDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -218,7 +219,7 @@ namespace Nop.Plugin.Api.Controllers
             _productService.UpdateProduct(product);
 
             CustomerActivityService.InsertActivity("AddNewProduct",
-                LocalizationService.GetResource("ActivityLog.AddNewProduct"), product);
+                                                   LocalizationService.GetResource("ActivityLog.AddNewProduct"), product);
 
             // Preparing the result dto of the new product
             var productDto = _dtoHelper.PrepareProductDTO(product);
@@ -239,7 +240,9 @@ namespace Nop.Plugin.Api.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        public IActionResult UpdateProduct([ModelBinder(typeof(JsonModelBinder<ProductDto>))] Delta<ProductDto> productDelta)
+        public IActionResult UpdateProduct(
+            [ModelBinder(typeof(JsonModelBinder<ProductDto>))]
+            Delta<ProductDto> productDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -285,7 +288,7 @@ namespace Nop.Plugin.Api.Controllers
             _productService.UpdateProduct(product);
 
             CustomerActivityService.InsertActivity("UpdateProduct",
-               LocalizationService.GetResource("ActivityLog.UpdateProduct"), product);
+                                                   LocalizationService.GetResource("ActivityLog.UpdateProduct"), product);
 
             // Preparing the result dto of the new product
             var productDto = _dtoHelper.PrepareProductDTO(product);
@@ -324,7 +327,7 @@ namespace Nop.Plugin.Api.Controllers
 
             //activity log
             CustomerActivityService.InsertActivity("DeleteProduct",
-                string.Format(LocalizationService.GetResource("ActivityLog.DeleteProduct"), product.Name), product);
+                                                   string.Format(LocalizationService.GetResource("ActivityLog.DeleteProduct"), product.Name), product);
 
             return new RawJsonActionResult("{}");
         }
@@ -333,15 +336,20 @@ namespace Nop.Plugin.Api.Controllers
         {
             // If no pictures are specified means we don't have to update anything
             if (setPictures == null)
+            {
                 return;
+            }
 
             // delete unused product pictures
-            var unusedProductPictures = entityToUpdate.ProductPictures.Where(x => setPictures.All(y => y.Id != x.Id)).ToList();
+            var productPictures = _productService.GetProductPicturesByProductId(entityToUpdate.Id);
+            var unusedProductPictures = productPictures.Where(x => setPictures.All(y => y.Id != x.Id)).ToList();
             foreach (var unusedProductPicture in unusedProductPictures)
             {
                 var picture = PictureService.GetPictureById(unusedProductPicture.PictureId);
                 if (picture == null)
+                {
                     throw new ArgumentException("No picture found with the specified id");
+                }
                 PictureService.DeletePicture(picture);
             }
 
@@ -350,7 +358,7 @@ namespace Nop.Plugin.Api.Controllers
                 if (imageDto.Id > 0)
                 {
                     // update existing product picture
-                    var productPictureToUpdate = entityToUpdate.ProductPictures.FirstOrDefault(x => x.Id == imageDto.Id);
+                    var productPictureToUpdate = productPictures.FirstOrDefault(x => x.Id == imageDto.Id);
                     if (productPictureToUpdate != null && imageDto.Position > 0)
                     {
                         productPictureToUpdate.DisplayOrder = imageDto.Position;
@@ -361,7 +369,7 @@ namespace Nop.Plugin.Api.Controllers
                 {
                     // add new product picture
                     var newPicture = PictureService.InsertPicture(imageDto.Binary, imageDto.MimeType, string.Empty);
-                    _productService.InsertProductPicture(new ProductPicture()
+                    _productService.InsertProductPicture(new ProductPicture
                     {
                         PictureId = newPicture.Id,
                         ProductId = entityToUpdate.Id,
@@ -375,12 +383,14 @@ namespace Nop.Plugin.Api.Controllers
         {
             // If no product attribute mappings are specified means we don't have to update anything
             if (productDtoDelta.Dto.ProductAttributeMappings == null)
+            {
                 return;
+            }
 
             // delete unused product attribute mappings
             var toBeUpdatedIds = productDtoDelta.Dto.ProductAttributeMappings.Where(y => y.Id != 0).Select(x => x.Id);
-
-            var unusedProductAttributeMappings = entityToUpdate.ProductAttributeMappings.Where(x => !toBeUpdatedIds.Contains(x.Id)).ToList();
+            var productAttributeMappings = _productAttributeService.GetProductAttributeMappingsByProductId(entityToUpdate.Id);
+            var unusedProductAttributeMappings = productAttributeMappings.Where(x => !toBeUpdatedIds.Contains(x.Id)).ToList();
 
             foreach (var unusedProductAttributeMapping in unusedProductAttributeMappings)
             {
@@ -392,11 +402,11 @@ namespace Nop.Plugin.Api.Controllers
                 if (productAttributeMappingDto.Id > 0)
                 {
                     // update existing product attribute mapping
-                    var productAttributeMappingToUpdate = entityToUpdate.ProductAttributeMappings.FirstOrDefault(x => x.Id == productAttributeMappingDto.Id);
+                    var productAttributeMappingToUpdate = productAttributeMappings.FirstOrDefault(x => x.Id == productAttributeMappingDto.Id);
                     if (productAttributeMappingToUpdate != null)
                     {
-                        productDtoDelta.Merge(productAttributeMappingDto,productAttributeMappingToUpdate,false);
-                       
+                        productDtoDelta.Merge(productAttributeMappingDto, productAttributeMappingToUpdate, false);
+
                         _productAttributeService.UpdateProductAttributeMapping(productAttributeMappingToUpdate);
 
                         UpdateProductAttributeValues(productAttributeMappingDto, productDtoDelta);
@@ -404,7 +414,10 @@ namespace Nop.Plugin.Api.Controllers
                 }
                 else
                 {
-                    var newProductAttributeMapping = new ProductAttributeMapping {ProductId = entityToUpdate.Id};
+                    var newProductAttributeMapping = new ProductAttributeMapping
+                    {
+                        ProductId = entityToUpdate.Id
+                    };
 
                     productDtoDelta.Merge(productAttributeMappingDto, newProductAttributeMapping);
 
@@ -418,7 +431,9 @@ namespace Nop.Plugin.Api.Controllers
         {
             // If no product attribute values are specified means we don't have to update anything
             if (productAttributeMappingDto.ProductAttributeValues == null)
+            {
                 return;
+            }
 
             // delete unused product attribute values
             var toBeUpdatedIds = productAttributeMappingDto.ProductAttributeValues.Where(y => y.Id != 0).Select(x => x.Id);
@@ -460,10 +475,14 @@ namespace Nop.Plugin.Api.Controllers
         private void UpdateProductTags(Product product, IReadOnlyCollection<string> productTags)
         {
             if (productTags == null)
+            {
                 return;
+            }
 
             if (product == null)
+            {
                 throw new ArgumentNullException(nameof(product));
+            }
 
             //Copied from UpdateProductTags method of ProductTagService
             //product tags
@@ -475,7 +494,9 @@ namespace Nop.Plugin.Api.Controllers
                 foreach (var newProductTag in productTags)
                 {
                     if (!existingProductTag.Name.Equals(newProductTag, StringComparison.InvariantCultureIgnoreCase))
+                    {
                         continue;
+                    }
 
                     found = true;
                     break;
@@ -490,8 +511,8 @@ namespace Nop.Plugin.Api.Controllers
             foreach (var productTag in productTagsToRemove)
             {
                 //product.ProductTags.Remove(productTag);
-                product.ProductProductTagMappings
-                    .Remove(product.ProductProductTagMappings.FirstOrDefault(mapping => mapping.ProductTagId == productTag.Id));
+                //product.ProductProductTagMappings
+                //       .Remove(product.ProductProductTagMappings.FirstOrDefault(mapping => mapping.ProductTagId == productTag.Id));
                 _productService.UpdateProduct(product);
             }
 
@@ -513,11 +534,14 @@ namespace Nop.Plugin.Api.Controllers
                     productTag = productTag2;
                 }
 
-                if (!_productService.ProductTagExists(product, productTag.Id))
-                {
-                    product.ProductProductTagMappings.Add(new ProductProductTagMapping { ProductTag = productTag });
-                    _productService.UpdateProduct(product);
-                }
+                //if (!_productService.ProductTagExists(product, productTag.Id))
+                //{
+                //    product.ProductProductTagMappings.Add(new ProductProductTagMapping
+                //                                          {
+                //                                              ProductTag = productTag
+                //                                          });
+                //    _productService.UpdateProduct(product);
+                //}
 
                 var seName = _urlRecordService.ValidateSeName(productTag, string.Empty, productTag.Name, true);
                 _urlRecordService.SaveSlug(productTag, seName, 0);
@@ -527,55 +551,66 @@ namespace Nop.Plugin.Api.Controllers
         private void UpdateDiscountMappings(Product product, List<int> passedDiscountIds)
         {
             if (passedDiscountIds == null)
+            {
                 return;
+            }
 
             var allDiscounts = DiscountService.GetAllDiscounts(DiscountType.AssignedToSkus, showHidden: true);
-
+            var appliedProductDiscount = DiscountService.GetAppliedDiscounts(product);
             foreach (var discount in allDiscounts)
             {
                 if (passedDiscountIds.Contains(discount.Id))
                 {
                     //new discount
-                    if (product.AppliedDiscounts.Count(d => d.Id == discount.Id) == 0)
-                        product.AppliedDiscounts.Add(discount);
+                    if (appliedProductDiscount.Count(d => d.Id == discount.Id) == 0)
+                    {
+                        appliedProductDiscount.Add(discount);
+                    }
                 }
                 else
                 {
                     //remove discount
-                    if (product.AppliedDiscounts.Count(d => d.Id == discount.Id) > 0)
-                        product.AppliedDiscounts.Remove(discount);
+                    if (appliedProductDiscount.Count(d => d.Id == discount.Id) > 0)
+                    {
+                        appliedProductDiscount.Remove(discount);
+                    }
                 }
             }
 
             _productService.UpdateProduct(product);
             _productService.UpdateHasDiscountsApplied(product);
         }
-        
+
         private void UpdateProductManufacturers(Product product, List<int> passedManufacturerIds)
         {
             // If no manufacturers specified then there is nothing to map 
             if (passedManufacturerIds == null)
+            {
                 return;
-
-            var unusedProductManufacturers = product.ProductManufacturers.Where(x => !passedManufacturerIds.Contains(x.ManufacturerId)).ToList();
+            }
+            var productmanufacturers = _manufacturerService.GetProductManufacturersByProductId(product.Id);
+            var unusedProductManufacturers = productmanufacturers.Where(x => !passedManufacturerIds.Contains(x.Id)).ToList();
 
             // remove all manufacturers that are not passed
             foreach (var unusedProductManufacturer in unusedProductManufacturers)
             {
-                _manufacturerService.DeleteProductManufacturer(unusedProductManufacturer);
+                //_manufacturerService.DeleteProductManufacturer(unusedProductManufacturer);
             }
 
             foreach (var passedManufacturerId in passedManufacturerIds)
             {
                 // not part of existing manufacturers so we will create a new one
-                if (product.ProductManufacturers.All(x => x.ManufacturerId != passedManufacturerId))
+                if (productmanufacturers.All(x => x.Id != passedManufacturerId))
                 {
                     // if manufacturer does not exist we simply ignore it, otherwise add it to the product
                     var manufacturer = _manufacturerService.GetManufacturerById(passedManufacturerId);
                     if (manufacturer != null)
                     {
-                        _manufacturerService.InsertProductManufacturer(new ProductManufacturer()
-                        { ProductId = product.Id, ManufacturerId = manufacturer.Id });
+                        _manufacturerService.InsertProductManufacturer(new ProductManufacturer
+                        {
+                            ProductId = product.Id,
+                            ManufacturerId = manufacturer.Id
+                        });
                     }
                 }
             }
@@ -585,11 +620,13 @@ namespace Nop.Plugin.Api.Controllers
         {
             // If no associated products specified then there is nothing to map 
             if (passedAssociatedProductIds == null)
+            {
                 return;
+            }
 
             var noLongerAssociatedProducts =
                 _productService.GetAssociatedProducts(product.Id, showHidden: true)
-                    .Where(p => !passedAssociatedProductIds.Contains(p.Id));
+                               .Where(p => !passedAssociatedProductIds.Contains(p.Id));
 
             // update all products that are no longer associated with our product
             foreach (var noLongerAssocuatedProduct in noLongerAssociatedProducts)

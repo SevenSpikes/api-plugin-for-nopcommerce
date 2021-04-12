@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Nop.Plugin.Api.DTOs.Images;
+using Nop.Plugin.Api.DTO.Images;
 
 namespace Nop.Plugin.Api.Attributes
 {
@@ -11,23 +11,22 @@ namespace Nop.Plugin.Api.Attributes
         {
             // Images are not required so they could be null
             // and there is nothing to validate in this case
-            if (instance == null)
-                return;
 
-            var imagesCollection = instance as ICollection<ImageMappingDto>;
-
-            foreach (var image in imagesCollection)
+            if (instance is ICollection<ImageMappingDto> imagesCollection)
             {
-                var imageValidationAttribute = new ImageValidationAttribute();
-
-                imageValidationAttribute.Validate(image);
-
-                var errorsForImage = imageValidationAttribute.GetErrors();
-
-                if (errorsForImage.Count > 0)
+                foreach (var image in imagesCollection)
                 {
-                    _errors = errorsForImage;
-                    break;
+                    var imageValidationAttribute = new ImageValidationAttribute();
+
+                    imageValidationAttribute.Validate(image);
+
+                    var errorsForImage = imageValidationAttribute.GetErrors();
+
+                    if (errorsForImage.Count > 0)
+                    {
+                        _errors = errorsForImage;
+                        break;
+                    }
                 }
             }
         }

@@ -1,5 +1,5 @@
-﻿using Nop.Core.Domain.Catalog;
-using System;
+﻿using System;
+using Nop.Core.Domain.Catalog;
 
 namespace Nop.Plugin.Api.Factories
 {

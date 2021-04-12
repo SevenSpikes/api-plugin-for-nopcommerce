@@ -1,16 +1,18 @@
-﻿using Microsoft.AspNetCore.Http;
-using Nop.Plugin.Api.DTOs.Products;
+﻿using System.Collections.Generic;
+using JetBrains.Annotations;
+using Microsoft.AspNetCore.Http;
+using Nop.Plugin.Api.DTO.Products;
 using Nop.Plugin.Api.Helpers;
-using System.Collections.Generic;
 
 namespace Nop.Plugin.Api.Validators
 {
+    [UsedImplicitly]
     public class ProductDtoValidator : BaseDtoValidator<ProductDto>
     {
-
         #region Constructors
 
-        public ProductDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary) : base(httpContextAccessor, jsonHelper, requestJsonDictionary)
+        public ProductDtoValidator(IHttpContextAccessor httpContextAccessor, IJsonHelper jsonHelper, Dictionary<string, object> requestJsonDictionary) :
+            base(httpContextAccessor, jsonHelper, requestJsonDictionary)
         {
             SetNameRule();
         }
@@ -25,6 +27,5 @@ namespace Nop.Plugin.Api.Validators
         }
 
         #endregion
-
     }
 }

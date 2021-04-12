@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Nop.Core.Data;
+using Nop.Data;
 using Nop.Core.Domain.Catalog;
 
 namespace Nop.Plugin.Api.Services
@@ -16,11 +16,13 @@ namespace Nop.Plugin.Api.Services
         public ProductPicture GetProductPictureByPictureId(int pictureId)
         {
             if (pictureId == 0)
+            {
                 return null;
+            }
 
             var query = from pp in _productPictureRepository.Table
-                where pp.PictureId == pictureId
-                select pp;
+                        where pp.PictureId == pictureId
+                        select pp;
 
             var productPictures = query.ToList();
 

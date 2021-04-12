@@ -8,7 +8,7 @@ namespace Nop.Plugin.Api.Converters
     public class ApiTypeConverter : IApiTypeConverter
     {
         /// <summary>
-        /// Converts the value, which should be in ISO 8601 format to UTC time or null if not valid
+        ///     Converts the value, which should be in ISO 8601 format to UTC time or null if not valid
         /// </summary>
         /// <param name="value">The time format in ISO 8601. If no timezone or offset specified we assume it is in UTC</param>
         /// <returns>The time in UTC or null if the time is not valid</returns>
@@ -16,16 +16,10 @@ namespace Nop.Plugin.Api.Converters
         {
             DateTime result;
 
-            var formats = new string[]
-            {
-                "yyyy",
-                "yyyy-MM",
-                "yyyy-MM-dd",
-                "yyyy-MM-ddTHH:mm",
-                "yyyy-MM-ddTHH:mm:ss",
-                "yyyy-MM-ddTHH:mm:sszzz",
-                "yyyy-MM-ddTHH:mm:ss.FFFFFFFK"
-            };
+            var formats = new[]
+                          {
+                              "yyyy", "yyyy-MM", "yyyy-MM-dd", "yyyy-MM-ddTHH:mm", "yyyy-MM-ddTHH:mm:ss", "yyyy-MM-ddTHH:mm:sszzz", "yyyy-MM-ddTHH:mm:ss.FFFFFFFK"
+                          };
 
             if (DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out result))
             {
@@ -69,7 +63,10 @@ namespace Nop.Plugin.Api.Converters
         {
             if (!string.IsNullOrEmpty(value))
             {
-                var stringIds = value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                var stringIds = value.Split(new[]
+                                            {
+                                                ','
+                                            }, StringSplitOptions.RemoveEmptyEntries).ToList();
                 var intIds = new List<int>();
 
                 foreach (var id in stringIds)
@@ -82,7 +79,9 @@ namespace Nop.Plugin.Api.Converters
                 }
 
                 intIds = intIds.Distinct().ToList();
-                return intIds.Count > 0 ? intIds : null;
+                return intIds.Count > 0
+                           ? intIds
+                           : null;
             }
 
             return null;
@@ -96,7 +95,7 @@ namespace Nop.Plugin.Api.Converters
                 {
                     return true;
                 }
-                else if (value.Equals("unpublished", StringComparison.InvariantCultureIgnoreCase))
+                if (value.Equals("unpublished", StringComparison.InvariantCultureIgnoreCase))
                 {
                     return false;
                 }

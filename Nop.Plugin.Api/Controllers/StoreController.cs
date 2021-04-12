@@ -1,7 +1,13 @@
-﻿using Nop.Core;
+﻿using System.Collections.Generic;
+using System.Net;
+using Microsoft.AspNetCore.Mvc;
+using Nop.Core;
 using Nop.Plugin.Api.Attributes;
-using Nop.Plugin.Api.DTOs.Stores;
+using Nop.Plugin.Api.DTO.Errors;
+using Nop.Plugin.Api.DTO.Stores;
+using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.JSON.ActionResults;
+using Nop.Plugin.Api.JSON.Serializers;
 using Nop.Services.Customers;
 using Nop.Services.Discounts;
 using Nop.Services.Localization;
@@ -9,24 +15,16 @@ using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Stores;
-using System.Collections.Generic;
-using System.Net;
-using Nop.Plugin.Api.Helpers;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    using Microsoft.AspNetCore.Authentication.JwtBearer;
-    using Microsoft.AspNetCore.Mvc;
-    using DTOs.Errors;
-    using JSON.Serializers;
-
-    [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class StoreController : BaseApiController
     {
-        private readonly IStoreContext _storeContext;
         private readonly IDTOHelper _dtoHelper;
+        private readonly IStoreContext _storeContext;
 
-        public StoreController(IJsonFieldsSerializer jsonFieldsSerializer,
+        public StoreController(
+            IJsonFieldsSerializer jsonFieldsSerializer,
             IAclService aclService,
             ICustomerService customerService,
             IStoreMappingService storeMappingService,
@@ -38,21 +36,21 @@ namespace Nop.Plugin.Api.Controllers
             IStoreContext storeContext,
             IDTOHelper dtoHelper)
             : base(jsonFieldsSerializer,
-                  aclService,
-                  customerService,
-                  storeMappingService,
-                  storeService,
-                  discountService,
-                  customerActivityService,
-                  localizationService,
-                  pictureService)
+                   aclService,
+                   customerService,
+                   storeMappingService,
+                   storeService,
+                   discountService,
+                   customerActivityService,
+                   localizationService,
+                   pictureService)
         {
             _storeContext = storeContext;
             _dtoHelper = dtoHelper;
         }
 
         /// <summary>
-        /// Retrieve category by spcified id
+        ///     Retrieve category by spcified id
         /// </summary>
         /// <param name="fields">Fields from the category you want your json to contain</param>
         /// <response code="200">OK</response>
@@ -60,10 +58,10 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="401">Unauthorized</response>
         [HttpGet]
         [Route("/api/current_store")]
-        [ProducesResponseType(typeof(StoresRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(StoresRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetCurrentStore(string fields = "")
         {
@@ -86,21 +84,21 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         /// <summary>
-        /// Retrieve all stores
+        ///     Retrieve all stores
         /// </summary>
         /// <param name="fields">Fields from the store you want your json to contain</param>
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
         [Route("/api/stores")]
-        [ProducesResponseType(typeof(StoresRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(StoresRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetAllStores(string fields = "")
         {
             var allStores = StoreService.GetAllStores();
-        
+
             IList<StoreDto> storesAsDto = new List<StoreDto>();
 
             foreach (var store in allStores)
@@ -110,10 +108,10 @@ namespace Nop.Plugin.Api.Controllers
                 storesAsDto.Add(storeDto);
             }
 
-            var storesRootObject = new StoresRootObject()
-            {
-                Stores = storesAsDto
-            };
+            var storesRootObject = new StoresRootObject
+                                   {
+                                       Stores = storesAsDto
+                                   };
 
             var json = JsonFieldsSerializer.Serialize(storesRootObject, fields);
 

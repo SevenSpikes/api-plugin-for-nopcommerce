@@ -2,47 +2,45 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Microsoft.AspNetCore.Mvc;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Discounts;
 using Nop.Core.Domain.Media;
 using Nop.Plugin.Api.Attributes;
-using Nop.Plugin.Api.Constants;
-using Nop.Plugin.Api.DTOs.Categories;
+using Nop.Plugin.Api.Delta;
+using Nop.Plugin.Api.DTO.Categories;
+using Nop.Plugin.Api.DTO.Errors;
+using Nop.Plugin.Api.DTO.Images;
+using Nop.Plugin.Api.Factories;
+using Nop.Plugin.Api.Helpers;
+using Nop.Plugin.Api.Infrastructure;
+using Nop.Plugin.Api.JSON.ActionResults;
+using Nop.Plugin.Api.JSON.Serializers;
+using Nop.Plugin.Api.ModelBinders;
 using Nop.Plugin.Api.Models.CategoriesParameters;
 using Nop.Plugin.Api.Services;
 using Nop.Services.Catalog;
-using Nop.Services.Localization;
-using Nop.Services.Logging;
-using Nop.Services.Seo;
-using Nop.Plugin.Api.Delta;
-using Nop.Plugin.Api.DTOs.Images;
-using Nop.Plugin.Api.Factories;
-using Nop.Plugin.Api.JSON.ActionResults;
-using Nop.Plugin.Api.ModelBinders;
 using Nop.Services.Customers;
 using Nop.Services.Discounts;
+using Nop.Services.Localization;
+using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Security;
+using Nop.Services.Seo;
 using Nop.Services.Stores;
-using Nop.Plugin.Api.Helpers;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    using Microsoft.AspNetCore.Authentication.JwtBearer;
-    using DTOs.Errors;
-    using JSON.Serializers;
-
-    [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CategoriesController : BaseApiController
     {
         private readonly ICategoryApiService _categoryApiService;
         private readonly ICategoryService _categoryService;
-        private readonly IUrlRecordService _urlRecordService;
-        private readonly IFactory<Category> _factory; 
         private readonly IDTOHelper _dtoHelper;
+        private readonly IFactory<Category> _factory;
+        private readonly IUrlRecordService _urlRecordService;
 
-        public CategoriesController(ICategoryApiService categoryApiService,
+        public CategoriesController(
+            ICategoryApiService categoryApiService,
             IJsonFieldsSerializer jsonFieldsSerializer,
             ICategoryService categoryService,
             IUrlRecordService urlRecordService,
@@ -55,7 +53,8 @@ namespace Nop.Plugin.Api.Controllers
             IAclService aclService,
             ICustomerService customerService,
             IFactory<Category> factory,
-            IDTOHelper dtoHelper) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService,pictureService)
+            IDTOHelper dtoHelper) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService,
+                                         customerActivityService, localizationService, pictureService)
         {
             _categoryApiService = categoryApiService;
             _categoryService = categoryService;
@@ -65,44 +64,40 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         /// <summary>
-        /// Receive a list of all Categories
+        ///     Receive a list of all Categories
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="400">Bad Request</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [Route("/api/categories")] 
-        [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [Route("/api/categories")]
+        [ProducesResponseType(typeof(CategoriesRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetCategories(CategoriesParametersModel parameters)
         {
-            if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
+            if (parameters.Limit < Constants.Configurations.MinLimit || parameters.Limit > Constants.Configurations.MaxLimit)
             {
                 return Error(HttpStatusCode.BadRequest, "limit", "Invalid limit parameter");
             }
 
-            if (parameters.Page < Configurations.DefaultPageValue)
+            if (parameters.Page < Constants.Configurations.DefaultPageValue)
             {
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid page parameter");
             }
 
             var allCategories = _categoryApiService.GetCategories(parameters.Ids, parameters.CreatedAtMin, parameters.CreatedAtMax,
-                                                                             parameters.UpdatedAtMin, parameters.UpdatedAtMax,
-                                                                             parameters.Limit, parameters.Page, parameters.SinceId,
-                                                                             parameters.ProductId, parameters.PublishedStatus)
+                                                                  parameters.UpdatedAtMin, parameters.UpdatedAtMax,
+                                                                  parameters.Limit, parameters.Page, parameters.SinceId,
+                                                                  parameters.ProductId, parameters.PublishedStatus)
                                                    .Where(c => StoreMappingService.Authorize(c));
 
-            IList<CategoryDto> categoriesAsDtos = allCategories.Select(category =>
-            {
-                return _dtoHelper.PrepareCategoryDTO(category);
+            IList<CategoryDto> categoriesAsDtos = allCategories.Select(category => _dtoHelper.PrepareCategoryDTO(category)).ToList();
 
-            }).ToList();
-
-            var categoriesRootObject = new CategoriesRootObject()
-            {
-                Categories = categoriesAsDtos
-            };
+            var categoriesRootObject = new CategoriesRootObject
+                                       {
+                                           Categories = categoriesAsDtos
+                                       };
 
             var json = JsonFieldsSerializer.Serialize(categoriesRootObject, parameters.Fields);
 
@@ -110,15 +105,15 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         /// <summary>
-        /// Receive a count of all Categories
+        ///     Receive a count of all Categories
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
         [Route("/api/categories/count")]
-        [ProducesResponseType(typeof(CategoriesCountRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(CategoriesCountRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetCategoriesCount(CategoriesCountParametersModel parameters)
         {
@@ -126,16 +121,16 @@ namespace Nop.Plugin.Api.Controllers
                                                                             parameters.UpdatedAtMin, parameters.UpdatedAtMax,
                                                                             parameters.PublishedStatus, parameters.ProductId);
 
-            var categoriesCountRootObject = new CategoriesCountRootObject()
-            {
-                Count = allCategoriesCount
-            };
+            var categoriesCountRootObject = new CategoriesCountRootObject
+                                            {
+                                                Count = allCategoriesCount
+                                            };
 
             return Ok(categoriesCountRootObject);
         }
 
         /// <summary>
-        /// Retrieve category by spcified id
+        ///     Retrieve category by specified id
         /// </summary>
         /// <param name="id">Id of the category</param>
         /// <param name="fields">Fields from the category you want your json to contain</param>
@@ -144,9 +139,9 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="401">Unauthorized</response>
         [HttpGet]
         [Route("/api/categories/{id}")]
-        [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(CategoriesRootObject), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetCategoryById(int id, string fields = "")
         {
@@ -172,14 +167,16 @@ namespace Nop.Plugin.Api.Controllers
 
             return new RawJsonActionResult(json);
         }
-        
+
         [HttpPost]
         [Route("/api/categories")]
-        [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(CategoriesRootObject), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        public IActionResult CreateCategory([ModelBinder(typeof(JsonModelBinder<CategoryDto>))] Delta<CategoryDto> categoryDelta)
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        public IActionResult CreateCategory(
+            [ModelBinder(typeof(JsonModelBinder<CategoryDto>))]
+            Delta<CategoryDto> categoryDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -192,7 +189,7 @@ namespace Nop.Plugin.Api.Controllers
             Picture insertedPicture = null;
 
             // We need to insert the picture before the category so we can obtain the picture id and map it to the category.
-            if (categoryDelta.Dto.Image != null && categoryDelta.Dto.Image.Binary != null)
+            if (categoryDelta.Dto.Image?.Binary != null)
             {
                 insertedPicture = PictureService.InsertPicture(categoryDelta.Dto.Image.Binary, categoryDelta.Dto.Image.MimeType, string.Empty);
             }
@@ -208,7 +205,7 @@ namespace Nop.Plugin.Api.Controllers
 
             _categoryService.InsertCategory(category);
 
-            
+
             UpdateAclRoles(category, categoryDelta.Dto.RoleIds);
 
             UpdateDiscounts(category, categoryDelta.Dto.DiscountIds);
@@ -223,7 +220,7 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             CustomerActivityService.InsertActivity("AddNewCategory",
-                LocalizationService.GetResource("ActivityLog.AddNewCategory"), category);
+                                                   LocalizationService.GetResource("ActivityLog.AddNewCategory"), category);
 
             // Preparing the result dto of the new category
             var newCategoryDto = _dtoHelper.PrepareCategoryDTO(category);
@@ -239,13 +236,14 @@ namespace Nop.Plugin.Api.Controllers
 
         [HttpPut]
         [Route("/api/categories/{id}")]
-        [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(CategoriesRootObject), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
         public IActionResult UpdateCategory(
-            [ModelBinder(typeof (JsonModelBinder<CategoryDto>))] Delta<CategoryDto> categoryDelta)
+            [ModelBinder(typeof(JsonModelBinder<CategoryDto>))]
+            Delta<CategoryDto> categoryDelta)
         {
             // Here we display the errors if the validation has failed at some point.
             if (!ModelState.IsValid)
@@ -277,7 +275,6 @@ namespace Nop.Plugin.Api.Controllers
             //search engine name
             if (categoryDelta.Dto.SeName != null)
             {
-                
                 var seName = _urlRecordService.ValidateSeName(category, categoryDelta.Dto.SeName, category.Name, true);
                 _urlRecordService.SaveSlug(category, seName, 0);
             }
@@ -285,7 +282,7 @@ namespace Nop.Plugin.Api.Controllers
             _categoryService.UpdateCategory(category);
 
             CustomerActivityService.InsertActivity("UpdateCategory",
-                LocalizationService.GetResource("ActivityLog.UpdateCategory"), category);
+                                                   LocalizationService.GetResource("ActivityLog.UpdateCategory"), category);
 
             var categoryDto = _dtoHelper.PrepareCategoryDTO(category);
 
@@ -300,10 +297,10 @@ namespace Nop.Plugin.Api.Controllers
 
         [HttpDelete]
         [Route("/api/categories/{id}")]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult DeleteCategory(int id)
         {
@@ -331,7 +328,9 @@ namespace Nop.Plugin.Api.Controllers
         {
             // no image specified then do nothing
             if (imageDto == null)
+            {
                 return;
+            }
 
             Picture updatedPicture;
             var currentCategoryPicture = PictureService.GetPictureById(categoryEntityToUpdate.PictureId);
@@ -365,23 +364,30 @@ namespace Nop.Plugin.Api.Controllers
 
         private void UpdateDiscounts(Category category, List<int> passedDiscountIds)
         {
-            if(passedDiscountIds == null)
+            if (passedDiscountIds == null)
+            {
                 return;
+            }
 
             var allDiscounts = DiscountService.GetAllDiscounts(DiscountType.AssignedToCategories, showHidden: true);
+            var appliedCategoryDiscount = DiscountService.GetAppliedDiscounts(category);
             foreach (var discount in allDiscounts)
             {
                 if (passedDiscountIds.Contains(discount.Id))
                 {
                     //new discount
-                    if (category.AppliedDiscounts.Count(d => d.Id == discount.Id) == 0)
-                        category.AppliedDiscounts.Add(discount);
+                    if (appliedCategoryDiscount.Count(d => d.Id == discount.Id) == 0)
+                    {
+                        appliedCategoryDiscount.Add(discount);
+                    }
                 }
                 else
                 {
                     //remove discount
-                    if (category.AppliedDiscounts.Count(d => d.Id == discount.Id) > 0)
-                        category.AppliedDiscounts.Remove(discount);
+                    if (appliedCategoryDiscount.Count(d => d.Id == discount.Id) > 0)
+                    {
+                        appliedCategoryDiscount.Remove(discount);
+                    }
                 }
             }
             _categoryService.UpdateCategory(category);

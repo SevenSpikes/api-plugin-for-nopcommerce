@@ -1,65 +1,65 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Nop.Plugin.Api.Constants;
+using Nop.Plugin.Api.Infrastructure;
 using Nop.Plugin.Api.ModelBinders;
 
-namespace Nop.Plugin.Api.Models.ProductSpecificationAttributes
+namespace Nop.Plugin.Api.Models.ProductSpecificationAttributesParameters
 {
-    [ModelBinder(typeof(ParametersModelBinder<ProductSpecifcationAttributesParametersModel>))]
-    public class ProductSpecifcationAttributesParametersModel
+    [ModelBinder(typeof(ParametersModelBinder<ProductSpecificationAttributesParametersModel>))]
+    public class ProductSpecificationAttributesParametersModel
     {
-        public ProductSpecifcationAttributesParametersModel()
+        public ProductSpecificationAttributesParametersModel()
         {
-            Limit = Configurations.DefaultLimit;
-            Page = Configurations.DefaultPageValue;
-            SinceId = Configurations.DefaultSinceId;
+            Limit = Constants.Configurations.DefaultLimit;
+            Page = Constants.Configurations.DefaultPageValue;
+            SinceId = Constants.Configurations.DefaultSinceId;
             Fields = string.Empty;
         }
 
         /// <summary>
-        /// Product Id
+        ///     Product Id
         /// </summary>
         [JsonProperty("product_id")]
         public int ProductId { get; set; }
 
         /// <summary>
-        /// Specification Attribute Option Id
+        ///     Specification Attribute Option Id
         /// </summary>
         [JsonProperty("specification_attribute_option_id")]
         public int SpecificationAttributeOptionId { get; set; }
 
         /// <summary>
-        /// Allow Filtering
+        ///     Allow Filtering
         /// </summary>
         [JsonProperty("allow_filtering")]
         public bool? AllowFiltering { get; set; }
 
         /// <summary>
-        /// Show on Product Page
+        ///     Show on Product Page
         /// </summary>
         [JsonProperty("show_on_product_page")]
         public bool? ShowOnProductPage { get; set; }
 
         /// <summary>
-        /// Amount of results (default: 50) (maximum: 250)
+        ///     Amount of results (default: 50) (maximum: 250)
         /// </summary>
         [JsonProperty("limit")]
         public int Limit { get; set; }
 
         /// <summary>
-        /// Page to show (default: 1)
+        ///     Page to show (default: 1)
         /// </summary>
         [JsonProperty("page")]
         public int Page { get; set; }
 
         /// <summary>
-        /// Restrict results to after the specified ID
+        ///     Restrict results to after the specified ID
         /// </summary>
         [JsonProperty("since_id")]
         public int SinceId { get; set; }
 
         /// <summary>
-        /// comma-separated list of fields to include in the response
+        ///     comma-separated list of fields to include in the response
         /// </summary>
         [JsonProperty("fields")]
         public string Fields { get; set; }

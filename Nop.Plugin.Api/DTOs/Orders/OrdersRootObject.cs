@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Nop.Plugin.Api.DTOs.Orders
+namespace Nop.Plugin.Api.DTO.Orders
 {
     public class OrdersRootObject : ISerializableObject
     {
@@ -21,7 +21,7 @@ namespace Nop.Plugin.Api.DTOs.Orders
 
         public Type GetPrimaryPropertyType()
         {
-            return typeof (OrderDto);
+            return typeof(OrderDto);
         }
     }
 }

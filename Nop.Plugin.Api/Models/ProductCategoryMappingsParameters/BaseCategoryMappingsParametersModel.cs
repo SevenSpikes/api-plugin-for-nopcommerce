@@ -6,15 +6,15 @@ namespace Nop.Plugin.Api.Models.ProductCategoryMappingsParameters
     public class BaseCategoryMappingsParametersModel
     {
         /// <summary>
-        /// Show all the product-category mappings for this product
+        ///     Show all the product-category mappings for this product
         /// </summary>
         [JsonProperty("product_id")]
         public int? ProductId { get; set; }
 
         /// <summary>
-        /// Show all the product-category mappings for this category
+        ///     Show all the product-category mappings for this category
         /// </summary>
         [JsonProperty("category_id")]
-        public int? CategoryId { get; set; } 
+        public int? CategoryId { get; set; }
     }
 }

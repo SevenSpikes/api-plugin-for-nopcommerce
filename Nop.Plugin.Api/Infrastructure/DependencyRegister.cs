@@ -1,29 +1,26 @@
-﻿using Autofac;
+﻿using System.Collections.Generic;
+using Autofac;
+using JetBrains.Annotations;
+using Microsoft.AspNetCore.Http;
 using Nop.Core.Configuration;
+using Nop.Core.Domain.Catalog;
+using Nop.Core.Domain.Common;
+using Nop.Core.Domain.Customers;
+using Nop.Core.Domain.Orders;
 using Nop.Core.Infrastructure;
 using Nop.Core.Infrastructure.DependencyManagement;
+using Nop.Plugin.Api.Converters;
+using Nop.Plugin.Api.Factories;
+using Nop.Plugin.Api.Helpers;
+using Nop.Plugin.Api.JSON.Serializers;
+using Nop.Plugin.Api.Maps;
+using Nop.Plugin.Api.ModelBinders;
 using Nop.Plugin.Api.Services;
-using Nop.Web.Framework.Infrastructure.Extensions;
+using Nop.Plugin.Api.Validators;
 
 namespace Nop.Plugin.Api.Infrastructure
 {
-    using Autofac.Core;
-    using Microsoft.AspNetCore.Http;
-    using Nop.Core.Domain.Catalog;
-    using Nop.Core.Domain.Common;
-    using Nop.Core.Domain.Customers;
-    using Nop.Core.Domain.Orders;
-    using Nop.Plugin.Api.Converters;
-    using Nop.Plugin.Api.Data;
-    using Nop.Plugin.Api.Factories;
-    using Nop.Plugin.Api.Helpers;
-    using Nop.Plugin.Api.JSON.Serializers;
-    using Nop.Plugin.Api.ModelBinders;
-    using Nop.Plugin.Api.Validators;
-    //using Nop.Plugin.Api.WebHooks;
-    using System;
-    using System.Collections.Generic;
-
+    [UsedImplicitly]
     public class DependencyRegister : IDependencyRegistrar
     {
         public void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
@@ -33,6 +30,8 @@ namespace Nop.Plugin.Api.Infrastructure
             RegisterModelBinders(builder);
         }
 
+        public virtual int Order => short.MaxValue;
+
         private void RegisterModelBinders(ContainerBuilder builder)
         {
             builder.RegisterGeneric(typeof(ParametersModelBinder<>)).InstancePerLifetimeScope();
@@ -41,7 +40,7 @@ namespace Nop.Plugin.Api.Infrastructure
 
         private void RegisterPluginServices(ContainerBuilder builder)
         {
-            builder.RegisterType<ClientService>().As<IClientService>().InstancePerLifetimeScope();
+            //builder.RegisterType<ClientService>().As<IClientService>().InstancePerLifetimeScope();
             builder.RegisterType<CustomerApiService>().As<ICustomerApiService>().InstancePerLifetimeScope();
             builder.RegisterType<CategoryApiService>().As<ICategoryApiService>().InstancePerLifetimeScope();
             builder.RegisterType<ProductApiService>().As<IProductApiService>().InstancePerLifetimeScope();
@@ -61,17 +60,10 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<CustomerRolesHelper>().As<ICustomerRolesHelper>().InstancePerLifetimeScope();
             builder.RegisterType<JsonHelper>().As<IJsonHelper>().InstancePerLifetimeScope();
             builder.RegisterType<DTOHelper>().As<IDTOHelper>().InstancePerLifetimeScope();
-            builder.RegisterType<NopConfigManagerHelper>().As<IConfigManagerHelper>().InstancePerLifetimeScope();
-
-            //TODO: Upgrade 4.1. Check this!
-            //builder.RegisterType<NopWebHooksLogger>().As<Microsoft.AspNet.WebHooks.Diagnostics.ILogger>().InstancePerLifetimeScope();
 
             builder.RegisterType<JsonFieldsSerializer>().As<IJsonFieldsSerializer>().InstancePerLifetimeScope();
 
             builder.RegisterType<FieldsValidator>().As<IFieldsValidator>().InstancePerLifetimeScope();
-
-            //TODO: Upgrade 4.1. Check this!
-            //builder.RegisterType<WebHookService>().As<IWebHookService>().SingleInstance();
 
             builder.RegisterType<ObjectConverter>().As<IObjectConverter>().InstancePerLifetimeScope();
             builder.RegisterType<ApiTypeConverter>().As<IApiTypeConverter>().InstancePerLifetimeScope();
@@ -84,16 +76,11 @@ namespace Nop.Plugin.Api.Infrastructure
             builder.RegisterType<ShoppingCartItemFactory>().As<IFactory<ShoppingCartItem>>().InstancePerLifetimeScope();
             builder.RegisterType<ManufacturerFactory>().As<IFactory<Manufacturer>>().InstancePerLifetimeScope();
 
-            builder.RegisterType<Maps.JsonPropertyMapper>().As<Maps.IJsonPropertyMapper>().InstancePerLifetimeScope();
+            builder.RegisterType<JsonPropertyMapper>().As<IJsonPropertyMapper>().InstancePerLifetimeScope();
 
             builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
 
             builder.RegisterType<Dictionary<string, object>>().SingleInstance();
-        }
-
-        public virtual int Order
-        {
-            get { return Int16.MaxValue; }
         }
     }
 }
