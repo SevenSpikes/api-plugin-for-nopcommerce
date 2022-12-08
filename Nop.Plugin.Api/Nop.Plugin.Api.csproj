@@ -67,7 +67,7 @@
     <PackageReference Include="IdentityServer4.EntityFramework.Storage" Version="2.5.0-preview.3.10" />
     <PackageReference Include="IdentityServer4.Storage" Version="2.5.0-preview.3.10" />
     <PackageReference Include="Microsoft.AspNetCore.Rewrite" Version="2.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Libraries\Nop.Core\Nop.Core.csproj" />
